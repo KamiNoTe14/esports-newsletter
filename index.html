@@ -245,7 +245,7 @@ body.lib-open{overflow:hidden}
     <div id="libBody"></div>
   </div>
 </div>
-<input type="file" id="issueFileInput" accept=".json,application/json" hidden>
+<input type="file" id="issueFileInput" accept=".json,.zip,application/json,application/zip" hidden>
 
 <main class="layout">
   <form class="form" id="form" autocomplete="off" onsubmit="return false">
@@ -1457,6 +1457,7 @@ async function buildPackage(){
   dir.file(fileName(), html);
   used.forEach((name, id) => dir.file("images/" + name, getU(id).data.split(",")[1], {base64:true}));
   dir.file(baseName() + " - Outlook draft.eml", buildEml(html, used));
+  dir.file(baseName() + " - issue data (open in portal).json", JSON.stringify({app:"eagles-coach-portal", version:1, rev:newRev(), savedAt:new Date().toISOString(), state}));
   return {filename: baseName() + ".zip", data: await zip.generateAsync({type:"blob"}), html, zipped:true};
 }
 
@@ -1690,8 +1691,17 @@ async function downloadIssueFile(){
 }
 $("#issueFileInput").addEventListener("change", async e => {
   const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
-  try { const j = JSON.parse(await f.text()); if (j.app !== "eagles-coach-portal") throw 0; await loadIssue(j, false); state.libPath = ""; closeLibrary(); toast(`Opened Week ${state.week}.`); }
-  catch(err){ toast("That isn't a newsletter issue file."); }
+  try {
+    let text;
+    if (/\.zip$/i.test(f.name) || f.type.includes("zip")){
+      if (!window.JSZip) throw 0;
+      const zip = await JSZip.loadAsync(f);
+      const entry = Object.values(zip.files).find(z => !z.dir && /\.json$/i.test(z.name));
+      if (!entry) { toast("That newsletter download is from before issue data was included. Open it in the old portal and use Save issue file instead."); return; }
+      text = await entry.async("string");
+    } else text = await f.text();
+    const j = JSON.parse(text); if (j.app !== "eagles-coach-portal") throw 0; await loadIssue(j, false); state.libPath = ""; closeLibrary(); toast(`Opened Week ${state.week}.`); }
+  catch(err){ toast("That file isn't a newsletter from the portal. Pick the .zip you downloaded, or an issue .json file."); }
 });
 $("#conflictLoad").addEventListener("click", async () => { const j = libConflict; if (!j) return; await loadIssue(j, false); toast("Loaded the newer version from the library."); });
 $("#conflictKeep").addEventListener("click", async () => { libConflict = null; $("#conflictBar").hidden = true; if (await saveIssue({force:true})) toast("Saved your version over the other one."); });

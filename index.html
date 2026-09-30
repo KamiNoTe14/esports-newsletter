@@ -1535,6 +1535,7 @@ async function restoreFolder(){
 async function connectFolder(){
   try {
     const h = await window.showDirectoryPicker({id:"eagles-newsletters", mode:"readwrite"});
+    if (/^\d{4}-\d{2}$/.test(h.name)){ toast(`"${h.name}" looks like a school-year folder. Pick the folder that contains it (for example "Newsletters") so each year gets its own subfolder.`); return; }
     libDir = h; libPending = null; await kvSet("dir", h);
     toast(`Connected to "${h.name}". Every issue you save goes there.`);
     setLibStatus(); renderLibrary();

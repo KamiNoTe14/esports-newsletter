@@ -108,6 +108,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
   <main class="panel" id="panel"><p class="muted">Loading…</p></main>
 </div>
 <input type="file" id="imgInput" accept="image/*" hidden>
+<input type="file" id="standInput" accept=".csv,.json,text/csv,application/json" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
@@ -115,7 +116,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const SITE_BASE = new URL("../", location.href).href;
-function toast(m){ const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3800); }
+function toast(m){ const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, Math.max(3800, m.length * 60)); }
 
 /* ---------- GitHub ---------- */
 const GH_KEY = "eagles-gh";
@@ -161,9 +162,9 @@ const LISTS = {
   teams:{title:"Team", add:"Add team", intro:"Each team card on the Teams and Home pages. Separate multiple leagues with commas.", name:i => `${i.game || "Game"} · ${i.name || "Team"}`,
     fields:[["game","Game"],["name","Team name"],["leagues","Leagues"],["note","Note (optional)"]],
     sub:{key:"roster", title:"Roster", add:"Add player", fields:[["name","Name"],["tag","Gamertag"],["role","Role (optional)"],["captain","Captain","check"],["private","Gamertag only","check"]]}},
-  standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Copy Place, team, school, W-L and Rating from RallyCry. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
+  standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Download the standings from RallyCry as CSV or JSON and click \"Import RallyCry file\", or type the rows in by hand. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
     fields:[["title","Title","text","MHSEL Smash Varsity · Division 2"],["updated","Updated","date"],["link","Link to full standings","url"],["on","Show this table","check"]],
-    sub:{key:"rows", title:"Rows", add:"Add row", fields:[["rank","#"],["team","Team"],["school","School"],["w","W"],["l","L"],["rating","Rating"],["us","Hartland","check"]]}},
+    sub:{key:"rows", title:"Rows", add:"Add row", importBtn:"Import RallyCry file (CSV or JSON)", fields:[["rank","#"],["team","Team"],["school","School"],["w","W"],["l","L"],["rating","Rating"],["us","Hartland","check"]]}},
   brackets:{title:"Bracket", add:"Add bracket", intro:"Link to the bracket on RallyCry, upload a screenshot of it, or both.", name:i => i.title || "Bracket",
     fields:[["title","Title","text","Fall 2026 MHSEL Playoffs · Smash"],["league","League"],["status","Status","select",["","Upcoming","In progress","Final"]],["link","Bracket link","url"],["image","Bracket image","image"],["text","Notes","textarea"],["on","Show this bracket","check"]]},
   records:{title:"Record", add:"Add record", intro:"Championships, milestones and program firsts.", name:i => i.title || "Record",
@@ -220,7 +221,7 @@ function subEditor(path, spec, arr){
   return `<div class="sub"><p class="sub-h">${esc(spec.title)}${arr.length ? ` (${arr.length})` : ""}</p>${arr.map((r, j) => `<div class="sub-row" style="--n:${spec.fields.length}">
       ${spec.fields.map(f => f[2] === "check" ? `<div style="padding-bottom:8px">${field(`${path}.${j}.${f[0]}`, f, r[f[0]] ?? false)}</div>` : field(`${path}.${j}.${f[0]}`, f, r[f[0]] ?? "")).join("")}
       <div class="tools" style="padding-bottom:4px"><button type="button" data-move="${path}" data-i="${j}" data-d="-1" aria-label="Move up"${j === 0 ? " disabled" : ""}>▲</button><button type="button" data-move="${path}" data-i="${j}" data-d="1" aria-label="Move down"${j === arr.length - 1 ? " disabled" : ""}>▼</button><button type="button" class="x" data-del="${path}" data-i="${j}" aria-label="Remove row">×</button></div>
-    </div>`).join("")}<button class="add" type="button" data-add="${path}" style="padding:5px 10px;font-size:13.5px">+ ${esc(spec.add)}</button></div>`;
+    </div>`).join("")}<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" type="button" data-add="${path}" style="padding:5px 10px;font-size:13.5px">+ ${esc(spec.add)}</button>${spec.importBtn ? `<button class="add" type="button" data-import="${path}" style="padding:5px 10px;font-size:13.5px">⇪ ${esc(spec.importBtn)}</button>` : ""}</div></div>`;
 }
 function sectionSwitch(t){
   const v = site.sections?.[t.toggle] !== false;
@@ -370,6 +371,137 @@ $("#imgInput").addEventListener("change", async e => {
   } catch(err){ toast("Couldn't read that image. Try a JPG or PNG."); }
 });
 
+/* ---------- standings import (RallyCry CSV / JSON) ---------- */
+let importPath = null;
+function parseCSV(text){
+  text = text.replace(/^\uFEFF/, "");
+  const delim = (text.split(/\r?\n/)[0].match(/\t/g) || []).length > (text.split(/\r?\n/)[0].match(/,/g) || []).length ? "\t" : ",";
+  const rows = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){ if (c === '"'){ if (text[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === delim){ row.push(cur); cur = ""; }
+    else if (c === "\n" || c === "\r"){ if (c === "\r" && text[i + 1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; }
+    else cur += c;
+  }
+  if (cur || row.length){ row.push(cur); rows.push(row); }
+  const clean = rows.filter(r => r.some(v => v.trim()));
+  if (clean.length < 2) return [];
+  const head = clean[0].map(h => h.trim());
+  return clean.slice(1).map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()])));
+}
+function flatten(o, pre = "", out = {}){
+  for (const [k, v] of Object.entries(o || {})){
+    const key = pre ? `${pre}.${k}` : k;
+    if (v && typeof v === "object" && !Array.isArray(v)) flatten(v, key, out);
+    else if (!Array.isArray(v)) out[key] = v;
+  }
+  return out;
+}
+function findRows(j){
+  let best = null;
+  (function walk(v){
+    if (Array.isArray(v)){
+      if (v.length && v.every(x => x && typeof x === "object" && !Array.isArray(x)) && (!best || v.length > best.length)) best = v;
+      v.forEach(walk);
+    } else if (v && typeof v === "object") Object.values(v).forEach(walk);
+  })(j);
+  return (best || []).map(x => flatten(x));
+}
+function mapStandings(recs){
+  if (!recs.length) return {rows:[], keys:[]};
+  const keys = [...new Set(recs.flatMap(r => Object.keys(r)))];
+  const norm = k => k.toLowerCase().replace(/[^a-z0-9.]/g, "");
+  const last = k => norm(k).split(".").pop();
+  const pick = (tests, avoid) => {
+    for (const t of tests){
+      const hit = keys.find(k => (typeof t === "string" ? last(k) === t || norm(k) === t : t.test(norm(k))) && !(avoid && avoid.test(norm(k))));
+      if (hit) return hit;
+    }
+    return null;
+  };
+  const kRank = pick(["place", "rank", "position", "standing", "pos", /(^|\.)(place|rank)/]);
+  const kTeam = pick(["entry", "entries", "entryname", "team", "teamname", "name", "displayname", /entr(y|ies).*name/, /team.*name/, /(^|\.)name$/], /school|org|game|division|league|player|user/);
+  const kSchool = pick(["school", "schoolname", "organization", "organizationname", "org", "orgname", "affiliation", /school/, /organi[sz]ation.*name/, /org.*name/]);
+  const kWL = pick(["matchwl", "wl", "record", "matchrecord", /match.*wl|w.?l$/]);
+  const kW = pick(["wins", "w", "matchwins", "win", /matchwin|wins$/], /loss|%|pct|percent|rate/);
+  const kL = pick(["losses", "l", "matchlosses", "loss", /matchloss|losses$/], /win|%|pct|percent|rate/);
+  const kRating = pick(["rating", "elo", "mmr", "rank rating", /rating|elo|mmr/]);
+  const kBye = pick(["bye", "byes", "hasbye", /bye/]);
+  const val = (r, k) => k == null || r[k] == null ? "" : String(r[k]).trim();
+  const rows = recs.map((r, i) => {
+    let w = val(r, kW), l = val(r, kL);
+    if ((!w || !l) && kWL){ const m = val(r, kWL).match(/(\d+)\s*[-–/:]\s*(\d+)/); if (m){ w = w || m[1]; l = l || m[2]; } }
+    let rating = val(r, kRating); if (/^-?\d+\.\d+$/.test(rating)) rating = String(Math.round(+rating));
+    const bye = kBye && /^(true|yes|1|bye)$/i.test(val(r, kBye)) || /\bbye\b/i.test(val(r, kWL));
+    const team = val(r, kTeam), school = val(r, kSchool) === team ? "" : val(r, kSchool);
+    return {rank:val(r, kRank).replace(/(st|nd|rd|th)$/i, ""), team, school, w:w || (bye ? "Bye" : ""), l, rating, us:/hartland/i.test(team + " " + school)};
+  }).filter(r => r.team);
+  return {rows, keys, found:{place:kRank, team:kTeam, school:kSchool, wins:kW || kWL, losses:kL || kWL, rating:kRating}};
+}
+/* RallyCry "bracket" export: a list of matches. Tally each team's match W-L. A bye counts as a win. */
+function tallyMatches(matches){
+  const t = new Map();
+  const get = n => { n = String(n || "").trim(); if (!n || /^tbd$/i.test(n)) return null; if (!t.has(n)) t.set(n, {team:n, w:0, l:0, byes:0}); return t.get(n); };
+  for (const m of matches){
+    if (m.state && !/^complete/i.test(m.state)) { m.sides.forEach(sd => get(sd.name)); continue; }
+    const sides = m.sides.filter(sd => get(sd.name));
+    if (sides.length === 1){ const x = get(sides[0].name); x.w++; x.byes++; continue; }
+    if (sides.length !== 2) continue;
+    let win = sides.findIndex(sd => sd.won === true);
+    if (win < 0){ const a = parseFloat(sides[0].score), b = parseFloat(sides[1].score);
+      if (/^w$/i.test(sides[0].score) || /^(f|l)$/i.test(sides[1].score)) win = 0;
+      else if (/^w$/i.test(sides[1].score) || /^(f|l)$/i.test(sides[0].score)) win = 1;
+      else if (!isNaN(a) && !isNaN(b) && a !== b) win = a > b ? 0 : 1; }
+    if (win < 0) continue;
+    get(sides[win].name).w++; get(sides[1 - win].name).l++;
+  }
+  return [...t.values()];
+}
+function matchesFrom(json, csv){
+  if (json && Array.isArray(json.matches) && json.matches.some(m => Array.isArray(m.slots)))
+    return json.matches.map(m => ({state:m.state, sides:(m.slots || []).map(sd => ({name:sd.entryName ?? sd.name, won:sd.won, score:sd.gamesWon}))}));
+  if (csv && csv.length && "Side 1" in csv[0])
+    return csv.map(r => ({state:r.State, sides:[{name:r["Side 1"], score:r["Side 1 Score"]}, {name:r["Side 2"], score:r["Side 2 Score"]}]}));
+  return null;
+}
+function rankRows(rows){
+  const num = v => { const n = parseFloat(v); return isNaN(n) ? -Infinity : n; };
+  rows.sort((a, b) => num(b.w) - num(a.w) || num(a.l) - num(b.l) || num(b.rating) - num(a.rating) || a.team.localeCompare(b.team));
+  rows.forEach((r, i) => { const p = rows[i - 1]; r.rank = p && p.w === r.w && p.l === r.l && String(p.rating || "") === String(r.rating || "") ? p.rank : String(i + 1); });
+  return rows;
+}
+$("#standInput").addEventListener("change", async e => {
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f || !importPath) return;
+  let recs = [], json = null, csv = null;
+  try {
+    const text = await f.text();
+    if (/\.json$/i.test(f.name) || /^\s*[\[{]/.test(text)) { json = JSON.parse(text); recs = findRows(json); }
+    else recs = csv = parseCSV(text);
+  } catch(err){ toast("Couldn't read that file. Download a fresh CSV or JSON from RallyCry and try again."); return; }
+  const old = getP(importPath) || [], byName = new Map(old.map(r => [String(r.team || "").trim().toLowerCase(), r]));
+  const matches = matchesFrom(json, csv);
+  let rows, keys = [], found = {};
+  if (matches){
+    rows = rankRows(tallyMatches(matches).map(x => { const o = byName.get(x.team.toLowerCase()) || {};
+      return {rank:"", team:x.team, school:o.school || "", w:String(x.w), l:String(x.l), rating:o.rating || "", us:o.us ?? /hartland/i.test(x.team + " " + (o.school || ""))}; }));
+  } else {
+    ({rows, keys, found} = mapStandings(recs));
+    rows.forEach(r => { const o = byName.get(r.team.toLowerCase()); if (o){ r.school = r.school || o.school || ""; r.rating = r.rating || o.rating || ""; } });
+  }
+  if (!rows.length){ toast(keys.length ? `Couldn't find the team names in that file. Columns seen: ${keys.slice(0, 12).join(", ")}` : "That file doesn't have any standings rows in it."); return; }
+  const arr = getP(importPath);
+  if (arr.length && !confirm(`Replace the ${arr.length} row${arr.length === 1 ? "" : "s"} in this table with ${rows.length} rows from ${f.name}?`)) return;
+  arr.splice(0, arr.length, ...rows);
+  const table = getP(importPath.split(".").slice(0, -1).join("."));
+  if (table) table.updated = new Date().toISOString().slice(0, 10);
+  setDirty(true); setStatus(); renderPanel();
+  const missing = matches ? [] : Object.entries(found).filter(([k, v]) => !v && k !== "school").map(([k]) => k);
+  const us = rows.filter(r => r.us).length;
+  toast(`Imported ${rows.length} teams${matches ? " and counted their W-L from the match results" : ""}${us ? `, ${us} Hartland row${us > 1 ? "s" : ""} highlighted` : ""}.${matches && !rows.some(r => r.rating) ? " RallyCry's file has no ratings, so type those in (they're kept next import)." : ""}${missing.length ? ` No ${missing.join("/")} column found, so check those.` : ""} It goes live when you publish.`);
+});
+
 /* ---------- events ---------- */
 $("#side").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; tab = b.dataset.tab; renderSide(); renderPanel(); $("#panel").scrollIntoView({block:"start"}); });
 $("#panel").addEventListener("input", e => {
@@ -402,6 +534,7 @@ $("#panel").addEventListener("click", async e => {
     const arr = getP(b.dataset.move), i = +b.dataset.i, j = i + (+b.dataset.d);
     if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; setDirty(true); setStatus(); renderPanel(); return;
   }
+  if (b.dataset.import){ importPath = b.dataset.import; $("#standInput").click(); return; }
   if (b.dataset.upload){ uploadPath = b.dataset.upload; $("#imgInput").click(); return; }
   if (b.dataset.clearimg){ setP(b.dataset.clearimg, ""); setDirty(true); setStatus(); renderPanel(); return; }
 });

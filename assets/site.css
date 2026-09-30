@@ -199,3 +199,6 @@ table.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;
 .loading{padding:80px 20px;text-align:center;color:var(--muted)}
 
 .tbl td .sub{display:block;font-size:13px;color:var(--muted,#8FA3BF);font-weight:400;margin-top:2px}
+.tbl.cut tr.extra{display:none}
+.tbl-more{margin-top:10px;background:none;border:1px solid var(--line-2);color:var(--text);font:600 14px var(--body);padding:7px 14px;border-radius:8px;cursor:pointer}
+.tbl-more:hover{border-color:var(--gold);color:var(--gold)}

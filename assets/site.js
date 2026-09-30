@@ -99,7 +99,7 @@ function standingsHTML(site){
   return `<section class="section alt"><div class="wrap">${secH("League standings")}
     <div class="grid" style="gap:28px">${list.map(s => `<div>
       <div class="sec-h" style="margin-bottom:12px"><h3>${esc(s.title)}</h3>${s.updated ? `<span class="muted" style="font-size:14px">Updated ${esc(shortDate(s.updated) || s.updated)}</span>` : ""}</div>
-      ${(s.rows || []).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Team</th><th class="n">W</th><th class="n">L</th></tr></thead><tbody>${(s.rows || []).map((r, i) => `<tr${r.us ? ' class="us"' : ""}><td>${esc(r.rank || i + 1)}</td><td>${esc(r.team)}</td><td class="n">${esc(r.w)}</td><td class="n">${esc(r.l)}</td></tr>`).join("")}</tbody></table></div>` : ""}
+      ${(s.rows || []).length ? (() => { const rows = s.rows || [], hasR = rows.some(r => String(r.rating || "").trim()); return `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Team</th><th class="n">W</th><th class="n">L</th>${hasR ? '<th class="n">Rating</th>' : ""}</tr></thead><tbody>${rows.map((r, i) => `<tr${r.us ? ' class="us"' : ""}><td>${esc(r.rank || i + 1)}</td><td>${esc(r.team)}${r.school ? `<span class="sub">${esc(r.school)}</span>` : ""}</td><td class="n">${esc(r.w)}</td><td class="n">${esc(r.l)}</td>${hasR ? `<td class="n">${esc(r.rating || "")}</td>` : ""}</tr>`).join("")}</tbody></table></div>`; })() : ""}
       ${safe(s.link) ? `<p style="margin:10px 0 0"><a href="${esc(safe(s.link))}" target="_blank" rel="noopener">Full standings →</a></p>` : ""}
     </div>`).join("")}</div></div></section>`;
 }

@@ -161,9 +161,9 @@ const LISTS = {
   teams:{title:"Team", add:"Add team", intro:"Each team card on the Teams and Home pages. Separate multiple leagues with commas.", name:i => `${i.game || "Game"} · ${i.name || "Team"}`,
     fields:[["game","Game"],["name","Team name"],["leagues","Leagues"],["note","Note (optional)"]],
     sub:{key:"roster", title:"Roster", add:"Add player", fields:[["name","Name"],["tag","Gamertag"],["role","Role (optional)"],["captain","Captain","check"],["private","Gamertag only","check"]]}},
-  standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
+  standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Copy Place, team, school, W-L and Rating from RallyCry. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
     fields:[["title","Title","text","MHSEL Smash Varsity · Division 2"],["updated","Updated","date"],["link","Link to full standings","url"],["on","Show this table","check"]],
-    sub:{key:"rows", title:"Rows", add:"Add row", fields:[["rank","#"],["team","Team"],["w","W"],["l","L"],["us","Hartland","check"]]}},
+    sub:{key:"rows", title:"Rows", add:"Add row", fields:[["rank","#"],["team","Team"],["school","School"],["w","W"],["l","L"],["rating","Rating"],["us","Hartland","check"]]}},
   brackets:{title:"Bracket", add:"Add bracket", intro:"Link to the bracket on RallyCry, upload a screenshot of it, or both.", name:i => i.title || "Bracket",
     fields:[["title","Title","text","Fall 2026 MHSEL Playoffs · Smash"],["league","League"],["status","Status","select",["","Upcoming","In progress","Final"]],["link","Bracket link","url"],["image","Bracket image","image"],["text","Notes","textarea"],["on","Show this bracket","check"]]},
   records:{title:"Record", add:"Add record", intro:"Championships, milestones and program firsts.", name:i => i.title || "Record",
@@ -391,7 +391,7 @@ $("#panel").addEventListener("click", async e => {
   if (b.id === "ghForget"){ const c = ghCfg() || {}; delete c.token; ghSave(c); connected = false; setStatus(); renderSide(); renderPanel(); toast("Key removed from this computer."); return; }
   if (b.dataset.add){
     const arr = getP(b.dataset.add); const key = b.dataset.add.split(".").pop();
-    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", leagues:"MHSEL", note:"", roster:[]}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", w:"", l:"", us:false}}[key] || {};
+    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", leagues:"MHSEL", note:"", roster:[]}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}}[key] || {};
     arr.push(blank); setDirty(true); setStatus(); renderPanel(); return;
   }
   if (b.dataset.del){

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Site Manager · Hartland Esports</title>
+<link rel="icon" href="../assets/eagle.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#EDF1F6;--panel:#fff;--field:#F5F8FB;--ink:#0B1F33;--muted:#5A6B7F;--line:#D6DFE8;--navy:#00274C;--gold:#FFBC05;--chip:#E4EAF1;--danger:#B3261E;--ok:#1E7A45;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--body:"Barlow",Arial,Helvetica,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.topbar{background:var(--navy);color:#fff;border-bottom:4px solid var(--gold);padding:12px 20px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.brand small{display:block;font-weight:600;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.brand h1{margin:0;font-family:var(--display);font-weight:700;font-size:26px;line-height:1;letter-spacing:.02em;text-transform:uppercase}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:6px;padding:9px 15px;font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.06em;text-transform:uppercase;line-height:1;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.45)}
+.btn-ghost:hover{box-shadow:inset 0 0 0 1.5px #fff}
+.btn-line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-line:hover{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.status{border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:600;background:rgba(255,255,255,.1);color:#C9D6E3}
+.status::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#8FA3B8;margin-right:7px}
+.status.ok::before{background:#5BD68A}.status.warn::before{background:var(--gold)}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:20px;max-width:1200px;margin:0 auto;padding:20px}
+@media (max-width:820px){.layout{grid-template-columns:1fr;padding:14px}}
+.side{position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:2px}
+@media (max-width:820px){.side{position:static;flex-direction:row;flex-wrap:wrap;gap:6px}}
+.side button{border:0;background:transparent;text-align:left;padding:9px 12px;border-radius:6px;font-weight:600;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media (max-width:820px){.side button{background:var(--panel);border:1px solid var(--line)}}
+.side button:hover{background:var(--chip);color:var(--ink)}
+.side button[aria-current="true"]{background:var(--navy);color:#fff}
+.side .dot{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:1px 6px;background:var(--chip);color:var(--muted)}
+.side button[aria-current="true"] .dot{background:rgba(255,255,255,.15);color:#fff}
+.side .dot.off{background:#F6E1DF;color:#8A2A22}
+.panel{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h2{margin:0;font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.03em;text-transform:uppercase}
+h3{margin:0;font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase}
+.intro{margin:0;color:var(--muted);max-width:70ch}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:620px){.g2,.g3{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+label.f>span{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:70px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:0;border-color:transparent}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink);cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--navy)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFF8E1;border:1px solid #F0D98A;border-radius:8px;padding:10px 14px}
+.switch.off{background:#F5F7FA;border-color:var(--line)}
+.item{border:1px solid var(--line);border-radius:10px;background:var(--field);padding:12px;display:flex;flex-direction:column;gap:10px}
+.item input,.item select,.item textarea{background:#fff}
+.item-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.item-h b{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.03em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tools{display:flex;gap:4px;flex-shrink:0}
+.tools button{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:6px;display:grid;place-items:center;color:var(--ink)}
+.tools button:hover:not(:disabled){border-color:var(--gold)}
+.tools button:disabled{opacity:.35;cursor:default}
+.tools .x:hover{color:var(--danger);border-color:var(--danger)}
+.add{align-self:flex-start;border:1.5px dashed var(--line);background:transparent;border-radius:6px;padding:8px 14px;font-weight:600}
+.add:hover{border-color:var(--gold);background:var(--chip)}
+.grid>.add{justify-self:start}
+.sub{border-top:1px dashed var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.sub-row{display:grid;gap:6px;align-items:end;grid-template-columns:repeat(var(--n),minmax(0,1fr)) auto}
+.sub-row .tools button{width:26px;height:26px}
+.sub-row label.f>span{font-size:10.5px}
+.sub-h{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin:0}
+.img-f{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.img-f img{width:84px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--line);background:#fff}
+.img-f .ph{width:84px;height:60px;border-radius:6px;border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:12px;background:#fff}
+.img-f input[type=url]{flex:1;min-width:160px}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:2px 6px;background:var(--gold);color:var(--navy)}
+.muted{color:var(--muted);font-size:13.5px}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.steps code,.muted code{background:var(--chip);padding:1px 5px;border-radius:3px;font-size:13px}
+.notice{border-radius:8px;padding:10px 14px;font-size:14px}
+.notice.warn{background:#FFF4D1;color:#4A3B00;border:1px solid #F0D98A}
+.notice.ok{background:#E3F4EA;color:#123F25;border:1px solid #B7DFC5}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;border-left:4px solid var(--gold);padding:10px 16px;border-radius:6px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);z-index:50}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><small>Hartland Eagles Esports</small><h1>Site Manager</h1></div>
+  <div class="actions">
+    <span class="status" id="status">Not connected</span>
+    <a class="btn btn-ghost" href="../portal/">Newsletter portal</a>
+    <a class="btn btn-ghost" href="../" target="_blank" rel="noopener">View site</a>
+    <button class="btn btn-gold" id="publish" type="button" disabled>Publish changes</button>
+  </div>
+</header>
+<div class="layout">
+  <nav class="side" id="side" aria-label="Sections"></nav>
+  <main class="panel" id="panel"><p class="muted">Loading…</p></main>
+</div>
+<input type="file" id="imgInput" accept="image/*" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SITE_BASE = new URL("../", location.href).href;
+function toast(m){ const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3800); }
+
+/* ---------- GitHub ---------- */
+const GH_KEY = "eagles-gh";
+function repoGuess(){
+  const m = /^([^.]+)\.github\.io$/i.exec(location.hostname);
+  const seg = location.pathname.split("/").filter(Boolean)[0];
+  return m && seg ? {owner:m[1], repo:seg} : {owner:"KamiNoTe14", repo:"esports-newsletter"};
+}
+function ghCfg(){ try { return JSON.parse(localStorage.getItem(GH_KEY)) || null; } catch(e){ return null; } }
+function ghSave(c){ try { localStorage.setItem(GH_KEY, JSON.stringify(c)); } catch(e){} }
+async function gh(path, opts = {}){
+  const c = ghCfg(); if (!c?.token) throw new Error("Not connected");
+  const r = await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}${path}`, {...opts, headers:{"Accept":"application/vnd.github+json","Authorization":`Bearer ${c.token}`,"X-GitHub-Api-Version":"2022-11-28", ...(opts.body ? {"Content-Type":"application/json"} : {})}});
+  if (!r.ok){ const e = new Error(`GitHub said ${r.status}`); e.status = r.status; try { e.detail = (await r.json()).message; } catch(x){} throw e; }
+  return r.status === 204 ? null : r.json();
+}
+const b64enc = str => { const b = new TextEncoder().encode(str); let s = ""; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); };
+const b64dec = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, "")), c => c.charCodeAt(0)));
+
+/* ---------- state ---------- */
+let site = null, siteSha = null, dirty = false, connected = false, ghUser = "";
+const pending = {}; // path -> base64 image data
+let tab = "connect";
+function setDirty(v){ dirty = v; $("#publish").disabled = !(v && connected); renderSide(); }
+window.addEventListener("beforeunload", e => { if (dirty){ e.preventDefault(); e.returnValue = ""; } });
+function getP(path){ return path.split(".").reduce((o, k) => o?.[k], site); }
+function setP(path, v){ const ks = path.split("."); const last = ks.pop(); const o = ks.reduce((o, k) => o[k], site); o[last] = v; }
+
+/* ---------- schema ---------- */
+const TABS = [
+  {id:"connect", label:"Connect"},
+  {id:"program", label:"Program & join"},
+  {id:"contact", label:"Coaches & links"},
+  {id:"teams", label:"Teams & rosters", toggle:"rosters", toggleLabel:"Show rosters on the Teams page"},
+  {id:"standings", label:"Standings", toggle:"standings", toggleLabel:"Show league standings"},
+  {id:"brackets", label:"Playoff brackets", toggle:"brackets", toggleLabel:"Show playoff brackets"},
+  {id:"records", label:"Program records", toggle:"records", toggleLabel:"Show program records"},
+  {id:"news", label:"News articles", toggle:"news", toggleLabel:"Show news articles"},
+  {id:"gallery", label:"Photo gallery", toggle:"gallery", toggleLabel:"Show the photo gallery"},
+  {id:"sponsors", label:"Sponsors", toggle:"sponsors", toggleLabel:"Show sponsors"}
+];
+const LISTS = {
+  teams:{title:"Team", add:"Add team", intro:"Each team card on the Teams and Home pages. Separate multiple leagues with commas.", name:i => `${i.game || "Game"} · ${i.name || "Team"}`,
+    fields:[["game","Game"],["name","Team name"],["leagues","Leagues"],["note","Note (optional)"]],
+    sub:{key:"roster", title:"Roster", add:"Add player", fields:[["name","Name"],["tag","Gamertag"],["role","Role (optional)"],["private","Gamertag only","check"]]}},
+  standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
+    fields:[["title","Title","text","MHSEL Smash Varsity · Division 2"],["updated","Updated","date"],["link","Link to full standings","url"],["on","Show this table","check"]],
+    sub:{key:"rows", title:"Rows", add:"Add row", fields:[["rank","#"],["team","Team"],["w","W"],["l","L"],["us","Hartland","check"]]}},
+  brackets:{title:"Bracket", add:"Add bracket", intro:"Link to the bracket on RallyCry, upload a screenshot of it, or both.", name:i => i.title || "Bracket",
+    fields:[["title","Title","text","Fall 2026 MHSEL Playoffs · Smash"],["league","League"],["status","Status","select",["","Upcoming","In progress","Final"]],["link","Bracket link","url"],["image","Bracket image","image"],["text","Notes","textarea"],["on","Show this bracket","check"]]},
+  records:{title:"Record", add:"Add record", intro:"Championships, milestones and program firsts.", name:i => i.title || "Record",
+    fields:[["title","Title","text","Fall State Champions"],["year","Year / season"],["detail","Details"]]},
+  news:{title:"Article", add:"Add article", intro:"News coverage of the program. Newest shows first.", name:i => i.title || "Article",
+    fields:[["title","Headline"],["source","Source","text","Livingston Daily"],["date","Date","date"],["link","Link","url"],["image","Image (optional)","image"],["summary","Summary","textarea"]]},
+  gallery:{title:"Photo", add:"Add photo", intro:"Photos appear in the Media page gallery. Use albums to group them (for example \"Fall 2026 States\").", name:i => i.caption || "Photo",
+    fields:[["image","Photo","image"],["caption","Caption"],["album","Album (optional)"]]},
+  sponsors:{title:"Sponsor", add:"Add sponsor", intro:"Logos show on the Home and About pages. Transparent PNG logos look best.", name:i => i.name || "Sponsor",
+    fields:[["name","Name"],["link","Website","url"],["logo","Logo","image"]]},
+  coaches:{title:"Coach", add:"Add coach", name:i => i.name || "Coach", fields:[["name","Name"],["role","Role"],["email","Email (optional)","email"]]},
+  seasons:{title:"Season phase", add:"Add phase", name:i => i.name || "Phase", fields:[["name","Name"],["when","When"],["text","Description","textarea"]]}
+};
+
+/* ---------- rendering ---------- */
+function renderSide(){
+  $("#side").innerHTML = TABS.map(t => {
+    let badge = "";
+    if (t.toggle && site) badge = site.sections?.[t.toggle] === false ? `<span class="dot off">Off</span>` : (LISTS[t.id] && (site[t.id] || []).length ? `<span class="dot">${site[t.id].length}</span>` : "");
+    if (t.id === "connect") badge = connected ? `<span class="dot">✓</span>` : `<span class="dot off">!</span>`;
+    return `<button type="button" data-tab="${t.id}"${tab === t.id ? ' aria-current="true"' : ""}>${t.label}${badge}</button>`;
+  }).join("");
+}
+function field(path, [key, label, type = "text", extra], val){
+  const id = "f-" + path.replace(/\./g, "-");
+  if (type === "check") return `<label class="toggle"><input id="${id}" type="checkbox" data-path="${path}"${val !== false && val !== undefined && val !== "" ? " checked" : ""}> ${esc(label)}</label>`;
+  if (type === "textarea") return `<label class="f"><span>${esc(label)}</span><textarea id="${id}" data-path="${path}" rows="3">${esc(val)}</textarea></label>`;
+  if (type === "select") return `<label class="f"><span>${esc(label)}</span><select id="${id}" data-path="${path}">${extra.map(o => `<option value="${esc(o)}"${o === (val || "") ? " selected" : ""}>${esc(o || "—")}</option>`).join("")}</select></label>`;
+  if (type === "image"){
+    const src = val ? (pending[val] ? `data:image/jpeg;base64,${pending[val]}` : (/^https?:/i.test(val) ? val : SITE_BASE + val)) : "";
+    return `<div class="f"><label class="f"><span>${esc(label)}</span></label><div class="img-f">${src ? `<img src="${esc(src)}" alt="">` : `<div class="ph">No image</div>`}<button type="button" class="btn btn-line" data-upload="${path}">${val ? "Replace" : "Upload"}</button><input id="${id}" type="url" data-path="${path}" value="${esc(/^https?:/i.test(val || "") ? val : "")}" placeholder="…or paste an image link">${val ? `<button type="button" class="btn btn-line" data-clearimg="${path}">Remove</button>` : ""}</div></div>`;
+  }
+  return `<label class="f"><span>${esc(label)}</span><input id="${id}" type="${type === "date" ? "date" : type === "url" ? "url" : type === "email" ? "email" : "text"}" data-path="${path}" value="${esc(val)}"${extra ? ` placeholder="${esc(extra)}"` : ""}></label>`;
+}
+function listEditor(key, spec){
+  const arr = site[key] = site[key] || [];
+  const isCheck = f => f[2] === "check";
+  return `<div class="grid" style="gap:10px">${arr.map((it, i) => {
+    const base = `${key}.${i}`;
+    const main = spec.fields.filter(f => !isCheck(f)), checks = spec.fields.filter(isCheck);
+    return `<div class="item">
+      <div class="item-h"><b>${esc(spec.name(it))}</b><div class="tools">
+        <button type="button" data-move="${key}" data-i="${i}" data-d="-1" aria-label="Move up"${i === 0 ? " disabled" : ""}>▲</button>
+        <button type="button" data-move="${key}" data-i="${i}" data-d="1" aria-label="Move down"${i === arr.length - 1 ? " disabled" : ""}>▼</button>
+        <button type="button" class="x" data-del="${key}" data-i="${i}" aria-label="Remove ${esc(spec.title)}">×</button>
+      </div></div>
+      <div class="grid g2">${main.map(f => `<div style="${f[2] === "textarea" || f[2] === "image" ? "grid-column:1/-1" : ""}">${field(`${base}.${f[0]}`, f, it[f[0]] ?? "")}</div>`).join("")}</div>
+      ${checks.length ? `<div style="display:flex;gap:16px;flex-wrap:wrap">${checks.map(f => field(`${base}.${f[0]}`, f, it[f[0]] ?? (f[0] === "on" ? true : false))).join("")}</div>` : ""}
+      ${spec.sub ? subEditor(`${base}.${spec.sub.key}`, spec.sub, it[spec.sub.key] = it[spec.sub.key] || []) : ""}
+    </div>`;
+  }).join("")}<button class="add" type="button" data-add="${key}">+ ${esc(spec.add)}</button></div>`;
+}
+function subEditor(path, spec, arr){
+  return `<div class="sub"><p class="sub-h">${esc(spec.title)}${arr.length ? ` (${arr.length})` : ""}</p>${arr.map((r, j) => `<div class="sub-row" style="--n:${spec.fields.length}">
+      ${spec.fields.map(f => f[2] === "check" ? `<div style="padding-bottom:8px">${field(`${path}.${j}.${f[0]}`, f, r[f[0]] ?? false)}</div>` : field(`${path}.${j}.${f[0]}`, f, r[f[0]] ?? "")).join("")}
+      <div class="tools" style="padding-bottom:4px"><button type="button" data-move="${path}" data-i="${j}" data-d="-1" aria-label="Move up"${j === 0 ? " disabled" : ""}>▲</button><button type="button" data-move="${path}" data-i="${j}" data-d="1" aria-label="Move down"${j === arr.length - 1 ? " disabled" : ""}>▼</button><button type="button" class="x" data-del="${path}" data-i="${j}" aria-label="Remove row">×</button></div>
+    </div>`).join("")}<button class="add" type="button" data-add="${path}" style="padding:5px 10px;font-size:13.5px">+ ${esc(spec.add)}</button></div>`;
+}
+function sectionSwitch(t){
+  const v = site.sections?.[t.toggle] !== false;
+  return `<div class="switch${v ? "" : " off"}"><label class="toggle"><input type="checkbox" data-path="sections.${t.toggle}"${v ? " checked" : ""}> ${esc(t.toggleLabel)}</label><span class="muted">${v ? "On" : "Hidden from the site"}</span></div>`;
+}
+function objFields(prefix, list, cols){
+  return `<div class="grid ${cols || "g2"}">${list.map(f => `<div style="${f[2] === "textarea" ? "grid-column:1/-1" : ""}">${field(`${prefix}.${f[0]}`, f, getP(`${prefix}.${f[0]}`) ?? "")}</div>`).join("")}</div>`;
+}
+function renderPanel(){
+  const P = $("#panel"), t = TABS.find(x => x.id === tab);
+  if (tab === "connect"){ P.innerHTML = connectPanel(); return; }
+  if (!site){ P.innerHTML = `<p class="muted">Loading…</p>`; return; }
+  if (tab === "program"){
+    site.program = site.program || {}; site.tryouts = site.tryouts || {}; site.calendar = site.calendar || {};
+    P.innerHTML = `<div class="card"><div class="card-h"><h2>Program</h2></div><p class="intro">The home page headline and the About page.</p>
+      ${objFields("program", [["heroTitle","Home headline"],["school","School line"],["heroText","Home intro","textarea"],["aboutText","About page intro","textarea"],["teamsIntro","Teams page intro","textarea"],["lab","Where you practice"]])}</div>
+    <div class="card"><div class="card-h"><h2>Tryouts</h2>${field("tryouts.on", ["on","Show tryout details","check"], site.tryouts.on !== false)}</div>
+      ${objFields("tryouts", [["title","Title","text","Fall 2027 tryouts"],["date","Date","date"],["time","Time","text","2:30–4:00 PM"],["location","Location"],["text","Details","textarea"]])}</div>
+    <div class="card"><div class="card-h"><h2>How our year works</h2></div><p class="intro">The season timeline on the Schedule and About pages.</p>${listEditor("seasons", LISTS.seasons)}</div>
+    <div class="card"><div class="card-h"><h2>Calendar</h2>${field("calendar.on", ["on","Show the calendar","check"], site.calendar.on !== false)}</div>
+      ${objFields("calendar", [["id","Google Calendar ID"]], "g2")}<p class="muted" style="margin:0">Find it in Google Calendar under the calendar's <b>Settings → Integrate calendar → Calendar ID</b>. The calendar must be public for families outside the district to see it.</p></div>`;
+    return;
+  }
+  if (tab === "contact"){
+    site.links = site.links || {};
+    P.innerHTML = `<div class="card"><div class="card-h"><h2>Coaches</h2></div>${listEditor("coaches", LISTS.coaches)}</div>
+    <div class="card"><div class="card-h"><h2>Social & streaming</h2></div><p class="intro">Leave a box empty to hide that link.</p>${objFields("links", [["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"]])}</div>
+    <div class="card"><div class="card-h"><h2>Support & other links</h2></div>${objFields("links", [["merch","Merch store","url"],["jerseys","Jersey store","url"],["fundraiser","Fundraiser link","url"],["fundraiserLabel","Fundraiser name"],["league","League site","url"],["athletics","Athletics site","url"]])}</div>`;
+    return;
+  }
+  const spec = LISTS[tab];
+  P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
+    ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
+    ${listEditor(tab, spec)}</div>`;
+}
+function connectPanel(){
+  const c = ghCfg() || repoGuess();
+  return `<div class="card"><div class="card-h"><h2>Connect to GitHub</h2>${connected ? `<span class="pill">Connected${ghUser ? " as " + esc(ghUser) : ""}</span>` : ""}</div>
+    <p class="intro">Publishing saves your changes to the website's GitHub repository. Each coach connects once per browser with a GitHub access key. The newsletter portal uses the same key, so you only set it up here.</p>
+    ${connected ? `<div class="notice ok">Connected to <b>${esc(c.owner)}/${esc(c.repo)}</b>. Edits here go live about a minute after you click <b>Publish changes</b>.</div>` : ""}
+    <div class="grid g3">
+      <label class="f"><span>GitHub owner</span><input id="ghOwner" value="${esc(c.owner || "")}"></label>
+      <label class="f"><span>Repository</span><input id="ghRepo" value="${esc(c.repo || "")}"></label>
+      <label class="f"><span>Access key</span><input id="ghToken" type="password" value="${esc(c.token || "")}" placeholder="github_pat_…" autocomplete="off"></label>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold" type="button" id="ghConnect">${connected ? "Reconnect" : "Connect"}</button>${connected ? `<button class="btn btn-line" type="button" id="ghForget">Forget key on this computer</button>` : ""}</div>
+  </div>
+  <div class="card"><h3>Getting an access key (Cameron)</h3>
+    <ol class="steps">
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → Fine-grained personal access tokens → Generate new token</a>.</li>
+      <li>Name it <code>Hartland Esports site</code> and pick an expiration (up to a year).</li>
+      <li>Under <b>Repository access</b>, choose <b>Only select repositories</b> and pick <b>esports-newsletter</b>.</li>
+      <li>Under <b>Permissions → Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>.</li>
+      <li>Click <b>Generate token</b>, copy it, paste it above and click <b>Connect</b>.</li>
+    </ol>
+  </div>
+  <div class="card"><h3>For Coach Watkins</h3>
+    <p class="muted" style="margin:0">Add him in the repository's <b>Settings → Collaborators → Add people</b>. GitHub's fine-grained keys only work on repositories the person owns, so after he accepts the invite he makes a <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=Hartland%20Esports%20site" target="_blank" rel="noopener">classic token</a> with only the <code>public_repo</code> box checked, and pastes that here on his computer.</p>
+  </div>`;
+}
+
+/* ---------- load / connect / publish ---------- */
+async function loadSite(){
+  if (connected){
+    try {
+      const c = ghCfg();
+      const f = await gh(`/contents/data/site.json?ref=${encodeURIComponent(c.branch || "main")}`);
+      site = JSON.parse(b64dec(f.content)); siteSha = f.sha; return;
+    } catch(e){ toast("Couldn't load the latest content from GitHub. Showing the live site's copy."); }
+  }
+  const r = await fetch(SITE_BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"});
+  site = await r.json(); siteSha = null;
+}
+async function connect(cfg){
+  ghSave(cfg);
+  try {
+    const repo = await gh("");
+    if (!repo.permissions?.push){ connected = false; toast("That key can read the repository but can't publish to it. Check its Contents permission."); return false; }
+    cfg.branch = repo.default_branch || "main"; ghSave(cfg);
+    connected = true;
+    try { ghUser = (await (await fetch("https://api.github.com/user", {headers:{Authorization:`Bearer ${cfg.token}`}})).json()).login || ""; } catch(e){}
+    return true;
+  } catch(e){
+    connected = false;
+    toast(e.status === 401 ? "GitHub didn't accept that key. Copy it again and paste it in." : e.status === 404 ? "Couldn't find that repository with this key. Check the owner, repository and the key's repository access." : "Couldn't reach GitHub. Check your connection and try again.");
+    return false;
+  } finally { setStatus(); }
+}
+function setStatus(){
+  const s = $("#status");
+  s.className = "status " + (connected ? "ok" : "warn");
+  s.textContent = connected ? (dirty ? "Unpublished changes" : "Connected to GitHub") : "Not connected: can't publish";
+  $("#publish").disabled = !(dirty && connected);
+}
+async function putFile(path, b64, message, sha){
+  const c = ghCfg();
+  return gh(`/contents/${path.split("/").map(encodeURIComponent).join("/")}`, {method:"PUT", body:JSON.stringify({message, content:b64, branch:c.branch || "main", ...(sha ? {sha} : {})})});
+}
+async function publish(){
+  const btn = $("#publish"); btn.disabled = true; btn.textContent = "Publishing…";
+  try {
+    const used = JSON.stringify(site);
+    for (const [path, data] of Object.entries(pending)){
+      if (used.includes(`"${path}"`)) await putFile(path, data, `Site manager: add ${path.split("/").pop()}`);
+      delete pending[path];
+    }
+    let sha = siteSha;
+    try { const cur = await gh(`/contents/data/site.json?ref=${encodeURIComponent(ghCfg().branch || "main")}`); if (sha && cur.sha !== sha){ if (!confirmOverwrite()) { btn.textContent = "Publish changes"; setStatus(); return; } } sha = cur.sha; } catch(e){ if (e.status !== 404) throw e; }
+    const res = await putFile("data/site.json", b64enc(JSON.stringify(site, null, 2) + "\n"), "Site manager: update site content", sha);
+    siteSha = res.content.sha;
+    setDirty(false); setStatus();
+    toast("Published. The live site updates in about a minute.");
+  } catch(e){
+    toast(`Couldn't publish: ${e.detail || e.message}. Your edits are still here; try again.`);
+    setStatus();
+  } finally { btn.textContent = "Publish changes"; }
+}
+let overwriteArmed = false;
+function confirmOverwrite(){
+  if (overwriteArmed){ overwriteArmed = false; return true; }
+  overwriteArmed = true; setTimeout(() => overwriteArmed = false, 8000);
+  toast("Someone else published site changes since you opened this page. Click Publish again within 8 seconds to replace them with yours, or reload to see theirs.");
+  return false;
+}
+
+/* ---------- images ---------- */
+function readURL(file){ return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); }); }
+async function shrink(file, maxW, png){
+  const im = new Image(); im.src = await readURL(file); await im.decode();
+  const sc = Math.min(1, maxW / im.naturalWidth), w = Math.round(im.naturalWidth * sc), h = Math.round(im.naturalHeight * sc);
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const cx = cv.getContext("2d");
+  if (!png){ cx.fillStyle = "#fff"; cx.fillRect(0, 0, w, h); }
+  cx.drawImage(im, 0, 0, w, h);
+  return cv.toDataURL(png ? "image/png" : "image/jpeg", .85).split(",")[1];
+}
+let uploadPath = null;
+$("#imgInput").addEventListener("change", async e => {
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f || !uploadPath) return;
+  if (!/^image\//.test(f.type)){ toast("That file isn't an image."); return; }
+  try {
+    const coll = uploadPath.split(".")[0], png = coll === "sponsors" || /\.png$/i.test(f.name) && coll !== "gallery";
+    const data = await shrink(f, coll === "gallery" || coll === "news" || coll === "brackets" ? 1600 : 600, png);
+    const slug = f.name.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "image";
+    const path = `assets/uploads/${coll}/${Date.now().toString(36)}-${slug}.${png ? "png" : "jpg"}`;
+    pending[path] = data; setP(uploadPath, path); setDirty(true); renderPanel();
+    toast("Image added. It goes live when you publish.");
+  } catch(err){ toast("Couldn't read that image. Try a JPG or PNG."); }
+});
+
+/* ---------- events ---------- */
+$("#side").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; tab = b.dataset.tab; renderSide(); renderPanel(); $("#panel").scrollIntoView({block:"start"}); });
+$("#panel").addEventListener("input", e => {
+  const el = e.target, path = el.dataset.path; if (!path) return;
+  setP(path, el.type === "checkbox" ? el.checked : el.value);
+  setDirty(true); setStatus();
+  if (el.type === "checkbox" && path.startsWith("sections.")) renderPanel();
+  if (el.type === "url" && /\.(image|logo)$/.test(path)) { clearTimeout(renderPanel.t); renderPanel.t = setTimeout(() => { const pos = el.id; renderPanel(); document.getElementById(pos)?.focus(); }, 900); }
+});
+$("#panel").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "ghConnect"){
+    const cfg = {owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), token:$("#ghToken").value.trim()};
+    if (!cfg.token){ toast("Paste your access key first."); return; }
+    b.disabled = true; b.textContent = "Connecting…";
+    if (await connect(cfg)){ if (!dirty) await loadSite(); toast("Connected. You can publish changes now."); tab = "program"; }
+    renderSide(); renderPanel(); return;
+  }
+  if (b.id === "ghForget"){ const c = ghCfg() || {}; delete c.token; ghSave(c); connected = false; setStatus(); renderSide(); renderPanel(); toast("Key removed from this computer."); return; }
+  if (b.dataset.add){
+    const arr = getP(b.dataset.add); const key = b.dataset.add.split(".").pop();
+    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", leagues:"MHSEL", note:"", roster:[]}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{name:"", tag:"", role:"", private:false}, rows:{rank:"", team:"", w:"", l:"", us:false}}[key] || {};
+    arr.push(blank); setDirty(true); setStatus(); renderPanel(); return;
+  }
+  if (b.dataset.del){
+    if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "?"; b.title = "Click again to remove"; setTimeout(() => { if (b.isConnected){ b.classList.remove("armed"); b.textContent = "×"; } }, 3000); return; }
+    getP(b.dataset.del).splice(+b.dataset.i, 1); setDirty(true); setStatus(); renderPanel(); return;
+  }
+  if (b.dataset.move){
+    const arr = getP(b.dataset.move), i = +b.dataset.i, j = i + (+b.dataset.d);
+    if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; setDirty(true); setStatus(); renderPanel(); return;
+  }
+  if (b.dataset.upload){ uploadPath = b.dataset.upload; $("#imgInput").click(); return; }
+  if (b.dataset.clearimg){ setP(b.dataset.clearimg, ""); setDirty(true); setStatus(); renderPanel(); return; }
+});
+$("#publish").addEventListener("click", publish);
+
+(async function init(){
+  const cfg = ghCfg();
+  if (cfg?.token) await connect(cfg);
+  try { await loadSite(); } catch(e){ $("#panel").innerHTML = `<div class="notice warn">Couldn't load the site's content. Reload the page.</div>`; return; }
+  tab = connected ? "program" : "connect";
+  setStatus(); renderSide(); renderPanel();
+})();
+})();
+</script>
+</body>
+</html>

@@ -1,36 +1,30 @@
-# Hartland Eagles Esports: Coach's Portal
+# Hartland Esports website
 
-The weekly newsletter builder for *The Esports Report*. It's a single web page (`index.html`) with nothing to install and no server.
+Live at **https://kaminote14.github.io/esports-newsletter/**
 
-## Put it online (GitHub Pages, one time)
+| Page | What it is |
+|---|---|
+| `/` (and `teams`, `schedule`, `newsletters`, `media`, `about`) | The public program website. Every page reads its content from `data/site.json` and `data/issues.json`. |
+| `/admin/` | **Site Manager**: edit teams, rosters, standings, brackets, records, news, gallery, sponsors, links and program info; turn sections on or off; publish. |
+| `/portal/` | **Coach's Portal**: build the weekly newsletter. **Publish for web** posts it to the site's Newsletters page. |
 
-1. On GitHub, create a new repository (for example `esports-newsletter`). Public is fine; the page contains no student data until someone types it in, and everything you type is stored on your own computer and in your Drive folder, not on GitHub.
-2. Upload `index.html`, `README.md` and `.nojekyll` (drag them onto the repository page, then **Commit changes**).
-3. Go to **Settings → Pages**. Under **Build and deployment**, set **Source** to *Deploy from a branch*, choose **main** and **/ (root)**, then **Save**.
-4. After a minute the portal is live at `https://<your-username>.github.io/esports-newsletter/`. Bookmark it on both computers.
+## One-time setup for each coach
 
-To update the portal later, upload a new `index.html` over the old one.
+1. Open the **Site Manager** (`/admin/`) and follow the **Connect** steps to create a GitHub access key and paste it in. The portal uses the same key automatically.
+   - **Cameron:** a fine-grained key limited to this repository, with **Contents: Read and write**.
+   - **Coach Watkins:** add him under **Settings → Collaborators**. After he accepts, he makes a classic token with only `public_repo` checked. GitHub's fine-grained keys can't be used on someone else's personal repository.
+2. In the **portal**, connect the shared Google Drive newsletter folder under **Library → Choose folder** (Chrome or Edge).
 
-## Set up the shared library (each coach, one time)
+## Everyday use
 
-1. Install **Google Drive for desktop** and sign in with your school account.
-2. Make one folder you both can edit, for example **Shared drives › Esports › Newsletters** (or a folder in one person's My Drive shared with the other).
-3. Open the portal in **Chrome or Edge**, click **Library → Choose folder**, and pick that folder in the Google Drive section of the file picker. Allow the browser to edit files when it asks.
+- **Newsletter:** build it in the portal, email it like before, then click **Publish for web**. The issue page, the Newsletters archive, the home page's "Latest report" and "Coming up" all update within about a minute.
+- **Everything else:** change it in the Site Manager and click **Publish changes**.
+- **Student privacy:** rosters have a **Gamertag only** box per player. The portal's Eagle of the Week has **Gamertag only on the website**.
 
-Chrome remembers the folder. After restarting the browser you may see **Library: click to reconnect**. One click restores it.
+## Files
 
-## How the library works
-
-- Each issue is saved as a file: `Newsletters/2026-27/Week 03 - 2026-09-25.json`. The school-year folder is picked from the issue date (July starts a new school year) or from the **School year folder** box.
-- Once an issue is in the library, changes save automatically a second or two after you stop typing. The status pill in the top bar shows when it last saved.
-- **Start next week** saves the current week to the library first, then starts the new week, with last week's schedule carried into results.
-- **Library** lists every issue by school year. Search it, filter by tag, **Open** an issue to read or edit it, or **Copy** one to start a new issue from it.
-- **Publish for web** saves a self-contained web page of the issue (into `2026-27/Web pages/` and your Downloads) and copies it, ready to paste into Google Sites with **Insert → Embed → Embed code**.
-
-### Taking turns
-
-Both of you can open the same issue. If one of you saves while the other has it open, the second person sees a yellow bar ("changed on another computer") and autosave pauses until they choose **Load their version** or **Keep mine**. Drive for desktop can take a few seconds to sync a change between computers, so let it finish before you switch.
-
-### Other browsers
-
-Firefox and Safari can't connect to a folder. The Library there offers **Save issue file** and **Open issue file** instead.
+- `data/site.json`: all site content (edited through the Site Manager)
+- `data/issues.json`: the newsletter list (written by the portal)
+- `newsletters/<school year>/week-NN-YYYY-MM-DD.html`: published issues
+- `assets/uploads/…`: images uploaded through the Site Manager
+- `assets/site.css`, `assets/site.js`: site design and rendering

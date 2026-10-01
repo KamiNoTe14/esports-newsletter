@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {seasonOf, seasonLabel, gameFor, abbrFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js";
+import {seasonOf, seasonLabel, gameFor, abbrFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=4";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -14,21 +14,30 @@ async function getJSON(p){ const r = await fetch(BASE + p + "?v=" + Date.now(), 
 export async function archive(season){ try { return (await getJSON(`data/matches/${season}.json`)).matches || []; } catch(e){ return []; } }
 async function archiveSeasons(){ try { return (await getJSON("data/matches/index.json")).seasons || []; } catch(e){ return [seasonOf()]; } }
 
-/* Calls cb(scoreboard) now and on every change. Falls back to re-checking every 30 s if the live connection can't start. */
-export async function watchBoard(cb){
-  if (isMock()){
-    const read = () => { try { return JSON.parse(localStorage.getItem("eagles-mock-scoreboard")) || {matches:[]}; } catch(e){ return {matches:[]}; } };
-    cb(read()); window.addEventListener("storage", e => { if (e.key === "eagles-mock-scoreboard") cb(read()); }); return;
-  }
-  try {
+/* Live documents from Firestore. Each calls cb(data) now and again on every change.
+   If the live connection can't start, it re-checks every 30 seconds instead. */
+let _db = null;
+function db(){
+  return _db = _db || (async () => {
     const fb = await import(BASE + "assets/vendor/firebase-read.js");
     const app = fb.initializeApp(FIREBASE_CONFIG, "site");
-    const db = fb.initializeFirestore(app, {localCache:fb.memoryLocalCache()});
-    fb.onSnapshot(fb.doc(db, "public", "scoreboard"), s => cb(s.exists() ? s.data() : {matches:[]}), () => poll(cb));
-  } catch(e){ poll(cb); }
+    return {fb, db:fb.initializeFirestore(app, {localCache:fb.memoryLocalCache()})};
+  })();
 }
-function poll(cb){
-  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/public/scoreboard?key=${FIREBASE_CONFIG.apiKey}`;
+async function watchDoc(id, mockKey, cb){
+  const empty = {matches:[]};
+  if (isMock()){
+    const read = () => { try { return JSON.parse(localStorage.getItem(mockKey)) || empty; } catch(e){ return empty; } };
+    cb(read()); window.addEventListener("storage", e => { if (e.key === mockKey) cb(read()); }); return;
+  }
+  try { const {fb, db:d} = await db(); fb.onSnapshot(fb.doc(d, "public", id), s => cb(s.exists() ? s.data() : empty), () => poll(id, cb)); }
+  catch(e){ poll(id, cb); }
+}
+export function watchBoard(cb){ return watchDoc("scoreboard", "eagles-mock-scoreboard", cb); }
+/* Every finished match of a season in full detail (lineups, stats), updated the moment a match goes final. */
+export function watchSeason(season, cb){ return watchDoc("season-" + season, "eagles-mock-season-" + season, cb); }
+function poll(id, cb){
+  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/public/${id}?key=${FIREBASE_CONFIG.apiKey}`;
   const tick = async () => { try { const r = await fetch(url, {cache:"no-store"}); if (r.ok) cb(fromRest((await r.json()).fields || {})); } catch(e){} };
   tick(); setInterval(tick, 30000);
 }
@@ -41,7 +50,7 @@ function fromRest(fields){ /* Firestore REST value format -> plain JSON */
 /* archive (full detail) + scoreboard (freshest status/score), newest data wins */
 export function merge(archived, board){
   const by = new Map(archived.map(m => [m.id, m]));
-  (board?.matches || []).forEach(b => { const a = by.get(b.id); by.set(b.id, a ? {...a, ...b, games:b.games || a.games, players:a.players, stream:{...(a.stream || {}), ...(b.stream || {})}} : b); });
+  (board?.matches || []).forEach(b => { const a = by.get(b.id); by.set(b.id, a ? {...a, ...b, games:(b.games || []).length ? b.games : a.games, players:a.players, stream:{...(a.stream || {}), ...(b.stream || {})}} : b); });
   return [...by.values()];
 }
 
@@ -100,9 +109,9 @@ function card(site, m){
 export async function startResults(site){
   const host = $("#results"); if (!host) return;
   const season = seasonOf();
-  let arch = await archive(season), board = null, team = (location.hash.match(/^#team-(.+)$/) || [])[1] || "";
+  let arch = await archive(season), full = [], board = null, team = (location.hash.match(/^#team-(.+)$/) || [])[1] || "";
   const draw = () => {
-    const all = merge(arch, board).filter(m => m.season === season || !m.season);
+    const all = merge([...arch, ...full], board).filter(m => m.season === season || !m.season);
     const live = all.filter(m => m.status === "live");
     const fin = all.filter(m => m.status === "final").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
     const shown = fin.filter(m => !team || m.teamId === team);
@@ -120,7 +129,7 @@ export async function startResults(site){
   };
   draw();
   watchBoard(b => { board = b; draw(); });
-  setInterval(async () => { arch = await archive(season); draw(); }, 10 * 60 * 1000);
+  watchSeason(season, d => { full = d.matches || []; draw(); });
 }
 function teamName(site, t){ const g = gameFor(site, t.gameKey); return `${g.short || t.game} ${t.name}`; }
 function liveCard(site, m){
@@ -141,18 +150,29 @@ function resultRow(site, m){
     </summary><div class="res-body">
       <p class="muted" style="margin:0 0 10px">${esc(m.league || "")}${m.week ? ` · Week ${esc(m.week)}` : ""}${m.event ? ` · ${esc(m.event)}` : ""} · Best of ${esc(m.bestOf)}${m.forfeit ? ` · ${m.forfeit === "them" ? "Won by forfeit" : "Forfeit"}` : ""}</p>
       ${games.length ? `<div class="res-games">${games.map(x => `<span class="${x.winner === "us" ? "W" : x.winner === "them" ? "L" : ""}"><small>${esc(g.unit || "Game")} ${x.n}</small>${g.points ? `${x.us}–${x.them}` : x.winner === "us" ? "Won" : x.winner === "them" ? "Lost" : "–"}</span>`).join("")}</div>` : ""}
-      ${lineup ? `<p style="margin:12px 0 0"><span class="muted">Lineup:</span> ${lineup}</p>` : ""}
+      ${boxScore(g, m) || (lineup ? `<p style="margin:12px 0 0"><span class="muted">Lineup:</span> ${lineup}</p>` : "")}
       ${w ? `<p style="margin:12px 0 0"><a class="btn btn-line" href="${esc(w)}" target="_blank" rel="noopener">▶ Watch the replay</a></p>` : ""}
     </div></details>`;
+}
+
+function boxScore(g, m){
+  const ps = m.players || [], cols = (g.statList || []).filter(c => ps.some(p => p.stats && c.key in p.stats));
+  if (!ps.length || !cols.length) return "";
+  return `<div class="tbl-wrap box"><table class="tbl"><thead><tr><th>Player</th>${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(p.stats[c.key]) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
 /* ---------- player profile ---------- */
 export async function startPlayer(site){
   const host = $("#player"); if (!host) return;
+  const seasons = await archiveSeasons();
+  const arch = (await Promise.all(seasons.map(archive))).flat();
+  let shown = false;
+  watchSeason(seasonOf(), d => { shown = true; drawPlayer(site, host, merge([...arch, ...(d.matches || [])], null)); });
+  setTimeout(() => { if (!shown) drawPlayer(site, host, arch); }, 5000);
+}
+function drawPlayer(site, host, all){
   const id = new URLSearchParams(location.search).get("id") || "";
   const entries = (site.teams || []).flatMap(t => (t.roster || []).filter(p => p.id === id).map(p => ({...p, team:t})));
-  const seasons = await archiveSeasons();
-  const all = (await Promise.all(seasons.map(archive))).flat();
   const played = all.filter(m => m.status === "final" && (m.players || []).some(p => p.id === id)).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
   const me = entries[0] || (() => { const p = played[0]?.players.find(x => x.id === id); return p ? {...p, team:null} : null; })();
   if (!me){ host.innerHTML = `<section class="section"><div class="wrap"><div class="empty">We couldn't find that player. <a href="${BASE}teams.html">See the rosters</a>.</div></div></section>`; return; }

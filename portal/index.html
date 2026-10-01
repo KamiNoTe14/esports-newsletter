@@ -1411,11 +1411,12 @@ if (isSample) $("#sampleBanner").hidden = false;
 /* ---------- import from the scorekeeper (works when the portal runs on the team website) ---------- */
 async function scoreData(){
   const base = new URL("../assets/", location.href).href;
-  const L = await import(base + "live.js"), M = await import(base + "matches.js");
+  const L = await import(base + "live.js?v=4"), M = await import(base + "matches.js?v=4");
   const seasons = [...new Set([M.seasonOf(new Date((state.date || "") + "T12:00")), M.seasonOf()])].filter(s => !/NaN/.test(s));
   const arch = (await Promise.all(seasons.map(L.archive))).flat();
-  const board = await new Promise(res => { let done = false; const fin = b => { if (!done){ done = true; res(b); } }; L.watchBoard(fin); setTimeout(() => fin({matches:[]}), 6000); });
-  return L.merge(arch, board);
+  const once = (watch, arg) => new Promise(res => { let done = false; const fin = b => { if (!done){ done = true; res(b); } }; arg ? watch(arg, fin) : watch(fin); setTimeout(() => fin({matches:[]}), 6000); });
+  const [board, ...live] = await Promise.all([once(L.watchBoard), ...seasons.map(se => once(L.watchSeason, se))]);
+  return L.merge([...arch, ...live.flatMap(d => d.matches || [])], board);
 }
 function ymd(iso){ const d = new Date(iso); const p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; }
 function hm(iso){ const d = new Date(iso); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }

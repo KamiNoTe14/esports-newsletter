@@ -164,7 +164,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 
 <script type="module">
 import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, seasonOf, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, isMock} from "../../assets/matches.js";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=4";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -192,7 +192,12 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
   window.addEventListener("hashchange", route);
 })();
 
-function onMatches(list){
+/* Finished matches also live in one "season" summary the public pages read. Rewrite it whenever a final match is touched. */
+let finalIds = new Set(), summariesSynced = false;
+function seasonSum(all, id, nowFinal){ return nowFinal || finalIds.has(id) ? seasonDocFrom(all, season) : null; }
+function onMatches(list, meta){
+  finalIds = new Set(list.filter(m => m.status === "final").map(m => m.id));
+  if (!summariesSynced && meta && !meta.fromCache && !pendingSaves.size && user && EDITORS.includes(user.email)){ summariesSynced = true; const all = list.map(m => settle({...m})); be.syncSummaries(scoreboardFrom(all, site), seasonDocFrom(all, season)).catch(e => { summariesSynced = false; console.error(e); }); }
   matches = list.map(m => settle(pendingSaves.get(m.id) || m));
   if (cur && !dirtyIds.has(cur.id)){ const fresh = matches.find(m => m.id === cur.id); if (fresh) cur = clone(fresh); }
   if (view === "list") renderList();
@@ -310,7 +315,9 @@ function renderMatch(fromSnapshot){
       ${cur.stream?.live ? `<a class="btn btn-line" style="flex:1;text-decoration:none" href="${esc(cur.stream.live)}" target="_blank" rel="noopener">▶ Stream</a>` : ""}</div>`;
   const top = head + seg + board + clinch + panel + tools;
   if (typing && $("#scoreTop")){ $("#scoreTop").innerHTML = top; bindTop(); return; }
+  const wasOpen = [...document.querySelectorAll("#details details")].map(d => d.open);
   $("#app").innerHTML = `<div id="scoreTop">${top}</div><div id="details">${detailsHTML(g, them)}</div>`;
+  document.querySelectorAll("#details details").forEach((d, i) => { if (wasOpen[i]) d.open = true; });
   bindTop(); bindDetails(g);
 }
 function chips(g, them){
@@ -418,7 +425,7 @@ async function flush(){
     pendingSaves.delete(id);
     matches = matches.filter(x => x.id !== id).concat([m]);
     saving = true;
-    try { await be.save(m, scoreboardFrom(matches, site), user?.email); if (!pendingSaves.has(id)) dirtyIds.delete(id); }
+    try { await be.save(m, scoreboardFrom(matches, site), user?.email, seasonSum(matches, id, m.status === "final")); if (m.status === "final") finalIds.add(id); if (!pendingSaves.has(id)) dirtyIds.delete(id); }
     catch(e){ console.error(e); if (!pendingSaves.has(id)) pendingSaves.set(id, m);
       toast(/permission/i.test(e.code || e.message || "") ? "This account isn't allowed to change scores." : "Couldn't save. Check the connection; it'll retry on the next tap."); }
     saving = false;
@@ -474,7 +481,7 @@ function renderForm(){
   F.oppSchool.oninput = () => F.abbr.placeholder = abbrFor(F.oppSchool.value);
   if (!isNew) $("#del").onclick = async () => {
     if (!confirm("Delete this match for good?")) return;
-    try { await be.remove(openId, scoreboardFrom(matches.filter(m => m.id !== openId), site)); toast("Match deleted."); cur = null; location.hash = ""; }
+    try { await be.remove(openId, scoreboardFrom(matches.filter(m => m.id !== openId), site), seasonSum(matches.filter(m => m.id !== openId), openId, false)); toast("Match deleted."); cur = null; location.hash = ""; }
     catch(e){ toast("Couldn't delete: " + (e.code || e.message)); }
   };
   F.onsubmit = async e => {
@@ -488,7 +495,7 @@ function renderForm(){
     m.id = openId || be.newId();
     settle(m);
     const all = matches.filter(x => x.id !== m.id).concat([m]);
-    try { await be.save(m, scoreboardFrom(all, site), user.email); }
+    try { await be.save(m, scoreboardFrom(all, site), user.email, seasonSum(all, m.id, m.status === "final")); }
     catch(err){ toast(/permission/i.test(err.code || err.message || "") ? "This account isn't allowed to change scores." : "Couldn't save. Check the connection."); return; }
     if (m.season !== season) toast(`Saved to the ${seasonLabel(m.season)} season.`);
     cur = clone(m); openId = m.id; location.hash = "m/" + m.id;

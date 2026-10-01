@@ -97,6 +97,13 @@ export function scoreboardFrom(matches, site){
   return {updated:new Date().toISOString(), matches:[...live, ...up, ...done].map(pick)};
 }
 
+/* Every finished match of one season, in full (lineups and stats). The Results and player pages read this one
+   document, so details show up the moment a match goes final. Written only when a final match changes. */
+export function seasonDocFrom(matches, season){
+  const list = matches.filter(m => m.status === "final" && m.season === season).map(({updatedBy, updatedAt, clinched, ...m}) => m).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
+  return {season, updated:new Date().toISOString(), matches:list};
+}
+
 /* ---------- storage backends ---------- */
 let _be = null;
 export async function backend(){
@@ -125,21 +132,29 @@ async function firebaseBackend(){
     watchSeason(season, cb, onState){
       const q = fb.query(fb.collection(db, "matches"), fb.where("season", "==", season));
       return fb.onSnapshot(q, {includeMetadataChanges:true}, snap => {
-        cb(snap.docs.map(d => ({id:d.id, ...d.data()})));
+        cb(snap.docs.map(d => ({id:d.id, ...d.data()})), {fromCache:snap.metadata.fromCache});
         onState && onState({pending:snap.metadata.hasPendingWrites, fromCache:snap.metadata.fromCache});
       }, err => onState && onState({error:err}));
     },
     newId(){ return fb.doc(fb.collection(db, "matches")).id; },
-    async save(m, scoreboard, by){
+    async save(m, scoreboard, by, seasonDoc){
       const b = fb.writeBatch(db), {id, ...data} = m;
       b.set(fb.doc(db, "matches", id), strip({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""}));
       if (scoreboard) b.set(fb.doc(db, "public", "scoreboard"), strip(scoreboard));
+      if (seasonDoc) b.set(fb.doc(db, "public", "season-" + seasonDoc.season), strip(seasonDoc));
       await b.commit();
     },
-    async remove(id, scoreboard){
+    async remove(id, scoreboard, seasonDoc){
       const b = fb.writeBatch(db);
       b.delete(fb.doc(db, "matches", id));
       if (scoreboard) b.set(fb.doc(db, "public", "scoreboard"), strip(scoreboard));
+      if (seasonDoc) b.set(fb.doc(db, "public", "season-" + seasonDoc.season), strip(seasonDoc));
+      await b.commit();
+    },
+    async syncSummaries(scoreboard, seasonDoc){
+      const b = fb.writeBatch(db);
+      b.set(fb.doc(db, "public", "scoreboard"), strip(scoreboard));
+      b.set(fb.doc(db, "public", "season-" + seasonDoc.season), strip(seasonDoc));
       await b.commit();
     }
   };
@@ -160,11 +175,12 @@ function mockBackend(){
     async signIn(){ user = {email:EDITORS[0], name:"Test Coach", photo:""}; sessionStorage.setItem("eagles-mock-user", JSON.stringify(user)); userSubs.forEach(f => f(user)); },
     async signOut(){ user = null; sessionStorage.removeItem("eagles-mock-user"); userSubs.forEach(f => f(null)); },
     watchSeason(season, cb, onState){
-      const f = () => { cb(Object.entries(read()).map(([id, m]) => ({id, ...m})).filter(m => m.season === season)); onState && onState({pending:false}); };
+      const f = () => { cb(Object.entries(read()).map(([id, m]) => ({id, ...m})).filter(m => m.season === season), {fromCache:false}); onState && onState({pending:false}); };
       subs.add(f); setTimeout(f, 0); return () => subs.delete(f);
     },
     newId(){ return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
-    async save(m, scoreboard, by){ const all = read(), {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); localStorage.setItem(K, JSON.stringify(all)); if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); emit(); },
-    async remove(id, scoreboard){ const all = read(); delete all[id]; localStorage.setItem(K, JSON.stringify(all)); if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); emit(); }
+    async save(m, scoreboard, by, seasonDoc){ const all = read(), {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
+    async remove(id, scoreboard, seasonDoc){ const all = read(); delete all[id]; localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
+    async syncSummaries(scoreboard, seasonDoc){ if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); if (seasonDoc) localStorage.setItem("eagles-mock-season-" + seasonDoc.season, JSON.stringify(seasonDoc)); }
   };
 }

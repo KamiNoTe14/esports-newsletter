@@ -257,7 +257,7 @@ function heroSetup(){
     const calm = matchMedia("(prefers-reduced-motion: reduce)").matches || navigator.connection?.saveData;
     if (!calm){
       v.muted = true; v.defaultMuted = true; v.setAttribute("muted", "");
-      v.src = BASE + "assets/hero/" + (matchMedia("(max-width: 700px)").matches ? "hero-mobile.mp4" : "hero.mp4");
+      v.src = BASE + "assets/hero/" + (matchMedia("(max-width: 700px)").matches ? "hero-mobile.mp4" : "hero.mp4") + "?v=2";
       v.addEventListener("playing", () => { v.classList.add("on"); pause.hidden = false; }, {once:true});
       const p = v.play(); if (p && p.catch) p.catch(() => {});
       pause.addEventListener("click", () => {

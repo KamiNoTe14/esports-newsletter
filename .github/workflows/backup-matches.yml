@@ -1,0 +1,40 @@
+name: Back up match results
+
+# Every hour (and on demand from the Actions tab), copy finished matches from the
+# score database into data/matches/ so the Results and player pages have full detail
+# and the program keeps a permanent copy of every result.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: backup-matches
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Copy finished matches from Firestore
+        run: node .github/scripts/backup-matches.mjs
+      - name: Save changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/matches
+          if git diff --cached --quiet; then echo "Nothing new"; exit 0; fi
+          git commit -m "Back up match results"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" || echo "Pages will rebuild on its own"

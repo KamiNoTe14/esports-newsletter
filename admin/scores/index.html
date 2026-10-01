@@ -390,11 +390,11 @@ function bindDetails(g){
     const r = all.find(p => (p.id || p.name) === id) || (cur.players || []).find(p => p.id === id) || {};
     const keepOpen = [...D.querySelectorAll("details")].map(d => d.open);
     change(m => { m.players = m.players || []; const i = m.players.findIndex(p => p.id === id);
-      if (i >= 0) m.players.splice(i, 1); else m.players.push({id, name:r.name || "", tag:r.tag || "", private:!!r.private, stats:{}}); }, true);
+      if (i >= 0) m.players.splice(i, 1); else m.players.push({id, name:r.private ? "" : (r.name || ""), tag:r.tag || "", private:!!r.private, stats:{}}); }, true);
     $("#details").querySelectorAll("details").forEach((d, i) => d.open = keepOpen[i]);
   });
   const sub = $("#addsub"); if (sub) sub.onchange = () => { if (!sub.value) return; const id = sub.value; const r = (site.teams || []).flatMap(t => t.roster || []).find(p => (p.id || p.name) === id) || {};
-    change(m => { m.players = m.players || []; if (!m.players.some(p => p.id === id)) m.players.push({id, name:r.name || "", tag:r.tag || "", private:!!r.private, stats:{}, sub:true}); }, true);
+    change(m => { m.players = m.players || []; if (!m.players.some(p => p.id === id)) m.players.push({id, name:r.private ? "" : (r.name || ""), tag:r.tag || "", private:!!r.private, stats:{}, sub:true}); }, true);
     $("#details").querySelector("details").open = true; };
   D.querySelectorAll("[data-stat]").forEach(inp => inp.oninput = () => {
     const p = (cur.players || []).find(x => x.id === inp.dataset.pid); if (!p) return;

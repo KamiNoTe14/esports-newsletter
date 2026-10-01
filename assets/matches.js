@@ -90,7 +90,7 @@ export function scoreboardFrom(matches, site){
   const pick = m => ({id:m.id, game:m.game, gameName:m.gameName, teamName:m.teamName, level:m.level, league:m.league,
     opponent:{school:m.opponent?.school || "", team:m.opponent?.team || "", abbr:m.opponent?.abbr || abbrFor(m.opponent?.school)},
     startsAt:m.startsAt, status:m.status, bestOf:m.bestOf, score:m.score, result:m.result, forfeit:m.forfeit || null,
-    current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, stream:m.stream || {}});
+    current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, games:(m.games || []).filter(g => g.winner || g.us || g.them), stream:m.stream || {}, teamId:m.teamId || "", season:m.season, week:m.week || "", event:m.event || ""});
   const live = matches.filter(m => m.status === "live");
   const up = matches.filter(m => m.status === "upcoming" || m.status === "postponed").sort((a, b) => a.startsAt < b.startsAt ? -1 : 1).slice(0, 10);
   const done = matches.filter(m => m.status === "final").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1).slice(0, 12);

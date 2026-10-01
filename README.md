@@ -7,6 +7,7 @@ Live at **https://kaminote14.github.io/esports-newsletter/**
 | `/` (and `teams`, `schedule`, `newsletters`, `media`, `about`) | The public program website. Every page reads its content from `data/site.json` and `data/issues.json`. |
 | `/admin/` | **Site Manager**: edit teams, rosters, standings, brackets, records, news, gallery, sponsors, links and program info; turn sections on or off; publish. |
 | `/admin/scores/` | **Scorekeeper**: phone-first live score entry (coaches sign in with Google). Scores are stored in Firebase Firestore (`hartland-esports`) and read live by the site. Add `?mock=1` to test without touching real data. |
+| `/results.html`, `/player.html?id=…` | **Results** (live, filterable by team) and **player profiles** (stats from the scorekeeper, optional recruiting info from the Site Manager's Player profiles tab). |
 | `/portal/` | **Coach's Portal**: build the weekly newsletter. **Publish for web** posts it to the site's Newsletters page. |
 
 ## One-time setup for each coach
@@ -26,7 +27,7 @@ Live at **https://kaminote14.github.io/esports-newsletter/**
 
 - `data/site.json`: all site content (edited through the Site Manager)
 - `data/issues.json`: the newsletter list (written by the portal)
-- `data/matches/<season>.json`: backup of finished matches (written by the scorekeeper)
+- `data/matches/<season>.json`: finished matches, copied from the score database every hour by `.github/workflows/backup-matches.yml` (run it any time from the Actions tab)
 - `assets/matches.js`: the match data model and Firestore access, shared by the scorekeeper, site and future overlay
 - `firestore.rules`: who can change scores. Paste into Firebase console → Firestore → Rules after any change
 - `newsletters/<school year>/week-NN-YYYY-MM-DD.html`: published issues

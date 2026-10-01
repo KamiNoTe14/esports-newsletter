@@ -21,6 +21,7 @@ const NAV = [
   ["home", "", "Home"],
   ["teams", "teams.html", "Teams"],
   ["schedule", "schedule.html", "Schedule"],
+  ["results", "results.html", "Results"],
   ["newsletters", "newsletters.html", "Newsletters"],
   ["media", "media.html", "Media"],
   ["about", "about.html", "About & Join"]
@@ -90,7 +91,7 @@ function teamCards(site){
       <h3>${esc(t.name)}</h3>
       ${t.note ? `<p class="muted" style="margin:0;font-size:15px">${esc(t.note)}</p>` : ""}
       <div class="chips">${lg.map((l, i) => `<span class="chip${i ? " gold" : ""}">${esc(l)}</span>`).join("")}</div>
-      ${showRoster && roster.length ? `<ul class="roster">${roster.map(p => `<li><span>${p.private || !p.name ? `<span class="tag">${esc(p.tag)}</span>` : esc(p.name)}${p.captain ? ` <span class="cap" title="Team captain" aria-label="Team captain">C</span>` : ""}${p.role ? ` <span class="muted">· ${esc(p.role)}</span>` : ""}</span>${!p.private && p.name && p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}</li>`).join("")}</ul>` : ""}
+      ${showRoster && roster.length ? `<ul class="roster">${roster.map(p => `<li><span>${p.id ? `<a class="pl" href="${BASE}player.html?id=${encodeURIComponent(p.id)}">` : ""}${p.private || !p.name ? `<span class="tag">${esc(p.tag)}</span>` : esc(p.name)}${p.id ? "</a>" : ""}${p.captain ? ` <span class="cap" title="Team captain" aria-label="Team captain">C</span>` : ""}${p.role ? ` <span class="muted">· ${esc(p.role)}</span>` : ""}</span>${!p.private && p.name && p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </article>`; }).join("")}</div>`;
 }
 function standingsHTML(site){
@@ -150,7 +151,7 @@ function calLinks(site){
 function home(site, issues){
   const P = site.program || {}, L = site.links || {};
   const last = latestIssue(issues), up = upcoming(issues).slice(0, 5);
-  return `
+  return `<section class="scores" id="scores" aria-label="Scores" hidden></section>
   <section class="hero"><div class="wrap">
     <div>
       <p class="eyebrow">${esc(P.school || "Hartland High School")}</p>
@@ -197,6 +198,12 @@ function schedule(site, issues){
   </div></section>` : "")
   + `<section class="section"><div class="wrap">${secH("How our year works")}${timeline(site)}</div></section>`;
 }
+function results(site){
+  return pageH(`${seasonText()} season`, "Results", "Every finished match this season. Scores update live, and you can tap any match for game-by-game scores, the lineup and the replay.")
+  + `<section class="section"><div class="wrap" id="results"><div class="loading">Loading results…</div></div></section>`;
+}
+function player(){ return `<div id="player"><div class="loading" style="padding:80px 0">Loading player…</div></div>`; }
+function seasonText(){ const d = new Date(), y = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; return `${y}–${String((y + 1) % 100).padStart(2, "0")}`; }
 function timeline(site){
   return `<ol class="timeline">${(site.seasons || []).map((s, i) => `<li class="${i === 0 || i === 3 ? "big" : ""}"><h3>${esc(s.name)}</h3><p class="when">${esc(s.when)}</p><p>${esc(s.text)}</p></li>`).join("")}</ol>`;
 }
@@ -245,8 +252,11 @@ async function boot(){
   try { site = await getJSON("data/site.json"); } catch(e){ app.innerHTML = `<div class="loading">Couldn't load the site. Please refresh.</div>`; return; }
   try { issues = (await getJSON("data/issues.json")).issues || []; } catch(e){}
   document.body.insertAdjacentHTML("afterbegin", header(site));
-  const render = {home, teams, schedule, newsletters, media, about}[PAGE] || home;
+  const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
+  if (["home", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js").then(L => {
+    if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
+  }).catch(e => { console.error(e); const r = $("#results") || $("#player"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));
   const btn = $(".nav-btn"), nav = $("#nav");
   btn?.addEventListener("click", () => { const o = nav.classList.toggle("open"); btn.setAttribute("aria-expanded", o); });

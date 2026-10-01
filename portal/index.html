@@ -318,7 +318,7 @@ body.lib-open{overflow:hidden}
       <div class="card-h"><h2>Last week's results</h2><div class="tally" id="tally"></div></div>
       <div class="rows" id="results"></div>
       <div class="res-foot">
-        <button class="add" type="button" data-add="results">+ Add result</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" type="button" data-add="results">+ Add result</button><button class="add" type="button" id="importResults" title="Pull this week's finished matches from the scorekeeper">⇩ Import from scorekeeper</button></div>
         <details class="saved-teams" id="savedTeams">
           <summary>Saved teams</summary>
           <p class="muted">Anything new you type in a Team box is saved here for next time. Remove the ones you no longer use.</p>
@@ -331,7 +331,7 @@ body.lib-open{overflow:hidden}
     <section class="card" data-sec="schedule">
       <div class="card-h"><h2>Coming up</h2></div>
       <div class="rows" id="schedule"></div>
-      <button class="add" type="button" data-add="schedule">+ Add match</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" type="button" data-add="schedule">+ Add match</button><button class="add" type="button" id="importSchedule" title="Pull next week's matches from the scorekeeper">⇩ Import from scorekeeper</button></div>
     </section>
 
     <section class="card" data-sec="spot">
@@ -1408,6 +1408,58 @@ $("#dismissSample").addEventListener("click", () => { $("#sampleBanner").hidden 
 if (isSample) $("#sampleBanner").hidden = false;
 
 /* ---------- toolbar ---------- */
+/* ---------- import from the scorekeeper (works when the portal runs on the team website) ---------- */
+async function scoreData(){
+  const base = new URL("../assets/", location.href).href;
+  const L = await import(base + "live.js"), M = await import(base + "matches.js");
+  const seasons = [...new Set([M.seasonOf(new Date((state.date || "") + "T12:00")), M.seasonOf()])].filter(s => !/NaN/.test(s));
+  const arch = (await Promise.all(seasons.map(L.archive))).flat();
+  const board = await new Promise(res => { let done = false; const fin = b => { if (!done){ done = true; res(b); } }; L.watchBoard(fin); setTimeout(() => fin({matches:[]}), 6000); });
+  return L.merge(arch, board);
+}
+function ymd(iso){ const d = new Date(iso); const p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; }
+function hm(iso){ const d = new Date(iso); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
+function addDays(ymdStr, n){ const d = new Date(ymdStr + "T12:00"); d.setDate(d.getDate() + n); return ymd(d.toISOString()); }
+function shortSchool(m){ const s = m.opponent?.school || m.opponent?.team || ""; return s.replace(/\s+(senior\s+)?(high\s+school|high\s+shcool|hs|jr\/sr\s+high\s+school|academy)$/i, "").trim() || s; }
+function issueDay(){ return /^\d{4}-\d{2}-\d{2}$/.test(state.date || "") ? state.date : ymd(new Date().toISOString()); }
+async function importFromScorekeeper(kind, btn){
+  if (!/^https?:/.test(location.protocol)){ toast("Importing works in the portal on the team website."); return; }
+  const label = btn.textContent; btn.disabled = true; btn.textContent = "Importing…";
+  try {
+    const all = await scoreData(), D = issueDay();
+    if (isSample){ state.results = []; state.schedule = []; }
+    markEdited();
+    if (kind === "results"){
+      const from = addDays(D, -7), list = all.filter(m => m.status === "final" && ymd(m.startsAt) > from && ymd(m.startsAt) <= D).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
+      let added = 0;
+      list.forEach(m => {
+        if (state.results.some(r => r.mid === m.id)) return;
+        const pts = (m.games || []).filter(g => g.winner || g.us || g.them), bo = +m.bestOf || 1;
+        const usePts = !m.forfeit && bo > 1 && [3, 5, 7].includes(bo) && pts.length && pts.every(g => (+g.us || +g.them) && (g.winner ? (g.winner === "us") === (+g.us > +g.them) : true));
+        const row = {mid:m.id, team:m.teamName || "", opp:shortSchool(m), league:m.league || "", fmt:usePts ? "bo" + bo : "single", games:[], score:"", wl:""};
+        if (usePts){ row.games = Array.from({length:bo}, (_, i) => pts[i] ? {us:String(pts[i].us ?? ""), them:String(pts[i].them ?? "")} : {us:"", them:""}); }
+        else { row.score = `${m.score?.us ?? 0}-${m.score?.them ?? 0}`; row.wl = m.result === "W" ? "W" : m.result === "L" ? "L" : ""; }
+        saveTeam(row.team); state.results.push(row); added++;
+      });
+      state.results = state.results.filter(r => r.mid || r.opp || r.score || (r.games || []).some(g => g.us !== "" || g.them !== ""));
+      renderTeamList(); renderResults(); refresh();
+      toast(added ? `Added ${added} result${added === 1 ? "" : "s"} from ${addDays(from, 1).slice(5).replace("-", "/")} to ${D.slice(5).replace("-", "/")}.` : list.length ? "Those results are already here." : "No finished matches in the week before this issue's date.");
+    } else {
+      const to = addDays(D, 7), list = all.filter(m => (m.status === "upcoming" || m.status === "live") && ymd(m.startsAt) > D && ymd(m.startsAt) <= to).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
+      let added = 0;
+      list.forEach(m => {
+        if (state.schedule.some(r => r.mid === m.id)) return;
+        state.schedule.push({mid:m.id, date:ymd(m.startsAt), team:m.teamName || "", opp:shortSchool(m), time:hm(m.startsAt), where:"Online", league:m.league || ""}); added++;
+      });
+      state.schedule = state.schedule.filter(r => r.mid || r.opp || r.team);
+      renderSchedule(); refresh();
+      toast(added ? `Added ${added} upcoming match${added === 1 ? "" : "es"}.` : list.length ? "Those matches are already here." : "No matches in the scorekeeper for the week after this issue's date.");
+    }
+  } catch(e){ console.error(e); toast("Couldn't reach the scorekeeper. Check the connection and try again."); }
+  btn.disabled = false; btn.textContent = label;
+}
+document.getElementById("importResults")?.addEventListener("click", e => importFromScorekeeper("results", e.currentTarget));
+document.getElementById("importSchedule")?.addEventListener("click", e => importFromScorekeeper("schedule", e.currentTarget));
 function toast(msg){ const el = $("#toast"); el.textContent = msg; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 3200); }
 function baseName(){ return `eagles-esports-week-${String(state.week||"").replace(/[^\w-]/g,"") || "x"}`; }
 function fileName(){ return baseName() + ".html"; }

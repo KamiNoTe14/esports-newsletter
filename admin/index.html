@@ -153,6 +153,7 @@ const TABS = [
   {id:"contact", label:"Coaches & links"},
   {id:"teams", label:"Teams & rosters", toggle:"rosters", toggleLabel:"Show rosters on the Teams page"},
   {id:"games", label:"Games"},
+  {id:"profiles", label:"Player profiles"},
   {id:"standings", label:"Standings", toggle:"standings", toggleLabel:"Show league standings"},
   {id:"brackets", label:"Playoff brackets", toggle:"brackets", toggleLabel:"Show playoff brackets"},
   {id:"records", label:"Program records", toggle:"records", toggleLabel:"Show program records"},
@@ -254,6 +255,20 @@ function renderPanel(){
     P.innerHTML = `<div class="card"><div class="card-h"><h2>Coaches</h2></div>${listEditor("coaches", LISTS.coaches)}</div>
     <div class="card"><div class="card-h"><h2>Social & streaming</h2></div><p class="intro">Leave a box empty to hide that link.</p>${objFields("links", [["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"]])}</div>
     <div class="card"><div class="card-h"><h2>Support & other links</h2></div>${objFields("links", [["merch","Merch store","url"],["jerseys","Jersey store","url"],["fundraiser","Fundraiser link","url"],["fundraiserLabel","Fundraiser name"],["league","League site","url"],["athletics","Athletics site","url"]])}</div>`;
+    return;
+  }
+  if (tab === "profiles"){
+    const wasOpen = new Set([...P.querySelectorAll("details[data-pid][open]")].map(d => d.dataset.pid));
+    fillIds(); site.profiles = site.profiles || {};
+    const people = new Map();
+    (site.teams || []).forEach(t => (t.roster || []).forEach(r => { if (!r.id) return; const e = people.get(r.id) || {r, teams:[], priv:false}; e.teams.push(`${t.game} ${t.name}`); e.priv = e.priv || !!r.private; people.set(r.id, e); }));
+    const list = [...people.entries()].sort((a, b) => String(a[1].r.name || a[1].r.tag).localeCompare(String(b[1].r.name || b[1].r.tag)));
+    P.innerHTML = `<div class="card"><div class="card-h"><h2>Player profiles</h2><span class="muted">${list.length} players</span></div>
+      <p class="intro">Every rostered player has a public profile page with their stats from the scorekeeper. Anything you add here is optional and shows on their page, which is handy for recruiting. Players marked <b>Gamertag only</b> show just their gamertag and stats; nothing from this page is shown for them.</p>
+      ${list.map(([id, e]) => { const pr = site.profiles[id] = site.profiles[id] || {}; const filled = ["gradYear","bio","highlights","photo","mains"].filter(k => pr[k]).length;
+        return `<details class="item" data-pid="${esc(id)}"${wasOpen.has(id) ? " open" : ""} style="padding:0"><summary style="padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:center;justify-content:space-between"><b>${esc(e.r.name || e.r.tag)}${e.r.name && e.r.tag ? ` <span class="muted" style="font-weight:400">· ${esc(e.r.tag)}</span>` : ""}</b><span class="muted" style="font-size:13.5px">${e.priv ? "Gamertag only · " : ""}${esc(e.teams.join(", "))}${filled ? ` · ${filled} filled in` : ""} · <a href="${SITE_BASE}player.html?id=${encodeURIComponent(id)}" target="_blank" rel="noopener">View page</a></span></summary>
+          <div style="padding:0 14px 14px">${objFields(`profiles.${id}`, [["gradYear","Graduation year","text","2028"],["mains","Mains / position","text","Main: Pikachu · Striker"],["highlights","Highlight video link","url"],["bio","Short bio","textarea"],["photo","Photo","image"]])}
+          ${field(`profiles.${id}.recruit`, ["recruit","Show a \"college coaches: contact us\" note","check"], !!pr.recruit)}</div></details>`; }).join("")}</div>`;
     return;
   }
   const spec = LISTS[tab];

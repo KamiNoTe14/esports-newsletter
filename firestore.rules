@@ -1,0 +1,45 @@
+rules_version = '2';
+// Hartland Esports score database.
+// Anyone can READ scores (the website and stream overlay need that).
+// Only the coaches listed below can CHANGE anything.
+// To change who can edit: update this list, then paste this whole file into
+// Firebase console > Firestore > Rules and click Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isCoach() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() in [
+          'cameronmontney@hartlandschools.us',
+          'jasonwatkins@hartlandschools.us'
+        ];
+    }
+
+    function validMatch() {
+      let d = request.resource.data;
+      return d.status in ['upcoming', 'live', 'final', 'postponed', 'canceled']
+        && d.season is string && d.season.size() <= 9
+        && d.startsAt is string
+        && d.score.us is int && d.score.them is int
+        && d.games is list && d.games.size() <= 15;
+    }
+
+    match /matches/{matchId} {
+      allow read: if true;
+      allow create, update: if isCoach() && validMatch();
+      allow delete: if isCoach();
+    }
+
+    // Small summary documents the website reads (scores strip, etc.)
+    match /public/{docId} {
+      allow read: if true;
+      allow write: if isCoach();
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

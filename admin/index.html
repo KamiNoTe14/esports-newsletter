@@ -98,6 +98,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
   <div class="brand"><small>Hartland Eagles Esports</small><h1>Site Manager</h1></div>
   <div class="actions">
     <span class="status" id="status">Not connected</span>
+    <a class="btn btn-ghost" href="scores/">Scorekeeper</a>
     <a class="btn btn-ghost" href="../portal/">Newsletter portal</a>
     <a class="btn btn-ghost" href="../" target="_blank" rel="noopener">View site</a>
     <button class="btn btn-gold" id="publish" type="button" disabled>Publish changes</button>
@@ -151,6 +152,7 @@ const TABS = [
   {id:"program", label:"Program & join"},
   {id:"contact", label:"Coaches & links"},
   {id:"teams", label:"Teams & rosters", toggle:"rosters", toggleLabel:"Show rosters on the Teams page"},
+  {id:"games", label:"Games"},
   {id:"standings", label:"Standings", toggle:"standings", toggleLabel:"Show league standings"},
   {id:"brackets", label:"Playoff brackets", toggle:"brackets", toggleLabel:"Show playoff brackets"},
   {id:"records", label:"Program records", toggle:"records", toggleLabel:"Show program records"},
@@ -160,11 +162,13 @@ const TABS = [
 ];
 const LISTS = {
   teams:{title:"Team", add:"Add team", intro:"Each team card on the Teams and Home pages. Separate multiple leagues with commas.", name:i => `${i.game || "Game"} · ${i.name || "Team"}`,
-    fields:[["game","Game"],["name","Team name"],["leagues","Leagues"],["note","Note (optional)"]],
+    fields:[["game","Game (as shown on the site)"],["name","Team name"],["gameKey","Game type (for scores)","select",() => [["", "—"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["level","Level","select",["Varsity","JV"]],["leagues","Leagues"],["note","Note (optional)"]],
     sub:{key:"roster", title:"Roster", add:"Add player", fields:[["name","Name"],["tag","Gamertag"],["role","Role (optional)"],["captain","Captain","check"],["private","Gamertag only","check"]]}},
   standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Download the standings from RallyCry as CSV or JSON and click \"Import RallyCry file\", or type the rows in by hand. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
     fields:[["title","Title","text","MHSEL Smash Varsity · Division 2"],["updated","Updated","date"],["link","Link to full standings","url"],["on","Show this table","check"]],
     sub:{key:"rows", title:"Rows", add:"Add row", importBtn:"Import RallyCry file (CSV or JSON)", fields:[["rank","#"],["team","Team"],["school","School"],["w","W"],["l","L"],["rating","Rating"],["us","Hartland","check"]]}},
+  games:{title:"Game", add:"Add game", intro:"Every game we compete in. The scorekeeper uses this to know how a match is scored, so adding a new title is just filling this in. Then pick it as the \"Game type\" on that team.", name:i => i.name || "Game",
+    fields:[["name","Full name","text","Rocket League"],["short","Short name","text","Rocket League"],["abbr","Abbreviation","text","RL"],["key","ID (no spaces, don't change once used)","text","rocket-league"],["unit","A match is a series of…","select",["Game","Set","Map","Round"]],["points","Score inside each one (blank = just win/lose)","text","Goals"],["bestOf","Usually best of","select",["1","3","5","7"]],["teamSize","Players per side","text","3"],["stats","Player stats to track (comma separated)","text","Goals, Assists, Saves"],["icon","Icon (optional)","image"]]},
   brackets:{title:"Bracket", add:"Add bracket", intro:"Link to the bracket on RallyCry, upload a screenshot of it, or both.", name:i => i.title || "Bracket",
     fields:[["title","Title","text","Fall 2026 MHSEL Playoffs · Smash"],["league","League"],["status","Status","select",["","Upcoming","In progress","Final"]],["link","Bracket link","url"],["image","Bracket image","image"],["text","Notes","textarea"],["on","Show this bracket","check"]]},
   records:{title:"Record", add:"Add record", intro:"Championships, milestones and program firsts.", name:i => i.title || "Record",
@@ -192,7 +196,7 @@ function field(path, [key, label, type = "text", extra], val){
   const id = "f-" + path.replace(/\./g, "-");
   if (type === "check") return `<label class="toggle"><input id="${id}" type="checkbox" data-path="${path}"${val !== false && val !== undefined && val !== "" ? " checked" : ""}> ${esc(label)}</label>`;
   if (type === "textarea") return `<label class="f"><span>${esc(label)}</span><textarea id="${id}" data-path="${path}" rows="3">${esc(val)}</textarea></label>`;
-  if (type === "select") return `<label class="f"><span>${esc(label)}</span><select id="${id}" data-path="${path}">${extra.map(o => `<option value="${esc(o)}"${o === (val || "") ? " selected" : ""}>${esc(o || "—")}</option>`).join("")}</select></label>`;
+  if (type === "select"){ const opts = (typeof extra === "function" ? extra() : extra).map(o => Array.isArray(o) ? o : [o, o]); return `<label class="f"><span>${esc(label)}</span><select id="${id}" data-path="${path}">${opts.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(val ?? "") ? " selected" : ""}>${esc(l || "—")}</option>`).join("")}</select></label>`; }
   if (type === "image"){
     const src = val ? (pending[val] ? `data:image/jpeg;base64,${pending[val]}` : (/^https?:/i.test(val) ? val : SITE_BASE + val)) : "";
     return `<div class="f"><label class="f"><span>${esc(label)}</span></label><div class="img-f">${src ? `<img src="${esc(src)}" alt="">` : `<div class="ph">No image</div>`}<button type="button" class="btn btn-line" data-upload="${path}">${val ? "Replace" : "Upload"}</button><input id="${id}" type="url" data-path="${path}" value="${esc(/^https?:/i.test(val || "") ? val : "")}" placeholder="…or paste an image link">${val ? `<button type="button" class="btn btn-line" data-clearimg="${path}">Remove</button>` : ""}</div></div>`;
@@ -256,6 +260,13 @@ function renderPanel(){
   P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
     ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
     ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}`;
+}
+/* Stable IDs: each player keeps one ID across teams and years (the same name = the same player), so stats follow them. */
+function fillIds(){
+  const byName = {};
+  (site.teams || []).forEach(t => (t.roster || []).forEach(r => { const k = String(r.name || r.tag || "").trim().toLowerCase(); if (r.id && k) byName[k] = byName[k] || r.id; }));
+  (site.teams || []).forEach(t => (t.roster || []).forEach(r => { const k = String(r.name || r.tag || "").trim().toLowerCase(); if (!r.id && k) r.id = byName[k] = byName[k] || "p-" + Math.random().toString(16).slice(2, 10); }));
+  (site.games || []).forEach(g => { if (!g.key) g.key = String(g.name || "game").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); });
 }
 /* ---------- team → school list (fills in schools on every standings import) ---------- */
 function schoolKey(n){ return String(n || "").trim().toLowerCase().replace(/\s+/g, " "); }
@@ -341,6 +352,7 @@ async function publish(){
   const btn = $("#publish"); btn.disabled = true; btn.textContent = "Publishing…";
   try {
     (site.standings || []).forEach(t => learnSchools(t.rows));
+    fillIds();
     const used = JSON.stringify(site);
     for (const [path, data] of Object.entries(pending)){
       if (used.includes(`"${path}"`)) await putFile(path, data, `Site manager: add ${path.split("/").pop()}`);
@@ -561,7 +573,7 @@ $("#panel").addEventListener("click", async e => {
   if (b.id === "ghForget"){ const c = ghCfg() || {}; delete c.token; ghSave(c); connected = false; setStatus(); renderSide(); renderPanel(); toast("Key removed from this computer."); return; }
   if (b.dataset.add){
     const arr = getP(b.dataset.add); const key = b.dataset.add.split(".").pop();
-    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", leagues:"MHSEL", note:"", roster:[]}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}}[key] || {};
+    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", gameKey:"", level:"Varsity", leagues:"MHSEL", note:"", roster:[]}, games:{key:"", name:"", short:"", abbr:"", unit:"Game", points:"", bestOf:"3", teamSize:"", stats:"", icon:""}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{id:"", name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}}[key] || {};
     arr.push(blank); setDirty(true); setStatus(); renderPanel(); return;
   }
   if (b.dataset.del){

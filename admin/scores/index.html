@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#00274C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Scorekeeper · Hartland Esports</title>
+<link rel="icon" href="../../assets/eagle.png">
+<link rel="apple-touch-icon" href="../../assets/eagle.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --navy:#00274C; --navy-2:#003466; --bg:#061423; --surface:#0D2238; --surface-2:#13304D; --line:#1E3D5E; --line-2:#2C5279;
+  --text:#F2F6FA; --muted:#9DB0C6; --gold:#FFBC05; --gold-2:#FFD35C; --white:#FFFFFF; --live:#FF3B3B; --ok:#3DDC84;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif; --body:"Barlow",Arial,Helvetica,sans-serif; --r:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 var(--body)}
+body{min-height:100vh;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;touch-action:manipulation;user-select:none}
+a{color:var(--gold)}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:linear-gradient(180deg,var(--navy),#00203F);border-bottom:3px solid var(--gold)}
+.top img{width:34px;height:34px}
+.top h1{margin:0;font:800 22px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;flex:1;min-width:0}
+.top h1 small{display:block;font:600 11px/1.3 var(--body);letter-spacing:.12em;color:var(--gold)}
+.sync{font:600 12px/1 var(--body);color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sync i{width:9px;height:9px;border-radius:50%;background:var(--ok);display:inline-block}
+.sync.saving i{background:var(--gold)} .sync.err{color:#FF8A8A} .sync.err i{background:var(--live)}
+.who{width:34px;height:34px;border-radius:50%;background:var(--surface-2);border:2px solid var(--line-2);overflow:hidden;display:grid;place-items:center;font:700 14px var(--display)}
+.who img{width:100%;height:100%;object-fit:cover}
+main{max-width:640px;margin:0 auto;padding:14px}
+.mockbar{background:#5B2A86;color:#fff;text-align:center;font:600 13px var(--body);padding:6px 10px}
+h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:22px 4px 10px}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+/* sign in */
+.hero{text-align:center;padding:48px 12px}
+.hero img{width:96px}
+.hero h2{font-size:30px;letter-spacing:.04em;color:var(--white);margin:18px 0 8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px;border-radius:12px;font:800 18px/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.btn-gold{background:var(--gold);color:var(--navy)} .btn-gold:active{background:var(--gold-2)}
+.btn-line{border:2px solid var(--line-2);color:var(--text)} .btn-line:active{background:var(--surface-2)}
+.btn-danger{border:2px solid #7A2B2B;color:#FF9C9C}
+.btn-block{width:100%}
+/* list */
+.mlist{display:grid;gap:10px}
+.mrow{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:12px 14px;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-height:76px}
+.mrow:active{background:var(--surface-2)}
+.mrow.live{border-color:var(--live);box-shadow:0 0 0 1px var(--live) inset}
+.gbadge{width:52px;height:52px;border-radius:12px;background:var(--navy);border:1px solid var(--line-2);display:grid;place-items:center;font:800 15px/1 var(--display);letter-spacing:.04em;color:var(--gold);overflow:hidden}
+.gbadge img{width:100%;height:100%;object-fit:cover}
+.mrow b{display:block;font:700 19px/1.1 var(--display);letter-spacing:.02em}
+.mrow .sub{font-size:14px;color:var(--muted);line-height:1.3;margin-top:3px}
+.mrow .st{text-align:right;font:800 22px/1 var(--display)}
+.mrow .st small{display:block;font:700 12px/1.2 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.mrow .st .W{color:var(--gold)} .mrow .st .L{color:var(--muted)}
+.pill-live{display:inline-flex;align-items:center;gap:6px;color:#fff;background:var(--live);border-radius:6px;padding:3px 7px;font:800 12px/1 var(--display);letter-spacing:.12em}
+.pill-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.empty{padding:22px;text-align:center;color:var(--muted)}
+.fab{white-space:nowrap;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.45);min-height:60px;padding:0 30px;font-size:20px}
+.foot{margin:26px 4px 0;font-size:13px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.linkbtn{color:var(--gold);font-weight:600;text-decoration:underline;padding:6px 0}
+/* match */
+.mhead{display:flex;align-items:center;gap:10px;margin:2px 0 12px}
+.back{min-width:48px;min-height:48px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:24px;line-height:1}
+.mhead .t{flex:1;min-width:0}
+.mhead .t b{display:block;font:800 21px/1.1 var(--display);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mhead .t span{font-size:13.5px;color:var(--muted)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px}
+.seg button{min-height:58px;border-radius:11px;font:800 19px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--text);box-shadow:inset 0 0 0 2px var(--line-2)}
+.seg button.s-live[aria-pressed="true"]{background:var(--live);color:#fff;box-shadow:none}
+.seg button.s-final[aria-pressed="true"]{background:var(--gold);color:var(--navy);box-shadow:none}
+.board{margin:12px 0;padding:16px 10px 14px;background:radial-gradient(120% 140% at 50% 0%,var(--navy-2),var(--navy) 60%);border:1px solid var(--line-2);border-radius:18px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center}
+.board .side .nm{font:800 20px/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.board .side.us .nm{color:var(--gold)}
+.board .side .full{font-size:12.5px;color:var(--muted);margin-top:4px;min-height:1.2em;padding:0 4px}
+.board .num{font:800 84px/0.95 var(--display);font-variant-numeric:tabular-nums;margin-top:6px}
+.board .dash{font:800 40px/1 var(--display);color:var(--line-2);padding:0 4px}
+.board .meta{grid-column:1/-1;margin-top:10px;font:700 13px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.board .meta .W{color:var(--gold)}
+.panel{padding:14px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.panel-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.panel-h b{font:800 22px/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.panel-h span{font-size:13px;color:var(--muted)}
+.pts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pcol{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.pcol .nm{font:800 15px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pcol.us .nm{color:var(--gold)}
+.pcol .v{font:800 64px/1 var(--display);font-variant-numeric:tabular-nums;margin:6px 0 8px}
+.pcol .row{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
+.step{min-height:64px;border-radius:12px;font:800 32px/1 var(--display);background:var(--surface-2);border:1px solid var(--line-2)}
+.step.plus{background:var(--gold);color:var(--navy);border:0}
+.pcol:not(.us) .step.plus{background:var(--white)}
+.step:active{transform:scale(.96)}
+.won{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.won button{min-height:62px;border-radius:12px;font:800 17px/1.1 var(--display);letter-spacing:.05em;text-transform:uppercase;border:2px solid var(--line-2);padding:4px 8px}
+.won button.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.won button.on.them{background:var(--white);border-color:var(--white)}
+.big2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big2 button{min-height:96px;border-radius:14px;font:800 22px/1.05 var(--display);letter-spacing:.04em;text-transform:uppercase}
+.big2 .u{background:var(--gold);color:var(--navy)} .big2 .t{background:var(--white);color:var(--navy)}
+.big2 button:active{transform:scale(.97)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 2px;scrollbar-width:none}
+.chip{flex:none;min-height:46px;padding:6px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);font:700 15px/1.1 var(--display);letter-spacing:.04em;text-align:left}
+.chip small{display:block;font:600 11px/1.1 var(--body);letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.chip.cur{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.chip.w{color:var(--gold)}
+.tools{display:flex;gap:10px;margin-top:12px}
+.tools button{flex:1}
+.clinch{margin:12px 0;padding:14px;border-radius:16px;background:linear-gradient(90deg,var(--gold),var(--gold-2));color:var(--navy);display:flex;align-items:center;gap:12px}
+.clinch b{flex:1;font:800 22px/1.05 var(--display);text-transform:uppercase;letter-spacing:.03em}
+.clinch .btn{background:var(--navy);color:var(--white);min-height:50px}
+.clinch.them{background:var(--surface-2);color:var(--text)} .clinch.them .btn{background:var(--white);color:var(--navy)}
+details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:"▾";color:var(--muted)}
+details.sec[open]>summary::after{content:"▴"}
+details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-left:auto;margin-right:10px}
+.secb{padding:0 14px 14px}
+.plist{display:grid;gap:8px}
+.prow{border:1px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden}
+.prow>button{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:8px 12px;text-align:left}
+.prow .ck{width:26px;height:26px;border-radius:7px;border:2px solid var(--line-2);display:grid;place-items:center;font-weight:800;color:var(--navy);flex:none}
+.prow.on .ck{background:var(--gold);border-color:var(--gold)}
+.prow .pn{flex:1;min-width:0}
+.prow .pn b{display:block;font-weight:600}
+.prow .pn small{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:0 12px 12px}
+.stats label{font-size:12px;color:var(--muted);display:grid;gap:4px}
+.stats input{width:100%;min-height:44px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);padding:0 10px;font:700 18px var(--display)}
+/* form */
+.form{display:grid;gap:14px}
+.f{display:grid;gap:6px}
+.f>span{font:700 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.f input,.f select,.f textarea{width:100%;min-height:52px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);padding:10px 14px;font-size:17px}
+.f textarea{min-height:90px}
+.f input:focus,.f select:focus,.f textarea:focus,.stats input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:13px;color:var(--muted);margin:-6px 2px 0}
+.formbar{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 2fr;gap:10px;padding:12px 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,var(--bg) 30%)}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;background:var(--white);color:var(--navy);padding:12px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 28px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+@media (min-width:700px){ .board .num{font-size:110px} }
+</style>
+</head>
+<body>
+<div id="mockbar" class="mockbar" hidden>TEST MODE · scores here are pretend and only on this computer</div>
+<header class="top">
+  <img src="../../assets/eagle.png" alt="">
+  <h1>Scorekeeper<small>HARTLAND ESPORTS</small></h1>
+  <span id="sync" class="sync" hidden><i></i><span>Saved</span></span>
+  <button id="who" class="who" type="button" hidden aria-label="Account"></button>
+</header>
+<main id="app"><p class="empty">Loading…</p></main>
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script type="module">
+import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, seasonOf, termOf, seasonLabel,
+  fmtDay, fmtTime, localInput, scoreboardFrom, isMock} from "../../assets/matches.js";
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(12); } catch(e){} };
+const SITE = new URL("../../", location.href).href;
+function toast(m, ms = 3200){ const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
+
+let site = {teams:[], games:[]}, be = null, user = null, season = seasonOf(), matches = [], unwatch = null;
+let view = "list", openId = null, cur = null, draft = null, undo = {}, saveTimer = null, saving = false, dirtyIds = new Set();
+const pendingSaves = new Map(); // match id -> latest local copy not yet written
+
+/* ---------- boot ---------- */
+(async function boot(){
+  if (isMock()) $("#mockbar").hidden = false;
+  try { site = await (await fetch(SITE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
+  try { be = await backend(); }
+  catch(e){ $("#app").innerHTML = `<div class="hero"><h2>Can't reach the score database</h2><p class="muted">Check the internet connection and reload.</p></div>`; return; }
+  be.onUser(u => {
+    user = u; renderWho();
+    if (unwatch){ unwatch(); unwatch = null; }
+    if (u && EDITORS.includes(u.email)) unwatch = be.watchSeason(season, onMatches, onState);
+    route();
+  });
+  window.addEventListener("hashchange", route);
+})();
+
+function onMatches(list){
+  matches = list.map(m => settle(pendingSaves.get(m.id) || m));
+  if (cur && !dirtyIds.has(cur.id)){ const fresh = matches.find(m => m.id === cur.id); if (fresh) cur = clone(fresh); }
+  if (view === "list") renderList();
+  else if (view === "match") renderMatch(true);
+}
+function onState(s){
+  const el = $("#sync"); el.hidden = false;
+  if (s.error){ el.className = "sync err"; el.lastChild.textContent = "Offline"; return; }
+  if (saving || s.pending){ el.className = "sync saving"; el.lastChild.textContent = navigator.onLine ? "Saving…" : "Saved on phone · will sync"; }
+  else { el.className = "sync"; el.lastChild.textContent = "Saved"; }
+}
+window.addEventListener("online", () => onState({pending:dirtyIds.size > 0}));
+window.addEventListener("offline", () => onState({pending:true}));
+
+function renderWho(){
+  const w = $("#who");
+  if (!user){ w.hidden = true; return; }
+  w.hidden = false; w.innerHTML = user.photo ? `<img src="${esc(user.photo)}" alt="" referrerpolicy="no-referrer">` : esc((user.name || "?")[0]);
+  w.onclick = () => { if (confirm(`Signed in as ${user.email}.\n\nSign out?`)) be.signOut(); };
+}
+
+function route(){
+  const h = location.hash.slice(1);
+  if (!user) return renderSignIn();
+  if (!EDITORS.includes(user.email)) return renderNotAllowed();
+  if (h === "new"){ view = "form"; openId = null; draft = blankMatch(site, (site.teams || [])[0]); return renderForm(); }
+  if (h.startsWith("edit/")){ const m = matches.find(x => x.id === h.slice(5)); view = "form"; openId = h.slice(5); draft = m ? clone(m) : null; if (!m){ location.hash = ""; return; } return renderForm(); }
+  if (h.startsWith("m/")){ view = "match"; if (openId !== h.slice(2) || !cur){ openId = h.slice(2); const m = matches.find(x => x.id === openId); cur = m ? clone(m) : null; } return renderMatch(); }
+  if (pendingSaves.size) flush();
+  view = "list"; openId = null; cur = null; renderList();
+}
+
+/* ---------- sign in ---------- */
+function renderSignIn(){
+  $("#app").innerHTML = `<div class="hero"><img src="../../assets/eagle.png" alt=""><h2>Coaches only</h2>
+    <p class="muted" style="max-width:340px;margin:0 auto 26px">Sign in with your hartlandschools.us Google account to enter scores. You stay signed in on this phone.</p>
+    <button class="btn btn-gold" id="signin" type="button">Sign in with Google</button></div>`;
+  $("#signin").onclick = async () => { try { await be.signIn(); } catch(e){ toast(/popup-closed|cancelled/.test(e.code || "") ? "Sign-in was closed." : "Couldn't sign in. " + (e.code || e.message || "")); } };
+}
+function renderNotAllowed(){
+  $("#app").innerHTML = `<div class="hero"><h2>Not a scorekeeper account</h2><p class="muted">${esc(user.email)} can't enter scores. Sign in with a coach account.</p>
+    <button class="btn btn-line" id="so" type="button">Sign out</button></div>`;
+  $("#so").onclick = () => be.signOut();
+}
+
+/* ---------- list ---------- */
+function gameBadge(m){
+  const g = gameFor(site, m.game);
+  return `<span class="gbadge">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : SITE + g.icon)}" alt="">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
+}
+function oppName(m){ return m.opponent?.abbr || abbrFor(m.opponent?.school || m.opponent?.team); }
+function rowHTML(m){
+  const live = m.status === "live", fin = m.status === "final";
+  const st = live ? `${m.score.us}–${m.score.them}<small><span class="pill-live">LIVE</span></small>`
+    : fin ? `<span class="${m.result}">${m.result}</span> ${m.score.us}–${m.score.them}<small>Final${m.forfeit ? " · FF" : ""}</small>`
+    : m.status === "postponed" ? `<small>Postponed</small>` : m.status === "canceled" ? `<small>Canceled</small>`
+    : `${esc(fmtTime(m.startsAt))}<small>${esc(fmtDay(m.startsAt))}</small>`;
+  return `<button class="mrow${live ? " live" : ""}" type="button" data-open="${esc(m.id)}">${gameBadge(m)}
+    <span><b>${esc(m.teamName)}</b><span class="sub">vs ${esc(m.opponent?.team || m.opponent?.school || "TBD")}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}<br>${esc(m.league)}${m.week ? ` · Wk ${esc(m.week)}` : ""}</span></span>
+    <span class="st">${st}</span></button>`;
+}
+function renderList(){
+  const by = s => matches.filter(m => s.includes(m.status));
+  const live = by(["live"]), up = by(["upcoming", "postponed"]).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1), done = by(["final", "canceled"]).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
+  const sec = (title, list, empty) => `<h2>${title}</h2>${list.length ? `<div class="mlist">${list.map(rowHTML).join("")}</div>` : `<div class="card empty">${empty}</div>`}`;
+  const gh = ghCfg();
+  $("#app").innerHTML = (live.length ? sec("Live now", live, "") : "")
+    + sec("Upcoming", up, "No upcoming matches. Tap <b>New match</b> to add one.")
+    + sec(`Final · ${esc(seasonLabel(season))}`, done, "No finished matches yet this season.")
+    + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div>
+    <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
+  $("#new").onclick = () => location.hash = "new";
+  $("#app").querySelectorAll("[data-open]").forEach(b => b.onclick = () => location.hash = "m/" + b.dataset.open);
+  $("#backup") && ($("#backup").onclick = () => archive(true));
+}
+
+/* ---------- match (live scoring) ---------- */
+function renderMatch(fromSnapshot){
+  if (!cur){ const m = matches.find(x => x.id === openId); if (!m){ $("#app").innerHTML = `<p class="empty">Loading match…</p>`; return; } cur = clone(m); }
+  const typing = fromSnapshot && document.activeElement?.closest?.("#details");
+  const g = gameFor(site, cur.game), us = "Hartland", them = oppName(cur), unit = g.unit || "Game";
+  const status = cur.status, need = Math.floor(cur.bestOf / 2) + 1;
+  const n = cur.current || 1, gm = (cur.games || []).find(x => x.n === n) || {n, us:0, them:0, winner:null};
+  const head = `<div class="mhead"><button class="back" type="button" id="back" aria-label="Back to matches">←</button>
+      <div class="t"><b>vs ${esc(cur.opponent?.team || cur.opponent?.school || them)}</b><span>${esc(cur.teamName)} · ${esc(fmtDay(cur.startsAt))} ${esc(fmtTime(cur.startsAt))} · ${esc(cur.league)} · Bo${cur.bestOf}</span></div>
+      <button class="btn btn-line" type="button" id="edit" style="min-height:48px;padding:0 14px;font-size:16px">Edit</button></div>`;
+  const seg = `<div class="seg" role="group" aria-label="Match status">
+      <button type="button" data-status="upcoming" aria-pressed="${status === "upcoming" || status === "postponed"}">Upcoming</button>
+      <button type="button" class="s-live" data-status="live" aria-pressed="${status === "live"}">● Live</button>
+      <button type="button" class="s-final" data-status="final" aria-pressed="${status === "final"}">Final</button></div>`;
+  const resultTxt = status === "final" ? `<span class="${cur.result}">${cur.result === "W" ? "Hartland wins" : cur.result === "L" ? `${esc(them)} wins` : "Tied"}</span>` : cur.clinched ? "Series decided" : status === "live" ? `${esc(unit)} ${n} in progress` : `First to ${need}`;
+  const board = `<div class="board" aria-live="polite">
+      <div class="side us"><div class="nm">${us}</div><div class="full">${esc(cur.teamName)}</div><div class="num">${cur.score.us}</div></div>
+      <div class="dash">–</div>
+      <div class="side"><div class="nm">${esc(them)}</div><div class="full">${esc(cur.opponent?.team || cur.opponent?.school || "")}</div><div class="num">${cur.score.them}</div></div>
+      <div class="meta">${resultTxt}${cur.forfeit ? " · forfeit" : ""}</div></div>`;
+  let panel = "";
+  if (cur.forfeit){
+    panel = `<div class="panel"><div class="panel-h"><b>Forfeit</b></div><p class="muted" style="margin:0 0 12px">${cur.forfeit === "them" ? `${esc(them)} forfeited. Hartland wins` : `Hartland forfeited. ${esc(them)} wins`} ${cur.score.us}–${cur.score.them}.</p><button class="btn btn-line btn-block" type="button" data-ff="">Undo forfeit</button></div>`;
+  } else if (g.points){
+    panel = `<div class="panel"><div class="panel-h"><b>${esc(unit)} ${n}</b><span>${esc(g.points)}${gm.winner ? ` · won by ${gm.winner === "us" ? "Hartland" : esc(them)}` : ""}</span></div>
+      <div class="pts">
+        <div class="pcol us"><div class="nm">${us}</div><div class="v">${gm.us || 0}</div><div class="row"><button class="step" type="button" data-pt="us" data-d="-1" aria-label="Hartland minus one">−</button><button class="step plus" type="button" data-pt="us" data-d="1" aria-label="Hartland plus one">+1</button></div></div>
+        <div class="pcol"><div class="nm">${esc(them)}</div><div class="v">${gm.them || 0}</div><div class="row"><button class="step" type="button" data-pt="them" data-d="-1" aria-label="${esc(them)} minus one">−</button><button class="step plus" type="button" data-pt="them" data-d="1" aria-label="${esc(them)} plus one">+1</button></div></div>
+      </div>
+      <div class="won"><button type="button" data-win="us" class="${gm.winner === "us" ? "on" : ""}">Hartland won ${esc(unit)} ${n}</button><button type="button" data-win="them" class="${gm.winner === "them" ? "on them" : ""}">${esc(them)} won ${esc(unit)} ${n}</button></div>
+      ${chips(g, them)}</div>`;
+  } else {
+    panel = `<div class="panel"><div class="panel-h"><b>${esc(unit)} ${n}</b><span>Tap who won it</span></div>
+      <div class="big2"><button class="u" type="button" data-win="us">+1 Hartland<br><small style="font-size:14px">won ${esc(unit.toLowerCase())} ${n}</small></button><button class="t" type="button" data-win="them">+1 ${esc(them)}<br><small style="font-size:14px">won ${esc(unit.toLowerCase())} ${n}</small></button></div>
+      ${chips(g, them)}</div>`;
+  }
+  const clinch = status !== "final" && cur.clinched ? `<div class="clinch${cur.clinched === "them" ? " them" : ""}"><b>${cur.clinched === "us" ? "Hartland" : esc(them)} wins ${Math.max(cur.score.us, cur.score.them)}–${Math.min(cur.score.us, cur.score.them)}</b><button class="btn" type="button" data-status="final">Mark final</button></div>` : "";
+  const tools = `<div class="tools"><button class="btn btn-line" type="button" id="undo"${(undo[cur.id] || []).length ? "" : " disabled style=\"opacity:.4\""}>↶ Undo</button>
+      ${cur.stream?.live ? `<a class="btn btn-line" style="flex:1;text-decoration:none" href="${esc(cur.stream.live)}" target="_blank" rel="noopener">▶ Stream</a>` : ""}</div>`;
+  const top = head + seg + board + clinch + panel + tools;
+  if (typing && $("#scoreTop")){ $("#scoreTop").innerHTML = top; bindTop(); return; }
+  $("#app").innerHTML = `<div id="scoreTop">${top}</div><div id="details">${detailsHTML(g, them)}</div>`;
+  bindTop(); bindDetails(g);
+}
+function chips(g, them){
+  const list = (cur.games || []).slice().sort((a, b) => a.n - b.n);
+  const n = cur.current || 1;
+  const all = list.some(x => x.n === n) ? list : [...list, {n, us:0, them:0, winner:null}];
+  if (all.length < 2 && !all[0]?.winner && !(all[0]?.us || all[0]?.them)) return "";
+  return `<div class="chips" aria-label="${esc(g.unit || "Game")}s">${all.map(x => `<button type="button" class="chip${x.n === n ? " cur" : ""}${x.winner === "us" ? " w" : ""}" data-goto="${x.n}"><small>${esc((g.unit || "G")[0])}${x.n}${x.winner ? (x.winner === "us" ? " · W" : " · L") : x.n === n ? " · now" : ""}</small>${g.points ? `${x.us || 0}–${x.them || 0}` : x.winner ? (x.winner === "us" ? "Hartland" : esc(them)) : "—"}</button>`).join("")}</div>`;
+}
+function bindTop(){
+  $("#back").onclick = () => location.hash = "";
+  $("#edit").onclick = () => location.hash = "edit/" + cur.id;
+  $("#undo").onclick = () => { const st = undo[cur.id] || []; if (!st.length) return; cur = st.pop(); settle(cur); buzz(); queueSave(); renderMatch(); };
+  $("#scoreTop").querySelectorAll("[data-status]").forEach(b => b.onclick = () => setStatus(b.dataset.status));
+  $("#scoreTop").querySelectorAll("[data-pt]").forEach(b => b.onclick = () => change(m => {
+    const gm = gameRec(m, m.current || 1); gm[b.dataset.pt] = Math.max(0, (gm[b.dataset.pt] || 0) + (+b.dataset.d));
+    if (m.status === "upcoming") m.status = "live";
+  }));
+  $("#scoreTop").querySelectorAll("[data-win]").forEach(b => b.onclick = () => change(m => {
+    const n = m.current || 1, gm = gameRec(m, n), who = b.dataset.win;
+    gm.winner = gm.winner === who ? null : who;
+    if (m.status === "upcoming") m.status = "live";
+    settle(m);
+    const decided = (m.games || []).filter(x => x.winner).length;
+    if (gm.winner && !m.clinched && decided < m.bestOf){ const next = Math.max(...m.games.map(x => x.n)) + 1; if (!m.games.some(x => x.n === next && x.winner)) m.current = next; }
+  }));
+  $("#scoreTop").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => change(m => { m.current = +b.dataset.goto; }, true));
+  $("#scoreTop").querySelectorAll("[data-ff]").forEach(b => b.onclick = () => change(m => { m.forfeit = b.dataset.ff || null; if (m.forfeit) m.status = "final"; }));
+}
+function gameRec(m, n){ m.games = m.games || []; let gm = m.games.find(x => x.n === n); if (!gm){ gm = {n, us:0, them:0, winner:null}; m.games.push(gm); m.games.sort((a, b) => a.n - b.n); } return gm; }
+function change(fn, quiet){
+  (undo[cur.id] = undo[cur.id] || []).push(clone(cur)); if (undo[cur.id].length > 40) undo[cur.id].shift();
+  fn(cur); cur.games = (cur.games || []).filter(x => x.winner || x.us || x.them || x.n === cur.current); settle(cur);
+  if (!quiet) buzz();
+  queueSave(); renderMatch();
+}
+function setStatus(s){
+  if (s === "final" && !cur.forfeit && !cur.clinched){
+    const msg = cur.score.us === cur.score.them ? `The series is tied ${cur.score.us}–${cur.score.them}. Mark it final as a tie?` : `Nobody has won ${Math.floor(cur.bestOf / 2) + 1} ${(gameFor(site, cur.game).unit || "game").toLowerCase()}s yet (${cur.score.us}–${cur.score.them}). Mark it final anyway?`;
+    if (!confirm(msg)) return;
+  }
+  const was = cur.status;
+  change(m => { m.status = s; if (s === "live" && !(m.games || []).length) m.current = 1; });
+  if (s === "final" && was !== "final"){ toast(cur.result === "W" ? "Final. Eagles win! 🦅" : "Final saved."); setTimeout(() => archive(false), 1500); }
+}
+
+/* players, stats, links */
+function detailsHTML(g, them){
+  const team = (site.teams || []).find(t => t.id === cur.teamId);
+  const roster = (team?.roster || []).filter(p => p.name || p.tag);
+  const inMatch = cur.players || [];
+  const extra = inMatch.filter(p => !roster.some(r => r.id === p.id));
+  const people = [...roster.map(r => ({id:r.id || r.name, name:r.name, tag:r.tag, private:!!r.private})), ...extra];
+  const count = inMatch.length;
+  const stats = g.statList || [];
+  const otherPlayers = (site.teams || []).filter(t => t.id !== cur.teamId).flatMap(t => t.roster || []).filter(p => (p.name || p.tag) && !people.some(x => x.id === (p.id || p.name)));
+  const uniq = [...new Map(otherPlayers.map(p => [p.id || p.name, p])).values()];
+  return `<details class="sec"${count ? "" : ""}><summary>Players & stats<span>${count ? `${count} played` : "Who played?"}</span></summary><div class="secb">
+      <div class="plist">${people.map(p => { const on = inMatch.find(x => x.id === p.id); return `<div class="prow${on ? " on" : ""}">
+        <button type="button" data-player="${esc(p.id)}"><span class="ck">${on ? "✓" : ""}</span><span class="pn"><b>${esc(p.name || p.tag)}</b>${p.name && p.tag ? `<small>${esc(p.tag)}</small>` : ""}</span></button>
+        ${on && stats.length ? `<div class="stats">${stats.map(s => `<label>${esc(s.label)}<input type="number" inputmode="numeric" min="0" data-stat="${esc(s.key)}" data-pid="${esc(p.id)}" value="${esc(on.stats?.[s.key] ?? "")}"></label>`).join("")}</div>` : ""}</div>`; }).join("")}</div>
+      ${uniq.length ? `<label class="f" style="margin-top:12px"><span>Add a sub from another team</span><select id="addsub"><option value="">Choose a player…</option>${uniq.map(p => `<option value="${esc(p.id || p.name)}">${esc(p.name || p.tag)}${p.name && p.tag ? ` (${esc(p.tag)})` : ""}</option>`).join("")}</select></label>` : ""}
+      ${stats.length ? "" : `<p class="hint" style="margin-top:10px">To track stats for this game, list them on the Games tab in the Site Manager.</p>`}
+    </div></details>
+    <details class="sec"><summary>Stream links<span>${cur.stream?.live || cur.stream?.vod ? "Added" : "None yet"}</span></summary><div class="secb form">
+      <label class="f"><span>YouTube live link</span><input type="url" inputmode="url" data-link="live" value="${esc(cur.stream?.live || "")}" placeholder="https://youtube.com/live/…"></label>
+      <label class="f"><span>Replay (VOD) link</span><input type="url" inputmode="url" data-link="vod" value="${esc(cur.stream?.vod || "")}" placeholder="Leave blank to use the live link"></label></div></details>
+    <details class="sec"><summary>Forfeit or fix</summary><div class="secb" style="display:grid;gap:10px">
+      <button class="btn btn-line" type="button" data-ff="them">${esc(them)} forfeited</button>
+      <button class="btn btn-line" type="button" data-ff="us">Hartland forfeited</button>
+      <button class="btn btn-line" type="button" id="resetg">Clear all ${esc((g.unit || "game").toLowerCase())} scores</button></div></details>`;
+}
+function bindDetails(g){
+  const D = $("#details");
+  D.querySelectorAll("[data-player]").forEach(b => b.onclick = () => {
+    const id = b.dataset.player, all = (site.teams || []).flatMap(t => t.roster || []);
+    const r = all.find(p => (p.id || p.name) === id) || (cur.players || []).find(p => p.id === id) || {};
+    const keepOpen = [...D.querySelectorAll("details")].map(d => d.open);
+    change(m => { m.players = m.players || []; const i = m.players.findIndex(p => p.id === id);
+      if (i >= 0) m.players.splice(i, 1); else m.players.push({id, name:r.name || "", tag:r.tag || "", private:!!r.private, stats:{}}); }, true);
+    $("#details").querySelectorAll("details").forEach((d, i) => d.open = keepOpen[i]);
+  });
+  const sub = $("#addsub"); if (sub) sub.onchange = () => { if (!sub.value) return; const id = sub.value; const r = (site.teams || []).flatMap(t => t.roster || []).find(p => (p.id || p.name) === id) || {};
+    change(m => { m.players = m.players || []; if (!m.players.some(p => p.id === id)) m.players.push({id, name:r.name || "", tag:r.tag || "", private:!!r.private, stats:{}, sub:true}); }, true);
+    $("#details").querySelector("details").open = true; };
+  D.querySelectorAll("[data-stat]").forEach(inp => inp.oninput = () => {
+    const p = (cur.players || []).find(x => x.id === inp.dataset.pid); if (!p) return;
+    p.stats = p.stats || {}; if (inp.value === "") delete p.stats[inp.dataset.stat]; else p.stats[inp.dataset.stat] = +inp.value; queueSave();
+  });
+  D.querySelectorAll("[data-link]").forEach(inp => inp.oninput = () => { cur.stream = cur.stream || {}; cur.stream[inp.dataset.link] = inp.value.trim(); queueSave(); });
+  D.querySelectorAll("[data-ff]").forEach(b => b.onclick = () => { if (confirm(b.textContent.trim() + "? This marks the match final.")){ change(m => { m.forfeit = b.dataset.ff; m.status = "final"; }); setTimeout(() => archive(false), 1500); } });
+  $("#resetg").onclick = () => { if (confirm("Clear every game score for this match? (Undo can bring it back.)")) change(m => { m.games = []; m.current = 1; }); };
+}
+
+/* ---------- saving ---------- */
+function queueSave(){
+  if (!cur) return;
+  dirtyIds.add(cur.id); pendingSaves.set(cur.id, settle(clone(cur))); onState({pending:true});
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flush, 350);
+}
+async function flush(){
+  clearTimeout(saveTimer);
+  for (const [id, m] of [...pendingSaves]){
+    pendingSaves.delete(id);
+    matches = matches.filter(x => x.id !== id).concat([m]);
+    saving = true;
+    try { await be.save(m, scoreboardFrom(matches, site), user?.email); if (!pendingSaves.has(id)) dirtyIds.delete(id); }
+    catch(e){ console.error(e); if (!pendingSaves.has(id)) pendingSaves.set(id, m);
+      toast(/permission/i.test(e.code || e.message || "") ? "This account isn't allowed to change scores." : "Couldn't save. Check the connection; it'll retry on the next tap."); }
+    saving = false;
+  }
+  onState({pending:dirtyIds.size > 0});
+}
+window.addEventListener("pagehide", () => { if (pendingSaves.size) flush(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden && pendingSaves.size) flush(); });
+
+/* ---------- create / edit form ---------- */
+function renderForm(){
+  if (!draft){ location.hash = ""; return; }
+  const teams = site.teams || [];
+  const known = site.teamSchools || {};
+  const schools = [...new Set([...Object.values(known), ...matches.map(m => m.opponent?.school).filter(Boolean)])].sort();
+  const oppTeams = [...new Set([...Object.keys(known), ...matches.map(m => m.opponent?.team).filter(Boolean)])].sort();
+  const team = teams.find(t => t.id === draft.teamId) || {};
+  const leagues = [...new Set([...String(team.leagues || "").split(",").map(s => s.trim()).filter(Boolean), ...LEAGUES, draft.league].filter(Boolean))];
+  const isNew = !openId;
+  $("#app").innerHTML = `<div class="mhead"><button class="back" type="button" id="cancel1" aria-label="Back">←</button><div class="t"><b>${isNew ? "New match" : "Edit match"}</b><span>${esc(seasonLabel(draft.season))} season</span></div></div>
+    <form class="form" id="mf" autocomplete="off">
+      <label class="f"><span>Our team</span><select name="teamId" required>${teams.map(t => `<option value="${esc(t.id)}"${t.id === draft.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select></label>
+      ${team.id && !team.gameKey ? `<p class="hint" style="color:var(--gold)">This team has no game type yet. Set it on the Teams tab in the Site Manager so scoring works right.</p>` : ""}
+      <label class="f"><span>Opponent team name</span><input name="oppTeam" list="oppTeams" value="${esc(draft.opponent?.team || "")}" placeholder="Denby Tars"></label>
+      <label class="f"><span>Opponent school</span><input name="oppSchool" list="schools" value="${esc(draft.opponent?.school || "")}" placeholder="Denby High School"></label>
+      <div class="two">
+        <label class="f"><span>Short name</span><input name="abbr" maxlength="5" value="${esc(draft.opponent?.abbr || "")}" placeholder="${esc(abbrFor(draft.opponent?.school || ""))}" style="text-transform:uppercase"></label>
+        <label class="f"><span>Best of</span><select name="bestOf">${[1, 3, 5, 7].map(n => `<option${n === +draft.bestOf ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+      </div>
+      <label class="f"><span>Date & time</span><input type="datetime-local" name="when" value="${esc(localInput(draft.startsAt))}" required></label>
+      <div class="two">
+        <label class="f"><span>League / event</span><select name="league">${leagues.map(l => `<option${l === draft.league ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+        <label class="f"><span>Stage</span><select name="stage">${STAGES.map(([v, l]) => `<option value="${v}"${v === draft.stage ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+      </div>
+      <div class="two">
+        <label class="f"><span>Week #</span><input name="week" inputmode="numeric" value="${esc(draft.week || "")}" placeholder="3"></label>
+        <label class="f"><span>Event name (optional)</span><input name="event" value="${esc(draft.event || "")}" placeholder="State quarterfinal"></label>
+      </div>
+      <label class="f"><span>YouTube live link</span><input type="url" name="live" inputmode="url" value="${esc(draft.stream?.live || "")}" placeholder="https://youtube.com/live/…"></label>
+      <label class="f"><span>Notes</span><textarea name="notes" rows="2">${esc(draft.notes || "")}</textarea></label>
+      ${isNew ? "" : `<label class="f"><span>Status</span><select name="status">${["upcoming", "live", "final", "postponed", "canceled"].map(s => `<option value="${s}"${s === draft.status ? " selected" : ""}>${s[0].toUpperCase() + s.slice(1)}</option>`).join("")}</select></label>
+        <button class="btn btn-danger" type="button" id="del">Delete this match</button>`}
+      <datalist id="schools">${schools.map(s => `<option value="${esc(s)}">`).join("")}</datalist>
+      <datalist id="oppTeams">${oppTeams.map(s => `<option value="${esc(s)}">`).join("")}</datalist>
+      <div class="formbar"><button class="btn btn-line" type="button" id="cancel2">Cancel</button><button class="btn btn-gold" type="submit">${isNew ? "Create match" : "Save"}</button></div>
+    </form>`;
+  const F = $("#mf");
+  const cancel = () => location.hash = openId ? "m/" + openId : "";
+  $("#cancel1").onclick = cancel; $("#cancel2").onclick = cancel;
+  F.teamId.onchange = () => { const t = teams.find(x => x.id === F.teamId.value); const keep = {opponent:readOpp(F), startsAt:readWhen(F) || draft.startsAt, stream:{live:F.live.value.trim(), vod:draft.stream?.vod || ""}, notes:F.notes.value, week:F.week.value};
+    const nb = blankMatch(site, t, keep.startsAt); draft = {...draft, ...nb, ...keep, status:draft.status, games:draft.games, players:isNew ? [] : draft.players}; renderForm(); };
+  F.oppTeam.onchange = () => { const k = Object.keys(known).find(n => n.toLowerCase() === F.oppTeam.value.trim().toLowerCase()); if (k && !F.oppSchool.value){ F.oppSchool.value = known[k]; F.abbr.placeholder = abbrFor(known[k]); } };
+  F.oppSchool.oninput = () => F.abbr.placeholder = abbrFor(F.oppSchool.value);
+  if (!isNew) $("#del").onclick = async () => {
+    if (!confirm("Delete this match for good?")) return;
+    try { await be.remove(openId, scoreboardFrom(matches.filter(m => m.id !== openId), site)); toast("Match deleted."); cur = null; location.hash = ""; }
+    catch(e){ toast("Couldn't delete: " + (e.code || e.message)); }
+  };
+  F.onsubmit = async e => {
+    e.preventDefault();
+    const when = readWhen(F); if (!when){ toast("Pick a date and time."); return; }
+    const t = teams.find(x => x.id === F.teamId.value) || {}, g = gameFor(site, t.gameKey);
+    const m = {...draft, teamId:t.id, teamName:teamLabel(site, t), game:g.key || "", gameName:g.name || t.game || "", level:t.level || "Varsity",
+      opponent:readOpp(F), startsAt:when, season:seasonOf(when), term:termOf(when), bestOf:+F.bestOf.value, league:F.league.value, stage:F.stage.value,
+      week:F.week.value.trim(), event:F.event.value.trim(), stream:{...(draft.stream || {}), live:F.live.value.trim()}, notes:F.notes.value.trim()};
+    if (!isNew) m.status = F.status.value;
+    m.id = openId || be.newId();
+    settle(m);
+    const all = matches.filter(x => x.id !== m.id).concat([m]);
+    try { await be.save(m, scoreboardFrom(all, site), user.email); }
+    catch(err){ toast(/permission/i.test(err.code || err.message || "") ? "This account isn't allowed to change scores." : "Couldn't save. Check the connection."); return; }
+    if (m.season !== season) toast(`Saved to the ${seasonLabel(m.season)} season.`);
+    cur = clone(m); openId = m.id; location.hash = "m/" + m.id;
+  };
+}
+function readOpp(F){ const school = F.oppSchool.value.trim(), team = F.oppTeam.value.trim(); return {school, team, abbr:(F.abbr.value.trim() || abbrFor(school || team)).toUpperCase(), logo:draft?.opponent?.logo || ""}; }
+function readWhen(F){ const v = F.when.value; if (!v) return ""; const d = new Date(v); return isNaN(d) ? "" : d.toISOString(); }
+
+/* ---------- backup finished matches to the GitHub repo ---------- */
+function ghCfg(){ try { return JSON.parse(localStorage.getItem("eagles-gh")); } catch(e){ return null; } }
+async function archive(loud){
+  const c = ghCfg(); if (!c?.token || isMock()){ if (loud) toast(isMock() ? "Backups are off in test mode." : "Connect this device in the Site Manager first."); return; }
+  const finals = matches.filter(m => m.status === "final").map(m => { const {updatedBy, ...rest} = m; return rest; }).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
+  const path = `data/matches/${season}.json`, api = `https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`;
+  const H = {"Accept":"application/vnd.github+json", "Authorization":`Bearer ${c.token}`, "X-GitHub-Api-Version":"2022-11-28"};
+  try {
+    let sha; const r = await fetch(api + "?ref=" + encodeURIComponent(c.branch || "main"), {headers:H, cache:"no-store"}); if (r.ok) sha = (await r.json()).sha;
+    const body = JSON.stringify({season, updated:new Date().toISOString(), matches:finals}, null, 2) + "\n";
+    const put = await fetch(api, {method:"PUT", headers:{...H, "Content-Type":"application/json"}, body:JSON.stringify({message:`Scorekeeper: back up ${seasonLabel(season)} results`, content:b64(body), sha, branch:c.branch || "main"})});
+    if (!put.ok) throw new Error(put.status);
+    if (loud) toast(`Backed up ${finals.length} finished match${finals.length === 1 ? "" : "es"}.`);
+  } catch(e){ if (loud) toast("Backup didn't go through (" + e.message + "). Scores are still saved."); }
+}
+function b64(s){ const bytes = new TextEncoder().encode(s); let bin = ""; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(bin); }
+</script>
+</body>
+</html>

@@ -258,7 +258,7 @@ function renderPanel(){
     site.links = site.links || {};
     P.innerHTML = `<div class="card"><div class="card-h"><h2>Coaches</h2></div>${listEditor("coaches", LISTS.coaches)}</div>
     <div class="card"><div class="card-h"><h2>Social & streaming</h2></div><p class="intro">Leave a box empty to hide that link.</p>${objFields("links", [["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"]])}</div>
-    <div class="card"><div class="card-h"><h2>Support & other links</h2></div>${objFields("links", [["merch","Merch store","url"],["jerseys","Jersey store","url"],["fundraiser","Fundraiser link","url"],["fundraiserLabel","Fundraiser name"],["league","League site","url"],["athletics","Athletics site","url"]])}</div>`;
+    <div class="card"><div class="card-h"><h2>Support & other links</h2></div>${objFields("links", [["register","Registration form","url"],["merch","Merch store","url"],["jerseys","Jersey store","url"],["fundraiser","Fundraiser link","url"],["fundraiserLabel","Fundraiser name"],["league","League site","url"],["athletics","Athletics site","url"]])}</div>`;
     return;
   }
   if (tab === "profiles"){

@@ -445,7 +445,8 @@ function mapStandings(recs){
    a bye is a match win but doesn't change rating. Teams with the same rating share a place. */
 function tallyMatches(matches){
   const t = new Map();
-  const get = n => { n = String(n || "").trim(); if (!n || /^tbd$/i.test(n)) return null; if (!t.has(n)) t.set(n, {team:n, w:0, l:0, byes:0, rating:1500, diff:0}); return t.get(n); };
+  const get = n => { n = String(n || "").trim(); if (!n || /^(tbd|bye)$/i.test(n)) return null; if (!t.has(n)) t.set(n, {team:n, school:"", w:0, l:0, byes:0, rating:1500, diff:0}); return t.get(n); };
+  matches.forEach(m => m.sides.forEach(sd => { const x = get(sd.name), sc = String(sd.school || "").trim(); if (x && sc) x.school = sc; }));
   const played = [];
   matches.forEach((m, i) => {
     if (m.state && !/^complete/i.test(m.state)) { m.sides.forEach(sd => get(sd.name)); return; }
@@ -473,9 +474,9 @@ function tallyMatches(matches){
 }
 function matchesFrom(json, csv){
   if (json && Array.isArray(json.matches) && json.matches.some(m => Array.isArray(m.slots)))
-    return json.matches.map(m => ({state:m.state, when:m.startDate || "", sides:(m.slots || []).map(sd => ({name:sd.entryName ?? sd.name, won:sd.won, score:sd.gamesWon, pts:sd.roundsScored}))}));
+    return json.matches.map(m => ({state:m.state, when:m.startDate || "", sides:(m.slots || []).map(sd => ({name:sd.entryName ?? sd.name, school:sd.schoolName ?? sd.entrySchoolName ?? sd.school?.name ?? (typeof sd.school === "string" ? sd.school : "") ?? "", won:sd.won, score:sd.gamesWon, pts:sd.roundsScored}))}));
   if (csv && csv.length && "Side 1" in csv[0])
-    return csv.map(r => ({state:r.State, when:r["Start Time"] || "", sides:[{name:r["Side 1"], score:r["Side 1 Score"], pts:r["Side 1 Score"]}, {name:r["Side 2"], score:r["Side 2 Score"], pts:r["Side 2 Score"]}]}));
+    return csv.map(r => ({state:r.State, when:r["Start Time"] || "", sides:[{name:r["Side 1"], school:r["Side 1 School"], score:r["Side 1 Score"], pts:r["Side 1 Score"]}, {name:r["Side 2"], school:r["Side 2 School"], score:r["Side 2 Score"], pts:r["Side 2 Score"]}]}));
   return null;
 }
 function rankRows(rows){
@@ -497,7 +498,7 @@ $("#standInput").addEventListener("change", async e => {
   let rows, keys = [], found = {};
   if (matches){
     rows = tallyMatches(matches).map(x => { const o = byName.get(x.team.toLowerCase()) || {};
-      return {rank:x.rank, team:x.team, school:o.school || "", w:String(x.w), l:String(x.l), rating:String(Math.round(x.rating)), us:o.us ?? /hartland/i.test(x.team + " " + (o.school || ""))}; });
+      return {rank:x.rank, team:x.team, school:x.school || o.school || "", w:String(x.w), l:String(x.l), rating:String(Math.round(x.rating)), us:o.us ?? /hartland/i.test(x.team + " " + (x.school || o.school || ""))}; });
   } else {
     ({rows, keys, found} = mapStandings(recs));
     rows.forEach(r => { const o = byName.get(r.team.toLowerCase()); if (o){ r.school = r.school || o.school || ""; r.rating = r.rating || o.rating || ""; } });

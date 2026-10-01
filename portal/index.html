@@ -1867,7 +1867,7 @@ function setPv(phone){ $("#frameWrap").classList.toggle("phone", phone); $("#pvD
 
 renderAll();
 restoreFolder();
-if (/github\.io$/i.test(location.hostname) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) $("#siteLink").hidden = false;
+if (/(github\.io|hartlandesports\.com)$/i.test(location.hostname) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) $("#siteLink").hidden = false;
 })();
 </script>
 

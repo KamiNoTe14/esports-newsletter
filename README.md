@@ -1,6 +1,6 @@
 # Hartland Esports website
 
-Live at **https://kaminote14.github.io/esports-newsletter/**
+Live at **https://hartlandesports.com** (also reachable at https://kaminote14.github.io/esports-newsletter/, which redirects)
 
 | Page | What it is |
 |---|---|

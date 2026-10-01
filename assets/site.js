@@ -152,12 +152,16 @@ function home(site, issues){
   const P = site.program || {}, L = site.links || {};
   const last = latestIssue(issues), up = upcoming(issues).slice(0, 5);
   return `<section class="scores" id="scores" aria-label="Scores" hidden></section>
-  <section class="hero"><div class="wrap">
-    <div>
+  <section class="hero${P.heroVideo !== false ? " has-video" : ""}">
+    ${P.heroVideo !== false ? `<video class="hero-video" id="heroVideo" muted loop playsinline preload="none" poster="${BASE}assets/hero/hero.jpg" aria-hidden="true" tabindex="-1"></video>
+    <div class="hero-tint" aria-hidden="true"></div>
+    <button class="hero-pause" id="heroPause" type="button" aria-label="Pause background video" hidden>❚❚</button>` : ""}
+    <div class="wrap">
+    <div class="hero-copy">
       <p class="eyebrow">${esc(P.school || "Hartland High School")}</p>
       <h1>${esc(P.heroTitle || "Hartland Eagles Esports").replace(/Esports$/i, "<span>Esports</span>")}</h1>
       <p class="lead">${esc(P.heroText || "")}</p>
-      <div class="btns">${safe(L.youtube) ? `<a class="btn btn-gold" href="${esc(safe(L.youtube))}" target="_blank" rel="noopener">Watch on YouTube</a>` : ""}<a class="btn btn-line" href="${BASE}about.html#join">Join the team</a></div>
+      <div class="btns">${safe(L.youtube) ? `<a class="btn btn-gold" href="${esc(safe(L.youtube))}" target="_blank" rel="noopener">Watch on YouTube</a>` : ""}${P.promo !== false ? `<button class="btn btn-line" type="button" id="promoBtn">▶ Watch our promo</button>` : ""}<a class="btn btn-line" href="${BASE}about.html#join">Join the team</a></div>
     </div>
     <img class="hero-logo" src="${BASE}assets/logo-team.png" alt="Hartland Eagles Esports logo" width="600" height="420">
   </div></section>
@@ -245,6 +249,35 @@ function about(site){
   <section class="section alt"><div class="wrap">${secH("Follow along")}<p class="lead" style="margin-bottom:6px">Matches stream on YouTube, with highlights across our socials.</p>${socials(site)}</div></section>`;
 }
 
+/* Home hero: muted looping highlight reel behind the headline. Phones get a smaller file. If the video can't or
+   shouldn't play (reduced motion, data saver, blocked autoplay), the poster image stays and nothing breaks. */
+function heroSetup(){
+  const v = $("#heroVideo"), pause = $("#heroPause");
+  if (v){
+    const calm = matchMedia("(prefers-reduced-motion: reduce)").matches || navigator.connection?.saveData;
+    if (!calm){
+      v.muted = true; v.defaultMuted = true; v.setAttribute("muted", "");
+      v.src = BASE + "assets/hero/" + (matchMedia("(max-width: 700px)").matches ? "hero-mobile.mp4" : "hero.mp4");
+      v.addEventListener("playing", () => { v.classList.add("on"); pause.hidden = false; }, {once:true});
+      const p = v.play(); if (p && p.catch) p.catch(() => {});
+      pause.addEventListener("click", () => {
+        if (v.paused){ v.play(); pause.textContent = "❚❚"; pause.setAttribute("aria-label", "Pause background video"); }
+        else { v.pause(); pause.textContent = "▶"; pause.setAttribute("aria-label", "Play background video"); }
+      });
+      document.addEventListener("visibilitychange", () => { if (document.hidden) v.pause(); else if (pause.textContent !== "▶") v.play().catch(() => {}); });
+    }
+  }
+  $("#promoBtn")?.addEventListener("click", e => {
+    const b = e.currentTarget, wasPlaying = v && !v.paused; if (wasPlaying) v.pause();
+    const lb = document.createElement("div"); lb.className = "lightbox"; lb.setAttribute("role", "dialog"); lb.setAttribute("aria-modal", "true"); lb.setAttribute("aria-label", "Hartland Esports promo video");
+    lb.innerHTML = `<button class="btn btn-line" type="button">Close</button><video src="${BASE}assets/hero/promo.mp4" poster="${BASE}assets/hero/promo.jpg" controls autoplay playsinline style="max-width:min(1100px,94vw);max-height:78vh;border-radius:8px;background:#000"></video>`;
+    const close = () => { lb.remove(); b.focus(); document.removeEventListener("keydown", k); if (wasPlaying) v.play().catch(() => {}); };
+    const k = ev => { if (ev.key === "Escape") close(); };
+    lb.addEventListener("click", ev => { if (ev.target === lb || ev.target.tagName === "BUTTON") close(); });
+    document.addEventListener("keydown", k); document.body.appendChild(lb); lb.querySelector("button").focus();
+  });
+}
+
 /* ---------- boot ---------- */
 async function boot(){
   const app = $("#main");
@@ -258,6 +291,7 @@ async function boot(){
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));
+  heroSetup();
   const btn = $(".nav-btn"), nav = $("#nav");
   btn?.addEventListener("click", () => { const o = nav.classList.toggle("open"); btn.setAttribute("aria-expanded", o); });
   $("#copyIcs")?.addEventListener("click", async e => { const i = $("#icsUrl"); try { await navigator.clipboard.writeText(i.value); e.target.textContent = "Copied"; } catch(err){ i.select(); } });

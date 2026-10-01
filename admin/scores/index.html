@@ -163,8 +163,8 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 <div id="toast" class="toast" hidden role="status"></div>
 
 <script type="module">
-import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, seasonOf, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=4";
+import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, seasonOf, termOf, seasonLabel,
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=5";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -248,7 +248,7 @@ function gameBadge(m){
   const g = gameFor(site, m.game);
   return `<span class="gbadge">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : SITE + g.icon)}" alt="">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
 }
-function oppName(m){ return m.opponent?.abbr || abbrFor(m.opponent?.school || m.opponent?.team); }
+function oppName(m){ return oppShort(m); }
 function rowHTML(m){
   const live = m.status === "live", fin = m.status === "final";
   const st = live ? `${m.score.us}–${m.score.them}<small><span class="pill-live">LIVE</span></small>`
@@ -452,7 +452,7 @@ function renderForm(){
       <label class="f"><span>Opponent team name</span><input name="oppTeam" list="oppTeams" value="${esc(draft.opponent?.team || "")}" placeholder="Denby Tars"></label>
       <label class="f"><span>Opponent school</span><input name="oppSchool" list="schools" value="${esc(draft.opponent?.school || "")}" placeholder="Denby High School"></label>
       <div class="two">
-        <label class="f"><span>Short name</span><input name="abbr" maxlength="5" value="${esc(draft.opponent?.abbr || "")}" placeholder="${esc(abbrFor(draft.opponent?.school || ""))}" style="text-transform:uppercase"></label>
+        <label class="f"><span>Short name (optional)</span><input name="abbr" maxlength="24" value="${esc(draft.opponent?.short || "")}" placeholder="${esc(shortSchool(draft.opponent?.school || "") || "Novi")}"></label>
         <label class="f"><span>Best of</span><select name="bestOf">${[1, 3, 5, 7].map(n => `<option${n === +draft.bestOf ? " selected" : ""}>${n}</option>`).join("")}</select></label>
       </div>
       <label class="f"><span>Date & time</span><input type="datetime-local" name="when" value="${esc(localInput(draft.startsAt))}" required></label>
@@ -477,8 +477,8 @@ function renderForm(){
   $("#cancel1").onclick = cancel; $("#cancel2").onclick = cancel;
   F.teamId.onchange = () => { const t = teams.find(x => x.id === F.teamId.value); const keep = {opponent:readOpp(F), startsAt:readWhen(F) || draft.startsAt, stream:{live:F.live.value.trim(), vod:draft.stream?.vod || ""}, notes:F.notes.value, week:F.week.value};
     const nb = blankMatch(site, t, keep.startsAt); draft = {...draft, ...nb, ...keep, status:draft.status, games:draft.games, players:isNew ? [] : draft.players}; renderForm(); };
-  F.oppTeam.onchange = () => { const k = Object.keys(known).find(n => n.toLowerCase() === F.oppTeam.value.trim().toLowerCase()); if (k && !F.oppSchool.value){ F.oppSchool.value = known[k]; F.abbr.placeholder = abbrFor(known[k]); } };
-  F.oppSchool.oninput = () => F.abbr.placeholder = abbrFor(F.oppSchool.value);
+  F.oppTeam.onchange = () => { const k = Object.keys(known).find(n => n.toLowerCase() === F.oppTeam.value.trim().toLowerCase()); if (k && !F.oppSchool.value){ F.oppSchool.value = known[k]; F.abbr.placeholder = shortSchool(known[k]); } };
+  F.oppSchool.oninput = () => F.abbr.placeholder = shortSchool(F.oppSchool.value) || "Novi";
   if (!isNew) $("#del").onclick = async () => {
     if (!confirm("Delete this match for good?")) return;
     try { await be.remove(openId, scoreboardFrom(matches.filter(m => m.id !== openId), site), seasonSum(matches.filter(m => m.id !== openId), openId, false)); toast("Match deleted."); cur = null; location.hash = ""; }
@@ -501,7 +501,7 @@ function renderForm(){
     cur = clone(m); openId = m.id; location.hash = "m/" + m.id;
   };
 }
-function readOpp(F){ const school = F.oppSchool.value.trim(), team = F.oppTeam.value.trim(); return {school, team, abbr:(F.abbr.value.trim() || abbrFor(school || team)).toUpperCase(), logo:draft?.opponent?.logo || ""}; }
+function readOpp(F){ const school = F.oppSchool.value.trim(), team = F.oppTeam.value.trim(); return {school, team, short:F.abbr.value.trim(), abbr:abbrFor(school || team), logo:draft?.opponent?.logo || ""}; }
 function readWhen(F){ const v = F.when.value; if (!v) return ""; const d = new Date(v); return isNaN(d) ? "" : d.toISOString(); }
 
 /* ---------- backup finished matches to the GitHub repo ---------- */

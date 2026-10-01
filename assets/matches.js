@@ -31,6 +31,14 @@ export function seasonOf(d){ d = new Date(d || Date.now()); const y = d.getMonth
 export const seasonLabel = s => String(s || "").replace("-", "/");
 export function termOf(d){ const m = new Date(d || Date.now()).getMonth(); return m >= 6 ? "fall" : "spring"; }
 export function slug(s){ return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+/* "Novi High School" -> "Novi", "Detroit Catholic Central" stays. Used wherever space is tight (scores strip, scorekeeper). */
+export function shortSchool(name){
+  const s = String(name || "").trim();
+  const cut = s.replace(/\s+(jr\.?\s*\/\s*sr\.?\s+|junior\s+|senior\s+|community\s+)?(high\s+sc?h?c?ool|high|hs|h\.s\.|school)\s*$/i, "").replace(/\s+senior$/i, "").trim();
+  return cut || s;
+}
+/* The opponent's name for tight spaces: a short name the coach typed, else the school without "High School". */
+export function oppShort(m){ const o = m?.opponent || {}; return String(o.short || "").trim() || shortSchool(o.school) || o.team || "Opponent"; }
 export function abbrFor(school){
   const words = String(school || "").replace(/\b(high|senior|junior|school|academy|hs|jr\/sr|community|the|of)\b/gi, " ").split(/[^A-Za-z0-9]+/).filter(Boolean);
   if (!words.length) return "OPP";
@@ -69,7 +77,7 @@ export function blankMatch(site, team, when){
     season:seasonOf(startsAt), term:termOf(startsAt), stage:"regular", week:"",
     game:g.key || "", gameName:g.name || team?.game || "", teamId:team?.id || "", teamName:teamLabel(site, team), level:team?.level || "Varsity",
     league:String(team?.leagues || "MHSEL").split(",")[0].trim() || "MHSEL", event:"",
-    opponent:{school:"", team:"", abbr:"", logo:""},
+    opponent:{school:"", team:"", short:"", abbr:"", logo:""},
     startsAt, status:"upcoming", bestOf:g.bestOf || 3, current:1,
     score:{us:0, them:0}, games:[], result:null, forfeit:null, clinched:null,
     stream:{live:"", vod:""}, players:[], notes:"", source:{}
@@ -88,7 +96,7 @@ export function localInput(iso){ /* "YYYY-MM-DDTHH:MM" in the browser's zone, fo
 /* The small summary the scores strip reads: everything live, the next 10 upcoming, the last 12 finals. */
 export function scoreboardFrom(matches, site){
   const pick = m => ({id:m.id, game:m.game, gameName:m.gameName, teamName:m.teamName, level:m.level, league:m.league,
-    opponent:{school:m.opponent?.school || "", team:m.opponent?.team || "", abbr:m.opponent?.abbr || abbrFor(m.opponent?.school)},
+    opponent:{school:m.opponent?.school || "", team:m.opponent?.team || "", short:m.opponent?.short || "", abbr:m.opponent?.abbr || abbrFor(m.opponent?.school)},
     startsAt:m.startsAt, status:m.status, bestOf:m.bestOf, score:m.score, result:m.result, forfeit:m.forfeit || null,
     current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, games:(m.games || []).filter(g => g.winner || g.us || g.them), stream:m.stream || {}, teamId:m.teamId || "", season:m.season, week:m.week || "", event:m.event || ""});
   const live = matches.filter(m => m.status === "live");

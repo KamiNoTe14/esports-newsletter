@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {seasonOf, seasonLabel, gameFor, abbrFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=4";
+import {seasonOf, seasonLabel, gameFor, oppShort, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=5";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -55,7 +55,7 @@ export function merge(archived, board){
 }
 
 /* ---------- shared bits ---------- */
-const opp = m => m.opponent?.abbr || abbrFor(m.opponent?.school || m.opponent?.team);
+const opp = m => oppShort(m);
 const oppFull = m => m.opponent?.team || m.opponent?.school || "TBD";
 function badge(site, m, cls = "gbadge"){
   const g = gameFor(site, m.game);
@@ -100,7 +100,7 @@ function card(site, m){
   return `<a class="sc${live ? " live" : ""}${fin ? " fin" : ""}" href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ""} aria-label="${esc(`${m.teamName} vs ${oppFull(m)}: ${live ? "live" : fin ? "final" : "upcoming"}${up ? "" : `, ${m.score?.us}–${m.score?.them}`}`)}">
     <span class="sc-top">${badge(site, m, "sc-game")}<span class="sc-st">${st}</span></span>
     <span class="sc-row us${usWin ? " win" : ""}${themWin ? " lose" : ""}"><span class="sc-nm">Hartland</span>${up ? "" : `<span class="sc-sc">${m.score?.us ?? 0}</span>`}</span>
-    <span class="sc-row${themWin ? " win" : ""}${usWin ? " lose" : ""}"><span class="sc-nm">${esc(opp(m))}</span>${up ? "" : `<span class="sc-sc">${m.score?.them ?? 0}</span>`}</span>
+    <span class="sc-row${themWin ? " win" : ""}${usWin ? " lose" : ""}"><span class="sc-nm" title="${esc(m.opponent?.school || oppFull(m))}">${esc(opp(m))}</span>${up ? "" : `<span class="sc-sc">${m.score?.them ?? 0}</span>`}</span>
     <span class="sc-sub">${sub}${ext ? ` <span class="sc-watch">${live ? "▶ Watch" : fin ? "▶ Replay" : ""}</span>` : ""}</span>
   </a>`;
 }

@@ -255,7 +255,24 @@ function renderPanel(){
   const spec = LISTS[tab];
   P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
     ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
-    ${listEditor(tab, spec)}</div>`;
+    ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}`;
+}
+/* ---------- team → school list (fills in schools on every standings import) ---------- */
+function schoolKey(n){ return String(n || "").trim().toLowerCase().replace(/\s+/g, " "); }
+function schoolMap(){ const m = site.teamSchools = site.teamSchools && typeof site.teamSchools === "object" ? site.teamSchools : {}; return m; }
+function schoolFor(team){ const m = schoolMap(), k = schoolKey(team); for (const [n, sc] of Object.entries(m)) if (schoolKey(n) === k) return sc; return ""; }
+function learnSchools(rows){
+  const m = schoolMap(); let added = 0;
+  for (const r of rows || []){ const team = String(r.team || "").trim(), sc = String(r.school || "").trim(); if (!team || !sc) continue;
+    const have = Object.keys(m).find(n => schoolKey(n) === schoolKey(team));
+    if (have){ if (m[have] !== sc){ m[have] = sc; added++; } } else { m[team] = sc; added++; } }
+  return added;
+}
+function schoolsCard(){
+  const m = schoolMap(), names = Object.keys(m).sort((a, b) => a.localeCompare(b));
+  return `<div class="card"><div class="card-h"><h2>Team → school list</h2><span class="muted">${names.length} team${names.length === 1 ? "" : "s"}</span></div>
+    <p class="intro">Imports fill in schools from this list, so each team only has to be entered once. It learns on its own: any school in an imported file, or typed into a standings row, gets added when you import or publish. One team per line: <b>Team name | School</b>. Works for every game.</p>
+    <label class="f"><span>Teams and schools</span><textarea id="schoolList" rows="12" spellcheck="false" style="font-family:ui-monospace,Consolas,Menlo,monospace;font-size:13.5px" placeholder="Hartland Fortnite | Hartland High School">${esc(names.map(n => `${n} | ${m[n]}`).join("\n"))}</textarea></label></div>`;
 }
 function connectPanel(){
   const c = ghCfg() || repoGuess();
@@ -323,6 +340,7 @@ async function putFile(path, b64, message, sha){
 async function publish(){
   const btn = $("#publish"); btn.disabled = true; btn.textContent = "Publishing…";
   try {
+    (site.standings || []).forEach(t => learnSchools(t.rows));
     const used = JSON.stringify(site);
     for (const [path, data] of Object.entries(pending)){
       if (used.includes(`"${path}"`)) await putFile(path, data, `Site manager: add ${path.split("/").pop()}`);
@@ -498,26 +516,33 @@ $("#standInput").addEventListener("change", async e => {
   let rows, keys = [], found = {};
   if (matches){
     rows = tallyMatches(matches).map(x => { const o = byName.get(x.team.toLowerCase()) || {};
-      return {rank:x.rank, team:x.team, school:x.school || o.school || "", w:String(x.w), l:String(x.l), rating:String(Math.round(x.rating)), us:o.us ?? /hartland/i.test(x.team + " " + (x.school || o.school || ""))}; });
+      return {rank:x.rank, team:x.team, school:x.school || schoolFor(x.team) || o.school || "", w:String(x.w), l:String(x.l), rating:String(Math.round(x.rating)), us:o.us ?? /hartland/i.test(x.team + " " + (x.school || schoolFor(x.team) || o.school || ""))}; });
   } else {
     ({rows, keys, found} = mapStandings(recs));
-    rows.forEach(r => { const o = byName.get(r.team.toLowerCase()); if (o){ r.school = r.school || o.school || ""; r.rating = r.rating || o.rating || ""; } });
+    rows.forEach(r => { const o = byName.get(r.team.toLowerCase()) || {}; r.school = r.school || schoolFor(r.team) || o.school || ""; r.rating = r.rating || o.rating || ""; });
   }
   if (!rows.length){ toast(keys.length ? `Couldn't find the team names in that file. Columns seen: ${keys.slice(0, 12).join(", ")}` : "That file doesn't have any standings rows in it."); return; }
   const arr = getP(importPath);
   if (arr.length && !confirm(`Replace the ${arr.length} row${arr.length === 1 ? "" : "s"} in this table with ${rows.length} rows from ${f.name}?`)) return;
   arr.splice(0, arr.length, ...rows);
+  const learned = learnSchools(rows), noSchool = rows.filter(r => !r.school).length;
   const table = getP(importPath.split(".").slice(0, -1).join("."));
   if (table) table.updated = new Date().toISOString().slice(0, 10);
   setDirty(true); setStatus(); renderPanel();
+  const schoolNote = learned ? ` Saved ${learned} school${learned === 1 ? "" : "s"} to the team list.` : "";
+  const schoolMiss = noSchool ? ` ${noSchool} team${noSchool === 1 ? " has" : "s have"} no school yet. Add them in the Team → school list below.` : "";
   const missing = matches ? [] : Object.entries(found).filter(([k, v]) => !v && k !== "school").map(([k]) => k);
   const us = rows.filter(r => r.us).length;
-  toast(`Imported ${rows.length} teams${matches ? " and worked out W-L and ratings from the match results" : ""}${us ? `, ${us} Hartland row${us > 1 ? "s" : ""} highlighted` : ""}.${missing.length ? ` No ${missing.join("/")} column found, so check those.` : ""} It goes live when you publish.`);
+  toast(`Imported ${rows.length} teams${matches ? " and worked out W-L and ratings from the match results" : ""}${us ? `, ${us} Hartland row${us > 1 ? "s" : ""} highlighted` : ""}.${missing.length ? ` No ${missing.join("/")} column found, so check those.` : ""}${schoolNote}${schoolMiss} It goes live when you publish.`);
 });
 
 /* ---------- events ---------- */
 $("#side").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; tab = b.dataset.tab; renderSide(); renderPanel(); $("#panel").scrollIntoView({block:"start"}); });
 $("#panel").addEventListener("input", e => {
+  if (e.target.id === "schoolList"){
+    const m = {}; e.target.value.split(/\r?\n/).forEach(line => { const i = line.lastIndexOf("|"); if (i < 0) return; const n = line.slice(0, i).trim(), sc = line.slice(i + 1).trim(); if (n && sc) m[n] = sc; });
+    site.teamSchools = m; setDirty(true); setStatus(); return;
+  }
   const el = e.target, path = el.dataset.path; if (!path) return;
   setP(path, el.type === "checkbox" ? el.checked : el.value);
   setDirty(true); setStatus();

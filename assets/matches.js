@@ -39,6 +39,12 @@ export function shortSchool(name){
 }
 /* The opponent's name for tight spaces: a short name the coach typed, else the school without "High School". */
 export function oppShort(m){ const o = m?.opponent || {}; return String(o.short || "").trim() || shortSchool(o.school) || o.team || "Opponent"; }
+/* Is this match against a rival? Rivals are listed in the Site Manager; "Howell" matches "Howell High School". */
+export function rivalFor(site, m){
+  const key = n => shortSchool(n).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const k = key(m?.opponent?.school || ""); if (!k) return null;
+  return (site?.rivals || []).find(r => r.school && key(r.school) === k) || null;
+}
 export function abbrFor(school){
   const words = String(school || "").replace(/\b(high|senior|junior|school|academy|hs|jr\/sr|community|the|of)\b/gi, " ").split(/[^A-Za-z0-9]+/).filter(Boolean);
   if (!words.length) return "OPP";

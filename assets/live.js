@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {seasonOf, seasonLabel, gameFor, oppShort, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=5";
+import {seasonOf, seasonLabel, gameFor, oppShort, rivalFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=6";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -95,13 +95,13 @@ function card(site, m){
   const ext = !!watchLink(m);
   const usWin = fin && m.result === "W", themWin = fin && m.result === "L";
   const st = live ? `<span class="pill-live">Live</span>` : fin ? `<b>Final</b>${m.forfeit ? " · FF" : ""}` : m.status === "postponed" ? "Postponed" : esc(shortDay(m.startsAt));
-  const g = gameFor(site, m.game), cg = m.current;
+  const g = gameFor(site, m.game), cg = m.current, rv = rivalFor(site, m);
   const sub = live && cg && g.points ? `${esc((g.unit || "Game")[0])}${cg.n} · ${cg.us}–${cg.them}` : up ? `${esc(fmtTime(m.startsAt))} · ${esc(m.teamName || "")}` : esc(m.teamName || "");
-  return `<a class="sc${live ? " live" : ""}${fin ? " fin" : ""}" href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ""} aria-label="${esc(`${m.teamName} vs ${oppFull(m)}: ${live ? "live" : fin ? "final" : "upcoming"}${up ? "" : `, ${m.score?.us}–${m.score?.them}`}`)}">
+  return `<a class="sc${live ? " live" : ""}${fin ? " fin" : ""}${rv ? " rival" : ""}" href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ""} aria-label="${esc(`${m.teamName} vs ${oppFull(m)}: ${live ? "live" : fin ? "final" : "upcoming"}${up ? "" : `, ${m.score?.us}–${m.score?.them}`}`)}">
     <span class="sc-top">${badge(site, m, "sc-game")}<span class="sc-st">${st}</span></span>
     <span class="sc-row us${usWin ? " win" : ""}${themWin ? " lose" : ""}"><span class="sc-nm">Hartland</span>${up ? "" : `<span class="sc-sc">${m.score?.us ?? 0}</span>`}</span>
     <span class="sc-row${themWin ? " win" : ""}${usWin ? " lose" : ""}"><span class="sc-nm" title="${esc(m.opponent?.school || oppFull(m))}">${esc(opp(m))}</span>${up ? "" : `<span class="sc-sc">${m.score?.them ?? 0}</span>`}</span>
-    <span class="sc-sub">${sub}${ext ? ` <span class="sc-watch">${live ? "▶ Watch" : fin ? "▶ Replay" : ""}</span>` : ""}</span>
+    <span class="sc-sub">${rv ? `<span class="sc-rival">⚔ ${esc(rv.title || "Rivalry")}</span> · ` : ""}${sub}${ext ? ` <span class="sc-watch">${live ? "▶ Watch" : fin ? "▶ Replay" : ""}</span>` : ""}</span>
   </a>`;
 }
 
@@ -134,18 +134,19 @@ export async function startResults(site){
 function teamName(site, t){ const g = gameFor(site, t.gameKey); return `${g.short || t.game} ${t.name}`; }
 function liveCard(site, m){
   const g = gameFor(site, m.game), cg = m.current, w = watchLink(m);
-  return `<div class="card res-livecard">${badge(site, m)}<div><b>${esc(m.teamName)}</b><span class="muted">vs ${esc(oppFull(m))}</span></div>
+  const rv = rivalFor(site, m);
+  return `<div class="card res-livecard">${badge(site, m)}<div>${rv ? `<span class="chip gold rv" style="margin:0 0 4px">⚔ ${esc(rv.title || "Rivalry")}</span>` : ""}<b>${esc(m.teamName)}</b><span class="muted">vs ${esc(oppFull(m))}</span></div>
     <div class="res-score">${m.score?.us ?? 0}<span>–</span>${m.score?.them ?? 0}${cg && g.points ? `<small>${esc(g.unit || "Game")} ${cg.n}: ${cg.us}–${cg.them}</small>` : ""}</div>
     ${w ? `<a class="btn btn-gold" href="${esc(w)}" target="_blank" rel="noopener">▶ Watch live</a>` : ""}</div>`;
 }
 function resultRow(site, m){
   const g = gameFor(site, m.game), games = (m.games || []).filter(x => x.winner || x.us || x.them);
   const lineup = (m.players || []).map(p => `<a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>`).join(", ");
-  const w = watchLink(m);
-  return `<details class="res" id="m-${esc(m.id)}"><summary>
+  const w = watchLink(m), rv = rivalFor(site, m);
+  return `<details class="res${rv ? " rival" : ""}" id="m-${esc(m.id)}"><summary>
       <span class="res-date"><small>${esc(fmtDay(m.startsAt).split(",")[0])}</small><b>${esc(fmtDay(m.startsAt).split(", ")[1] || "")}</b></span>
       ${badge(site, m)}
-      <span class="res-who"><b>${esc(m.teamName)}</b><span>vs ${esc(oppFull(m))}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}</span></span>
+      <span class="res-who"><b>${esc(m.teamName)}${rv ? ` <span class="chip gold rv">⚔ ${esc(rv.title || "Rivalry")}</span>` : ""}</b><span>vs ${esc(oppFull(m))}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}</span></span>
       <span class="res-out ${m.result || ""}"><i>${esc(m.result || "–")}</i>${m.score?.us ?? 0}–${m.score?.them ?? 0}</span>
     </summary><div class="res-body">
       <p class="muted" style="margin:0 0 10px">${esc(m.league || "")}${m.week ? ` · Week ${esc(m.week)}` : ""}${m.event ? ` · ${esc(m.event)}` : ""} · Best of ${esc(m.bestOf)}${m.forfeit ? ` · ${m.forfeit === "them" ? "Won by forfeit" : "Forfeit"}` : ""}</p>

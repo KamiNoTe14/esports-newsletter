@@ -154,6 +154,7 @@ const TABS = [
   {id:"teams", label:"Teams & rosters", toggle:"rosters", toggleLabel:"Show rosters on the Teams page"},
   {id:"games", label:"Games"},
   {id:"profiles", label:"Player profiles"},
+  {id:"rivals", label:"Rivals"},
   {id:"standings", label:"Standings", toggle:"standings", toggleLabel:"Show league standings"},
   {id:"brackets", label:"Playoff brackets", toggle:"brackets", toggleLabel:"Show playoff brackets"},
   {id:"records", label:"Program records", toggle:"records", toggleLabel:"Show program records"},
@@ -170,6 +171,8 @@ const LISTS = {
     sub:{key:"rows", title:"Rows", add:"Add row", importBtn:"Import RallyCry file (CSV or JSON)", fields:[["rank","#"],["team","Team"],["school","School"],["w","W"],["l","L"],["rating","Rating"],["us","Hartland","check"]]}},
   games:{title:"Game", add:"Add game", intro:"Every game we compete in. The scorekeeper uses this to know how a match is scored, so adding a new title is just filling this in. Then pick it as the \"Game type\" on that team.", name:i => i.name || "Game",
     fields:[["name","Full name","text","Rocket League"],["short","Short name","text","Rocket League"],["abbr","Abbreviation","text","RL"],["key","ID (no spaces, don't change once used)","text","rocket-league"],["unit","A match is a series of…","select",["Game","Set","Map","Round"]],["points","Score inside each one (blank = just win/lose)","text","Goals"],["bestOf","Usually best of","select",["1","3","5","7"]],["teamSize","Players per side","text","3"],["stats","Player stats to track (comma separated)","text","Goals, Assists, Saves"],["icon","Icon (optional)","image"]]},
+  rivals:{title:"Rival", add:"Add rival", intro:"Matches against these schools get a gold rivalry tag on the scores strip, the Results page and the scorekeeper. Type the school the way it appears in matches; \"Howell\" also matches \"Howell High School\".", name:i => i.school || "Rival",
+    fields:[["school","School","text","Howell"],["title","Rivalry name (optional)","text","Battle of M-59"],["note","Why they're a rival (for the rivalry pages later)","textarea"]]},
   brackets:{title:"Bracket", add:"Add bracket", intro:"Link to the bracket on RallyCry, upload a screenshot of it, or both.", name:i => i.title || "Bracket",
     fields:[["title","Title","text","Fall 2026 MHSEL Playoffs · Smash"],["league","League"],["status","Status","select",["","Upcoming","In progress","Final"]],["link","Bracket link","url"],["image","Bracket image","image"],["text","Notes","textarea"],["on","Show this bracket","check"]]},
   records:{title:"Record", add:"Add record", intro:"Championships, milestones and program firsts.", name:i => i.title || "Record",
@@ -589,7 +592,7 @@ $("#panel").addEventListener("click", async e => {
   if (b.id === "ghForget"){ const c = ghCfg() || {}; delete c.token; ghSave(c); connected = false; setStatus(); renderSide(); renderPanel(); toast("Key removed from this computer."); return; }
   if (b.dataset.add){
     const arr = getP(b.dataset.add); const key = b.dataset.add.split(".").pop();
-    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", gameKey:"", level:"Varsity", leagues:"MHSEL", note:"", roster:[]}, games:{key:"", name:"", short:"", abbr:"", unit:"Game", points:"", bestOf:"3", teamSize:"", stats:"", icon:""}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{id:"", name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}}[key] || {};
+    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", gameKey:"", level:"Varsity", leagues:"MHSEL", note:"", roster:[]}, rivals:{school:"", title:"", note:""}, games:{key:"", name:"", short:"", abbr:"", unit:"Game", points:"", bestOf:"3", teamSize:"", stats:"", icon:""}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{id:"", name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}}[key] || {};
     arr.push(blank); setDirty(true); setStatus(); renderPanel(); return;
   }
   if (b.dataset.del){

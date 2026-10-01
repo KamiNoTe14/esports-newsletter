@@ -287,7 +287,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js?v=5").then(L => {
+  if (["home", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js?v=6").then(L => {
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));

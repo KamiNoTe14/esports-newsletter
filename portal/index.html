@@ -1411,7 +1411,7 @@ if (isSample) $("#sampleBanner").hidden = false;
 /* ---------- import from the scorekeeper (works when the portal runs on the team website) ---------- */
 async function scoreData(){
   const base = new URL("../assets/", location.href).href;
-  const L = await import(base + "live.js?v=5"), M = await import(base + "matches.js?v=5");
+  const L = await import(base + "live.js?v=6"), M = await import(base + "matches.js?v=6");
   const seasons = [...new Set([M.seasonOf(new Date((state.date || "") + "T12:00")), M.seasonOf()])].filter(s => !/NaN/.test(s));
   const arch = (await Promise.all(seasons.map(L.archive))).flat();
   const once = (watch, arg) => new Promise(res => { let done = false; const fin = b => { if (!done){ done = true; res(b); } }; arg ? watch(arg, fin) : watch(fin); setTimeout(() => fin({matches:[]}), 6000); });

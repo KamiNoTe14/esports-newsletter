@@ -322,3 +322,13 @@ b.W{color:var(--gold)}
 @media (max-width:760px){ .player-top{grid-template-columns:auto 1fr} .player-rec{grid-column:1/-1;display:flex;align-items:center;gap:14px;text-align:left} .player-rec b{font-size:36px;margin:0} .player-photo{width:96px;height:96px} .player-photo.ph{font-size:48px} }
 .tbl-wrap.box{margin-top:12px;max-width:560px}
 .tbl-wrap.box td,.tbl-wrap.box th{padding:8px 12px}
+
+/* rivalry matches */
+.sc.rival{border-color:rgba(255,188,5,.75);background:linear-gradient(180deg,rgba(255,188,5,.16),#0B1F38 55%)}
+.sc.rival.live{border-color:#FF3B3B}
+.sc-rival{color:var(--gold);font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:11px}
+details.res.rival{border-left:4px solid var(--gold)}
+.chip.rv{font-size:11px;padding:2px 7px;vertical-align:3px;margin-left:6px;white-space:nowrap}
+.res-who b .chip.rv{display:inline-block;color:var(--gold)}
+.res-score{white-space:nowrap}
+.res-score small{white-space:normal}

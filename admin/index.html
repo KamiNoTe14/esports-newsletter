@@ -440,30 +440,42 @@ function mapStandings(recs){
   }).filter(r => r.team);
   return {rows, keys, found:{place:kRank, team:kTeam, school:kSchool, wins:kW || kWL, losses:kL || kWL, rating:kRating}};
 }
-/* RallyCry "bracket" export: a list of matches. Tally each team's match W-L. A bye counts as a win. */
+/* RallyCry "bracket" export: a list of matches. Rebuild the standings the way the League Platform does:
+   every team starts at 1500; each match moves rating by Elo (K = 30, so +/-15 between equal teams);
+   a bye is a match win but doesn't change rating. Teams with the same rating share a place. */
 function tallyMatches(matches){
   const t = new Map();
-  const get = n => { n = String(n || "").trim(); if (!n || /^tbd$/i.test(n)) return null; if (!t.has(n)) t.set(n, {team:n, w:0, l:0, byes:0}); return t.get(n); };
-  for (const m of matches){
-    if (m.state && !/^complete/i.test(m.state)) { m.sides.forEach(sd => get(sd.name)); continue; }
+  const get = n => { n = String(n || "").trim(); if (!n || /^tbd$/i.test(n)) return null; if (!t.has(n)) t.set(n, {team:n, w:0, l:0, byes:0, rating:1500, diff:0}); return t.get(n); };
+  const played = [];
+  matches.forEach((m, i) => {
+    if (m.state && !/^complete/i.test(m.state)) { m.sides.forEach(sd => get(sd.name)); return; }
     const sides = m.sides.filter(sd => get(sd.name));
-    if (sides.length === 1){ const x = get(sides[0].name); x.w++; x.byes++; continue; }
-    if (sides.length !== 2) continue;
+    if (sides.length === 1){ const x = get(sides[0].name); x.w++; x.byes++; return; }
+    if (sides.length !== 2) return;
     let win = sides.findIndex(sd => sd.won === true);
     if (win < 0){ const a = parseFloat(sides[0].score), b = parseFloat(sides[1].score);
       if (/^w$/i.test(sides[0].score) || /^(f|l)$/i.test(sides[1].score)) win = 0;
       else if (/^w$/i.test(sides[1].score) || /^(f|l)$/i.test(sides[0].score)) win = 1;
       else if (!isNaN(a) && !isNaN(b) && a !== b) win = a > b ? 0 : 1; }
-    if (win < 0) continue;
-    get(sides[win].name).w++; get(sides[1 - win].name).l++;
+    if (win < 0) return;
+    played.push({when:m.when || "", i, W:get(sides[win].name), L:get(sides[1 - win].name), pts:[+sides[win].pts || 0, +sides[1 - win].pts || 0]});
+  });
+  played.sort((a, b) => (a.when > b.when) - (a.when < b.when) || a.i - b.i);
+  for (const m of played){
+    const exp = 1 / (1 + Math.pow(10, (m.L.rating - m.W.rating) / 400)), d = 30 * (1 - exp);
+    m.W.rating += d; m.L.rating -= d; m.W.w++; m.L.l++;
+    m.W.diff += m.pts[0] - m.pts[1]; m.L.diff += m.pts[1] - m.pts[0];
   }
-  return [...t.values()];
+  const list = [...t.values()];
+  list.sort((a, b) => b.rating - a.rating || b.w - a.w || b.diff - a.diff || a.team.localeCompare(b.team));
+  list.forEach((x, i) => { const p = list[i - 1]; x.rank = p && Math.abs(p.rating - x.rating) < 1e-6 ? p.rank : String(i + 1); });
+  return list;
 }
 function matchesFrom(json, csv){
   if (json && Array.isArray(json.matches) && json.matches.some(m => Array.isArray(m.slots)))
-    return json.matches.map(m => ({state:m.state, sides:(m.slots || []).map(sd => ({name:sd.entryName ?? sd.name, won:sd.won, score:sd.gamesWon}))}));
+    return json.matches.map(m => ({state:m.state, when:m.startDate || "", sides:(m.slots || []).map(sd => ({name:sd.entryName ?? sd.name, won:sd.won, score:sd.gamesWon, pts:sd.roundsScored}))}));
   if (csv && csv.length && "Side 1" in csv[0])
-    return csv.map(r => ({state:r.State, sides:[{name:r["Side 1"], score:r["Side 1 Score"]}, {name:r["Side 2"], score:r["Side 2 Score"]}]}));
+    return csv.map(r => ({state:r.State, when:r["Start Time"] || "", sides:[{name:r["Side 1"], score:r["Side 1 Score"], pts:r["Side 1 Score"]}, {name:r["Side 2"], score:r["Side 2 Score"], pts:r["Side 2 Score"]}]}));
   return null;
 }
 function rankRows(rows){
@@ -484,8 +496,8 @@ $("#standInput").addEventListener("change", async e => {
   const matches = matchesFrom(json, csv);
   let rows, keys = [], found = {};
   if (matches){
-    rows = rankRows(tallyMatches(matches).map(x => { const o = byName.get(x.team.toLowerCase()) || {};
-      return {rank:"", team:x.team, school:o.school || "", w:String(x.w), l:String(x.l), rating:o.rating || "", us:o.us ?? /hartland/i.test(x.team + " " + (o.school || ""))}; }));
+    rows = tallyMatches(matches).map(x => { const o = byName.get(x.team.toLowerCase()) || {};
+      return {rank:x.rank, team:x.team, school:o.school || "", w:String(x.w), l:String(x.l), rating:String(Math.round(x.rating)), us:o.us ?? /hartland/i.test(x.team + " " + (o.school || ""))}; });
   } else {
     ({rows, keys, found} = mapStandings(recs));
     rows.forEach(r => { const o = byName.get(r.team.toLowerCase()); if (o){ r.school = r.school || o.school || ""; r.rating = r.rating || o.rating || ""; } });
@@ -499,7 +511,7 @@ $("#standInput").addEventListener("change", async e => {
   setDirty(true); setStatus(); renderPanel();
   const missing = matches ? [] : Object.entries(found).filter(([k, v]) => !v && k !== "school").map(([k]) => k);
   const us = rows.filter(r => r.us).length;
-  toast(`Imported ${rows.length} teams${matches ? " and counted their W-L from the match results" : ""}${us ? `, ${us} Hartland row${us > 1 ? "s" : ""} highlighted` : ""}.${matches && !rows.some(r => r.rating) ? " RallyCry's file has no ratings, so type those in (they're kept next import)." : ""}${missing.length ? ` No ${missing.join("/")} column found, so check those.` : ""} It goes live when you publish.`);
+  toast(`Imported ${rows.length} teams${matches ? " and worked out W-L and ratings from the match results" : ""}${us ? `, ${us} Hartland row${us > 1 ? "s" : ""} highlighted` : ""}.${missing.length ? ` No ${missing.join("/")} column found, so check those.` : ""} It goes live when you publish.`);
 });
 
 /* ---------- events ---------- */

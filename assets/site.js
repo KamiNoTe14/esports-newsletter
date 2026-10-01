@@ -63,9 +63,16 @@ function upcoming(issues){
   const t = today(), seen = new Set(), out = [];
   [...issues].sort((a, b) => (b.date || "").localeCompare(a.date || "")).forEach(is => (is.upcoming || []).forEach(m => {
     const d = pd(m.date); const k = `${m.date}|${m.team}|${m.opp}`;
-    if (d && d >= t && !seen.has(k)){ seen.add(k); out.push(m); }
+    if (d && d >= t && !over(m) && !seen.has(k)){ seen.add(k); out.push(m); }
   }));
   return out.sort((a, b) => (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")));
+}
+/* A match from a newsletter's "Coming up" list counts as over 2 hours after its start time (or at the end of its day if no time). */
+function over(m){
+  const d = pd(m.date); if (!d) return false;
+  const tm = /^(\d{1,2}):(\d{2})/.exec(m.time || "");
+  if (tm) d.setHours(+tm[1] + 2, +tm[2], 0, 0); else d.setHours(23, 59, 0, 0);
+  return Date.now() > d.getTime();
 }
 function matchesList(list){
   return `<ul class="matches">${list.map(m => { const d = pd(m.date); return `<li>
@@ -173,7 +180,7 @@ function home(site, issues){
     </a></div></section>` : ""}
 
   <section class="section ${last ? "alt" : ""}"><div class="wrap">${secH("Coming up", `<a class="more" href="${BASE}schedule.html">Full schedule →</a>`)}
-    ${up.length ? matchesList(up) : `<div class="empty">Match times are posted in the weekly report and on our calendar. <a href="${BASE}schedule.html#subscribe">Add the calendar to your phone</a>.</div>`}
+    <div id="upNext" data-limit="5">${up.length ? matchesList(up) : `<div class="empty">Match times are posted in the weekly report and on our calendar. <a href="${BASE}schedule.html#subscribe">Add the calendar to your phone</a>.</div>`}</div>
   </div></section>
 
   <section class="section"><div class="wrap">${secH("Our teams", `<a class="more" href="${BASE}teams.html">Teams & leagues →</a>`)}${teamCards({...site, sections:{...site.sections, rosters:false}})}</div></section>
@@ -191,7 +198,7 @@ function teams(site){
 function schedule(site, issues){
   const c = site.calendar?.on !== false ? calLinks(site) : null, up = upcoming(issues);
   return pageH("Match days & events", "Schedule", "Matches, tryouts and events. Add our calendar to your phone and new dates show up automatically.")
-  + (up.length ? `<section class="section"><div class="wrap">${secH("Next matches")}${matchesList(up.slice(0, 10))}</div></section>` : "")
+  + `<section class="section" id="upSection"${up.length ? "" : " hidden"}><div class="wrap">${secH("Next matches")}<div id="upNext" data-limit="10">${up.length ? matchesList(up.slice(0, 10)) : ""}</div></div></section>`
   + (c ? `<section class="section ${up.length ? "alt" : ""}" id="subscribe"><div class="wrap">${secH("Add our calendar")}
     <div class="grid g3">
       <div class="card sub-card"><h3>Google Calendar</h3><p class="muted" style="margin:0;font-size:15px">Android phones and Gmail accounts.</p><a class="btn btn-gold" href="${c.google}" target="_blank" rel="noopener">Add to Google</a></div>
@@ -287,7 +294,8 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js?v=6").then(L => {
+  if (["home", "schedule", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js?v=7").then(L => {
+    if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));

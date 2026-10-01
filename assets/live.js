@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {seasonOf, seasonLabel, gameFor, oppShort, rivalFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=6";
+import {seasonOf, seasonLabel, gameFor, oppShort, rivalFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=7";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -103,6 +103,34 @@ function card(site, m){
     <span class="sc-row${themWin ? " win" : ""}${usWin ? " lose" : ""}"><span class="sc-nm" title="${esc(m.opponent?.school || oppFull(m))}">${esc(opp(m))}</span>${up ? "" : `<span class="sc-sc">${m.score?.them ?? 0}</span>`}</span>
     <span class="sc-sub">${rv ? `<span class="sc-rival">⚔ ${esc(rv.title || "Rivalry")}</span> · ` : ""}${sub}${ext ? ` <span class="sc-watch">${live ? "▶ Watch" : fin ? "▶ Replay" : ""}</span>` : ""}</span>
   </a>`;
+}
+
+/* ---------- "Coming up" / "Next matches" lists (home, schedule) ----------
+   Matches from the scorekeeper come first and drop off the moment they go final. Newsletter "Coming up" rows fill in
+   anything the scorekeeper doesn't have, unless the scorekeeper already knows that team's match on that day. */
+export function startUpcoming(site, fromIssues){
+  const host = $("#upNext"); if (!host) return;
+  const emptyHTML = host.querySelector(".empty")?.outerHTML || "";
+  const key = n => String(n || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const ymd = iso => { const d = new Date(iso), p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
+  const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  watchBoard(board => {
+    const all = board.matches || [];
+    const known = new Set(all.map(m => ymd(m.startsAt) + "|" + key(m.teamName)));
+    const live = all.filter(m => m.status === "live" || m.status === "upcoming" || m.status === "postponed").map(m => ({
+      t:new Date(m.startsAt).getTime(), day:new Date(m.startsAt), team:m.teamName, opp:oppShort(m) === "Opponent" ? "" : oppShort(m), time:fmtTime(m.startsAt), where:"", league:m.league,
+      live:m.status === "live", postponed:m.status === "postponed", rival:rivalFor(site, m), link:m.status === "live" ? safe(m.stream?.live) : ""}));
+    const rest = (fromIssues || []).filter(x => !known.has(x.date + "|" + key(x.team))).map(x => { const d = new Date(x.date + "T" + (/^\d{1,2}:\d{2}/.test(x.time || "") ? x.time.padStart(5, "0") : "23:59"));
+      const tm = /^(\d{1,2}):(\d{2})/.exec(x.time || ""); let time = ""; if (tm){ let h = +tm[1]; const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; time = `${h}:${tm[2]} ${ap}`; }
+      return {t:d.getTime(), day:d, team:x.team, opp:x.opp, time, where:x.where, league:x.league}; });
+    const list = [...live, ...rest].sort((a, b) => (b.live ? 1 : 0) - (a.live ? 1 : 0) || a.t - b.t).slice(0, +host.dataset.limit || 5);
+    const sec = $("#upSection"); if (sec) sec.hidden = !list.length;
+    host.innerHTML = list.length ? `<ul class="matches">${list.map(m => `<li${m.live ? ' class="is-live"' : ""}>
+      <div class="m-date"><small>${DAYS[m.day.getDay()]}</small><b>${m.day.getMonth() + 1}/${m.day.getDate()}</b></div>
+      <div><div class="m-team">${esc(m.team)}${m.live ? ` <span class="pill-live">Live</span>` : ""}${m.rival ? ` <span class="chip gold rv">⚔ ${esc(m.rival.title || "Rivalry")}</span>` : ""}</div><div class="m-sub">${[m.opp ? "vs. " + esc(m.opp) : "", m.postponed ? "Postponed" : esc(m.time), esc(m.where || "")].filter(Boolean).join(" · ")}${m.link ? ` · <a href="${esc(m.link)}" target="_blank" rel="noopener">▶ Watch live</a>` : ""}</div></div>
+      ${m.league ? `<span class="chip">${esc(m.league)}</span>` : "<span></span>"}
+    </li>`).join("")}</ul>` : emptyHTML;
+  });
 }
 
 /* ---------- results page ---------- */

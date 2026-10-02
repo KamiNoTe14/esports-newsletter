@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-02T14:34:23.029Z",
+  "updated": "2026-10-02T14:43:56.496Z",
   "matches": [
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",
@@ -417,62 +417,82 @@
     },
     {
       "id": "szxVQC5RorpZXtnIfZNo",
-      "gameName": "Rocket League",
-      "stream": {
-        "vod": "",
-        "live": ""
+      "result": "L",
+      "source": {},
+      "startsAt": "2026-03-12T20:00:00.000Z",
+      "bestOf": 5,
+      "notes": "",
+      "score": {
+        "us": 0,
+        "them": 3
       },
+      "status": "final",
+      "term": "spring",
+      "teamName": "Rocket League Varsity",
       "week": "5",
+      "event": "MHSEL Spring 2026",
+      "gameName": "Rocket League",
       "players": [
         {
           "stats": {
+            "saves": 3,
             "shots": 8,
             "goals": 1,
-            "saves": 3,
             "assists": 1
           },
           "id": "p-0b11aaef",
           "private": false,
-          "name": "Tavin Flanagan",
-          "tag": "TRE4TY."
+          "tag": "TRE4TY.",
+          "name": "Tavin Flanagan"
         },
         {
           "id": "p-61bdc66e",
-          "name": "Fred Nikitin",
           "stats": {
-            "shots": 5,
-            "goals": 0,
+            "assists": 1,
             "saves": 2,
-            "assists": 1
+            "goals": 0,
+            "shots": 5
           },
-          "tag": "Stupid Nonsense",
-          "private": false
+          "name": "Fred Nikitin",
+          "private": false,
+          "tag": "Stupid Nonsense"
         },
         {
           "name": "Dylan Reinwand",
-          "id": "p-c0313a9e",
           "tag": "Qyxical",
-          "private": false,
-          "alum": true,
           "stats": {
-            "saves": 4,
             "goals": 2,
             "shots": 15,
+            "saves": 4,
             "assists": 0
-          }
+          },
+          "id": "p-c0313a9e",
+          "private": false,
+          "alum": true
         }
       ],
-      "forfeit": null,
-      "term": "spring",
-      "clinched": "them",
-      "source": {},
-      "result": "L",
-      "stage": "regular",
-      "startsAt": "2026-03-12T20:00:00.000Z",
-      "updatedAt": "2026-10-02T14:19:36.952Z",
-      "bestOf": 5,
       "seriesOnly": false,
-      "status": "final",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "forfeit": null,
+      "clinched": "them",
+      "updatedAt": "2026-10-02T14:19:36.952Z",
+      "league": "MHSEL",
+      "teamId": "t5",
+      "current": 3,
+      "season": "2025-26",
+      "stage": "regular",
+      "game": "rocket-league",
+      "opponent": {
+        "team": "Jenison Wildcats RL",
+        "short": "",
+        "school": "Jenison High School",
+        "logo": "",
+        "abbr": "JEN"
+      },
+      "level": "Varsity",
       "games": [
         {
           "n": 1,
@@ -481,38 +501,18 @@
           "them": 4
         },
         {
-          "winner": "them",
           "us": 3,
           "n": 2,
-          "them": 4
+          "them": 4,
+          "winner": "them"
         },
         {
-          "n": 3,
           "us": 0,
           "winner": "them",
-          "them": 1
+          "them": 1,
+          "n": 3
         }
-      ],
-      "teamName": "Rocket League Varsity",
-      "level": "Varsity",
-      "notes": "",
-      "season": "2025-26",
-      "event": "MHSEL Spring 2026",
-      "opponent": {
-        "school": "Jenison High School",
-        "team": "Jenison Wildcats RL",
-        "short": "",
-        "abbr": "JEN",
-        "logo": ""
-      },
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "league": "MHSEL",
-      "game": "rocket-league",
-      "teamId": "t5",
-      "current": 3
+      ]
     },
     {
       "id": "nSch97HiIy9LTTJyhqVB",
@@ -834,6 +834,79 @@
       "week": "Round of 32",
       "season": "2025-26",
       "term": "spring"
+    },
+    {
+      "id": "RMLw71lk8vk3ed56pCWl",
+      "games": [
+        {
+          "us": 1,
+          "n": 1,
+          "them": 0,
+          "winner": "us"
+        },
+        {
+          "us": 3,
+          "winner": "them",
+          "n": 2,
+          "them": 4
+        },
+        {
+          "winner": "us",
+          "us": 3,
+          "n": 3,
+          "them": 2
+        },
+        {
+          "winner": "us",
+          "n": 4,
+          "them": 1,
+          "us": 2
+        },
+        {
+          "winner": "us",
+          "us": 3,
+          "them": 1,
+          "n": 5
+        }
+      ],
+      "startsAt": "2026-04-15T20:00:00.000Z",
+      "week": "Sweet Sixteen",
+      "notes": "",
+      "score": {
+        "us": 4,
+        "them": 1
+      },
+      "result": "W",
+      "teamName": "Rocket League Varsity",
+      "forfeit": null,
+      "updatedAt": "2026-10-02T14:43:55.057Z",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "status": "final",
+      "seriesOnly": false,
+      "event": "MHSEL Spring 2026",
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "school": "Divine Child High School",
+        "abbr": "DC",
+        "team": "FalconsRL"
+      },
+      "current": 5,
+      "season": "2025-26",
+      "stage": "playoffs",
+      "source": {},
+      "term": "spring",
+      "bestOf": 7,
+      "game": "rocket-league",
+      "league": "MHSEL",
+      "level": "Varsity",
+      "clinched": "us",
+      "teamId": "t5",
+      "gameName": "Rocket League",
+      "players": []
     }
   ]
 }

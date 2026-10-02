@@ -76,7 +76,27 @@ export function gameFor(site, key){
 }
 export function statList(s){
   if (Array.isArray(s)) return s;
-  return String(s || "").split(",").map(x => x.trim()).filter(Boolean).map(label => ({key:slug(label).replace(/-/g, "_"), label}));
+  /* A label ending in % ("Accuracy %") is averaged across games instead of added up. */
+  return String(s || "").split(",").map(x => x.trim()).filter(Boolean).map(label => ({key:slug(label).replace(/-/g, "_"), label, avg:/%\s*$/.test(label)}));
+}
+export const listOf = s => String(s || "").split(",").map(x => x.trim()).filter(Boolean);
+export const fmtStat = (d, v) => v === undefined || v === null || v === "" ? "–" : d.avg ? `${Math.round(+v * 10) / 10}%` : (isNaN(+v) ? String(v) : (+v).toLocaleString("en-US"));
+/* Stats are entered per game (m.games[n].p[playerId] = {elims, role, hero, …}). This rolls them up into each player's match
+   totals so everything that reads player.stats keeps working. Matches with only typed-in totals are left alone. */
+export function rollup(m, g){
+  const defs = g?.statList || [], games = (m.games || []).filter(x => x.p && Object.keys(x.p).length);
+  m.perGame = games.length > 0;
+  if (!m.perGame) return m;
+  (m.players || []).forEach(pl => {
+    const rows = games.filter(x => x.p[pl.id]).map(x => x.p[pl.id]);
+    pl.games = games.filter(x => x.p[pl.id]).map(x => x.n);
+    const st = {};
+    defs.forEach(d => { const vals = rows.map(r => r[d.key]).filter(v => v !== undefined && v !== null && v !== "").map(Number); if (!vals.length) return;
+      const sum = vals.reduce((a, b) => a + b, 0); st[d.key] = d.avg ? Math.round(sum / vals.length * 10) / 10 : sum; });
+    pl.stats = st;
+    const roles = [...new Set(rows.map(r => r.role).filter(Boolean))]; if (roles.length) pl.roles = roles; else delete pl.roles;
+  });
+  return m;
 }
 export function teamLabel(site, team){
   const g = gameFor(site, team?.gameKey);
@@ -123,7 +143,7 @@ export function scoreboardFrom(matches, site){
   const pick = m => ({id:m.id, game:m.game, gameName:m.gameName, teamName:m.teamName, level:m.level, league:m.league,
     opponent:{school:m.opponent?.school || "", team:m.opponent?.team || "", short:m.opponent?.short || "", abbr:m.opponent?.abbr || abbrFor(m.opponent?.school)},
     startsAt:m.startsAt, status:m.status, bestOf:m.bestOf, score:m.score, result:m.result, forfeit:m.forfeit || null,
-    current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, games:(m.games || []).filter(g => g.winner || g.us || g.them), stream:m.stream || {}, teamId:m.teamId || "", season:m.season, week:m.week || "", event:m.event || "", stage:m.stage || "regular"});
+    current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, games:(m.games || []).filter(g => g.winner || g.us || g.them).map(({p, ...g}) => g), stream:m.stream || {}, teamId:m.teamId || "", season:m.season, week:m.week || "", event:m.event || "", stage:m.stage || "regular"});
   const live = matches.filter(m => m.status === "live");
   const up = matches.filter(m => m.status === "upcoming" || m.status === "postponed").sort((a, b) => a.startsAt < b.startsAt ? -1 : 1).slice(0, 10);
   const done = matches.filter(m => m.status === "final").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1).slice(0, 12);

@@ -168,6 +168,15 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .arow .anow{grid-column:1 / 5}
 .adel{min-height:44px;border-radius:10px;border:1px solid var(--line-2);font-size:20px;color:var(--muted)}
 @media (max-width:560px){ .arow{grid-template-columns:1fr 1fr} .arow .anow{grid-column:1 / -1} .arow .adel{justify-self:end;width:44px;grid-column:2} }
+.gtabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 8px;padding-bottom:2px;scrollbar-width:none}
+.gtabs button{flex:none;min-width:58px;min-height:48px;padding:0 14px;border-radius:10px;border:1px solid var(--line-2);background:var(--bg);font:800 17px var(--display);letter-spacing:.06em;color:var(--muted);position:relative}
+.gtabs button[aria-pressed="true"]{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.gtabs button.has::after{content:"";position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.stats select{width:100%;min-height:44px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);padding:0 8px;font:600 15px var(--body)}
+.stats input[type=text]{font:600 15px var(--body)}
+.stotals{display:flex;flex-wrap:wrap;gap:6px 14px;padding:0 12px 12px;font:700 18px var(--display)}
+.stotals small{display:block;font:600 11px var(--body);letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.stotals .none{font:500 14px var(--body);color:var(--muted)} .stotals .in{color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;background:var(--white);color:var(--navy);padding:12px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 28px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 @media (min-width:700px){ .board .num{font-size:110px} }
 </style>
@@ -185,7 +194,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 
 <script type="module">
 import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=10";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=11";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -262,7 +271,7 @@ function route(){
   if (!EDITORS.includes(user.email)) return renderNotAllowed();
   if (h === "new"){ view = "form"; openId = null; draft = newDraft(); return renderForm(); }
   if (h.startsWith("edit/")){ const m = matches.find(x => x.id === h.slice(5)); view = "form"; openId = h.slice(5); draft = m ? clone(m) : null; if (!m){ location.hash = ""; return; } return renderForm(); }
-  if (h.startsWith("m/")){ view = "match"; if (openId !== h.slice(2) || !cur){ openId = h.slice(2); const m = matches.find(x => x.id === openId); cur = m ? clone(m) : null; } return renderMatch(); }
+  if (h.startsWith("m/")){ view = "match"; if (openId !== h.slice(2) || !cur){ statTab = null; openId = h.slice(2); const m = matches.find(x => x.id === openId); cur = m ? clone(m) : null; } return renderMatch(); }
   if (pendingSaves.size) flush();
   view = "list"; openId = null; cur = null; renderList();
 }
@@ -428,7 +437,7 @@ function bindTop(){
 function gameRec(m, n){ m.games = m.games || []; let gm = m.games.find(x => x.n === n); if (!gm){ gm = {n, us:0, them:0, winner:null}; m.games.push(gm); m.games.sort((a, b) => a.n - b.n); } return gm; }
 function change(fn, quiet){
   (undo[cur.id] = undo[cur.id] || []).push(clone(cur)); if (undo[cur.id].length > 40) undo[cur.id].shift();
-  fn(cur); cur.games = (cur.games || []).filter(x => x.winner || x.us || x.them || x.n === cur.current); settle(cur);
+  fn(cur); cur.games = (cur.games || []).filter(x => x.winner || x.us || x.them || x.n === cur.current || (x.p && Object.keys(x.p).length)); rollup(cur, gameFor(site, cur.game)); settle(cur);
   if (!quiet) buzz();
   queueSave(); renderMatch();
 }
@@ -450,6 +459,37 @@ function everyone(){ /* id -> person, for current rosters and past players */
   return map;
 }
 function snap(p, extra){ return {id:p.id, name:p.private ? "" : (p.name || ""), tag:p.tag || "", private:!!p.private, ...(p.alum ? {alum:true} : {}), stats:{}, ...(extra || {})}; }
+/* Stats are typed in per game/map/set; the Total tab adds them up. A match with only typed totals (older entries) stays editable on Total. */
+let statTab = null;
+function tracks(g){ return (g.statList || []).length || listOf(g.roles).length || (g.charLabel || "").trim(); }
+function statTabs(g, unit){
+  if (!tracks(g)) return "";
+  const n = Math.max(+cur.bestOf || 1, ...(cur.games || []).map(x => x.n), 1);
+  if (statTab === null) statTab = (!cur.perGame && (cur.players || []).some(p => p.stats && Object.keys(p.stats).length)) ? "total" : "1";
+  if (statTab !== "total" && +statTab > n) statTab = "total";
+  const has = k => (cur.games || []).some(x => x.n === k && x.p && Object.keys(x.p).length);
+  return `<div class="gtabs" role="tablist" aria-label="Which ${esc(unit.toLowerCase())} the stats are for">
+    <button type="button" data-stab="total" aria-pressed="${statTab === "total"}">Total</button>
+    ${Array.from({length:n}, (_, i) => `<button type="button" data-stab="${i + 1}" aria-pressed="${String(statTab) === String(i + 1)}" class="${has(i + 1) ? "has" : ""}">${esc(unit[0])}${i + 1}</button>`).join("")}</div>
+    <p class="hint" style="margin:0 0 10px">${statTab === "total" ? (cur.perGame ? `Totals are added up from each ${esc(unit.toLowerCase())}. Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to change them.` : `Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to enter stats for each ${esc(unit.toLowerCase())}, or type match totals here if that's all you have.`) : `Stats for ${esc(unit)} ${esc(statTab)}. Leave a player blank if they sat out.`}</p>`;
+}
+function statInputs(g, p, on, unit){
+  const stats = g.statList || [], roles = listOf(g.roles), charLabel = (g.charLabel || "").trim();
+  if (!tracks(g)) return "";
+  if (statTab === "total"){
+    if (cur.perGame){
+      const cells = [...(on.roles?.length ? [`<span><small>Role</small>${esc(on.roles.join(" / "))}</span>`] : []), ...stats.filter(st => on.stats && st.key in on.stats).map(st => `<span><small>${esc(st.label)}</small>${esc(fmtStat(st, on.stats[st.key]))}</span>`)];
+      return `<div class="stotals">${cells.join("") || `<span class="none">Sat out</span>`}${(on.games || []).length ? `<span class="in"><small>Played</small>${on.games.map(n => esc(unit[0]) + n).join(" ")}</span>` : ""}</div>`;
+    }
+    return stats.length ? `<div class="stats">${stats.map(st => `<label>${esc(st.label)}<input type="number" inputmode="decimal" min="0" step="any" data-stat="${esc(st.key)}" data-pid="${esc(p.id)}" value="${esc(on.stats?.[st.key] ?? "")}"></label>`).join("")}</div>` : "";
+  }
+  const n = +statTab, row = ((cur.games || []).find(x => x.n === n)?.p || {})[p.id] || {};
+  return `<div class="stats">
+    ${roles.length ? `<label>Role<select data-gk="role" data-pid="${esc(p.id)}"><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></label>` : ""}
+    ${charLabel ? `<label>${esc(charLabel)}<input type="text" list="charList" autocomplete="off" data-gk="hero" data-pid="${esc(p.id)}" value="${esc(row.hero || "")}"></label>` : ""}
+    ${stats.map(st => `<label>${esc(st.label)}<input type="number" inputmode="decimal" min="0" step="any" data-gk="${esc(st.key)}" data-num="1" data-pid="${esc(p.id)}" value="${esc(row[st.key] ?? "")}"></label>`).join("")}
+  </div>`;
+}
 function detailsHTML(g, them){
   const team = (site.teams || []).find(t => t.id === cur.teamId);
   const roster = (team?.roster || []).filter(p => p.name || p.tag);
@@ -474,12 +514,14 @@ function detailsHTML(g, them){
     </div></details>
     <details class="sec"><summary>Players & stats<span>${count ? `${count} played` : "Who played?"}</span></summary><div class="secb">
       ${prev ? `<button class="btn btn-line btn-block" type="button" id="copyLineup" data-from="${esc(prev.id)}" style="margin-bottom:10px;font-size:16px">Same lineup as ${esc(fmtDay(prev.startsAt))} vs ${esc(oppName(prev))}</button>` : ""}
+      ${statTabs(g, unit)}
       <div class="plist">${people.map(p => { const on = inMatch.find(x => x.id === p.id); return `<div class="prow${on ? " on" : ""}">
         <button type="button" data-player="${esc(p.id)}"><span class="ck">${on ? "✓" : ""}</span><span class="pn"><b>${esc(p.name || p.tag)}</b>${p.name && p.tag ? `<small>${esc(p.tag)}</small>` : ""}${p.alum ? `<small> · alum</small>` : ""}</span></button>
-        ${on && stats.length ? `<div class="stats">${stats.map(st => `<label>${esc(st.label)}<input type="number" inputmode="numeric" min="0" data-stat="${esc(st.key)}" data-pid="${esc(p.id)}" value="${esc(on.stats?.[st.key] ?? "")}"></label>`).join("")}</div>` : ""}</div>`; }).join("") || `<p class="hint" style="margin:0">No roster for this team. Add the players who played below.</p>`}</div>
+        ${on ? statInputs(g, p, on, unit) : ""}</div>`; }).join("") || `<p class="hint" style="margin:0">No roster for this team. Add the players who played below.</p>`}</div>
       ${others.length ? `<label class="f" style="margin-top:12px"><span>Add a player</span><select id="addsub"><option value="">Choose a player…</option>
         ${others.some(p => p.alum) ? `<optgroup label="Past players">${others.filter(p => p.alum).map(opt).join("")}</optgroup>` : ""}
         <optgroup label="Current players${team ? " on other teams" : ""}">${others.filter(p => !p.alum).map(opt).join("")}</optgroup></select></label>` : ""}
+      ${(g.charLabel || "").trim() ? `<datalist id="charList">${listOf(g.chars).map(c => `<option value="${esc(c)}">`).join("")}</datalist>` : ""}
       <details class="newp"><summary>＋ New past player</summary><div class="form" style="margin-top:10px">
         <div class="two"><label class="f"><span>Name</span><input id="np-name" autocomplete="off" placeholder="First Last"></label><label class="f"><span>Gamertag</span><input id="np-tag" autocomplete="off"></label></div>
         <div class="two"><label class="f"><span>Class of (optional)</span><input id="np-year" inputmode="numeric" maxlength="4" placeholder="2025"></label>
@@ -537,9 +579,22 @@ function bindDetails(g){
       if (U + T > (+cur.bestOf || 1) && !confirm(`${U}–${T} is more than a best of ${cur.bestOf}. Save it anyway?`)) return;
       games = [...Array(U).fill("us"), ...Array(T).fill("them")].map((w, i) => ({n:i + 1, us:0, them:0, winner:w})); seriesOnly = true;
     }
-    change(m => { m.games = games; m.seriesOnly = seriesOnly; m.forfeit = null; m.current = games.length; m.status = "final"; });
+    const oldP = Object.fromEntries((cur.games || []).filter(x => x.p).map(x => [x.n, x.p]));
+    games.forEach(x => { if (oldP[x.n]) x.p = oldP[x.n]; });
+    Object.keys(oldP).filter(n => !games.some(x => x.n === +n)).forEach(n => games.push({n:+n, us:0, them:0, winner:null, p:oldP[n]}));
+    change(m => { m.games = games; m.seriesOnly = seriesOnly; m.forfeit = null; m.current = games.filter(x => x.winner).length || 1; m.status = "final"; });
     toast(cur.result === "W" ? "Saved. Eagles win! 🦅" : "Saved as final."); setTimeout(() => archive(false), 1500);
   };
+  D.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { statTab = b.dataset.stab; keep(() => renderMatch()); });
+  D.querySelectorAll("[data-gk]").forEach(inp => { const h = () => {
+    const n = +statTab, gm = gameRec(cur, n); gm.p = gm.p || {}; const row = gm.p[inp.dataset.pid] = gm.p[inp.dataset.pid] || {};
+    const v = inp.value.trim(); if (v === "") delete row[inp.dataset.gk]; else row[inp.dataset.gk] = inp.dataset.num ? +v : v;
+    if (!Object.keys(row).length) delete gm.p[inp.dataset.pid];
+    if (!Object.keys(gm.p).length) delete gm.p;
+    cur.games = cur.games.filter(x => x.winner || x.us || x.them || x.n === cur.current || (x.p && Object.keys(x.p).length));
+    rollup(cur, g); queueSave();
+    const tb = D.querySelector(`[data-stab="${n}"]`); if (tb) tb.classList.toggle("has", !!gm.p);
+  }; inp.oninput = h; inp.onchange = h; });
   D.querySelectorAll("[data-stat]").forEach(inp => inp.oninput = () => {
     const p = (cur.players || []).find(x => x.id === inp.dataset.pid); if (!p) return;
     p.stats = p.stats || {}; if (inp.value === "") delete p.stats[inp.dataset.stat]; else p.stats[inp.dataset.stat] = +inp.value; queueSave();
@@ -552,7 +607,7 @@ function bindDetails(g){
 /* ---------- saving ---------- */
 function queueSave(){
   if (!cur) return;
-  dirtyIds.add(cur.id); pendingSaves.set(cur.id, settle(clone(cur))); onState({pending:true});
+  dirtyIds.add(cur.id); pendingSaves.set(cur.id, settle(rollup(clone(cur), gameFor(site, cur.game)))); onState({pending:true});
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flush, 350);
 }

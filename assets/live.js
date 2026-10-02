@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=10";
+import {seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=11";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -212,9 +212,9 @@ function resultRow(site, m){
 }
 
 function boxScore(g, m){
-  const ps = m.players || [], cols = (g.statList || []).filter(c => ps.some(p => p.stats && c.key in p.stats));
-  if (!ps.length || !cols.length) return "";
-  return `<div class="tbl-wrap box"><table class="tbl"><thead><tr><th>Player</th>${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(p.stats[c.key]) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const ps = m.players || [], cols = (g.statList || []).filter(c => ps.some(p => p.stats && c.key in p.stats)), roles = ps.some(p => (p.roles || []).length);
+  if (!ps.length || (!cols.length && !roles)) return "";
+  return `<div class="tbl-wrap box${cols.length > 4 ? " wide" : ""}"><table class="tbl"><thead><tr><th>Player</th>${roles ? "<th>Role</th>" : ""}${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${roles ? `<td class="muted">${esc((p.roles || []).join(" / "))}</td>` : ""}${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(fmtStat(c, p.stats[c.key])) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
 /* ---------- "Eagles at the next level" (About page): alumni who are playing somewhere now ---------- */
@@ -257,9 +257,19 @@ function drawPlayer(site, host, all, dir){
   document.title = `${display} · Hartland Esports`;
   const teams = entries.map(e => e.team);
   const byGame = {};
-  played.forEach(m => { const k = m.game || "other", s = byGame[k] = byGame[k] || {game:gameFor(site, m.game), n:0, w:0, l:0, tot:{}};
+  played.forEach(m => { const k = m.game || "other", s = byGame[k] = byGame[k] || {game:gameFor(site, m.game), n:0, w:0, l:0, tot:{}, cnt:{}, avg:{}, roles:{}, chars:{}};
     s.n++; if (m.result === "W") s.w++; else if (m.result === "L") s.l++;
-    const st = (m.players.find(p => p.id === id) || {}).stats || {}; Object.entries(st).forEach(([k2, v]) => s.tot[k2] = (s.tot[k2] || 0) + (+v || 0)); });
+    const mine = m.players.find(p => p.id === id) || {}, st = mine.stats || {};
+    const rows = (m.games || []).map(x => x.p?.[id]).filter(Boolean);
+    (s.game.statList || []).forEach(d => {
+      if (d.avg){ const vals = rows.length ? rows.map(r => r[d.key]).filter(v => v !== undefined && v !== "") : (d.key in st ? [st[d.key]] : []); vals.forEach(v => (s.avg[d.key] = s.avg[d.key] || []).push(+v)); }
+      else if (d.key in st){ s.tot[d.key] = (s.tot[d.key] || 0) + (+st[d.key] || 0); s.cnt[d.key] = (s.cnt[d.key] || 0) + 1; }
+    });
+    (rows.length ? rows.map(r => r.role) : (mine.roles || [])).filter(Boolean).forEach(r => s.roles[r] = (s.roles[r] || 0) + 1);
+    rows.map(r => r.hero).filter(Boolean).forEach(c => s.chars[c] = (s.chars[c] || 0) + 1); });
+  /* Only a player's three most-used characters are shown, in alphabetical order, so the page never says how often each is played. */
+  const top3 = o => Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3).map(x => x[0]).sort((a, b) => a.localeCompare(b));
+  const mainRoles = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(x => x[0]);
   const W = played.filter(m => m.result === "W").length, L = played.filter(m => m.result === "L").length;
   host.innerHTML = `<section class="page-h player-h"><div class="wrap player-top">
       ${prof.photo ? `<img class="player-photo" src="${esc(/^https?:/.test(prof.photo) ? prof.photo : BASE + prof.photo)}" alt="">` : `<div class="player-photo ph">${esc((display || "?")[0])}</div>`}
@@ -278,10 +288,11 @@ function drawPlayer(site, host, all, dir){
     <section class="section ${prof.bio || prof.highlights ? "alt" : ""}"><div class="wrap">
       <h2 class="res-h">Stats</h2>
       ${Object.keys(byGame).length ? `<div class="grid g2">${Object.values(byGame).map(s => `<div class="card stat-card"><p class="eyebrow">${esc(s.game.name)}</p>
-        <div class="stat-row"><div><b>${s.n}</b><small>Matches</small></div><div><b>${s.w}–${s.l}</b><small>Record</small></div>${(s.game.statList || []).filter(x => x.key in s.tot).map(x => `<div><b>${s.tot[x.key]}</b><small>${esc(x.label)}<br>${(s.tot[x.key] / s.n).toFixed(1)}/match</small></div>`).join("")}</div></div>`).join("")}</div>`
+        <div class="stat-row"><div><b>${s.n}</b><small>Matches</small></div><div><b>${s.w}–${s.l}</b><small>Record</small></div>${(s.game.statList || []).filter(x => x.avg ? (s.avg[x.key] || []).length : x.key in s.tot).map(x => x.avg ? `<div><b>${(s.avg[x.key].reduce((a, b) => a + b, 0) / s.avg[x.key].length).toFixed(1)}%</b><small>${esc(x.label.replace(/\s*%\s*$/, ""))}<br>average</small></div>` : `<div><b>${s.tot[x.key].toLocaleString("en-US")}</b><small>${esc(x.label)}<br>${(s.tot[x.key] / (s.cnt[x.key] || s.n)).toLocaleString("en-US", {maximumFractionDigits:1})}/match</small></div>`).join("")}</div>
+        ${mainRoles(s.roles).length || top3(s.chars).length ? `<div class="stat-tags">${mainRoles(s.roles).length ? `<p><span>Role</span>${mainRoles(s.roles).map(esc).join(" · ")}</p>` : ""}${top3(s.chars).length ? `<p><span>${esc((s.game.charLabel || "Character").trim())}es</span>${top3(s.chars).map(esc).join(" · ")}</p>`.replace("Characteres", "Characters") : ""}</div>` : ""}</div>`).join("")}</div>`
         : `<div class="empty">Stats show up here after ${esc(display)} plays a match.</div>`}
       ${played.length ? `<h2 class="res-h" style="margin-top:34px">Match log</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Team</th><th>Opponent</th><th class="n">Result</th><th>Stats</th></tr></thead><tbody>${played.map(m => { const st = (m.players.find(p => p.id === id) || {}).stats || {}, g = gameFor(site, m.game);
         const yr = new Date(m.startsAt).getFullYear();
-        return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
+        return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => x.avg ? `${fmtStat(x, st[x.key])} ${esc(x.label.replace(/\s*%\s*$/, ""))}` : `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
     </div></section>`;
 }

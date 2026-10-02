@@ -56,7 +56,7 @@ function footer(site){
   </div></footer>`;
 }
 function secH(title, more){ return `<div class="sec-h"><h2>${title}</h2>${more || ""}</div>`; }
-function pageH(eyebrow, title, lead){ return `<section class="page-h"><div class="wrap"><p class="eyebrow">${eyebrow}</p><h1 style="font-size:clamp(40px,6vw,68px)">${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}</div></section>`; }
+function pageH(eyebrow, title, lead, art){ return `<section class="page-h${art ? " has-art" : ""}"><div class="wrap">${art ? `<img class="page-art" src="${esc(url(art))}" alt="">` : ""}<p class="eyebrow">${eyebrow}</p><h1 style="font-size:clamp(40px,6vw,68px)">${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}</div></section>`; }
 
 function latestIssue(issues){ return [...issues].sort((a, b) => (b.date || "").localeCompare(a.date || "") || (+b.week) - (+a.week))[0]; }
 function upcoming(issues){
@@ -194,7 +194,7 @@ function home(site, issues){
 }
 function teams(site){
   const d = new Date(), y = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1;
-  return pageH(`${y}–${String((y + 1) % 100).padStart(2, "0")} season`, "Teams & leagues", esc(site.program?.teamsIntro || ""))
+  return pageH(`${y}–${String((y + 1) % 100).padStart(2, "0")} season`, "Teams & leagues", esc(site.program?.teamsIntro || ""), site.art?.teams)
   + `<section class="section"><div class="wrap">${teamCards(site)}${safe(site.links?.league) ? `<p style="margin:20px 0 0"><a href="${esc(safe(site.links.league))}" target="_blank" rel="noopener">MHSEL on RallyCry →</a></p>` : ""}</div></section>`
   + standingsHTML(site) + bracketsHTML(site);
 }
@@ -241,11 +241,12 @@ function media(site){
 }
 function about(site){
   const P = site.program || {}, T = site.tryouts || {}, L = site.links || {};
+  const joinArt = site.art?.join ? `<img class="join-art" src="${esc(url(site.art.join))}" alt="">` : "";
   const support = [["merch","Team merch","Shirts, hoodies and more from Big Frog of Brighton."],["jerseys","Official jerseys","Custom Hartland Esports jerseys from Guardian Proline."],["fundraiser", L.fundraiserLabel || "Fundraiser","Proceeds cover league fees and new equipment."]].filter(([k]) => safe(L[k]));
   return pageH(esc(P.school || "Hartland High School"), "About & join", esc(P.aboutText || ""))
   + `<section class="section" id="join"><div class="wrap">${secH("Join the team")}
     <div class="grid g2">
-      ${T.on !== false ? `<div class="card"><p class="eyebrow">${esc(T.title || "Tryouts")}</p><h3 style="font-size:30px;margin:8px 0">${esc(longDate(T.date))}</h3><p style="margin:0 0 6px"><b>${esc(T.time || "")}</b></p><p class="muted" style="margin:0 0 12px">${esc(T.location || "")}</p><p style="margin:0">${esc(T.text || "")}</p>${safe(L.register) ? `<p style="margin:16px 0 0"><a class="btn btn-gold" href="${esc(safe(L.register))}" target="_blank" rel="noopener">Register for esports</a></p>` : ""}</div>` : (safe(L.register) ? `<div class="card"><p class="eyebrow">Sign up</p><h3 style="font-size:30px;margin:8px 0">Register for esports</h3><p class="muted" style="margin:0 0 14px">Fill out the registration form to join the program.</p><a class="btn btn-gold" href="${esc(safe(L.register))}" target="_blank" rel="noopener">Open the registration form</a></div>` : "")}
+      ${T.on !== false ? `<div class="card join-card${joinArt ? " has-art" : ""}">${joinArt}<p class="eyebrow">${esc(T.title || "Tryouts")}</p><h3 style="font-size:30px;margin:8px 0">${esc(longDate(T.date))}</h3><p style="margin:0 0 6px"><b>${esc(T.time || "")}</b></p><p class="muted" style="margin:0 0 12px">${esc(T.location || "")}</p><p style="margin:0">${esc(T.text || "")}</p>${safe(L.register) ? `<p style="margin:16px 0 0"><a class="btn btn-gold" href="${esc(safe(L.register))}" target="_blank" rel="noopener">Register for esports</a></p>` : ""}</div>` : (safe(L.register) ? `<div class="card join-card${joinArt ? " has-art" : ""}">${joinArt}<p class="eyebrow">Sign up</p><h3 style="font-size:30px;margin:8px 0">Register for esports</h3><p class="muted" style="margin:0 0 14px">Fill out the registration form to join the program.</p><a class="btn btn-gold" href="${esc(safe(L.register))}" target="_blank" rel="noopener">Open the registration form</a></div>` : "")}
       <div class="card"><p class="eyebrow">Questions?</p><h3 style="font-size:30px;margin:8px 0">Talk to the coaches</h3>
         <ul class="roster" style="border:0;padding:0">${(site.coaches || []).map(c => `<li><span><b>Coach ${esc(c.name)}</b>${c.role && c.role !== "Coach" ? ` · ${esc(c.role)}` : ""}</span>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ""}</li>`).join("")}</ul>
         ${P.lab ? `<p class="muted" style="margin:12px 0 0;font-size:15px">We practice in the ${esc(P.lab)}.</p>` : ""}
@@ -298,7 +299,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=14").then(L => {
+  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=15").then(L => {
     if (PAGE === "about") L.startNextLevel(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);

@@ -374,3 +374,10 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .team.has-art h3{padding-right:96px}
 .stat-card{position:relative;overflow:hidden}
 .stat-card .team-art{height:84px}
+.page-h.has-art .wrap{position:relative}
+.page-art{position:absolute;right:0;bottom:-58px;width:min(330px,30vw);pointer-events:none;filter:drop-shadow(0 14px 18px rgba(0,0,0,.5))}
+.page-h.has-art .lead{max-width:min(640px,62%)}
+.join-card{position:relative;overflow:hidden}
+.join-art{position:absolute;right:12px;bottom:10px;width:210px;max-width:46%;pointer-events:none;filter:drop-shadow(0 8px 12px rgba(0,0,0,.45))}
+.join-card.has-art{padding-bottom:110px}
+@media (max-width:700px){.page-art{display:none}.page-h.has-art .lead{max-width:none}}

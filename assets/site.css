@@ -389,3 +389,6 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .main-cap{position:absolute;inset:auto 0 0 0;padding:26px 8px 8px;background:linear-gradient(180deg,transparent,rgba(4,10,20,.94) 62%);text-align:center}
 .main-cap b{display:block;font:700 13px/1.15 var(--body);letter-spacing:.04em;text-transform:uppercase}
 .main-sig{height:22px;width:auto;max-width:80%;margin:0 auto 4px;object-fit:contain}
+.main-chips{display:flex;flex-wrap:wrap;gap:8px}
+.main-chips span{display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;border:1px solid var(--line-2);border-radius:999px;background:var(--bg);font-weight:700;font-size:14px}
+.main-chips img{width:32px;height:32px}

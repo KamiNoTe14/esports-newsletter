@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-02T14:29:48.753Z",
+  "updated": "2026-10-02T14:30:37.067Z",
   "matches": [
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",
@@ -627,64 +627,102 @@
     },
     {
       "id": "sglia5wq9tWSPpscnRn1",
-      "games": [
-        {
-          "n": 1,
-          "them": 1,
-          "us": 10,
-          "winner": "us"
-        },
-        {
-          "them": 1,
-          "winner": "us",
-          "us": 6,
-          "n": 2
-        },
-        {
-          "winner": "us",
-          "them": 0,
-          "n": 3,
-          "us": 6
-        }
-      ],
-      "level": "Varsity",
-      "game": "rocket-league",
-      "stage": "regular",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "status": "final",
-      "opponent": {
-        "school": "Marquette Senior High School",
-        "team": "Marquette Sentinels RL",
-        "abbr": "MAR",
-        "logo": "",
-        "short": ""
-      },
-      "bestOf": 5,
-      "current": 3,
-      "source": {},
-      "result": "W",
-      "seriesOnly": false,
       "startsAt": "2026-03-26T20:00:00.000Z",
-      "forfeit": null,
-      "players": [],
       "teamName": "Rocket League Varsity",
-      "season": "2025-26",
-      "event": "MHSEL Spring 2026",
-      "week": "7",
+      "league": "MHSEL",
+      "teamId": "t5",
+      "game": "rocket-league",
+      "notes": "",
       "gameName": "Rocket League",
-      "updatedAt": "2026-10-02T14:29:47.220Z",
-      "term": "spring",
+      "clinched": "us",
+      "event": "MHSEL Spring 2026",
+      "seriesOnly": false,
+      "season": "2025-26",
       "score": {
         "us": 3,
         "them": 0
       },
-      "notes": "",
-      "clinched": "us",
-      "teamId": "t5",
-      "league": "MHSEL"
+      "current": 3,
+      "status": "final",
+      "forfeit": null,
+      "term": "spring",
+      "stage": "regular",
+      "week": "7",
+      "players": [
+        {
+          "id": "p-0b11aaef",
+          "stats": {
+            "assists": 3,
+            "shots": 9,
+            "goals": 6,
+            "saves": 1
+          },
+          "tag": "TRE4TY.",
+          "private": false,
+          "name": "Tavin Flanagan"
+        },
+        {
+          "tag": "Stupid Nonsense",
+          "private": false,
+          "id": "p-61bdc66e",
+          "name": "Fred Nikitin",
+          "stats": {
+            "goals": 5,
+            "shots": 11,
+            "assists": 3,
+            "saves": 0
+          }
+        },
+        {
+          "alum": true,
+          "private": false,
+          "stats": {
+            "goals": 11,
+            "shots": 20,
+            "assists": 3,
+            "saves": 11
+          },
+          "id": "p-c0313a9e",
+          "tag": "Qyxical",
+          "name": "Dylan Reinwand"
+        }
+      ],
+      "result": "W",
+      "level": "Varsity",
+      "source": {},
+      "games": [
+        {
+          "winner": "us",
+          "us": 10,
+          "n": 1,
+          "them": 1
+        },
+        {
+          "n": 2,
+          "us": 6,
+          "them": 1,
+          "winner": "us"
+        },
+        {
+          "winner": "us",
+          "us": 6,
+          "them": 0,
+          "n": 3
+        }
+      ],
+      "bestOf": 5,
+      "opponent": {
+        "school": "Marquette Senior High School",
+        "logo": "",
+        "abbr": "MAR",
+        "short": "",
+        "team": "Marquette Sentinels RL"
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "updatedAt": "2026-10-02T14:30:35.572Z"
     }
   ]
 }

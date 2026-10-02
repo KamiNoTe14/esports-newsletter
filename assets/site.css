@@ -381,3 +381,11 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .join-art{position:absolute;right:12px;bottom:10px;width:210px;max-width:46%;pointer-events:none;filter:drop-shadow(0 8px 12px rgba(0,0,0,.45))}
 .join-card.has-art{padding-bottom:110px}
 @media (max-width:700px){.page-art{display:none}.page-h.has-art .lead{max-width:none}}
+.mains-h{margin:14px 0 8px;font:700 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mains{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.main{position:relative;aspect-ratio:3/4;border-radius:10px;overflow:hidden;border:1px solid var(--line-2);background:radial-gradient(120% 90% at 50% 0%,#1B4A7A 0%,#00274C 55%,#07111F 100%)}
+.main-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0}
+.main-logo{position:absolute;top:8px;left:8px;width:26px;height:26px;object-fit:contain;opacity:.92}
+.main-cap{position:absolute;inset:auto 0 0 0;padding:26px 8px 8px;background:linear-gradient(180deg,transparent,rgba(4,10,20,.94) 62%);text-align:center}
+.main-cap b{display:block;font:700 13px/1.15 var(--body);letter-spacing:.04em;text-transform:uppercase}
+.main-sig{height:22px;width:auto;max-width:80%;margin:0 auto 4px;object-fit:contain}

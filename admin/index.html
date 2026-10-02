@@ -164,7 +164,7 @@ const TABS = [
 ];
 const LISTS = {
   teams:{title:"Team", add:"Add team", intro:"Each team card on the Teams and Home pages. Separate multiple leagues with commas.", name:i => `${i.game || "Game"} · ${i.name || "Team"}`,
-    fields:[["game","Game (as shown on the site)"],["name","Team name"],["gameKey","Game type (for scores)","select",() => [["", "—"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["level","Level","select",["Varsity","JV"]],["leagues","Leagues"],["note","Note (optional)"]],
+    fields:[["game","Game (as shown on the site)"],["name","Team name"],["gameKey","Game type (for scores)","select",() => [["", "—"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["level","Level","select",["Varsity","JV"]],["leagues","Leagues"],["note","Note (optional)"],["art","Card artwork for this team (optional; overrides the game's)","image"]],
     sub:{key:"roster", title:"Roster", add:"Add player", fields:[["name","Name"],["tag","Gamertag"],["role","Role (optional)"],["captain","Captain","check"],["private","Gamertag only","check"]]}},
   standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Download the standings from RallyCry as CSV or JSON and click \"Import RallyCry file\", or type the rows in by hand. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
     fields:[["title","Title","text","MHSEL Smash Varsity · Division 2"],["updated","Updated","date"],["link","Link to full standings","url"],["on","Show this table","check"]],

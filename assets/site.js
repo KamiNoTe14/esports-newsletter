@@ -88,7 +88,7 @@ function issueCard(is){
     ${is.record && (is.record.w + is.record.l) ? `<div class="rec">${is.record.w}–${is.record.l}</div>` : "<span></span>"}
   </a>`;
 }
-function gameArt(site, t){ return ((site.games || []).find(g => g.key === t.gameKey) || {}).art || ""; }
+function gameArt(site, t){ return t.art || ((site.games || []).find(g => g.key === t.gameKey) || {}).art || ""; }
 function gameIcon(site, t){ return ((site.games || []).find(g => g.key === t.gameKey) || {}).icon || ""; }
 function teamCards(site){
   const showRoster = on(site, "rosters");

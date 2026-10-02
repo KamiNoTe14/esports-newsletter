@@ -360,3 +360,13 @@ details.res.post.rival{border-left-color:var(--gold)}
 .stat-tags{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:6px}
 .stat-tags p{margin:0;font-weight:600}
 .stat-tags span{display:inline-block;min-width:64px;margin-right:10px;font:700 11.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* game logos */
+.game-logo{height:34px;width:auto;max-width:70%;object-fit:contain;object-position:left center;display:block;margin:0 0 10px}
+.stat-card .game-logo{height:30px;margin-bottom:4px}
+.gbadge.has-img{width:74px;padding:6px 7px;background:#00274C}
+.gbadge.has-img img{width:60px;height:32px;object-fit:contain}
+details.res>summary{grid-template-columns:54px auto 1fr auto}
+.sc-game.has-img{background:none;padding:0;height:20px;min-width:0;overflow:visible}
+.sc-game.has-img img{height:20px;width:auto;max-width:86px;object-fit:contain;object-position:left center;display:block}
+@media (max-width:640px){ details.res>summary{grid-template-columns:44px 1fr auto} }

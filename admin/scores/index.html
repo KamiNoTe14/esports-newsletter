@@ -55,6 +55,7 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .mrow.live{border-color:var(--live);box-shadow:0 0 0 1px var(--live) inset}
 .gbadge{width:52px;height:52px;border-radius:12px;background:var(--navy);border:1px solid var(--line-2);display:grid;place-items:center;font:800 15px/1 var(--display);letter-spacing:.04em;color:var(--gold);overflow:hidden}
 .gbadge img{width:100%;height:100%;object-fit:cover}
+.gbadge.has-img{padding:5px;background:var(--navy)} .gbadge.has-img img{width:42px;height:42px;object-fit:contain}
 .mrow b{display:block;font:700 19px/1.1 var(--display);letter-spacing:.02em}
 .mrow .rv{display:inline-block;margin-top:3px;font:700 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(255,188,5,.5);border-radius:4px;padding:3px 6px}
 .mrow .rv.ps{color:var(--navy);background:#fff;border-color:#fff}
@@ -302,7 +303,7 @@ function renderNotAllowed(){
 /* ---------- list ---------- */
 function gameBadge(m){
   const g = gameFor(site, m.game);
-  return `<span class="gbadge">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : SITE + g.icon)}" alt="">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
+  return `<span class="gbadge${g.icon ? " has-img" : ""}">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : SITE + g.icon)}" alt="">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
 }
 function oppName(m){ return oppShort(m); }
 function rowHTML(m){

@@ -67,7 +67,7 @@ const opp = m => oppShort(m);
 const oppFull = m => m.opponent?.team || m.opponent?.school || "TBD";
 function badge(site, m, cls = "gbadge"){
   const g = gameFor(site, m.game);
-  return `<span class="${cls}" title="${esc(g.name || m.gameName || "")}">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : BASE + g.icon)}" alt="">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
+  return `<span class="${cls}${g.icon ? " has-img" : ""}" title="${esc(g.name || m.gameName || "")}">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : BASE + g.icon)}" alt="${esc(g.short || g.name || "")}">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
 }
 function watchLink(m){ return safe(m.status === "final" ? (m.stream?.vod || m.stream?.live) : m.stream?.live); }
 function playerName(p){ const r = PEOPLE.get(p.id); if (r) return r.private || !r.name ? (r.tag || p.tag || "Player") : r.name; return p.private || !p.name ? (p.tag || "Player") : p.name; }
@@ -287,7 +287,7 @@ function drawPlayer(site, host, all, dir){
     </div></section>` : ""}
     <section class="section ${prof.bio || prof.highlights ? "alt" : ""}"><div class="wrap">
       <h2 class="res-h">Stats</h2>
-      ${Object.keys(byGame).length ? `<div class="grid g2">${Object.values(byGame).map(s => `<div class="card stat-card"><p class="eyebrow">${esc(s.game.name)}</p>
+      ${Object.keys(byGame).length ? `<div class="grid g2">${Object.values(byGame).map(s => `<div class="card stat-card">${s.game.icon ? `<img class="game-logo" src="${esc(/^https?:/.test(s.game.icon) ? s.game.icon : BASE + s.game.icon)}" alt="${esc(s.game.name)}">` : `<p class="eyebrow">${esc(s.game.name)}</p>`}
         <div class="stat-row"><div><b>${s.n}</b><small>Matches</small></div><div><b>${s.w}–${s.l}</b><small>Record</small></div>${(s.game.statList || []).filter(x => x.avg ? (s.avg[x.key] || []).length : x.key in s.tot).map(x => x.avg ? `<div><b>${(s.avg[x.key].reduce((a, b) => a + b, 0) / s.avg[x.key].length).toFixed(1)}%</b><small>${esc(x.label.replace(/\s*%\s*$/, ""))}<br>average</small></div>` : `<div><b>${s.tot[x.key].toLocaleString("en-US")}</b><small>${esc(x.label)}<br>${(s.tot[x.key] / (s.cnt[x.key] || s.n)).toLocaleString("en-US", {maximumFractionDigits:1})}/match</small></div>`).join("")}</div>
         ${mainRoles(s.roles).length || top3(s.chars).length ? `<div class="stat-tags">${mainRoles(s.roles).length ? `<p><span>Role</span>${mainRoles(s.roles).map(esc).join(" · ")}</p>` : ""}${top3(s.chars).length ? `<p><span>${esc((s.game.charLabel || "Character").trim())}es</span>${top3(s.chars).map(esc).join(" · ")}</p>`.replace("Characteres", "Characters") : ""}</div>` : ""}</div>`).join("")}</div>`
         : `<div class="empty">Stats show up here after ${esc(display)} plays a match.</div>`}

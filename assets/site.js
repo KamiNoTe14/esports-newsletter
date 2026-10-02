@@ -88,13 +88,14 @@ function issueCard(is){
     ${is.record && (is.record.w + is.record.l) ? `<div class="rec">${is.record.w}–${is.record.l}</div>` : "<span></span>"}
   </a>`;
 }
+function gameIcon(site, t){ return ((site.games || []).find(g => g.key === t.gameKey) || {}).icon || ""; }
 function teamCards(site){
   const showRoster = on(site, "rosters");
   return `<div class="grid g3">${(site.teams || []).map(t => {
     const lg = String(t.leagues || "").split(",").map(s => s.trim()).filter(Boolean);
     const roster = (t.roster || []).filter(p => p.name || p.tag);
     return `<article class="card team">
-      <p class="game">${esc(t.game)}</p>
+      ${gameIcon(site, t) ? `<img class="game-logo" src="${esc(url(gameIcon(site, t)))}" alt="${esc(t.game)}">` : `<p class="game">${esc(t.game)}</p>`}
       <h3>${esc(t.name)}</h3>
       ${t.note ? `<p class="muted" style="margin:0;font-size:15px">${esc(t.note)}</p>` : ""}
       <div class="chips">${lg.map((l, i) => `<span class="chip${i ? " gold" : ""}">${esc(l)}</span>`).join("")}</div>
@@ -295,7 +296,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=12").then(L => {
+  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=13").then(L => {
     if (PAGE === "about") L.startNextLevel(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);

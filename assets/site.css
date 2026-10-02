@@ -370,3 +370,7 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .sc-game.has-img{background:none;padding:0;height:20px;min-width:0;overflow:visible}
 .sc-game.has-img img{height:20px;width:auto;max-width:86px;object-fit:contain;object-position:left center;display:block}
 @media (max-width:640px){ details.res>summary{grid-template-columns:44px 1fr auto} }
+.team-art{position:absolute;top:10px;right:10px;height:104px;width:auto;max-width:none;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
+.team.has-art h3{padding-right:96px}
+.stat-card{position:relative;overflow:hidden}
+.stat-card .team-art{height:84px}

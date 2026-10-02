@@ -295,7 +295,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=10").then(L => {
+  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=11").then(L => {
     if (PAGE === "about") L.startNextLevel(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);

@@ -51,6 +51,12 @@ export function rivalFor(site, m){
   const k = key(m?.opponent?.school || ""); if (!k) return null;
   return (site?.rivals || []).find(r => r.school && key(r.school) === k) || null;
 }
+/* Playoff and finals matches get a tag: "Playoffs", or the round if one was typed ("Round of 32", "State Final"). */
+export function postseason(m){
+  if (m?.stage !== "playoffs" && m?.stage !== "finals") return null;
+  const w = String(m.week ?? "").trim(), round = w && !/^\d+$/.test(w) ? w : "";
+  return {finals:m.stage === "finals", label:round || (m.stage === "finals" ? "Finals" : "Playoffs")};
+}
 /* "3" -> "Week 3"; "Round of 32" or "Quarterfinal" stay as typed. Playoff and finals matches also say so. */
 export function roundLabel(m, short){
   const w = String(m?.week ?? "").trim(), stage = {playoffs:"Playoffs", finals:"Finals", exhibition:"Exhibition", scrim:"Scrimmage"}[m?.stage] || "";
@@ -117,7 +123,7 @@ export function scoreboardFrom(matches, site){
   const pick = m => ({id:m.id, game:m.game, gameName:m.gameName, teamName:m.teamName, level:m.level, league:m.league,
     opponent:{school:m.opponent?.school || "", team:m.opponent?.team || "", short:m.opponent?.short || "", abbr:m.opponent?.abbr || abbrFor(m.opponent?.school)},
     startsAt:m.startsAt, status:m.status, bestOf:m.bestOf, score:m.score, result:m.result, forfeit:m.forfeit || null,
-    current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, games:(m.games || []).filter(g => g.winner || g.us || g.them), stream:m.stream || {}, teamId:m.teamId || "", season:m.season, week:m.week || "", event:m.event || ""});
+    current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, games:(m.games || []).filter(g => g.winner || g.us || g.them), stream:m.stream || {}, teamId:m.teamId || "", season:m.season, week:m.week || "", event:m.event || "", stage:m.stage || "regular"});
   const live = matches.filter(m => m.status === "live");
   const up = matches.filter(m => m.status === "upcoming" || m.status === "postponed").sort((a, b) => a.startsAt < b.startsAt ? -1 : 1).slice(0, 10);
   const done = matches.filter(m => m.status === "final").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1).slice(0, 12);

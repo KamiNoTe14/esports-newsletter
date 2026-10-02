@@ -345,3 +345,14 @@ details.res.rival{border-left:4px solid var(--gold)}
 .next-card .tag{margin:0;color:var(--muted);font:14px ui-monospace,Consolas,Menlo,monospace}
 .next-card .now{margin:10px 0 0;font-weight:600;color:var(--gold)}
 details.res>summary:focus-visible{outline-offset:-3px;border-radius:var(--r)}
+
+/* playoff and finals matches */
+.chip.post{background:#fff;color:#00274C;border-color:#fff;font-size:11px;padding:2px 7px;vertical-align:3px;margin-left:6px;white-space:nowrap;display:inline-block}
+.chip.post.finals{background:var(--gold);border-color:var(--gold)}
+details.res.post{background:linear-gradient(90deg,rgba(255,255,255,.07),var(--surface) 45%);border-color:rgba(255,255,255,.35)}
+details.res.post.rival{border-left-color:var(--gold)}
+.sc.post{border-color:rgba(255,255,255,.7)}
+.sc.post.rival{border-color:rgba(255,188,5,.9)}
+.sc-post{color:#fff;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:11px}
+.res-split{display:block;margin-top:6px;font:600 12.5px/1.5 var(--body);color:var(--muted)}
+.tbl .chip.post{vertical-align:1px}

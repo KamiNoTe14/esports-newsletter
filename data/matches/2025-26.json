@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-02T14:46:01.843Z",
+  "updated": "2026-10-02T14:46:54.217Z",
   "matches": [
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",
@@ -948,27 +948,85 @@
     },
     {
       "id": "pR5tShC3b4AV2lc7Jy8r",
-      "gameName": "Rocket League",
-      "league": "MHSEL",
-      "clinched": "them",
-      "players": [],
-      "stage": "playoffs",
-      "teamId": "t5",
-      "updatedAt": "2026-10-02T14:46:00.339Z",
-      "season": "2025-26",
       "level": "Varsity",
+      "teamName": "Rocket League Varsity",
+      "result": "L",
+      "startsAt": "2026-04-17T20:00:00.000Z",
+      "players": [
+        {
+          "private": false,
+          "name": "Tavin Flanagan",
+          "tag": "TRE4TY.",
+          "stats": {
+            "shots": 8,
+            "assists": 4,
+            "saves": 4,
+            "goals": 2
+          },
+          "id": "p-0b11aaef"
+        },
+        {
+          "stats": {
+            "assists": 0,
+            "saves": 5,
+            "shots": 1,
+            "goals": 0
+          },
+          "tag": "Stupid Nonsense",
+          "private": false,
+          "id": "p-61bdc66e",
+          "name": "Fred Nikitin"
+        },
+        {
+          "alum": true,
+          "stats": {
+            "saves": 4,
+            "shots": 15,
+            "assists": 1,
+            "goals": 6
+          },
+          "tag": "Qyxical",
+          "private": false,
+          "name": "Dylan Reinwand",
+          "id": "p-c0313a9e"
+        }
+      ],
+      "updatedAt": "2026-10-02T14:46:52.731Z",
+      "opponent": {
+        "team": "DCC Varsity",
+        "abbr": "DCC",
+        "logo": "",
+        "school": "Detroit Catholic Central",
+        "short": ""
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "status": "final",
+      "week": "Elite Eight",
+      "current": 4,
+      "stage": "playoffs",
+      "event": "MHSEL Spring 2026",
+      "season": "2025-26",
       "source": {},
       "bestOf": 7,
-      "current": 4,
-      "term": "spring",
       "game": "rocket-league",
-      "status": "final",
+      "seriesOnly": false,
+      "forfeit": null,
+      "score": {
+        "us": 0,
+        "them": 4
+      },
+      "term": "spring",
+      "notes": "",
+      "league": "MHSEL",
       "games": [
         {
-          "them": 3,
-          "n": 1,
           "winner": "them",
-          "us": 1
+          "them": 3,
+          "us": 1,
+          "n": 1
         },
         {
           "n": 2,
@@ -977,41 +1035,21 @@
           "them": 4
         },
         {
+          "them": 5,
           "us": 4,
-          "winner": "them",
           "n": 3,
-          "them": 5
+          "winner": "them"
         },
         {
-          "us": 0,
-          "winner": "them",
           "n": 4,
-          "them": 3
+          "them": 3,
+          "us": 0,
+          "winner": "them"
         }
       ],
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "notes": "",
-      "score": {
-        "us": 0,
-        "them": 4
-      },
-      "opponent": {
-        "abbr": "DCC",
-        "school": "Detroit Catholic Central",
-        "logo": "",
-        "short": "",
-        "team": "DCC Varsity"
-      },
-      "forfeit": null,
-      "week": "Elite Eight",
-      "event": "MHSEL Spring 2026",
-      "result": "L",
-      "teamName": "Rocket League Varsity",
-      "seriesOnly": false,
-      "startsAt": "2026-04-17T20:00:00.000Z"
+      "gameName": "Rocket League",
+      "teamId": "t5",
+      "clinched": "them"
     }
   ]
 }

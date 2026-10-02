@@ -171,7 +171,7 @@ function home(site, issues){
       <p class="lead">${esc(P.heroText || "")}</p>
       <div class="btns">${safe(L.youtube) ? `<a class="btn btn-gold" href="${esc(safe(L.youtube))}" target="_blank" rel="noopener">Watch on YouTube</a>` : ""}${P.promo !== false ? `<button class="btn btn-line" type="button" id="promoBtn">▶ Watch our promo</button>` : ""}<a class="btn btn-line" href="${BASE}about.html#join">Join the team</a></div>
     </div>
-    <img class="hero-logo" src="${BASE}assets/logo-team.png" alt="Hartland Eagles Esports logo" width="600" height="420">
+    <img class="hero-logo" src="${BASE}assets/logo-team.png?v=2" alt="Hartland Eagles Esports logo" width="1100" height="770">
   </div></section>
 
   ${last ? `<section class="section"><div class="wrap">${secH("Latest report", `<a class="more" href="${BASE}newsletters.html">All newsletters →</a>`)}

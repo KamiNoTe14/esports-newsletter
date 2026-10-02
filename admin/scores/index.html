@@ -148,6 +148,24 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hint{font-size:13px;color:var(--muted);margin:-6px 2px 0}
 .formbar{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 2fr;gap:10px;padding:12px 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,var(--bg) 30%)}
+.seasonbar{display:flex;align-items:center;gap:10px;margin:2px 0 4px}
+.seasonbar span{font:700 13px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.seasonbar select{flex:1;min-height:48px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);padding:0 12px;font:700 19px var(--display);letter-spacing:.03em}
+.seasonbar b{font:800 22px var(--display);color:var(--gold);min-width:44px;text-align:right}
+.qgrid{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:34px 1fr 16px 1fr;gap:8px;align-items:center}
+.qrow span{font:800 16px var(--display);color:var(--muted)} .qrow i{font-style:normal;color:var(--muted);text-align:center}
+.qrow input,.arow input:not([type=checkbox]){width:100%;min-height:48px;border-radius:10px;border:1px solid var(--line-2);background:var(--bg);padding:0 12px;font-size:17px}
+.qrow input{font:700 20px var(--display);text-align:center}
+.newp{margin-top:12px;border:1px dashed var(--line-2);border-radius:12px;padding:12px}
+.newp>summary{cursor:pointer;font:700 16px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold);list-style:none}
+.newp>summary::-webkit-details-marker{display:none}
+.tog{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);min-height:44px}
+.tog input{width:22px;height:22px;accent-color:var(--gold)}
+.alist{display:grid;gap:8px;margin-bottom:12px}
+.arow{display:grid;grid-template-columns:1.4fr 1fr 70px auto 40px;gap:6px;align-items:center}
+.adel{min-height:44px;border-radius:10px;border:1px solid var(--line-2);font-size:20px;color:var(--muted)}
+@media (max-width:560px){ .arow{grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);padding-bottom:8px} .arow .adel{justify-self:end;width:44px} }
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;background:var(--white);color:var(--navy);padding:12px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 28px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 @media (min-width:700px){ .board .num{font-size:110px} }
 </style>
@@ -164,8 +182,8 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 <div id="toast" class="toast" hidden role="status"></div>
 
 <script type="module">
-import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, seasonOf, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=7";
+import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, seasonOf, seasonList, termOf, seasonLabel,
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=8";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -174,7 +192,9 @@ const buzz = () => { try { navigator.vibrate && navigator.vibrate(12); } catch(e
 const SITE = new URL("../../", location.href).href;
 function toast(m, ms = 3200){ const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
 
-let site = {teams:[], games:[]}, be = null, user = null, season = seasonOf(), matches = [], unwatch = null;
+const NOW = seasonOf();  // the current season; "season" below is the one being viewed
+let site = {teams:[], games:[]}, be = null, user = null, season = NOW, matches = [], unwatch = null;
+let dir = {alumni:[], seasons:[]}, lastEntry = null;
 let view = "list", openId = null, cur = null, draft = null, undo = {}, saveTimer = null, saving = false, dirtyIds = new Set();
 const pendingSaves = new Map(); // match id -> latest local copy not yet written
 
@@ -187,18 +207,32 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
   be.onUser(u => {
     user = u; renderWho();
     if (unwatch){ unwatch(); unwatch = null; }
-    if (u && EDITORS.includes(u.email)) unwatch = be.watchSeason(season, onMatches, onState);
+    if (u && EDITORS.includes(u.email)){ unwatch = be.watchSeason(season, onMatches, onState);
+      be.watchDirectory(d => { dir = {alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : []}; if (view === "list") renderList(); }); }
     route();
   });
   window.addEventListener("hashchange", route);
 })();
 
 /* Finished matches also live in one "season" summary the public pages read. Rewrite it whenever a final match is touched. */
-let finalIds = new Set(), summariesSynced = false;
+let finalIds = new Set(); const synced = new Set();
+/* The homepage scoreboard only ever holds the current season, so it's left alone while a past season is open. */
+const sb = all => season === NOW ? scoreboardFrom(all.filter(m => m.season === NOW), site) : null;
 function seasonSum(all, id, nowFinal){ return nowFinal || finalIds.has(id) ? seasonDocFrom(all, season) : null; }
+function noteSeason(se){ if (!dir.seasons.includes(se)){ dir.seasons = [...dir.seasons, se].sort().reverse(); be.saveDirectory(dir).catch(e => console.error(e)); } }
+function setSeason(se){
+  if (se === season) return;
+  if (pendingSaves.size) flush();
+  season = se; matches = []; finalIds = new Set();
+  if (unwatch) unwatch();
+  unwatch = be.watchSeason(season, onMatches, onState);
+}
 function onMatches(list, meta){
   finalIds = new Set(list.filter(m => m.status === "final").map(m => m.id));
-  if (!summariesSynced && meta && !meta.fromCache && !pendingSaves.size && user && EDITORS.includes(user.email)){ summariesSynced = true; const all = list.map(m => settle({...m})); be.syncSummaries(scoreboardFrom(all, site), seasonDocFrom(all, season)).catch(e => { summariesSynced = false; console.error(e); }); }
+  if (!synced.has(season) && meta && !meta.fromCache && !pendingSaves.size && user && EDITORS.includes(user.email)){
+    const se = season, all = list.map(m => settle({...m})); synced.add(se);
+    be.syncSummaries(sb(all), seasonDocFrom(all, se)).then(() => { if (finalIds.size) noteSeason(se); }).catch(e => { synced.delete(se); console.error(e); });
+  }
   matches = list.map(m => settle(pendingSaves.get(m.id) || m));
   if (cur && !dirtyIds.has(cur.id)){ const fresh = matches.find(m => m.id === cur.id); if (fresh) cur = clone(fresh); }
   if (view === "list") renderList();
@@ -224,11 +258,21 @@ function route(){
   const h = location.hash.slice(1);
   if (!user) return renderSignIn();
   if (!EDITORS.includes(user.email)) return renderNotAllowed();
-  if (h === "new"){ view = "form"; openId = null; draft = blankMatch(site, (site.teams || [])[0]); return renderForm(); }
+  if (h === "new"){ view = "form"; openId = null; draft = newDraft(); return renderForm(); }
   if (h.startsWith("edit/")){ const m = matches.find(x => x.id === h.slice(5)); view = "form"; openId = h.slice(5); draft = m ? clone(m) : null; if (!m){ location.hash = ""; return; } return renderForm(); }
   if (h.startsWith("m/")){ view = "match"; if (openId !== h.slice(2) || !cur){ openId = h.slice(2); const m = matches.find(x => x.id === openId); cur = m ? clone(m) : null; } return renderMatch(); }
   if (pendingSaves.size) flush();
   view = "list"; openId = null; cur = null; renderList();
+}
+
+/* A new match starts from the last one you entered (same team, league and date), which makes entering a past season quick. */
+function newDraft(){
+  const L = lastEntry && seasonOf(lastEntry.startsAt) === season ? lastEntry : null;
+  let when; if (L) when = L.startsAt; else if (season !== NOW){ const d = new Date(+season.slice(0, 4), 9, 1, 15, 30); when = d.toISOString(); }
+  const team = (site.teams || []).find(t => t.id === (L ? L.teamId : "")) || (L ? null : (site.teams || [])[0]);
+  const d = blankMatch(site, team, when);
+  if (L){ d.league = L.league; d.stage = L.stage; d.bestOf = L.bestOf; if (!L.teamId){ d._past = true; d.teamId = ""; d.teamName = L.teamName; d.game = L.game; d.level = L.level; d.gameName = gameFor(site, L.game).name; } }
+  return d;
 }
 
 /* ---------- sign in ---------- */
@@ -265,14 +309,42 @@ function renderList(){
   const live = by(["live"]), up = by(["upcoming", "postponed"]).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1), done = by(["final", "canceled"]).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
   const sec = (title, list, empty) => `<h2>${title}</h2>${list.length ? `<div class="mlist">${list.map(rowHTML).join("")}</div>` : `<div class="card empty">${empty}</div>`}`;
   const gh = ghCfg();
-  $("#app").innerHTML = (live.length ? sec("Live now", live, "") : "")
-    + sec("Upcoming", up, "No upcoming matches. Tap <b>New match</b> to add one.")
-    + sec(`Final · ${esc(seasonLabel(season))}`, done, "No finished matches yet this season.")
+  const rec = `${done.filter(m => m.result === "W").length}–${done.filter(m => m.result === "L").length}`;
+  const openAl = $("#alumniBox")?.open;
+  $("#app").innerHTML = `<label class="seasonbar"><span>Season</span><select id="seasonSel">${seasonList(dir.seasons).map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}${se === NOW ? " (current)" : dir.seasons.includes(se) ? " ✓" : ""}</option>`).join("")}</select><b>${done.length ? rec : ""}</b></label>`
+    + (live.length ? sec("Live now", live, "") : "")
+    + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
+    + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
+    + alumniHTML(openAl)
     + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div>
     <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
+  $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };
+  bindAlumni();
   $("#app").querySelectorAll("[data-open]").forEach(b => b.onclick = () => location.hash = "m/" + b.dataset.open);
   $("#backup") && ($("#backup").onclick = () => archive(true));
+}
+
+/* Past players (alumni). Kept in the score database so both coaches see the same list. */
+function alumniHTML(open){
+  const list = (dir.alumni || []).slice().sort((a, b) => (a.name || a.tag || "").localeCompare(b.name || b.tag || ""));
+  return `<details class="sec" id="alumniBox"${open ? " open" : ""}><summary>Past players<span>${list.length || "None yet"}</span></summary><div class="secb">
+    <p class="hint" style="margin:0 0 10px">Graduates and anyone no longer on a roster. Add them here or right from a match's Players section.</p>
+    <div class="alist">${list.map(p => `<div class="arow" data-aid="${esc(p.id)}">
+      <input data-a="name" value="${esc(p.name || "")}" placeholder="Name" aria-label="Name"><input data-a="tag" value="${esc(p.tag || "")}" placeholder="Gamertag" aria-label="Gamertag">
+      <input data-a="gradYear" value="${esc(p.gradYear || "")}" placeholder="Class" inputmode="numeric" maxlength="4" aria-label="Graduation year">
+      <label class="tog"><input type="checkbox" data-a="private"${p.private ? " checked" : ""}> Tag only</label>
+      <button type="button" class="adel" aria-label="Remove ${esc(p.name || p.tag)}">×</button></div>`).join("")}</div>
+    <div class="tools"><button class="btn btn-line" type="button" id="al-add">+ Add past player</button><button class="btn btn-gold" type="button" id="al-save">Save list</button></div>
+  </div></details>`;
+}
+function bindAlumni(){
+  const box = $("#alumniBox"); if (!box) return;
+  const read = () => [...box.querySelectorAll(".arow")].map(r => ({id:r.dataset.aid, name:r.querySelector("[data-a=name]").value.trim(), tag:r.querySelector("[data-a=tag]").value.trim(), gradYear:r.querySelector("[data-a=gradYear]").value.trim(), private:r.querySelector("[data-a=private]").checked})).filter(p => p.name || p.tag);
+  const save = async list => { dir.alumni = list; try { await be.saveDirectory(dir); toast("Past players saved."); } catch(e){ toast("Couldn't save. Check the connection."); } };
+  $("#al-add").onclick = () => { dir.alumni = [...read(), {id:"p-" + Math.random().toString(16).slice(2, 10), name:" ", tag:"", gradYear:"", private:false}]; renderList(); $("#alumniBox").open = true; const rows = document.querySelectorAll(".arow"); const blank = [...rows].find(r => !r.querySelector("[data-a=name]").value.trim()); if (blank){ blank.querySelector("[data-a=name]").value = ""; blank.querySelector("[data-a=name]").focus(); } };
+  $("#al-save").onclick = () => save(read());
+  box.querySelectorAll(".adel").forEach(b => b.onclick = () => { const row = b.closest(".arow"); if (!confirm("Remove this person from the past players list? Their old match results keep their name.")) return; row.remove(); save(read()); });
 }
 
 /* ---------- match (live scoring) ---------- */
@@ -322,6 +394,7 @@ function renderMatch(fromSnapshot){
   bindTop(); bindDetails(g);
 }
 function chips(g, them){
+  if (cur.seriesOnly) return `<p class="hint" style="margin:12px 0 0">Only the series score was entered for this match.</p>`;
   const list = (cur.games || []).slice().sort((a, b) => a.n - b.n);
   const n = cur.current || 1;
   const all = list.some(x => x.n === n) ? list : [...list, {n, us:0, them:0, winner:null}];
@@ -334,6 +407,7 @@ function bindTop(){
   $("#undo").onclick = () => { const st = undo[cur.id] || []; if (!st.length) return; cur = st.pop(); settle(cur); buzz(); queueSave(); renderMatch(); };
   $("#scoreTop").querySelectorAll("[data-status]").forEach(b => b.onclick = () => setStatus(b.dataset.status));
   $("#scoreTop").querySelectorAll("[data-pt]").forEach(b => b.onclick = () => change(m => {
+    if (m.seriesOnly){ m.seriesOnly = false; m.games = []; m.current = 1; }
     const gm = gameRec(m, m.current || 1); gm[b.dataset.pt] = Math.max(0, (gm[b.dataset.pt] || 0) + (+b.dataset.d));
     if (m.status === "upcoming") m.status = "live";
   }));
@@ -366,21 +440,49 @@ function setStatus(s){
 }
 
 /* players, stats, links */
+function everyone(){ /* id -> person, for current rosters and past players */
+  const map = new Map();
+  (site.teams || []).forEach(t => (t.roster || []).forEach(p => { if (p.name || p.tag) map.set(p.id || p.name, {id:p.id || p.name, name:p.name || "", tag:p.tag || "", private:!!p.private}); }));
+  (dir.alumni || []).forEach(p => { if (!map.has(p.id)) map.set(p.id, {id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
+  return map;
+}
+function snap(p, extra){ return {id:p.id, name:p.private ? "" : (p.name || ""), tag:p.tag || "", private:!!p.private, ...(p.alum ? {alum:true} : {}), stats:{}, ...(extra || {})}; }
 function detailsHTML(g, them){
   const team = (site.teams || []).find(t => t.id === cur.teamId);
   const roster = (team?.roster || []).filter(p => p.name || p.tag);
-  const inMatch = cur.players || [];
-  const extra = inMatch.filter(p => !roster.some(r => r.id === p.id));
+  const inMatch = cur.players || [], all = everyone();
+  const extra = inMatch.filter(p => !roster.some(r => (r.id || r.name) === p.id)).map(p => ({...p, name:p.name || (all.get(p.id)?.private ? "" : all.get(p.id)?.name) || "", alum:p.alum || all.get(p.id)?.alum}));
   const people = [...roster.map(r => ({id:r.id || r.name, name:r.name, tag:r.tag, private:!!r.private})), ...extra];
   const count = inMatch.length;
   const stats = g.statList || [];
-  const otherPlayers = (site.teams || []).filter(t => t.id !== cur.teamId).flatMap(t => t.roster || []).filter(p => (p.name || p.tag) && !people.some(x => x.id === (p.id || p.name)));
-  const uniq = [...new Map(otherPlayers.map(p => [p.id || p.name, p])).values()];
-  return `<details class="sec"${count ? "" : ""}><summary>Players & stats<span>${count ? `${count} played` : "Who played?"}</span></summary><div class="secb">
+  const others = [...all.values()].filter(p => !people.some(x => x.id === p.id)).sort((a, b) => (a.name || a.tag).localeCompare(b.name || b.tag));
+  const opt = p => `<option value="${esc(p.id)}">${esc(p.name || p.tag)}${p.name && p.tag ? ` (${esc(p.tag)})` : ""}${p.gradYear ? ` · '${esc(String(p.gradYear).slice(-2))}` : ""}</option>`;
+  const prev = !count && matches.filter(m => m.id !== cur.id && m.teamName === cur.teamName && (m.players || []).length).sort((a, b) => Math.abs(new Date(a.startsAt) - new Date(cur.startsAt)) - Math.abs(new Date(b.startsAt) - new Date(cur.startsAt)))[0];
+  const unit = g.unit || "Game", old = new Date(cur.startsAt) < Date.now() - 6 * 36e5;
+  const rows = Array.from({length:+cur.bestOf || 1}, (_, i) => (cur.seriesOnly ? null : (cur.games || []).find(x => x.n === i + 1)) || {n:i + 1});
+  return `<details class="sec" id="quick"${old && cur.status !== "final" ? " open" : ""}><summary>Type in the score<span>for a match that's already been played</span></summary><div class="secb form">
+      <div class="two">
+        <label class="f"><span>Hartland ${esc(unit.toLowerCase())}s won</span><input id="q-us" type="number" inputmode="numeric" min="0" max="${cur.bestOf}" value="${cur.status === "final" || cur.score.us || cur.score.them ? cur.score.us : ""}"></label>
+        <label class="f"><span>${esc(them)} ${esc(unit.toLowerCase())}s won</span><input id="q-them" type="number" inputmode="numeric" min="0" max="${cur.bestOf}" value="${cur.status === "final" || cur.score.us || cur.score.them ? cur.score.them : ""}"></label>
+      </div>
+      ${g.points ? `<p class="hint" style="margin:0">Know the ${esc(g.points.toLowerCase())} for each ${esc(unit.toLowerCase())}? Fill them in and the boxes above are worked out for you. Otherwise leave these blank.</p>
+      <div class="qgrid">${rows.map(r => `<div class="qrow"><span>${esc(unit[0])}${r.n}</span><input type="number" inputmode="numeric" min="0" data-q="us" data-n="${r.n}" value="${r.us ?? ""}" aria-label="Hartland ${esc(g.points)} in ${esc(unit)} ${r.n}"><i>–</i><input type="number" inputmode="numeric" min="0" data-q="them" data-n="${r.n}" value="${r.them ?? ""}" aria-label="${esc(them)} ${esc(g.points)} in ${esc(unit)} ${r.n}"></div>`).join("")}</div>` : ""}
+      <button class="btn btn-gold btn-block" type="button" id="q-save">Save as final</button>
+    </div></details>
+    <details class="sec"><summary>Players & stats<span>${count ? `${count} played` : "Who played?"}</span></summary><div class="secb">
+      ${prev ? `<button class="btn btn-line btn-block" type="button" id="copyLineup" data-from="${esc(prev.id)}" style="margin-bottom:10px;font-size:16px">Same lineup as ${esc(fmtDay(prev.startsAt))} vs ${esc(oppName(prev))}</button>` : ""}
       <div class="plist">${people.map(p => { const on = inMatch.find(x => x.id === p.id); return `<div class="prow${on ? " on" : ""}">
-        <button type="button" data-player="${esc(p.id)}"><span class="ck">${on ? "✓" : ""}</span><span class="pn"><b>${esc(p.name || p.tag)}</b>${p.name && p.tag ? `<small>${esc(p.tag)}</small>` : ""}</span></button>
-        ${on && stats.length ? `<div class="stats">${stats.map(s => `<label>${esc(s.label)}<input type="number" inputmode="numeric" min="0" data-stat="${esc(s.key)}" data-pid="${esc(p.id)}" value="${esc(on.stats?.[s.key] ?? "")}"></label>`).join("")}</div>` : ""}</div>`; }).join("")}</div>
-      ${uniq.length ? `<label class="f" style="margin-top:12px"><span>Add a sub from another team</span><select id="addsub"><option value="">Choose a player…</option>${uniq.map(p => `<option value="${esc(p.id || p.name)}">${esc(p.name || p.tag)}${p.name && p.tag ? ` (${esc(p.tag)})` : ""}</option>`).join("")}</select></label>` : ""}
+        <button type="button" data-player="${esc(p.id)}"><span class="ck">${on ? "✓" : ""}</span><span class="pn"><b>${esc(p.name || p.tag)}</b>${p.name && p.tag ? `<small>${esc(p.tag)}</small>` : ""}${p.alum ? `<small> · alum</small>` : ""}</span></button>
+        ${on && stats.length ? `<div class="stats">${stats.map(st => `<label>${esc(st.label)}<input type="number" inputmode="numeric" min="0" data-stat="${esc(st.key)}" data-pid="${esc(p.id)}" value="${esc(on.stats?.[st.key] ?? "")}"></label>`).join("")}</div>` : ""}</div>`; }).join("") || `<p class="hint" style="margin:0">No roster for this team. Add the players who played below.</p>`}</div>
+      ${others.length ? `<label class="f" style="margin-top:12px"><span>Add a player</span><select id="addsub"><option value="">Choose a player…</option>
+        ${others.some(p => p.alum) ? `<optgroup label="Past players">${others.filter(p => p.alum).map(opt).join("")}</optgroup>` : ""}
+        <optgroup label="Current players${team ? " on other teams" : ""}">${others.filter(p => !p.alum).map(opt).join("")}</optgroup></select></label>` : ""}
+      <details class="newp"><summary>＋ New past player</summary><div class="form" style="margin-top:10px">
+        <div class="two"><label class="f"><span>Name</span><input id="np-name" autocomplete="off" placeholder="First Last"></label><label class="f"><span>Gamertag</span><input id="np-tag" autocomplete="off"></label></div>
+        <div class="two"><label class="f"><span>Class of (optional)</span><input id="np-year" inputmode="numeric" maxlength="4" placeholder="2025"></label>
+          <label class="tog"><input id="np-priv" type="checkbox"> Gamertag only on the website</label></div>
+        <button class="btn btn-line btn-block" type="button" id="np-add">Add to this match</button>
+        <p class="hint" style="margin:0">Saved to your past players list, so you only type each person once.</p></div></details>
       ${stats.length ? "" : `<p class="hint" style="margin-top:10px">To track stats for this game, list them on the Games tab in the Site Manager.</p>`}
     </div></details>
     <details class="sec"><summary>Stream links<span>${cur.stream?.live || cur.stream?.vod ? "Added" : "None yet"}</span></summary><div class="secb form">
@@ -393,17 +495,47 @@ function detailsHTML(g, them){
 }
 function bindDetails(g){
   const D = $("#details");
+  const keep = fn => { const o = [...D.querySelectorAll("details")].map(d => d.open); fn(); $("#details").querySelectorAll("details").forEach((d, i) => { if (o[i]) d.open = true; }); };
+  const addPlayer = (p, extra) => keep(() => change(m => { m.players = m.players || []; if (!m.players.some(x => x.id === p.id)) m.players.push(snap(p, extra)); }, true));
   D.querySelectorAll("[data-player]").forEach(b => b.onclick = () => {
-    const id = b.dataset.player, all = (site.teams || []).flatMap(t => t.roster || []);
-    const r = all.find(p => (p.id || p.name) === id) || (cur.players || []).find(p => p.id === id) || {};
-    const keepOpen = [...D.querySelectorAll("details")].map(d => d.open);
-    change(m => { m.players = m.players || []; const i = m.players.findIndex(p => p.id === id);
-      if (i >= 0) m.players.splice(i, 1); else m.players.push({id, name:r.private ? "" : (r.name || ""), tag:r.tag || "", private:!!r.private, stats:{}}); }, true);
-    $("#details").querySelectorAll("details").forEach((d, i) => d.open = keepOpen[i]);
+    const id = b.dataset.player, r = everyone().get(id) || (cur.players || []).find(p => p.id === id) || {id};
+    keep(() => change(m => { m.players = m.players || []; const i = m.players.findIndex(p => p.id === id); if (i >= 0) m.players.splice(i, 1); else m.players.push(snap(r)); }, true));
   });
-  const sub = $("#addsub"); if (sub) sub.onchange = () => { if (!sub.value) return; const id = sub.value; const r = (site.teams || []).flatMap(t => t.roster || []).find(p => (p.id || p.name) === id) || {};
-    change(m => { m.players = m.players || []; if (!m.players.some(p => p.id === id)) m.players.push({id, name:r.private ? "" : (r.name || ""), tag:r.tag || "", private:!!r.private, stats:{}, sub:true}); }, true);
-    $("#details").querySelector("details").open = true; };
+  const sub = $("#addsub"); if (sub) sub.onchange = () => { if (!sub.value) return; const p = everyone().get(sub.value); if (!p) return;
+    const onRosterTeam = (site.teams || []).some(t => t.id === cur.teamId); addPlayer(p, !p.alum && onRosterTeam ? {sub:true} : null); };
+  const cp = $("#copyLineup"); if (cp) cp.onclick = () => { const from = matches.find(m => m.id === cp.dataset.from); if (!from) return;
+    keep(() => change(m => { m.players = (from.players || []).map(p => ({...p, stats:{}})); }, true)); };
+  $("#np-add").onclick = async () => {
+    const name = $("#np-name").value.trim(), tag = $("#np-tag").value.trim(), year = $("#np-year").value.trim(), priv = $("#np-priv").checked;
+    if (!name && !tag){ toast("Type a name or a gamertag."); return; }
+    if (priv && !tag){ toast("A gamertag-only player needs a gamertag."); return; }
+    const k = (name || tag).toLowerCase();
+    let p = [...everyone().values()].find(x => (x.name || x.tag).toLowerCase() === k);
+    if (!p){
+      p = {id:"p-" + Math.random().toString(16).slice(2, 10), name, tag, gradYear:year, private:priv};
+      dir.alumni = [...(dir.alumni || []), p];
+      try { await be.saveDirectory(dir); } catch(e){ toast("Couldn't save the new player. Check the connection."); return; }
+      p = {...p, alum:true};
+    } else toast(`${p.name || p.tag} is already on your list, so I used that entry.`);
+    addPlayer(p);
+  };
+  $("#q-save").onclick = () => {
+    const num = v => v === "" ? null : Math.max(0, parseInt(v, 10) || 0);
+    const rows = [...D.querySelectorAll(".qrow")].map(r => ({n:+r.querySelector("[data-q=us]").dataset.n, us:num(r.querySelector("[data-q=us]").value), them:num(r.querySelector("[data-q=them]").value)})).filter(r => r.us !== null && r.them !== null);
+    let games, seriesOnly = false;
+    if (rows.length){
+      if (rows.some(r => r.us === r.them)){ toast("One of those is tied. Each one needs a winner."); return; }
+      games = rows.map((r, i) => ({n:i + 1, us:r.us, them:r.them, winner:r.us > r.them ? "us" : "them"}));
+    } else {
+      const U = num($("#q-us").value), T = num($("#q-them").value);
+      if (U === null || T === null){ toast("Type how many each side won."); return; }
+      if (U + T === 0){ toast("Both can't be zero. For a forfeit, use Forfeit or fix below."); return; }
+      if (U + T > (+cur.bestOf || 1) && !confirm(`${U}–${T} is more than a best of ${cur.bestOf}. Save it anyway?`)) return;
+      games = [...Array(U).fill("us"), ...Array(T).fill("them")].map((w, i) => ({n:i + 1, us:0, them:0, winner:w})); seriesOnly = true;
+    }
+    change(m => { m.games = games; m.seriesOnly = seriesOnly; m.forfeit = null; m.current = games.length; m.status = "final"; });
+    toast(cur.result === "W" ? "Saved. Eagles win! 🦅" : "Saved as final."); setTimeout(() => archive(false), 1500);
+  };
   D.querySelectorAll("[data-stat]").forEach(inp => inp.oninput = () => {
     const p = (cur.players || []).find(x => x.id === inp.dataset.pid); if (!p) return;
     p.stats = p.stats || {}; if (inp.value === "") delete p.stats[inp.dataset.stat]; else p.stats[inp.dataset.stat] = +inp.value; queueSave();
@@ -426,7 +558,7 @@ async function flush(){
     pendingSaves.delete(id);
     matches = matches.filter(x => x.id !== id).concat([m]);
     saving = true;
-    try { await be.save(m, scoreboardFrom(matches, site), user?.email, seasonSum(matches, id, m.status === "final")); if (m.status === "final") finalIds.add(id); if (!pendingSaves.has(id)) dirtyIds.delete(id); }
+    try { await be.save(m, sb(matches), user?.email, seasonSum(matches, id, m.status === "final")); if (m.status === "final"){ finalIds.add(id); noteSeason(season); } if (!pendingSaves.has(id)) dirtyIds.delete(id); }
     catch(e){ console.error(e); if (!pendingSaves.has(id)) pendingSaves.set(id, m);
       toast(/permission/i.test(e.code || e.message || "") ? "This account isn't allowed to change scores." : "Couldn't save. Check the connection; it'll retry on the next tap."); }
     saving = false;
@@ -443,12 +575,18 @@ function renderForm(){
   const known = site.teamSchools || {};
   const schools = [...new Set([...Object.values(known), ...matches.map(m => m.opponent?.school).filter(Boolean)])].sort();
   const oppTeams = [...new Set([...Object.keys(known), ...matches.map(m => m.opponent?.team).filter(Boolean)])].sort();
-  const team = teams.find(t => t.id === draft.teamId) || {};
+  const past = !!draft._past || (!!openId && !draft.teamId) || (!teams.some(t => t.id === draft.teamId) && !!draft.teamName && !!openId);
+  const team = past ? {} : (teams.find(t => t.id === draft.teamId) || {});
   const leagues = [...new Set([...String(team.leagues || "").split(",").map(s => s.trim()).filter(Boolean), ...LEAGUES, draft.league].filter(Boolean))];
   const isNew = !openId;
   $("#app").innerHTML = `<div class="mhead"><button class="back" type="button" id="cancel1" aria-label="Back">←</button><div class="t"><b>${isNew ? "New match" : "Edit match"}</b><span>${esc(seasonLabel(draft.season))} season</span></div></div>
     <form class="form" id="mf" autocomplete="off">
-      <label class="f"><span>Our team</span><select name="teamId" required>${teams.map(t => `<option value="${esc(t.id)}"${t.id === draft.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select></label>
+      <label class="f"><span>Our team</span><select name="teamId" required>${teams.map(t => `<option value="${esc(t.id)}"${!past && t.id === draft.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}<option value="__past"${past ? " selected" : ""}>A past team (not on this list)…</option></select></label>
+      ${past ? `<label class="f"><span>Past team name</span><input name="pastName" list="pastTeams" value="${esc(draft.teamName || "")}" placeholder="Valorant Varsity" required></label>
+      <div class="two"><label class="f"><span>Game</span><select name="pastGame">${(site.games || []).map(g => `<option value="${esc(g.key)}"${g.key === draft.game ? " selected" : ""}>${esc(g.name)}</option>`).join("")}<option value=""${draft.game ? "" : " selected"}>Another game</option></select></label>
+        <label class="f"><span>Level</span><select name="pastLevel">${["Varsity", "JV"].map(l => `<option${l === draft.level ? " selected" : ""}>${l}</option>`).join("")}</select></label></div>
+      <p class="hint">For a game we no longer play, add it on the Games tab in the Site Manager first so it scores correctly.</p>
+      <datalist id="pastTeams">${[...new Set(matches.filter(m => !m.teamId).map(m => m.teamName).filter(Boolean))].map(n => `<option value="${esc(n)}">`).join("")}</datalist>` : ""}
       ${team.id && !team.gameKey ? `<p class="hint" style="color:var(--gold)">This team has no game type yet. Set it on the Teams tab in the Site Manager so scoring works right.</p>` : ""}
       <label class="f"><span>Opponent team name</span><input name="oppTeam" list="oppTeams" value="${esc(draft.opponent?.team || "")}" placeholder="Denby Tars"></label>
       <label class="f"><span>Opponent school</span><input name="oppSchool" list="schools" value="${esc(draft.opponent?.school || "")}" placeholder="Denby High School"></label>
@@ -476,29 +614,35 @@ function renderForm(){
   const F = $("#mf");
   const cancel = () => location.hash = openId ? "m/" + openId : "";
   $("#cancel1").onclick = cancel; $("#cancel2").onclick = cancel;
-  F.teamId.onchange = () => { const t = teams.find(x => x.id === F.teamId.value); const keep = {opponent:readOpp(F), startsAt:readWhen(F) || draft.startsAt, stream:{live:F.live.value.trim(), vod:draft.stream?.vod || ""}, notes:F.notes.value, week:F.week.value};
-    const nb = blankMatch(site, t, keep.startsAt); draft = {...draft, ...nb, ...keep, status:draft.status, games:draft.games, players:isNew ? [] : draft.players}; renderForm(); };
+  F.teamId.onchange = () => { const isPast = F.teamId.value === "__past", t = teams.find(x => x.id === F.teamId.value); const keep = {opponent:readOpp(F), startsAt:readWhen(F) || draft.startsAt, stream:{live:F.live.value.trim(), vod:draft.stream?.vod || ""}, notes:F.notes.value, week:F.week.value};
+    const nb = blankMatch(site, t, keep.startsAt); draft = {...draft, ...nb, ...keep, status:draft.status, games:draft.games, players:isNew ? [] : draft.players, _past:isPast};
+    if (isPast){ draft.teamId = ""; draft.teamName = ""; draft.game = (site.games || [])[0]?.key || ""; } renderForm(); };
+  if (F.pastGame) F.pastGame.onchange = () => { const g = gameFor(site, F.pastGame.value); if (g.bestOf) F.bestOf.value = String(g.bestOf); };
   F.oppTeam.onchange = () => { const k = Object.keys(known).find(n => n.toLowerCase() === F.oppTeam.value.trim().toLowerCase()); if (k && !F.oppSchool.value){ F.oppSchool.value = known[k]; F.abbr.placeholder = shortSchool(known[k]); } };
   F.oppSchool.oninput = () => F.abbr.placeholder = shortSchool(F.oppSchool.value) || "Novi";
   if (!isNew) $("#del").onclick = async () => {
     if (!confirm("Delete this match for good?")) return;
-    try { await be.remove(openId, scoreboardFrom(matches.filter(m => m.id !== openId), site), seasonSum(matches.filter(m => m.id !== openId), openId, false)); toast("Match deleted."); cur = null; location.hash = ""; }
+    try { await be.remove(openId, sb(matches.filter(m => m.id !== openId)), seasonSum(matches.filter(m => m.id !== openId), openId, false)); toast("Match deleted."); cur = null; location.hash = ""; }
     catch(e){ toast("Couldn't delete: " + (e.code || e.message)); }
   };
   F.onsubmit = async e => {
     e.preventDefault();
     const when = readWhen(F); if (!when){ toast("Pick a date and time."); return; }
-    const t = teams.find(x => x.id === F.teamId.value) || {}, g = gameFor(site, t.gameKey);
-    const m = {...draft, teamId:t.id, teamName:teamLabel(site, t), game:g.key || "", gameName:g.name || t.game || "", level:t.level || "Varsity",
+    const isPast = F.teamId.value === "__past";
+    if (isPast && !F.pastName.value.trim()){ toast("Type the past team's name."); return; }
+    const t = isPast ? {id:"", level:F.pastLevel.value} : (teams.find(x => x.id === F.teamId.value) || {}), g = gameFor(site, isPast ? F.pastGame.value : t.gameKey);
+    const m = {...draft, teamId:t.id || "", teamName:isPast ? F.pastName.value.trim() : teamLabel(site, t), game:g.key || "", gameName:(isPast && !F.pastGame.value) ? "" : (g.name || t.game || ""), level:t.level || "Varsity",
       opponent:readOpp(F), startsAt:when, season:seasonOf(when), term:termOf(when), bestOf:+F.bestOf.value, league:F.league.value, stage:F.stage.value,
       week:F.week.value.trim(), event:F.event.value.trim(), stream:{...(draft.stream || {}), live:F.live.value.trim()}, notes:F.notes.value.trim()};
     if (!isNew) m.status = F.status.value;
+    delete m._past;
     m.id = openId || be.newId();
     settle(m);
     const all = matches.filter(x => x.id !== m.id).concat([m]);
-    try { await be.save(m, scoreboardFrom(all, site), user.email, seasonSum(all, m.id, m.status === "final")); }
+    try { await be.save(m, sb(all), user.email, seasonSum(all, m.id, m.status === "final")); }
     catch(err){ toast(/permission/i.test(err.code || err.message || "") ? "This account isn't allowed to change scores." : "Couldn't save. Check the connection."); return; }
-    if (m.season !== season) toast(`Saved to the ${seasonLabel(m.season)} season.`);
+    lastEntry = {teamId:m.teamId, teamName:m.teamName, game:m.game, level:m.level, league:m.league, stage:m.stage, startsAt:m.startsAt, bestOf:m.bestOf};
+    if (m.season !== season){ toast(`Saved to the ${seasonLabel(m.season)} season. Showing that season now.`); synced.delete(m.season); setSeason(m.season); matches = [m]; }
     cur = clone(m); openId = m.id; location.hash = "m/" + m.id;
   };
 }

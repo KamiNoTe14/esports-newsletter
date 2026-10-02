@@ -210,7 +210,7 @@ function schedule(site, issues){
   + `<section class="section"><div class="wrap">${secH("How our year works")}${timeline(site)}</div></section>`;
 }
 function results(site){
-  return pageH(`${seasonText()} season`, "Results", "Every finished match this season. Scores update live, and you can tap any match for game-by-game scores, the lineup and the replay.")
+  return pageH(`${seasonText()} season`, "Results", "Every finished match, season by season. Scores update live, and you can tap any match for game-by-game scores, the lineup and the replay.")
   + `<section class="section"><div class="wrap" id="results"><div class="loading">Loading results…</div></div></section>`;
 }
 function player(){ return `<div id="player"><div class="loading" style="padding:80px 0">Loading player…</div></div>`; }
@@ -294,7 +294,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js?v=7").then(L => {
+  if (["home", "schedule", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js?v=8").then(L => {
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });

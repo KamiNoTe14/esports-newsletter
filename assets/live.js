@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {seasonOf, seasonLabel, gameFor, oppShort, rivalFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=7";
+import {seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=8";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -36,6 +36,14 @@ async function watchDoc(id, mockKey, cb){
 export function watchBoard(cb){ return watchDoc("scoreboard", "eagles-mock-scoreboard", cb); }
 /* Every finished match of a season in full detail (lineups, stats), updated the moment a match goes final. */
 export function watchSeason(season, cb){ return watchDoc("season-" + season, "eagles-mock-season-" + season, cb); }
+/* Past players and the list of seasons that have results. */
+export function watchDirectory(cb){ return watchDoc("directory", "eagles-mock-directory", d => cb({alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : []})); }
+/* Everyone we know by id (current rosters, then past players), so names stay right even if a match stored an old spelling. */
+const PEOPLE = new Map();
+function learnPeople(site, dir){
+  (site?.teams || []).forEach(t => (t.roster || []).forEach(p => { if (p.id) PEOPLE.set(p.id, {name:p.name || "", tag:p.tag || "", private:!!p.private}); }));
+  (dir?.alumni || []).forEach(p => { if (p.id && !PEOPLE.has(p.id)) PEOPLE.set(p.id, {name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
+}
 function poll(id, cb){
   const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/public/${id}?key=${FIREBASE_CONFIG.apiKey}`;
   const tick = async () => { try { const r = await fetch(url, {cache:"no-store"}); if (r.ok) cb(fromRest((await r.json()).fields || {})); } catch(e){} };
@@ -62,7 +70,7 @@ function badge(site, m, cls = "gbadge"){
   return `<span class="${cls}" title="${esc(g.name || m.gameName || "")}">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : BASE + g.icon)}" alt="">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
 }
 function watchLink(m){ return safe(m.status === "final" ? (m.stream?.vod || m.stream?.live) : m.stream?.live); }
-function playerName(p){ return p.private || !p.name ? (p.tag || "Player") : p.name; }
+function playerName(p){ const r = PEOPLE.get(p.id); if (r) return r.private || !r.name ? (r.tag || p.tag || "Player") : r.name; return p.private || !p.name ? (p.tag || "Player") : p.name; }
 
 /* ---------- scores strip ---------- */
 export function startStrip(site){
@@ -136,28 +144,42 @@ export function startUpcoming(site, fromIssues){
 /* ---------- results page ---------- */
 export async function startResults(site){
   const host = $("#results"); if (!host) return;
-  const season = seasonOf();
-  let arch = await archive(season), full = [], board = null, team = (location.hash.match(/^#team-(.+)$/) || [])[1] || "";
+  const NOW = seasonOf();
+  const qs = new URLSearchParams(location.search);
+  let season = (/^\d{4}-\d{2}$/.test(qs.get("season") || "") && qs.get("season")) || (location.hash.match(/season-(\d{4}-\d{2})/) || [])[1] || NOW;
+  let wanted = qs.get("m") || (location.hash.match(/^#m-(.+)$/) || [])[1] || "";
+  let board = null, team = "", dirSeasons = [], idxSeasons = [];
+  const arch = {}, full = {}, watching = new Set();
+  learnPeople(site, null);
+  const load = async se => { if (!(se in arch)){ arch[se] = []; arch[se] = await archive(se); draw(); } if (!watching.has(se)){ watching.add(se); watchSeason(se, d => { full[se] = d.matches || []; draw(); }); } };
   const draw = () => {
-    const all = merge([...arch, ...full], board).filter(m => m.season === season || !m.season);
+    const all = merge([...(arch[season] || []), ...(full[season] || [])], season === NOW ? board : null).filter(m => m.season === season || !m.season);
     const live = all.filter(m => m.status === "live");
     const fin = all.filter(m => m.status === "final").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
-    const shown = fin.filter(m => !team || m.teamId === team);
+    const shown = fin.filter(m => !team || m.teamName === team);
     const rec = list => { const w = list.filter(m => m.result === "W").length, l = list.filter(m => m.result === "L").length; return `${w}–${l}`; };
-    const teams = (site.teams || []).filter(t => fin.some(m => m.teamId === t.id));
+    const order = (site.teams || []).map(t => teamName(site, t));
+    const teams = [...new Set(fin.map(m => m.teamName).filter(Boolean))].sort((a, b) => (order.indexOf(a) < 0 ? 99 : order.indexOf(a)) - (order.indexOf(b) < 0 ? 99 : order.indexOf(b)) || a.localeCompare(b));
+    const seasons = [...new Set([NOW, season, ...dirSeasons, ...idxSeasons])].sort().reverse();
     const open = new Set([...host.querySelectorAll("details[open]")].map(d => d.id));
     host.innerHTML = `
       ${live.length ? `<div class="res-live"><h2 class="res-h"><span class="pill-live">Live</span> Now playing</h2><div class="grid g3">${live.map(m => liveCard(site, m)).join("")}</div></div>` : ""}
       <div class="res-sum"><div class="res-rec"><small>${esc(seasonLabel(season))} record</small><b>${rec(fin)}</b></div>
-        <div class="res-teams" role="group" aria-label="Filter by team"><button type="button" class="chip${team ? "" : " gold"}" data-team="">All teams</button>${teams.map(t => `<button type="button" class="chip${team === t.id ? " gold" : ""}" data-team="${esc(t.id)}">${esc(teamName(site, t))} <span class="rec-mini">${rec(fin.filter(m => m.teamId === t.id))}</span></button>`).join("")}</div></div>
-      ${shown.length ? `<div class="res-list">${shown.map(m => resultRow(site, m)).join("")}</div>` : `<div class="empty">${fin.length ? "No results for this team yet." : "Results show up here as soon as a match is final."}</div>`}`;
+        <div style="flex:1;display:grid;gap:10px">
+          ${seasons.length > 1 ? `<label class="res-season"><span>Season</span><select id="resSeason">${seasons.map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}</option>`).join("")}</select></label>` : ""}
+          <div class="res-teams" role="group" aria-label="Filter by team"><button type="button" class="chip${team ? "" : " gold"}" data-team="">All teams</button>${teams.map(t => `<button type="button" class="chip${team === t ? " gold" : ""}" data-team="${esc(t)}">${esc(t)} <span class="rec-mini">${rec(fin.filter(m => m.teamName === t))}</span></button>`).join("")}</div>
+        </div></div>
+      ${shown.length ? `<div class="res-list">${shown.map(m => resultRow(site, m)).join("")}</div>` : `<div class="empty">${fin.length ? "No results for this team yet." : season === NOW ? "Results show up here as soon as a match is final." : "No results recorded for this season."}</div>`}`;
     host.querySelectorAll("details").forEach(d => { if (open.has(d.id)) d.open = true; });
-    host.querySelectorAll("[data-team]").forEach(b => b.onclick = () => { team = b.dataset.team; history.replaceState(null, "", team ? "#team-" + team : location.pathname); draw(); });
-    const target = location.hash.match(/^#m-(.+)$/); if (target){ const d = document.getElementById("m-" + decodeURIComponent(target[1])); if (d && !d.dataset.seen){ d.dataset.seen = 1; d.open = true; d.scrollIntoView({block:"center"}); } }
+    host.querySelectorAll("[data-team]").forEach(b => b.onclick = () => { team = b.dataset.team; draw(); });
+    const sel = $("#resSeason"); if (sel) sel.onchange = () => { season = sel.value; team = ""; history.replaceState(null, "", location.pathname + (qs.get("mock") ? "?mock=1" : "") + (season === NOW ? "" : "#season-" + season)); load(season); draw(); };
+    const eb = document.querySelector(".page-h .eyebrow"); if (eb) eb.textContent = `${seasonLabel(season)} season`;
+    if (wanted){ const d = document.getElementById("m-" + decodeURIComponent(wanted)); if (d){ wanted = ""; d.open = true; d.scrollIntoView({block:"center"}); } }
   };
-  draw();
+  draw(); load(season);
+  archiveSeasons().then(x => { idxSeasons = x; draw(); });
   watchBoard(b => { board = b; draw(); });
-  watchSeason(season, d => { full = d.matches || []; draw(); });
+  watchDirectory(d => { dirSeasons = d.seasons; learnPeople(site, d); draw(); });
 }
 function teamName(site, t){ const g = gameFor(site, t.gameKey); return `${g.short || t.game} ${t.name}`; }
 function liveCard(site, m){
@@ -168,7 +190,7 @@ function liveCard(site, m){
     ${w ? `<a class="btn btn-gold" href="${esc(w)}" target="_blank" rel="noopener">▶ Watch live</a>` : ""}</div>`;
 }
 function resultRow(site, m){
-  const g = gameFor(site, m.game), games = (m.games || []).filter(x => x.winner || x.us || x.them);
+  const g = gameFor(site, m.game), games = m.seriesOnly ? [] : (m.games || []).filter(x => x.winner || x.us || x.them);
   const lineup = (m.players || []).map(p => `<a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>`).join(", ");
   const w = watchLink(m), rv = rivalFor(site, m);
   return `<details class="res${rv ? " rival" : ""}" id="m-${esc(m.id)}"><summary>
@@ -193,17 +215,22 @@ function boxScore(g, m){
 /* ---------- player profile ---------- */
 export async function startPlayer(site){
   const host = $("#player"); if (!host) return;
-  const seasons = await archiveSeasons();
-  const arch = (await Promise.all(seasons.map(archive))).flat();
-  let shown = false;
-  watchSeason(seasonOf(), d => { shown = true; drawPlayer(site, host, merge([...arch, ...(d.matches || [])], null)); });
-  setTimeout(() => { if (!shown) drawPlayer(site, host, arch); }, 5000);
+  const NOW = seasonOf(), full = {}, watching = new Set();
+  let arch = [], dir = {alumni:[], seasons:[]}, ready = false;
+  learnPeople(site, null);
+  const draw = () => { if (ready) drawPlayer(site, host, merge([...arch, ...Object.values(full).flat()], null), dir); };
+  const watch = se => { if (watching.has(se)) return; watching.add(se); watchSeason(se, d => { full[se] = d.matches || []; ready = true; draw(); }); };
+  watch(NOW);
+  watchDirectory(d => { dir = d; learnPeople(site, d); d.seasons.forEach(watch); draw(); });
+  archiveSeasons().then(async seasons => { arch = (await Promise.all(seasons.map(archive))).flat(); draw(); });
+  setTimeout(() => { ready = true; draw(); }, 5000);
 }
-function drawPlayer(site, host, all){
+function drawPlayer(site, host, all, dir){
   const id = new URLSearchParams(location.search).get("id") || "";
+  const alum = (dir?.alumni || []).find(p => p.id === id);
   const entries = (site.teams || []).flatMap(t => (t.roster || []).filter(p => p.id === id).map(p => ({...p, team:t})));
   const played = all.filter(m => m.status === "final" && (m.players || []).some(p => p.id === id)).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
-  const me = entries[0] || (() => { const p = played[0]?.players.find(x => x.id === id); return p ? {...p, team:null} : null; })();
+  const me = entries[0] || (alum ? {...alum, team:null} : null) || (() => { const p = played[0]?.players.find(x => x.id === id); return p ? {...p, team:null} : null; })();
   if (!me){ host.innerHTML = `<section class="section"><div class="wrap"><div class="empty">We couldn't find that player. <a href="${BASE}teams.html">See the rosters</a>.</div></div></section>`; return; }
   const priv = entries.some(e => e.private) || !!me.private;
   const prof = (!priv && site.profiles?.[id]) || {};
@@ -217,10 +244,10 @@ function drawPlayer(site, host, all){
   const W = played.filter(m => m.result === "W").length, L = played.filter(m => m.result === "L").length;
   host.innerHTML = `<section class="page-h player-h"><div class="wrap player-top">
       ${prof.photo ? `<img class="player-photo" src="${esc(/^https?:/.test(prof.photo) ? prof.photo : BASE + prof.photo)}" alt="">` : `<div class="player-photo ph">${esc((display || "?")[0])}</div>`}
-      <div><p class="eyebrow">${teams.map(t => esc(teamName(site, t))).join(" · ") || "Hartland Esports"}</p>
+      <div><p class="eyebrow">${teams.map(t => esc(teamName(site, t))).join(" · ") || [...new Set(played.map(m => m.teamName).filter(Boolean))].slice(0, 3).map(esc).join(" · ") || "Hartland Esports"}</p>
         <h1 style="font-size:clamp(40px,7vw,76px)">${esc(display)}</h1>
         ${!priv && me.name && me.tag ? `<p class="player-tag">${esc(me.tag)}</p>` : ""}
-        <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${prof.gradYear ? `<span class="chip gold">Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
+        <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>` : ""}${prof.gradYear ? `<span class="chip gold">Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
       </div>
       <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${played.length} match${played.length === 1 ? "" : "es"}</span></div>
     </div></section>
@@ -234,6 +261,7 @@ function drawPlayer(site, host, all){
         <div class="stat-row"><div><b>${s.n}</b><small>Matches</small></div><div><b>${s.w}–${s.l}</b><small>Record</small></div>${(s.game.statList || []).filter(x => x.key in s.tot).map(x => `<div><b>${s.tot[x.key]}</b><small>${esc(x.label)}<br>${(s.tot[x.key] / s.n).toFixed(1)}/match</small></div>`).join("")}</div></div>`).join("")}</div>`
         : `<div class="empty">Stats show up here after ${esc(display)} plays a match.</div>`}
       ${played.length ? `<h2 class="res-h" style="margin-top:34px">Match log</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Team</th><th>Opponent</th><th class="n">Result</th><th>Stats</th></tr></thead><tbody>${played.map(m => { const st = (m.players.find(p => p.id === id) || {}).stats || {}, g = gameFor(site, m.game);
-        return `<tr><td>${esc(fmtDay(m.startsAt))}</td><td>${esc(m.teamName)}</td><td><a href="${BASE}results.html#m-${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
+        const yr = new Date(m.startsAt).getFullYear();
+        return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}</td><td><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
     </div></section>`;
 }

@@ -334,3 +334,6 @@ details.res.rival{border-left:4px solid var(--gold)}
 .res-score small{white-space:normal}
 .matches li.is-live{box-shadow:inset 3px 0 0 #E52B2B}
 .m-team .chip.rv{color:var(--gold)}
+.res-season{display:flex;align-items:center;gap:10px}
+.res-season span{font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.res-season select{background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-radius:8px;padding:8px 12px;font:700 18px var(--display);letter-spacing:.03em}

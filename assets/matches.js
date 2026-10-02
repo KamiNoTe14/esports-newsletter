@@ -28,6 +28,12 @@ const VENDOR = new URL("./vendor/", import.meta.url).href;
 /* ---------- small helpers ---------- */
 export const isMock = () => /[?&]mock=1\b/.test(location.search);
 export function seasonOf(d){ d = new Date(d || Date.now()); const y = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; return `${y}-${String((y + 1) % 100).padStart(2, "0")}`; }
+/* Every season from this one back to 2015/16, newest first (for season pickers). */
+export function seasonList(extra = []){
+  const out = new Set(extra.filter(s => /^\d{4}-\d{2}$/.test(s)));
+  for (let y = +seasonOf().slice(0, 4); y >= 2015; y--) out.add(`${y}-${String((y + 1) % 100).padStart(2, "0")}`);
+  return [...out].sort().reverse();
+}
 export const seasonLabel = s => String(s || "").replace("-", "/");
 export function termOf(d){ const m = new Date(d || Date.now()).getMonth(); return m >= 6 ? "fall" : "spring"; }
 export function slug(s){ return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
@@ -167,10 +173,13 @@ async function firebaseBackend(){
     },
     async syncSummaries(scoreboard, seasonDoc){
       const b = fb.writeBatch(db);
-      b.set(fb.doc(db, "public", "scoreboard"), strip(scoreboard));
-      b.set(fb.doc(db, "public", "season-" + seasonDoc.season), strip(seasonDoc));
-      await b.commit();
-    }
+      if (scoreboard) b.set(fb.doc(db, "public", "scoreboard"), strip(scoreboard));
+      if (seasonDoc) b.set(fb.doc(db, "public", "season-" + seasonDoc.season), strip(seasonDoc));
+      if (scoreboard || seasonDoc) await b.commit();
+    },
+    /* public/directory: past players (alumni) and the list of seasons that have results */
+    watchDirectory(cb){ return fb.onSnapshot(fb.doc(db, "public", "directory"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
+    async saveDirectory(dir){ await fb.setDoc(fb.doc(db, "public", "directory"), strip(dir)); }
   };
 }
 
@@ -178,7 +187,7 @@ async function firebaseBackend(){
 function mockBackend(){
   const K = "eagles-mock-matches", SB = "eagles-mock-scoreboard";
   const read = () => { try { return JSON.parse(localStorage.getItem(K)) || {}; } catch(e){ return {}; } };
-  const subs = new Set();
+  const subs = new Set(), dirSubs = new Set();
   const emit = () => subs.forEach(f => f());
   window.addEventListener("storage", e => { if (e.key === K) emit(); });
   let user = null; const userSubs = new Set();
@@ -195,6 +204,8 @@ function mockBackend(){
     newId(){ return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
     async save(m, scoreboard, by, seasonDoc){ const all = read(), {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
     async remove(id, scoreboard, seasonDoc){ const all = read(); delete all[id]; localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
-    async syncSummaries(scoreboard, seasonDoc){ if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); if (seasonDoc) localStorage.setItem("eagles-mock-season-" + seasonDoc.season, JSON.stringify(seasonDoc)); }
+    async syncSummaries(scoreboard, seasonDoc){ if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); if (seasonDoc) localStorage.setItem("eagles-mock-season-" + seasonDoc.season, JSON.stringify(seasonDoc)); },
+    watchDirectory(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-directory")) || {}); } catch(e){ cb({}); } }; dirSubs.add(f); setTimeout(f, 0); return () => dirSubs.delete(f); },
+    async saveDirectory(dir){ localStorage.setItem("eagles-mock-directory", JSON.stringify(dir)); dirSubs.forEach(f => f()); }
   };
 }

@@ -250,6 +250,7 @@ function about(site){
     </div>
   </div></section>
   <section class="section alt"><div class="wrap">${secH("How our year works")}${timeline(site)}</div></section>
+  <section class="section" id="nextLevel" hidden></section>
   ${recordsHTML(site) ? `<section class="section" id="records"><div class="wrap">${secH("Program records")}${recordsHTML(site)}</div></section>` : ""}
   ${support.length ? `<section class="section ${recordsHTML(site) ? "alt" : ""}"><div class="wrap">${secH("Support the team")}<div class="grid g3">${support.map(([k, t, d]) => `<a class="card news-item" href="${esc(safe(L[k]))}" target="_blank" rel="noopener"><h3>${esc(t)}</h3><p class="muted" style="margin:0;font-size:15px">${esc(d)}</p><span class="more" style="font-family:var(--display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)">Visit →</span></a>`).join("")}</div></div></section>` : ""}
   ${sponsorsHTML(site) ? `<section class="section"><div class="wrap">${secH("Our sponsors")}${sponsorsHTML(site)}</div></section>` : ""}
@@ -294,7 +295,8 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player"].includes(PAGE)) import(BASE + "assets/live.js?v=8").then(L => {
+  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=9").then(L => {
+    if (PAGE === "about") L.startNextLevel(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });

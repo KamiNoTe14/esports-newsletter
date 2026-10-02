@@ -212,6 +212,20 @@ function boxScore(g, m){
   return `<div class="tbl-wrap box"><table class="tbl"><thead><tr><th>Player</th>${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(p.stats[c.key]) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
+/* ---------- "Eagles at the next level" (About page): alumni who are playing somewhere now ---------- */
+export function startNextLevel(site){
+  const host = $("#nextLevel"); if (!host) return;
+  watchDirectory(d => {
+    const list = (d.alumni || []).filter(p => (p.now || "").trim() && (p.name || p.tag)).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
+    host.hidden = !list.length; if (!list.length) return;
+    host.innerHTML = `<div class="wrap"><div class="sec-h"><h2>Eagles at the next level</h2></div>
+      <p class="lead" style="margin:0 0 18px">Hartland Esports alumni who kept playing after graduation.</p>
+      <div class="grid g3">${list.map(p => { const nm = p.private || !p.name ? p.tag : p.name; return `<a class="card next-card" href="${BASE}player.html?id=${encodeURIComponent(p.id)}">
+        <p class="eyebrow">${p.gradYear ? `Class of ${esc(p.gradYear)}` : "Alumni"}</p><h3>${esc(nm)}</h3>${!p.private && p.name && p.tag ? `<p class="tag">${esc(p.tag)}</p>` : ""}
+        <p class="now">${esc(p.now)}</p></a>`; }).join("")}</div></div>`;
+  });
+}
+
 /* ---------- player profile ---------- */
 export async function startPlayer(site){
   const host = $("#player"); if (!host) return;
@@ -247,6 +261,7 @@ function drawPlayer(site, host, all, dir){
       <div><p class="eyebrow">${teams.map(t => esc(teamName(site, t))).join(" · ") || [...new Set(played.map(m => m.teamName).filter(Boolean))].slice(0, 3).map(esc).join(" · ") || "Hartland Esports"}</p>
         <h1 style="font-size:clamp(40px,7vw,76px)">${esc(display)}</h1>
         ${!priv && me.name && me.tag ? `<p class="player-tag">${esc(me.tag)}</p>` : ""}
+        ${alum?.now ? `<p class="player-now"><span>Now playing</span> ${esc(alum.now)}</p>` : ""}
         <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>` : ""}${prof.gradYear ? `<span class="chip gold">Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
       </div>
       <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${played.length} match${played.length === 1 ? "" : "es"}</span></div>

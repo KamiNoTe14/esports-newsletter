@@ -337,3 +337,10 @@ details.res.rival{border-left:4px solid var(--gold)}
 .res-season{display:flex;align-items:center;gap:10px}
 .res-season span{font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .res-season select{background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-radius:8px;padding:8px 12px;font:700 18px var(--display);letter-spacing:.03em}
+.player-now{margin:0 0 12px;font-size:18px;color:#fff}
+.player-now span{display:inline-block;margin-right:8px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--navy,#00274C);background:var(--gold);border-radius:4px;padding:3px 8px;vertical-align:2px}
+.next-card{text-decoration:none;color:inherit;display:block;border-left:4px solid var(--gold)}
+.next-card:hover{border-color:var(--gold);background:var(--surface-2)}
+.next-card h3{font-size:26px;margin:6px 0 2px}
+.next-card .tag{margin:0;color:var(--muted);font:14px ui-monospace,Consolas,Menlo,monospace}
+.next-card .now{margin:10px 0 0;font-weight:600;color:var(--gold)}

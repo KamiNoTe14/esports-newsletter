@@ -163,9 +163,10 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .tog{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);min-height:44px}
 .tog input{width:22px;height:22px;accent-color:var(--gold)}
 .alist{display:grid;gap:8px;margin-bottom:12px}
-.arow{display:grid;grid-template-columns:1.4fr 1fr 70px auto 40px;gap:6px;align-items:center}
+.arow{display:grid;grid-template-columns:1.4fr 1fr 70px auto 40px;gap:6px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px}
+.arow .anow{grid-column:1 / 5}
 .adel{min-height:44px;border-radius:10px;border:1px solid var(--line-2);font-size:20px;color:var(--muted)}
-@media (max-width:560px){ .arow{grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);padding-bottom:8px} .arow .adel{justify-self:end;width:44px} }
+@media (max-width:560px){ .arow{grid-template-columns:1fr 1fr} .arow .anow{grid-column:1 / -1} .arow .adel{justify-self:end;width:44px;grid-column:2} }
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;background:var(--white);color:var(--navy);padding:12px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 28px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 @media (min-width:700px){ .board .num{font-size:110px} }
 </style>
@@ -329,20 +330,21 @@ function renderList(){
 function alumniHTML(open){
   const list = (dir.alumni || []).slice().sort((a, b) => (a.name || a.tag || "").localeCompare(b.name || b.tag || ""));
   return `<details class="sec" id="alumniBox"${open ? " open" : ""}><summary>Past players<span>${list.length || "None yet"}</span></summary><div class="secb">
-    <p class="hint" style="margin:0 0 10px">Graduates and anyone no longer on a roster. Add them here or right from a match's Players section.</p>
+    <p class="hint" style="margin:0 0 10px">Graduates and anyone no longer on a roster. Add them here or right from a match's Players section. If someone plays in college now, say where: it shows on their player page and in "Eagles at the next level" on the About page.</p>
     <div class="alist">${list.map(p => `<div class="arow" data-aid="${esc(p.id)}">
       <input data-a="name" value="${esc(p.name || "")}" placeholder="Name" aria-label="Name"><input data-a="tag" value="${esc(p.tag || "")}" placeholder="Gamertag" aria-label="Gamertag">
       <input data-a="gradYear" value="${esc(p.gradYear || "")}" placeholder="Class" inputmode="numeric" maxlength="4" aria-label="Graduation year">
       <label class="tog"><input type="checkbox" data-a="private"${p.private ? " checked" : ""}> Tag only</label>
+      <input class="anow" data-a="now" value="${esc(p.now || "")}" placeholder="Playing now at… (e.g. Rocket League at Michigan State)" aria-label="Where they play now">
       <button type="button" class="adel" aria-label="Remove ${esc(p.name || p.tag)}">×</button></div>`).join("")}</div>
     <div class="tools"><button class="btn btn-line" type="button" id="al-add">+ Add past player</button><button class="btn btn-gold" type="button" id="al-save">Save list</button></div>
   </div></details>`;
 }
 function bindAlumni(){
   const box = $("#alumniBox"); if (!box) return;
-  const read = () => [...box.querySelectorAll(".arow")].map(r => ({id:r.dataset.aid, name:r.querySelector("[data-a=name]").value.trim(), tag:r.querySelector("[data-a=tag]").value.trim(), gradYear:r.querySelector("[data-a=gradYear]").value.trim(), private:r.querySelector("[data-a=private]").checked})).filter(p => p.name || p.tag);
+  const read = () => [...box.querySelectorAll(".arow")].map(r => ({id:r.dataset.aid, name:r.querySelector("[data-a=name]").value.trim(), tag:r.querySelector("[data-a=tag]").value.trim(), gradYear:r.querySelector("[data-a=gradYear]").value.trim(), private:r.querySelector("[data-a=private]").checked, now:r.querySelector("[data-a=now]").value.trim()})).filter(p => p.name || p.tag);
   const save = async list => { dir.alumni = list; try { await be.saveDirectory(dir); toast("Past players saved."); } catch(e){ toast("Couldn't save. Check the connection."); } };
-  $("#al-add").onclick = () => { dir.alumni = [...read(), {id:"p-" + Math.random().toString(16).slice(2, 10), name:" ", tag:"", gradYear:"", private:false}]; renderList(); $("#alumniBox").open = true; const rows = document.querySelectorAll(".arow"); const blank = [...rows].find(r => !r.querySelector("[data-a=name]").value.trim()); if (blank){ blank.querySelector("[data-a=name]").value = ""; blank.querySelector("[data-a=name]").focus(); } };
+  $("#al-add").onclick = () => { dir.alumni = [...read(), {id:"p-" + Math.random().toString(16).slice(2, 10), name:" ", tag:"", gradYear:"", private:false, now:""}]; renderList(); $("#alumniBox").open = true; const rows = document.querySelectorAll(".arow"); const blank = [...rows].find(r => !r.querySelector("[data-a=name]").value.trim()); if (blank){ blank.querySelector("[data-a=name]").value = ""; blank.querySelector("[data-a=name]").focus(); } };
   $("#al-save").onclick = () => save(read());
   box.querySelectorAll(".adel").forEach(b => b.onclick = () => { const row = b.closest(".arow"); if (!confirm("Remove this person from the past players list? Their old match results keep their name.")) return; row.remove(); save(read()); });
 }
@@ -481,6 +483,7 @@ function detailsHTML(g, them){
         <div class="two"><label class="f"><span>Name</span><input id="np-name" autocomplete="off" placeholder="First Last"></label><label class="f"><span>Gamertag</span><input id="np-tag" autocomplete="off"></label></div>
         <div class="two"><label class="f"><span>Class of (optional)</span><input id="np-year" inputmode="numeric" maxlength="4" placeholder="2025"></label>
           <label class="tog"><input id="np-priv" type="checkbox"> Gamertag only on the website</label></div>
+        <label class="f"><span>Playing now at (optional)</span><input id="np-now" autocomplete="off" placeholder="Rocket League at Michigan State"></label>
         <button class="btn btn-line btn-block" type="button" id="np-add">Add to this match</button>
         <p class="hint" style="margin:0">Saved to your past players list, so you only type each person once.</p></div></details>
       ${stats.length ? "" : `<p class="hint" style="margin-top:10px">To track stats for this game, list them on the Games tab in the Site Manager.</p>`}
@@ -512,7 +515,7 @@ function bindDetails(g){
     const k = (name || tag).toLowerCase();
     let p = [...everyone().values()].find(x => (x.name || x.tag).toLowerCase() === k);
     if (!p){
-      p = {id:"p-" + Math.random().toString(16).slice(2, 10), name, tag, gradYear:year, private:priv};
+      p = {id:"p-" + Math.random().toString(16).slice(2, 10), name, tag, gradYear:year, private:priv, now:$("#np-now").value.trim()};
       dir.alumni = [...(dir.alumni || []), p];
       try { await be.saveDirectory(dir); } catch(e){ toast("Couldn't save the new player. Check the connection."); return; }
       p = {...p, alum:true};

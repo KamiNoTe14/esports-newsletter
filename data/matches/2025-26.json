@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-02T14:21:27.228Z",
+  "updated": "2026-10-02T14:22:01.184Z",
   "matches": [
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",
@@ -516,42 +516,52 @@
     },
     {
       "id": "nSch97HiIy9LTTJyhqVB",
-      "teamName": "Rocket League Varsity",
-      "season": "2025-26",
-      "players": [],
-      "forfeit": null,
-      "startsAt": "2026-03-19T20:00:00.000Z",
-      "league": "MHSEL",
-      "seriesOnly": false,
-      "teamId": "t5",
-      "clinched": "us",
       "notes": "",
+      "week": "6",
+      "current": 5,
+      "league": "MHSEL",
+      "teamId": "t5",
+      "term": "spring",
+      "event": "MHSEL Spring 2026",
+      "updatedAt": "2026-10-02T14:21:59.409Z",
+      "seriesOnly": false,
       "score": {
         "us": 3,
         "them": 2
       },
-      "game": "rocket-league",
-      "gameName": "Rocket League",
-      "event": "MHSEL Spring 2026",
+      "season": "2025-26",
+      "opponent": {
+        "logo": "",
+        "abbr": "FRE",
+        "school": "Freeland High School",
+        "short": "",
+        "team": "Freeland High School RL Green"
+      },
+      "source": {},
+      "result": "W",
+      "teamName": "Rocket League Varsity",
+      "bestOf": 5,
+      "status": "final",
+      "startsAt": "2026-03-19T20:00:00.000Z",
       "stream": {
-        "live": "",
-        "vod": ""
+        "vod": "",
+        "live": ""
       },
       "stage": "regular",
-      "term": "spring",
-      "level": "Varsity",
+      "game": "rocket-league",
+      "clinched": "us",
       "games": [
         {
-          "us": 2,
-          "winner": "us",
           "them": 1,
-          "n": 1
+          "n": 1,
+          "us": 2,
+          "winner": "us"
         },
         {
+          "them": 0,
           "winner": "us",
-          "n": 2,
           "us": 2,
-          "them": 0
+          "n": 2
         },
         {
           "us": 1,
@@ -560,32 +570,60 @@
           "winner": "them"
         },
         {
-          "us": 0,
           "them": 1,
-          "n": 4,
-          "winner": "them"
+          "winner": "them",
+          "us": 0,
+          "n": 4
         },
         {
-          "n": 5,
           "us": 5,
-          "them": 0,
-          "winner": "us"
+          "n": 5,
+          "winner": "us",
+          "them": 0
         }
       ],
-      "week": "6",
-      "result": "W",
-      "source": {},
-      "current": 5,
-      "bestOf": 5,
-      "opponent": {
-        "team": "Freeland High School RL Green",
-        "short": "",
-        "abbr": "FRE",
-        "logo": "",
-        "school": "Freeland High School"
-      },
-      "status": "final",
-      "updatedAt": "2026-10-02T14:21:25.775Z"
+      "level": "Varsity",
+      "players": [
+        {
+          "id": "p-0b11aaef",
+          "private": false,
+          "name": "Tavin Flanagan",
+          "stats": {
+            "assists": 1,
+            "shots": 12,
+            "goals": 3,
+            "saves": 5
+          },
+          "tag": "TRE4TY."
+        },
+        {
+          "stats": {
+            "saves": 5,
+            "shots": 12,
+            "goals": 2,
+            "assists": 4
+          },
+          "private": false,
+          "tag": "Stupid Nonsense",
+          "name": "Fred Nikitin",
+          "id": "p-61bdc66e"
+        },
+        {
+          "id": "p-c0313a9e",
+          "name": "Dylan Reinwand",
+          "tag": "Qyxical",
+          "stats": {
+            "goals": 5,
+            "shots": 13,
+            "saves": 14,
+            "assists": 2
+          },
+          "private": false,
+          "alum": true
+        }
+      ],
+      "gameName": "Rocket League",
+      "forfeit": null
     }
   ]
 }

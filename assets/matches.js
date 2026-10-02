@@ -51,6 +51,13 @@ export function rivalFor(site, m){
   const k = key(m?.opponent?.school || ""); if (!k) return null;
   return (site?.rivals || []).find(r => r.school && key(r.school) === k) || null;
 }
+/* "3" -> "Week 3"; "Round of 32" or "Quarterfinal" stay as typed. Playoff and finals matches also say so. */
+export function roundLabel(m, short){
+  const w = String(m?.week ?? "").trim(), stage = {playoffs:"Playoffs", finals:"Finals", exhibition:"Exhibition", scrim:"Scrimmage"}[m?.stage] || "";
+  const wk = !w ? "" : /^\d+$/.test(w) ? (short ? `Wk ${w}` : `Week ${w}`) : w;
+  const dup = stage && wk && wk.toLowerCase().includes(stage.toLowerCase().replace(/s$/, ""));
+  return [dup ? "" : stage, wk].filter(Boolean).join(" · ");
+}
 export function abbrFor(school){
   const words = String(school || "").replace(/\b(high|senior|junior|school|academy|hs|jr\/sr|community|the|of)\b/gi, " ").split(/[^A-Za-z0-9]+/).filter(Boolean);
   if (!words.length) return "OPP";

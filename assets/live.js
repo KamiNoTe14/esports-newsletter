@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=8";
+import {seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=9";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -199,7 +199,7 @@ function resultRow(site, m){
       <span class="res-who"><b>${esc(m.teamName)}${rv ? ` <span class="chip gold rv">⚔ ${esc(rv.title || "Rivalry")}</span>` : ""}</b><span>vs ${esc(oppFull(m))}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}</span></span>
       <span class="res-out ${m.result || ""}"><i>${esc(m.result || "–")}</i>${m.score?.us ?? 0}–${m.score?.them ?? 0}</span>
     </summary><div class="res-body">
-      <p class="muted" style="margin:0 0 10px">${esc(m.league || "")}${m.week ? ` · Week ${esc(m.week)}` : ""}${m.event ? ` · ${esc(m.event)}` : ""} · Best of ${esc(m.bestOf)}${m.forfeit ? ` · ${m.forfeit === "them" ? "Won by forfeit" : "Forfeit"}` : ""}</p>
+      <p class="muted" style="margin:0 0 10px">${esc(m.league || "")}${roundLabel(m) ? ` · ${esc(roundLabel(m))}` : ""}${m.event ? ` · ${esc(m.event)}` : ""} · Best of ${esc(m.bestOf)}${m.forfeit ? ` · ${m.forfeit === "them" ? "Won by forfeit" : "Forfeit"}` : ""}</p>
       ${games.length ? `<div class="res-games">${games.map(x => `<span class="${x.winner === "us" ? "W" : x.winner === "them" ? "L" : ""}"><small>${esc(g.unit || "Game")} ${x.n}</small>${g.points ? `${x.us}–${x.them}` : x.winner === "us" ? "Won" : x.winner === "them" ? "Lost" : "–"}</span>`).join("")}</div>` : ""}
       ${boxScore(g, m) || (lineup ? `<p style="margin:12px 0 0"><span class="muted">Lineup:</span> ${lineup}</p>` : "")}
       ${w ? `<p style="margin:12px 0 0"><a class="btn btn-line" href="${esc(w)}" target="_blank" rel="noopener">▶ Watch the replay</a></p>` : ""}

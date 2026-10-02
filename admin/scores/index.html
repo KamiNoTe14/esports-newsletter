@@ -183,8 +183,8 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 <div id="toast" class="toast" hidden role="status"></div>
 
 <script type="module">
-import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=8";
+import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, seasonOf, seasonList, termOf, seasonLabel,
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, isMock} from "../../assets/matches.js?v=9";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -302,7 +302,7 @@ function rowHTML(m){
     : m.status === "postponed" ? `<small>Postponed</small>` : m.status === "canceled" ? `<small>Canceled</small>`
     : `${esc(fmtTime(m.startsAt))}<small>${esc(fmtDay(m.startsAt))}</small>`;
   return `<button class="mrow${live ? " live" : ""}" type="button" data-open="${esc(m.id)}">${gameBadge(m)}
-    <span><b>${esc(m.teamName)}</b>${rivalFor(site, m) ? `<span class="rv">⚔ ${esc(rivalFor(site, m).title || "Rivalry")}</span>` : ""}<span class="sub">vs ${esc(m.opponent?.team || m.opponent?.school || "TBD")}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}<br>${esc(m.league)}${m.week ? ` · Wk ${esc(m.week)}` : ""}</span></span>
+    <span><b>${esc(m.teamName)}</b>${rivalFor(site, m) ? `<span class="rv">⚔ ${esc(rivalFor(site, m).title || "Rivalry")}</span>` : ""}<span class="sub">vs ${esc(m.opponent?.team || m.opponent?.school || "TBD")}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}<br>${esc(m.league)}${roundLabel(m, true) ? ` · ${esc(roundLabel(m, true))}` : ""}</span></span>
     <span class="st">${st}</span></button>`;
 }
 function renderList(){
@@ -603,7 +603,8 @@ function renderForm(){
         <label class="f"><span>Stage</span><select name="stage">${STAGES.map(([v, l]) => `<option value="${v}"${v === draft.stage ? " selected" : ""}>${l}</option>`).join("")}</select></label>
       </div>
       <div class="two">
-        <label class="f"><span>Week #</span><input name="week" inputmode="numeric" value="${esc(draft.week || "")}" placeholder="3"></label>
+        <label class="f"><span>Week or round</span><input name="week" list="rounds" value="${esc(draft.week || "")}" placeholder="3, or Round of 32"></label>
+        <datalist id="rounds">${["Round of 64", "Round of 32", "Round of 16", "Quarterfinal", "Semifinal", "State Final", "Third-place match"].map(r => `<option value="${r}">`).join("")}</datalist>
         <label class="f"><span>Event name (optional)</span><input name="event" value="${esc(draft.event || "")}" placeholder="State quarterfinal"></label>
       </div>
       <label class="f"><span>YouTube live link</span><input type="url" name="live" inputmode="url" value="${esc(draft.stream?.live || "")}" placeholder="https://youtube.com/live/…"></label>

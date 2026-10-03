@@ -22,6 +22,7 @@ const NAV = [
   ["teams", "teams.html", "Teams"],
   ["schedule", "schedule.html", "Schedule"],
   ["results", "results.html", "Results"],
+  ["legacy", "legacy.html", "Legacy"],
   ["newsletters", "newsletters.html", "Newsletters"],
   ["media", "media.html", "Media"],
   ["about", "about.html", "About & Join"]
@@ -50,7 +51,7 @@ function footer(site){
     <div class="f-grid">
       <div><h4>${esc(P.name || "Hartland Esports")}</h4><p class="muted" style="margin:0">${esc(P.school || "")}${P.lab ? `<br>${esc(P.lab)}` : ""}</p>${socials(site)}</div>
       <div><h4>Support the team</h4><ul>${support.map(([k, t]) => `<li><a href="${esc(safe(L[k]))}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("") || "<li class='muted'>Coming soon</li>"}</ul></div>
-      <div><h4>More</h4><ul>${more.map(([k, t]) => `<li><a href="${esc(safe(L[k]))}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("")}<li><a href="${BASE}newsletters.html">Newsletter archive</a></li><li><a href="${BASE}schedule.html#subscribe">Add our calendar</a></li></ul></div>
+      <div><h4>More</h4><ul>${more.map(([k, t]) => `<li><a href="${esc(safe(L[k]))}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("")}<li><a href="${BASE}legacy.html">Record book, rivalries & alumni</a></li><li><a href="${BASE}future.html">Future Eagles (grades 6–8)</a></li><li><a href="${BASE}newsletters.html">Newsletter archive</a></li><li><a href="${BASE}feed.xml">RSS feed</a></li><li><a href="${BASE}schedule.html#subscribe">Add our calendar</a></li></ul></div>
     </div>
     <div class="f-base"><span>© ${new Date().getFullYear()} ${esc(P.name || "Hartland Esports")} · Go Eagles!</span><span><a href="${BASE}portal/">Coach portal</a> · <a href="${BASE}admin/">Site manager</a></span></div>
   </div></footer>`;
@@ -189,8 +190,12 @@ function home(site, issues){
   <section class="section"><div class="wrap">${secH("Our teams", `<a class="more" href="${BASE}teams.html">Teams & leagues →</a>`)}${teamCards({...site, sections:{...site.sections, rosters:false}})}</div></section>
 
   ${newsHTML(site, 3) ? `<section class="section alt"><div class="wrap">${secH("In the news", `<a class="more" href="${BASE}media.html">All news →</a>`)}${newsHTML(site, 3)}</div></section>` : ""}
-  ${recordsHTML(site, 4) ? `<section class="section"><div class="wrap">${secH("Program records", `<a class="more" href="${BASE}about.html#records">All records →</a>`)}${recordsHTML(site, 4)}</div></section>` : ""}
-  ${sponsorsHTML(site) ? `<section class="section alt"><div class="wrap">${secH("Thank you to our sponsors")}${sponsorsHTML(site)}</div></section>` : ""}`;
+  ${recordsHTML(site, 4) ? `<section class="section"><div class="wrap">${secH("Program records", `<a class="more" href="${BASE}legacy.html">Record book →</a>`)}${recordsHTML(site, 4)}</div></section>` : ""}
+  <section class="section alt"><div class="wrap"><div class="grid g2">
+    <a class="card news-item" href="${BASE}legacy.html"><p class="eyebrow">Legacy</p><h3>Record book, rivalries & alumni</h3><p class="muted" style="margin:0;font-size:15px">Our all-time record, the schools we love to beat, and the Eagles now playing in college.</p><span class="more">Explore →</span></a>
+    <a class="card news-item" href="${BASE}future.html"><p class="eyebrow">Grades 6–8</p><h3>Future Eagles</h3><p class="muted" style="margin:0;font-size:15px">In middle school? Here's how to get ready for high school esports, and how parents can tell us you're interested.</p><span class="more">Get ready →</span></a>
+  </div></div></section>
+  ${sponsorsHTML(site) ? `<section class="section"><div class="wrap">${secH("Thank you to our sponsors")}${sponsorsHTML(site)}</div></section>` : ""}`;
 }
 function teams(site){
   const d = new Date(), y = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1;
@@ -254,11 +259,74 @@ function about(site){
     </div>
   </div></section>
   <section class="section alt"><div class="wrap">${secH("How our year works")}${timeline(site)}</div></section>
-  <section class="section" id="nextLevel" hidden></section>
-  ${recordsHTML(site) ? `<section class="section" id="records"><div class="wrap">${secH("Program records")}${recordsHTML(site)}</div></section>` : ""}
-  ${support.length ? `<section class="section ${recordsHTML(site) ? "alt" : ""}"><div class="wrap">${secH("Support the team")}<div class="grid g3">${support.map(([k, t, d]) => `<a class="card news-item" href="${esc(safe(L[k]))}" target="_blank" rel="noopener"><h3>${esc(t)}</h3><p class="muted" style="margin:0;font-size:15px">${esc(d)}</p><span class="more" style="font-family:var(--display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)">Visit →</span></a>`).join("")}</div></div></section>` : ""}
+  <section class="section"><div class="wrap"><div class="grid g2">
+    <a class="card news-item" href="${BASE}future.html"><p class="eyebrow">Grades 6–8</p><h3>Future Eagles</h3><p class="muted" style="margin:0;font-size:15px">Not in high school yet? See what to practice now, and how parents can tell us you're interested.</p><span class="more">Get ready →</span></a>
+    <a class="card news-item" href="${BASE}legacy.html"><p class="eyebrow">Legacy</p><h3>Record book, rivalries & alumni</h3><p class="muted" style="margin:0;font-size:15px">What this program has done so far, and where its players go next.</p><span class="more">Explore →</span></a>
+  </div></div></section>
+  ${support.length ? `<section class="section alt"><div class="wrap">${secH("Support the team")}<div class="grid g3">${support.map(([k, t, d]) => `<a class="card news-item" href="${esc(safe(L[k]))}" target="_blank" rel="noopener"><h3>${esc(t)}</h3><p class="muted" style="margin:0;font-size:15px">${esc(d)}</p><span class="more" style="font-family:var(--display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)">Visit →</span></a>`).join("")}</div></div></section>` : ""}
   ${sponsorsHTML(site) ? `<section class="section"><div class="wrap">${secH("Our sponsors")}${sponsorsHTML(site)}</div></section>` : ""}
   <section class="section alt"><div class="wrap">${secH("Follow along")}<p class="lead" style="margin-bottom:6px">Matches stream on YouTube, with highlights across our socials.</p>${socials(site)}</div></section>`;
+}
+
+/* ---------- Legacy: record book, rivalries, alumni (numbers are filled in live from final results) ---------- */
+function rivalList(site){ return (site.rivals || []).filter(r => r.school && r.title); }
+function rivalHref(r){ return `${BASE}rival.html?school=${encodeURIComponent(r.school)}`; }
+function legacy(site){
+  const rv = rivalList(site);
+  return pageH("Record book · Rivalries · Alumni", "Legacy", "Every final result since the program began, the schools we measure ourselves against, and where Eagles go after graduation.")
+  + `<section class="section" id="recordBook"><div class="wrap">${secH("Record book")}
+      <div id="allTime"><div class="loading">Adding up every final…</div></div>
+      ${recordsHTML(site) ? `<h3 class="res-h" style="margin-top:34px">Titles & milestones</h3>${recordsHTML(site)}` : ""}
+    </div></section>`
+  + (rv.length ? `<section class="section alt" id="rivalries"><div class="wrap">${secH("Rivalries")}
+      <div class="grid g2">${rv.map(r => `<a class="card rival-card" href="${rivalHref(r)}" data-rival="${esc(r.school)}">
+        <p class="eyebrow">⚔ ${esc(r.title)}</p><h3>Hartland vs. ${esc(r.school)}</h3>
+        ${r.note ? `<p class="muted" style="margin:0">${esc(r.note)}</p>` : ""}
+        <div class="rival-rec"><b data-rec>–</b><small>all-time</small></div><span class="more">The full story →</span></a>`).join("")}</div>
+    </div></section>` : "")
+  + `<section class="section" id="nextLevel" data-title="Where Eagles go next" data-lead="The road doesn't end at graduation. These Eagles took it to the college level, and it's the same road today's roster is on." hidden></section>`;
+}
+function rival(){ return `<div id="rival"><div class="loading" style="padding:80px 0">Loading the rivalry…</div></div>`; }
+
+/* ---------- Future Eagles (grades 6-8). Wording lives in site.json under "future"; these are the defaults. ---------- */
+const FUTURE = {
+  intro:"There's no middle school team yet, but the best time to start getting ready is now. Here's what our coaches would have a 6th, 7th or 8th grader work on before they ever walk into tryouts.",
+  clinic:"A past winter clinic put our upperclassmen in the coach's chair for a group of middle schoolers. Two of the players who showed up that week are standouts on our roster today.",
+  games:[
+    {key:"rocket-league", name:"Rocket League", good:"You hit the ball where you meant to, you know whose turn it is to go, and you're back in position before the other team shoots.",
+      routine:["10 minutes of free play: hit the ball hard, on purpose, every touch","10 minutes of training packs: shots first, then saves","Play 2v2 or 3v3 and practice rotating back post instead of chasing"]},
+    {key:"smash", name:"Super Smash Bros. Ultimate", good:"You have one main you really know, you can recover from anywhere, and you don't panic when you're behind.",
+      routine:["Pick one main and stick with it for a full month","10 minutes in training mode: movement, short hops and your two best combos","Play sets, not single games, and adjust between games like a tournament"]},
+    {key:"fortnite-zw", name:"Fortnite Zone Wars", good:"You build without thinking about it, you take fights with a height or cover advantage, and you and your duo talk the whole time.",
+      routine:["10 minutes of free building and edit courses","10 minutes of aim training or box fights","Zone Wars with a duo: call out every opponent you see and every rotation"]},
+    {key:"marvel-rivals", name:"Marvel Rivals", good:"You can play at least two roles, you group up before a fight instead of trickling in, and you track the other team's ultimates.",
+      routine:["Learn two heroes in two different roles","Warm up in the practice range before you queue","After each match, name one fight your team lost and why"]}
+  ],
+  habits:[
+    {title:"Watch your own replays", text:"One loss a week. Find the first mistake, not the last one."},
+    {title:"Warm up every time", text:"Ten minutes before the first real match, the same way every day."},
+    {title:"Talk like a teammate", text:"Short, calm callouts about what's happening now. No blaming."},
+    {title:"Be a good sport", text:"Say good game, win or lose. Coaches notice, and so do opponents."},
+    {title:"School comes first", text:"High school players have to stay eligible. Build the habit of finishing homework before you queue."}
+  ]
+};
+function future(site){
+  const F = {...FUTURE, ...(site.future || {})}, form = safe(F.formUrl);
+  const icon = k => ((site.games || []).find(g => g.key === k) || {}).icon;
+  return pageH("Grades 6–8", "Future Eagles", esc(F.intro))
+  + `<section class="section"><div class="wrap">${secH("Get ready for high school")}
+      <div class="grid g2">${F.games.map(g => `<article class="card prep">
+        ${icon(g.key) ? `<img class="game-logo" src="${esc(url(icon(g.key)))}" alt="${esc(g.name)}">` : `<p class="eyebrow">${esc(g.name)}</p>`}
+        <p class="prep-good"><span>What good looks like</span>${esc(g.good)}</p>
+        <p class="prep-h">A 30-minute practice</p><ol>${(g.routine || []).map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+      </article>`).join("")}</div></div></section>
+    <section class="section alt"><div class="wrap">${secH("Habits of a competitor")}
+      <div class="grid g3">${F.habits.map((h, i) => `<div class="card habit"><b>${i + 1}</b><h3>${esc(h.title)}</h3><p class="muted" style="margin:0">${esc(h.text)}</p></div>`).join("")}</div></div></section>
+    ${F.clinic ? `<section class="section"><div class="wrap">${secH("It already works")}<p class="lead">${esc(F.clinic)}</p></div></section>` : ""}
+    <section class="section ${F.clinic ? "alt" : ""}" id="interest"><div class="wrap">${secH("Parents: tell us you're interested")}
+      <div class="card" style="max-width:760px"><p style="margin:0 0 14px">${form ? "A short form for parents and guardians. We ask for your name and email, your student's first name and grade, and the games they play. Nothing else, and no student contact information." : "A short interest form for parents and guardians is on the way, including a question about a possible summer camp. Until it's up, the coaches are happy to answer questions."}</p>
+      ${form ? `<a class="btn btn-gold" href="${esc(form)}" target="_blank" rel="noopener">Open the interest form</a>` : `<a class="btn btn-gold" href="${BASE}about.html#join">Talk to the coaches</a>`}</div>
+    </div></section>`;
 }
 
 /* Home hero: muted looping highlight reel behind the headline. Phones get a smaller file. If the video can't or
@@ -297,13 +365,13 @@ async function boot(){
   try { site = await getJSON("data/site.json"); } catch(e){ app.innerHTML = `<div class="loading">Couldn't load the site. Please refresh.</div>`; return; }
   try { issues = (await getJSON("data/issues.json")).issues || []; } catch(e){}
   document.body.insertAdjacentHTML("afterbegin", header(site));
-  const render = {home, teams, schedule, results, player, newsletters, media, about}[PAGE] || home;
+  const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "about"].includes(PAGE)) import(BASE + "assets/live.js?v=17").then(L => {
-    if (PAGE === "about") L.startNextLevel(site);
+  if (["home", "schedule", "results", "player", "legacy", "rival"].includes(PAGE)) import(BASE + "assets/live.js?v=18").then(L => {
+    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
-  }).catch(e => { console.error(e); const r = $("#results") || $("#player"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
+  }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#rival") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));
   heroSetup();
   const btn = $(".nav-btn"), nav = $("#nav");

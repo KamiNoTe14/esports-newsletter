@@ -223,8 +223,8 @@ export function startNextLevel(site){
   watchDirectory(d => {
     const list = (d.alumni || []).filter(p => (p.now || "").trim() && (p.name || p.tag)).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
     host.hidden = !list.length; if (!list.length) return;
-    host.innerHTML = `<div class="wrap"><div class="sec-h"><h2>Eagles at the next level</h2></div>
-      <p class="lead" style="margin:0 0 18px">Hartland Esports alumni who kept playing after graduation.</p>
+    host.innerHTML = `<div class="wrap"><div class="sec-h"><h2>${esc(host.dataset.title || "Eagles at the next level")}</h2></div>
+      <p class="lead" style="margin:0 0 18px">${esc(host.dataset.lead || "Hartland Esports alumni who kept playing after graduation.")}</p>
       <div class="grid g3">${list.map(p => { const nm = p.private || !p.name ? p.tag : p.name; return `<a class="card next-card" href="${BASE}player.html?id=${encodeURIComponent(p.id)}">
         <p class="eyebrow">${p.gradYear ? `Class of ${esc(p.gradYear)}` : "Alumni"}</p><h3>${esc(nm)}</h3>${!p.private && p.name && p.tag ? `<p class="tag">${esc(p.tag)}</p>` : ""}
         <p class="now">${esc(p.now)}</p></a>`; }).join("")}</div></div>`;
@@ -267,8 +267,18 @@ function drawPlayer(site, host, all, dir){
     });
     (rows.length ? rows.map(r => r.role) : (mine.roles || [])).filter(Boolean).forEach(r => s.roles[r] = (s.roles[r] || 0) + 1);
     rows.map(r => r.hero).filter(Boolean).forEach(c => s.chars[c] = (s.chars[c] || 0) + 1); });
-  /* Only a player's three most-used characters are shown, in alphabetical order, so the page never says how often each is played. */
-  const top3 = o => Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3).map(x => x[0]).sort((a, b) => a.localeCompare(b));
+  /* Top characters: the main first, then two more. The coach can type them on the player's profile ("chars"); otherwise they are
+     ranked from the characters picked in final matches. How often each was played is never shown. */
+  const ranked = o => Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3).map(x => x[0]);
+  const manual = String(prof.chars || "").split(",").map(x => x.trim()).filter(Boolean).slice(0, 3);
+  const charGames = (site.games || []).map(g0 => { if (!String(g0.charLabel || "").trim()) return null;
+    const known = String(g0.chars || "").split(/[,\n]/).map(c => c.trim().toLowerCase()).filter(Boolean);
+    const list = manual.length && known.includes(manual[0].toLowerCase()) ? manual : ranked(byGame[g0.key]?.chars || {});
+    return list.length ? {g:g0, list, dir:String(g0.charArt || g0.charIcons || "").replace(/\/$/, "")} : null; }).filter(Boolean);
+  const src = p => /^https?:/.test(p) ? p : BASE + p;
+  const clip = (String(prof.heroClipId || "").match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([\w-]{11})/) || [])[1] || (/^[\w-]{11}$/.test(String(prof.heroClipId || "").trim()) ? prof.heroClipId.trim() : "");
+  const playlist = safe(prof.playlistUrl) || safe(prof.highlights);
+  const playing = host.querySelector(".clip.on");
   const mainRoles = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(x => x[0]);
   const W = played.filter(m => m.result === "W").length, L = played.filter(m => m.result === "L").length;
   host.innerHTML = `<section class="page-h player-h"><div class="wrap player-top">
@@ -281,18 +291,105 @@ function drawPlayer(site, host, all, dir){
       </div>
       <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${played.length} match${played.length === 1 ? "" : "es"}</span></div>
     </div></section>
-    ${prof.bio || safe(prof.highlights) ? `<section class="section"><div class="wrap grid g2" style="align-items:start">
+    ${prof.bio || clip || playlist ? `<section class="section"><div class="wrap grid g2" style="align-items:start">
       ${prof.bio ? `<div><h2 class="res-h">About</h2><p class="lead" style="margin:0">${esc(prof.bio)}</p></div>` : ""}
-      ${safe(prof.highlights) ? `<div><h2 class="res-h">Highlights</h2><a class="btn btn-gold" href="${esc(safe(prof.highlights))}" target="_blank" rel="noopener">▶ Watch highlight reel</a>${prof.recruit ? `<p class="muted" style="margin:14px 0 0">College coaches: reach out to ${(site.coaches || []).filter(c => c.email).map(c => `<a href="mailto:${esc(c.email)}">Coach ${esc(c.name.split(" ").pop())}</a>`).join(" or ") || "our coaches through the About page"}.</p>` : ""}</div>` : ""}
+      ${clip || playlist ? `<div><h2 class="res-h">Highlights</h2>
+        ${clip ? `<button class="clip" type="button" data-yt="${esc(clip)}" aria-label="Play ${esc(display)}'s highlight"><img src="https://i.ytimg.com/vi/${esc(clip)}/hqdefault.jpg" alt="" loading="lazy"><span aria-hidden="true">▶</span></button>` : ""}
+        ${playlist ? `<p style="margin:14px 0 0"><a ${clip ? "" : 'class="btn btn-gold" '}href="${esc(playlist)}" target="_blank" rel="noopener">${clip ? "See all highlights →" : "▶ Watch highlights"}</a></p>` : ""}
+        ${prof.recruit ? `<p class="muted" style="margin:14px 0 0">College coaches: detailed stats and full match film are available on request. Reach out to ${(site.coaches || []).filter(c => c.email).map(c => `<a href="mailto:${esc(c.email)}">Coach ${esc(c.name.split(" ").pop())}</a>`).join(" or ") || `<a href="${BASE}about.html#join">our coaches</a>`}.</p>` : ""}</div>` : ""}
     </div></section>` : ""}
-    <section class="section ${prof.bio || prof.highlights ? "alt" : ""}"><div class="wrap">
+    ${charGames.length ? `<section class="section ${prof.bio || clip || playlist ? "alt" : ""}"><div class="wrap"><h2 class="res-h">Characters</h2><div class="grid g2">${charGames.map(c => `<div class="card mains2">
+      <div class="main">${c.dir ? `<img class="main-art" src="${esc(src(c.dir + "/" + slug(c.list[0])))}-art.webp" alt="" loading="lazy" onerror="this.remove()">` : ""}<div class="main-cap">${c.g.charArt ? `<img class="main-sig" src="${esc(src(c.dir + "/" + slug(c.list[0])))}-sig.webp" alt="" onerror="this.remove()">` : ""}<small>Main</small><b>${esc(c.list[0])}</b></div></div>
+      <div class="alts">${c.g.icon ? `<img class="game-logo" src="${esc(src(c.g.icon))}" alt="${esc(c.g.name)}">` : `<p class="eyebrow">${esc(c.g.name)}</p>`}
+        ${c.list.length > 1 ? `<p class="mains-h">Also plays</p>${c.list.slice(1).map(n => `<span class="alt">${c.dir ? `<img src="${esc(src(c.dir + "/" + slug(n)))}-logo.webp" alt="" onerror="this.remove()">` : ""}${esc(n)}</span>`).join("")}` : ""}</div>
+    </div>`).join("")}</div></div></section>` : ""}
+    <section class="section ${!!(prof.bio || clip || playlist) !== !!charGames.length ? "alt" : ""}"><div class="wrap">
       <h2 class="res-h">Stats</h2>
       ${Object.keys(byGame).length ? `<div class="grid g2">${Object.values(byGame).map(s => `<div class="card stat-card">${s.game.statArt || s.game.art ? `<img class="team-art" src="${esc(BASE + (s.game.statArt || s.game.art))}" alt="">` : ""}${s.game.icon ? `<img class="game-logo" src="${esc(/^https?:/.test(s.game.icon) ? s.game.icon : BASE + s.game.icon)}" alt="${esc(s.game.name)}">` : `<p class="eyebrow">${esc(s.game.name)}</p>`}
         <div class="stat-row"><div><b>${s.n}</b><small>Matches</small></div><div><b>${s.w}–${s.l}</b><small>Record</small></div>${(s.game.statList || []).filter(x => x.avg ? (s.avg[x.key] || []).length : x.key in s.tot).map(x => x.avg ? `<div><b>${(s.avg[x.key].reduce((a, b) => a + b, 0) / s.avg[x.key].length).toFixed(1)}%</b><small>${esc(x.label.replace(/\s*%\s*$/, ""))}<br>average</small></div>` : `<div><b>${s.tot[x.key].toLocaleString("en-US")}</b><small>${esc(x.label)}<br>${(s.tot[x.key] / (s.cnt[x.key] || s.n)).toLocaleString("en-US", {maximumFractionDigits:1})}/match</small></div>`).join("")}</div>
-        ${mainRoles(s.roles).length || top3(s.chars).length ? `<div class="stat-tags">${mainRoles(s.roles).length ? `<p><span>Role</span>${mainRoles(s.roles).map(esc).join(" · ")}</p>` : ""}${top3(s.chars).length && !s.game.charArt && !s.game.charIcons ? `<p><span>${esc((s.game.charLabel || "Character").trim())}es</span>${top3(s.chars).map(esc).join(" · ")}</p>`.replace("Characteres", "Characters") : ""}</div>` : ""}${s.game.charIcons && !s.game.charArt && top3(s.chars).length ? `<p class="mains-h">Top ${esc((s.game.charLabel || "Character").trim().toLowerCase())}s</p><div class="main-chips">${top3(s.chars).map(c => `<span><img src="${esc(BASE + s.game.charIcons.replace(/\/$/, "") + "/" + slug(c))}-icon.png" alt="" onerror="this.remove()">${esc(c)}</span>`).join("")}</div>` : ""}${s.game.charArt && top3(s.chars).length ? `<p class="mains-h">Top ${esc((s.game.charLabel || "Character").trim().toLowerCase())}es</p><div class="mains">${top3(s.chars).map(c => { const b = BASE + s.game.charArt.replace(/\/$/, "") + "/" + slug(c); return `<div class="main"><img class="main-art" src="${esc(b)}-art.webp" alt="" loading="lazy" onerror="this.remove()"><img class="main-logo" src="${esc(b)}-logo.webp" alt="" onerror="this.remove()"><div class="main-cap"><img class="main-sig" src="${esc(b)}-sig.webp" alt="" onerror="this.remove()"><b>${esc(c)}</b></div></div>`; }).join("")}</div>`.replace("characteres", "characters") : ""}</div>`).join("")}</div>`
+        ${mainRoles(s.roles).length ? `<div class="stat-tags"><p><span>Role</span>${mainRoles(s.roles).map(esc).join(" · ")}</p></div>` : ""}</div>`).join("")}</div>`
         : `<div class="empty">Stats show up here after ${esc(display)} plays a match.</div>`}
       ${played.length ? `<h2 class="res-h" style="margin-top:34px">Match log</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Team</th><th>Opponent</th><th class="n">Result</th><th>Stats</th></tr></thead><tbody>${played.map(m => { const st = (m.players.find(p => p.id === id) || {}).stats || {}, g = gameFor(site, m.game);
         const yr = new Date(m.startsAt).getFullYear();
         return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => x.avg ? `${fmtStat(x, st[x.key])} ${esc(x.label.replace(/\s*%\s*$/, ""))}` : `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
     </div></section>`;
+  const btn = host.querySelector(".clip");
+  if (btn && playing && playing.dataset.yt === btn.dataset.yt) btn.replaceWith(playing);
+  else if (btn) btn.onclick = () => { const f = document.createElement("div"); f.className = "clip on"; f.dataset.yt = btn.dataset.yt;
+    f.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(btn.dataset.yt)}?autoplay=1&rel=0" title="Highlight video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`; btn.replaceWith(f); };
+}
+
+/* ---------- every FINAL match, all seasons. The record book, rivalry pages and player pages are built from this and
+   nothing else: a match that is still live or upcoming never counts toward permanent history. ---------- */
+function watchFinals(site, cb){
+  const NOW = seasonOf(), full = {}, watching = new Set();
+  let arch = [], dir = {alumni:[], seasons:[]}, ready = false;
+  learnPeople(site, null);
+  const draw = () => { if (ready) cb(merge([...arch, ...Object.values(full).flat()], null).filter(m => m.status === "final"), dir); };
+  const watch = se => { if (watching.has(se)) return; watching.add(se); watchSeason(se, d => { full[se] = d.matches || []; ready = true; draw(); }); };
+  watch(NOW);
+  watchDirectory(d => { dir = d; learnPeople(site, d); d.seasons.forEach(watch); draw(); });
+  archiveSeasons().then(async seasons => { arch = (await Promise.all(seasons.map(archive))).flat(); ready = true; draw(); });
+  setTimeout(() => { ready = true; draw(); }, 5000);
+}
+const wl = list => { const w = list.filter(m => m.result === "W").length, l = list.filter(m => m.result === "L").length; return {w, l, text:`${w}–${l}`}; };
+const rivalKey = n => String(n || "").toLowerCase().replace(/\s+(high\s+school|hs|school)\s*$/i, "").replace(/[^a-z0-9]+/g, " ").trim();
+const byNewest = (a, b) => a.startsAt > b.startsAt ? -1 : 1;
+
+export function startLegacy(site){
+  startNextLevel(site);
+  const host = $("#allTime");
+  watchFinals(site, fin => {
+    document.querySelectorAll("[data-rival]").forEach(c => { const r = {school:c.dataset.rival}; const vs = fin.filter(m => rivalFor({rivals:[r]}, m)); c.querySelector("[data-rec]").textContent = vs.length ? wl(vs).text : "0–0"; });
+    if (!host) return;
+    if (!fin.length){ host.innerHTML = `<div class="empty">The record book fills in as soon as the first match is final.</div>`; return; }
+    const seasons = [...new Set(fin.map(m => m.season || seasonOf(m.startsAt)))].sort().reverse();
+    const games = [...new Set(fin.map(m => m.game))].map(k => ({g:gameFor(site, k), list:fin.filter(m => m.game === k)})).sort((a, b) => b.list.length - a.list.length);
+    const post = fin.filter(m => postseason(m));
+    host.innerHTML = `<div class="rb-top">
+        <div class="rb-big"><small>All-time record</small><b>${wl(fin).text}</b><span>${fin.length} matches · ${seasons.length} season${seasons.length === 1 ? "" : "s"}</span></div>
+        ${post.length ? `<div class="rb-big"><small>🏆 Playoffs</small><b>${wl(post).text}</b><span>${post.length} playoff match${post.length === 1 ? "" : "es"}</span></div>` : ""}
+      </div>
+      <div class="grid g2" style="margin-top:18px;align-items:start">
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>By game</th><th class="n">W</th><th class="n">L</th></tr></thead><tbody>${games.map(x => `<tr><td>${esc(x.g.name || x.list[0].gameName || "Other")}</td><td class="n">${wl(x.list).w}</td><td class="n">${wl(x.list).l}</td></tr>`).join("")}</tbody></table></div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>By season</th><th class="n">W</th><th class="n">L</th></tr></thead><tbody>${seasons.map(se => { const l = fin.filter(m => (m.season || seasonOf(m.startsAt)) === se); return `<tr><td><a href="${BASE}results.html#season-${se}">${esc(seasonLabel(se))}</a></td><td class="n">${wl(l).w}</td><td class="n">${wl(l).l}</td></tr>`; }).join("")}</tbody></table></div>
+      </div>
+      <p class="muted" style="margin:14px 0 0;font-size:14px">Counts every match marked final. Matches in progress are never included.</p>`;
+  });
+}
+
+/* ---------- one rivalry: head-to-head, next meeting, every meeting ---------- */
+export function startRival(site){
+  const host = $("#rival"); if (!host) return;
+  const want = rivalKey(new URLSearchParams(location.search).get("school"));
+  const r = (site.rivals || []).find(x => rivalKey(x.school) === want);
+  if (!r){ host.innerHTML = `<section class="section"><div class="wrap"><div class="empty">We couldn't find that rivalry. <a href="${BASE}legacy.html#rivalries">See all rivalries</a>.</div></div></section>`; return; }
+  document.title = `Hartland vs. ${r.school} · Hartland Esports`;
+  let fin = [], board = null, loaded = false;
+  const mine = m => !!rivalFor({rivals:[r]}, m);
+  const draw = () => {
+    const vs = fin.filter(mine).sort(byNewest), rec = wl(vs);
+    const next = (board?.matches || []).filter(m => (m.status === "upcoming" || m.status === "live") && mine(m)).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1)[0];
+    let streak = ""; if (vs.length){ const first = vs[0].result; let n = 0; for (const m of vs){ if (m.result === first) n++; else break; } if (first === "W" || first === "L") streak = `${first === "W" ? "Hartland has" : `${r.school} has`} won the last ${n === 1 ? "meeting" : n + " meetings"}`; }
+    const lead = !vs.length ? "" : rec.w > rec.l ? `Hartland leads the series ${rec.text}.` : rec.w < rec.l ? `${r.school} leads the series ${rec.l}–${rec.w}.` : `The series is tied ${rec.text}.`;
+    const games = [...new Set(vs.map(m => m.game))].map(k => ({g:gameFor(site, k), list:vs.filter(m => m.game === k)}));
+    const notable = vs.filter(m => postseason(m) || Math.abs((m.score?.us || 0) - (m.score?.them || 0)) === 1).slice(0, 4);
+    const open = new Set([...host.querySelectorAll("details[open]")].map(d => d.id));
+    host.innerHTML = `<section class="page-h"><div class="wrap">
+        <p class="eyebrow">⚔ ${esc(r.title || "Rivalry")}</p><h1 style="font-size:clamp(38px,6vw,68px)">Hartland vs. ${esc(r.school)}</h1>
+        <p class="lead">${esc(r.story || r.note || "")}</p></div></section>
+      <section class="section"><div class="wrap">
+        <div class="rb-top"><div class="rb-big"><small>All-time head to head</small><b>${loaded ? rec.text : "–"}</b><span>${vs.length ? `${esc(lead)}${streak ? ` ${esc(streak)}.` : ""}` : loaded ? "No meetings on record yet. The first chapter is still to be written." : ""}</span></div>
+          <div class="rb-big next"><small>Next meeting</small>${next ? `<b>${esc(fmtDay(next.startsAt))}</b><span>${next.status === "live" ? `<span class="pill-live">Live</span> ` : ""}${esc(next.teamName)} · ${esc(fmtTime(next.startsAt))}${postseason(next) ? ` · 🏆 ${esc(postseason(next).label)}` : ""}</span>` : `<b class="tbd">TBD</b><span>Not on the schedule yet. It will show up here as soon as it is.</span>`}</div></div>
+        ${games.length > 1 ? `<div class="chips" style="margin-top:16px">${games.map(x => `<span class="chip">${esc(x.g.short || x.g.name || "Other")} <b style="margin-left:6px">${wl(x.list).text}</b></span>`).join("")}</div>` : ""}
+      </div></section>
+      ${notable.length ? `<section class="section alt"><div class="wrap"><h2 class="res-h">Matches to remember</h2><div class="grid g2">${notable.map(m => `<a class="card news-item" href="#m-${esc(m.id)}" data-open="m-${esc(m.id)}"><p class="eyebrow">${esc(fmtDay(m.startsAt))}, ${new Date(m.startsAt).getFullYear()}${postseason(m) ? ` · 🏆 ${esc(postseason(m).label)}` : ""}</p><h3>${m.result === "W" ? "Hartland" : esc(r.school)} ${Math.max(m.score?.us || 0, m.score?.them || 0)}–${Math.min(m.score?.us || 0, m.score?.them || 0)}</h3><p class="muted" style="margin:0;font-size:15px">${esc(m.teamName)}${postseason(m) ? ", with the season on the line" : ", decided by a single game"}.</p></a>`).join("")}</div></div></section>` : ""}
+      ${vs.length ? `<section class="section"><div class="wrap"><h2 class="res-h">Every meeting</h2><div class="res-list">${vs.map(m => resultRow(site, m)).join("")}</div></div></section>` : ""}
+      <section class="section alt"><div class="wrap"><a class="btn btn-line" href="${BASE}legacy.html#rivalries">← All rivalries</a></div></section>`;
+    host.querySelectorAll("details").forEach(d => { if (open.has(d.id)) d.open = true; });
+    host.querySelectorAll("[data-open]").forEach(a => a.onclick = e => { e.preventDefault(); const d = document.getElementById(a.dataset.open); if (d){ d.open = true; d.scrollIntoView({block:"center", behavior:"smooth"}); } });
+  };
+  draw();
+  watchFinals(site, f => { fin = f; loaded = true; draw(); });
+  watchBoard(b => { board = b; draw(); });
 }

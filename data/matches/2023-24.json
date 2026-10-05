@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:20:17.671Z",
+  "updated": "2026-10-05T20:20:43.033Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -900,151 +900,163 @@
     },
     {
       "id": "flN7Q3gtoYOBvUjhQUXR",
-      "players": [
-        {
-          "private": false,
-          "name": "Kyle Greig",
-          "alum": true,
-          "stats": {
-            "assists": 2,
-            "goals": 4,
-            "shots": 14,
-            "saves": 7
-          },
-          "games": [
-            1,
-            2,
-            3,
-            4
-          ],
-          "id": "p-88ef0aea",
-          "tag": "Ksquiggly.RL"
-        },
-        {
-          "tag": "goodnics",
-          "private": false,
-          "games": [
-            1,
-            2,
-            3,
-            4
-          ],
-          "stats": {
-            "saves": 5,
-            "shots": 6,
-            "assists": 2,
-            "goals": 0
-          },
-          "id": "p-a1be1608",
-          "alum": true,
-          "name": "Lincoln Deman"
-        },
-        {
-          "alum": true,
-          "name": "Troy Beaudoin",
-          "stats": {},
-          "games": [],
-          "tag": "Tyro.",
-          "private": false,
-          "id": "p-8a733446"
-        },
-        {
-          "tag": "SsnowyGG",
-          "stats": {
-            "goals": 3,
-            "shots": 12,
-            "assists": 2,
-            "saves": 8
-          },
-          "alum": true,
-          "name": "Christian Gatien",
-          "id": "p-5310cd2b",
-          "games": [
-            1,
-            2,
-            3,
-            4
-          ],
-          "private": false
-        },
-        {
-          "tag": "GoodName.mp4",
-          "games": [],
-          "name": "Joseph Wisniewski",
-          "alum": true,
-          "id": "p-a7fe3ce9",
-          "private": false,
-          "stats": {}
-        }
-      ],
-      "source": {},
-      "term": "fall",
-      "updatedAt": "2026-10-05T20:20:16.338Z",
-      "week": "7",
-      "teamId": "t5",
-      "seriesOnly": false,
-      "game": "rocket-league",
-      "result": "T",
-      "teamName": "Rocket League Varsity",
+      "result": "L",
+      "forfeit": null,
+      "clinched": "them",
+      "gameName": "Rocket League",
       "status": "final",
       "stage": "regular",
       "league": "MHSEL",
+      "current": 5,
       "event": "MHSEL Fall 2023",
+      "opponent": {
+        "logo": "",
+        "school": "Detroit Catholic Central",
+        "abbr": "DCC",
+        "team": "Detroit Catholic Central",
+        "short": ""
+      },
+      "perGame": true,
+      "source": {},
+      "updatedAt": "2026-10-05T20:20:41.704Z",
+      "seriesOnly": false,
+      "startsAt": "2023-11-09T21:00:00.000Z",
+      "teamId": "t5",
+      "teamName": "Rocket League Varsity",
+      "term": "fall",
+      "week": "7",
+      "players": [
+        {
+          "tag": "Ksquiggly.RL",
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "stats": {
+            "goals": 4,
+            "saves": 7,
+            "assists": 2,
+            "shots": 14
+          },
+          "id": "p-88ef0aea",
+          "private": false,
+          "alum": true,
+          "name": "Kyle Greig"
+        },
+        {
+          "tag": "goodnics",
+          "alum": true,
+          "name": "Lincoln Deman",
+          "stats": {
+            "goals": 0,
+            "saves": 5,
+            "assists": 2,
+            "shots": 6
+          },
+          "id": "p-a1be1608",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "id": "p-8a733446",
+          "private": false,
+          "tag": "Tyro.",
+          "alum": true,
+          "name": "Troy Beaudoin",
+          "stats": {},
+          "games": []
+        },
+        {
+          "alum": true,
+          "name": "Christian Gatien",
+          "stats": {
+            "saves": 8,
+            "shots": 12,
+            "goals": 3,
+            "assists": 2
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "id": "p-5310cd2b",
+          "tag": "SsnowyGG",
+          "private": false
+        },
+        {
+          "private": false,
+          "games": [],
+          "id": "p-a7fe3ce9",
+          "alum": true,
+          "name": "Joseph Wisniewski",
+          "tag": "GoodName.mp4",
+          "stats": {}
+        }
+      ],
+      "season": "2023-24",
+      "level": "Varsity",
+      "bestOf": 5,
+      "notes": "",
+      "score": {
+        "us": 2,
+        "them": 3
+      },
       "stream": {
         "vod": "",
         "live": ""
       },
-      "startsAt": "2023-11-09T21:00:00.000Z",
-      "score": {
-        "us": 2,
-        "them": 2
-      },
-      "current": 4,
-      "perGame": true,
+      "game": "rocket-league",
       "games": [
         {
-          "them": 0,
           "n": 1,
           "winner": "us",
+          "us": 1,
+          "them": 0,
           "p": {
             "p-88ef0aea": {
-              "goals": 0,
               "shots": 1,
               "assists": 0,
-              "saves": 2
+              "saves": 2,
+              "goals": 0
             },
             "p-5310cd2b": {
-              "shots": 2,
-              "saves": 2,
               "goals": 1,
-              "assists": 0
+              "assists": 0,
+              "shots": 2,
+              "saves": 2
             },
             "p-a1be1608": {
-              "shots": 2,
-              "saves": 1,
+              "goals": 0,
               "assists": 0,
-              "goals": 0
+              "shots": 2,
+              "saves": 1
             }
-          },
-          "us": 1
+          }
         },
         {
           "winner": "them",
           "n": 2,
-          "them": 2,
-          "us": 1,
           "p": {
             "p-5310cd2b": {
-              "goals": 0,
-              "saves": 1,
+              "shots": 3,
               "assists": 1,
-              "shots": 3
+              "saves": 1,
+              "goals": 0
             },
             "p-a1be1608": {
               "goals": 0,
-              "saves": 2,
               "assists": 0,
-              "shots": 2
+              "shots": 2,
+              "saves": 2
             },
             "p-88ef0aea": {
               "shots": 4,
@@ -1052,43 +1064,40 @@
               "assists": 0,
               "goals": 1
             }
-          }
+          },
+          "us": 1,
+          "them": 2
         },
         {
-          "winner": "them",
           "them": 2,
-          "us": 1,
           "n": 3,
+          "winner": "them",
+          "us": 1,
           "p": {
-            "p-88ef0aea": {
-              "goals": 0,
-              "saves": 1,
+            "p-5310cd2b": {
+              "goals": 1,
               "shots": 3,
-              "assists": 1
+              "assists": 0,
+              "saves": 3
             },
             "p-a1be1608": {
+              "goals": 0,
+              "assists": 0,
               "shots": 1,
-              "saves": 1,
-              "assists": 0,
-              "goals": 0
+              "saves": 1
             },
-            "p-5310cd2b": {
+            "p-88ef0aea": {
+              "assists": 1,
+              "goals": 0,
               "shots": 3,
-              "saves": 3,
-              "assists": 0,
-              "goals": 1
+              "saves": 1
             }
           }
         },
         {
-          "us": 4,
+          "n": 4,
+          "them": 3,
           "p": {
-            "p-88ef0aea": {
-              "assists": 1,
-              "shots": 6,
-              "saves": 0,
-              "goals": 3
-            },
             "p-a1be1608": {
               "goals": 0,
               "assists": 2,
@@ -1097,30 +1106,27 @@
             },
             "p-5310cd2b": {
               "goals": 1,
-              "assists": 1,
               "shots": 4,
+              "assists": 1,
               "saves": 2
+            },
+            "p-88ef0aea": {
+              "shots": 6,
+              "saves": 0,
+              "assists": 1,
+              "goals": 3
             }
           },
-          "winner": "us",
-          "n": 4,
-          "them": 3
+          "us": 4,
+          "winner": "us"
+        },
+        {
+          "us": 0,
+          "winner": "them",
+          "them": 2,
+          "n": 5
         }
-      ],
-      "forfeit": null,
-      "gameName": "Rocket League",
-      "clinched": null,
-      "opponent": {
-        "team": "Detroit Catholic Central",
-        "school": "Detroit Catholic Central",
-        "logo": "",
-        "short": "",
-        "abbr": "DCC"
-      },
-      "season": "2023-24",
-      "level": "Varsity",
-      "notes": "",
-      "bestOf": 5
+      ]
     }
   ]
 }

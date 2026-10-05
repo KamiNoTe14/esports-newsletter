@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T18:35:36.064Z",
+  "updated": "2026-10-05T18:45:44.859Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -2014,89 +2014,89 @@
     },
     {
       "id": "VgYPrjnzvnOycHQKOJUF",
-      "level": "Varsity",
-      "updatedAt": "2026-10-05T18:35:34.088Z",
+      "current": 7,
+      "opponent": {
+        "team": "Falcons Rocket League",
+        "short": "",
+        "logo": "",
+        "school": "Rochester High School",
+        "abbr": "ROC"
+      },
+      "stage": "playoffs",
+      "result": "W",
+      "game": "rocket-league",
+      "event": "MHSEL Fall 2024 State Championship at MSU",
+      "startsAt": "2024-12-07T17:00:00.000Z",
+      "perGame": false,
+      "forfeit": null,
+      "gameName": "Rocket League",
       "players": [],
-      "week": "State Final",
       "score": {
         "us": 4,
         "them": 3
       },
-      "forfeit": null,
-      "result": "W",
-      "gameName": "Rocket League",
-      "season": "2024-25",
-      "perGame": false,
-      "opponent": {
-        "short": "",
-        "logo": "",
-        "abbr": "ROC",
-        "team": "Falcons Rocket League",
-        "school": "Rochester High School"
-      },
-      "event": "MHSEL Fall 2024 State Championship at MSU",
-      "stage": "playoffs",
-      "startsAt": "2024-12-07T17:00:00.000Z",
-      "current": 7,
-      "source": {},
+      "level": "Varsity",
       "term": "fall",
-      "league": "MHSEL",
-      "status": "final",
-      "bestOf": 7,
-      "clinched": "us",
+      "season": "2024-25",
+      "games": [
+        {
+          "winner": "them",
+          "n": 1,
+          "them": 5,
+          "us": 4
+        },
+        {
+          "them": 3,
+          "us": 2,
+          "winner": "them",
+          "n": 2
+        },
+        {
+          "them": 1,
+          "us": 4,
+          "winner": "us",
+          "n": 3
+        },
+        {
+          "them": 2,
+          "n": 4,
+          "us": 1,
+          "winner": "them"
+        },
+        {
+          "n": 5,
+          "us": 1,
+          "winner": "us",
+          "them": 0
+        },
+        {
+          "us": 3,
+          "them": 2,
+          "n": 6,
+          "winner": "us"
+        },
+        {
+          "n": 7,
+          "winner": "us",
+          "them": 1,
+          "us": 3
+        }
+      ],
       "stream": {
         "vod": "",
         "live": "https://youtu.be/IPfxl3J5YeE"
       },
+      "seriesOnly": false,
+      "status": "final",
+      "bestOf": 7,
+      "teamName": "Rocket League Varsity",
+      "league": "MHSEL",
+      "source": {},
       "notes": "",
-      "teamId": "t5",
-      "game": "rocket-league",
-      "seriesOnly": true,
-      "games": [
-        {
-          "n": 1,
-          "winner": "us",
-          "us": 0,
-          "them": 0
-        },
-        {
-          "winner": "us",
-          "n": 2,
-          "them": 0,
-          "us": 0
-        },
-        {
-          "winner": "us",
-          "us": 0,
-          "n": 3,
-          "them": 0
-        },
-        {
-          "winner": "us",
-          "us": 0,
-          "them": 0,
-          "n": 4
-        },
-        {
-          "n": 5,
-          "them": 0,
-          "us": 0,
-          "winner": "them"
-        },
-        {
-          "n": 6,
-          "us": 0,
-          "them": 0,
-          "winner": "them"
-        },
-        {
-          "winner": "them",
-          "them": 0,
-          "n": 7,
-          "us": 0
-        }
-      ],
-      "teamName": "Rocket League Varsity"
+      "updatedAt": "2026-10-05T18:45:43.393Z",
+      "clinched": "us",
+      "week": "State Final",
+      "teamId": "t5"
     }
   ]
 }

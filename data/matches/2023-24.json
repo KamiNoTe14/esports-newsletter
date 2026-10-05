@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:36:05.102Z",
+  "updated": "2026-10-05T20:36:10.239Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -1819,27 +1819,8 @@
     },
     {
       "id": "QL52moN4rlOQ5UiFar42",
-      "forfeit": null,
       "clinched": "us",
       "gameName": "Rocket League",
-      "status": "final",
-      "league": "MHSEL",
-      "perGame": false,
-      "result": "W",
-      "current": 5,
-      "updatedAt": "2026-10-05T20:36:03.602Z",
-      "opponent": {
-        "team": "Detroit Catholic Central",
-        "school": "Detroit Catholic Central",
-        "logo": "",
-        "short": "",
-        "abbr": "DCC"
-      },
-      "teamId": "t5",
-      "stage": "playoffs",
-      "startsAt": "2023-12-09T15:00:00.000Z",
-      "event": "MHSEL Fall 2023 State Championships at Oakland University",
-      "source": {},
       "games": [
         {
           "n": 1,
@@ -1849,9 +1830,9 @@
         },
         {
           "n": 2,
-          "them": 0,
+          "winner": "us",
           "us": 0,
-          "winner": "us"
+          "them": 0
         },
         {
           "n": 3,
@@ -1860,36 +1841,113 @@
           "us": 0
         },
         {
+          "winner": "us",
           "n": 4,
-          "them": 0,
           "us": 0,
-          "winner": "us"
+          "them": 0
         },
         {
-          "them": 0,
-          "n": 5,
           "us": 0,
-          "winner": "them"
+          "winner": "them",
+          "n": 5,
+          "them": 0
         }
       ],
-      "teamName": "Rocket League Varsity",
-      "bestOf": 7,
-      "term": "fall",
-      "season": "2023-24",
-      "week": "Semifinal",
+      "opponent": {
+        "team": "Detroit Catholic Central",
+        "short": "",
+        "abbr": "DCC",
+        "logo": "",
+        "school": "Detroit Catholic Central"
+      },
+      "stream": {
+        "vod": "",
+        "live": "https://youtu.be/NBTij5eZnx4"
+      },
       "score": {
         "us": 4,
         "them": 1
       },
-      "players": [],
+      "startsAt": "2023-12-09T15:00:00.000Z",
+      "bestOf": 7,
       "level": "Varsity",
-      "seriesOnly": true,
       "notes": "",
-      "game": "rocket-league",
-      "stream": {
-        "vod": "",
-        "live": "https://youtu.be/NBTij5eZnx4"
-      }
+      "season": "2023-24",
+      "players": [
+        {
+          "tag": "Ksquiggly.RL",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "name": "Kyle Greig",
+          "alum": true,
+          "id": "p-88ef0aea",
+          "private": false,
+          "stats": {}
+        },
+        {
+          "name": "Lincoln Deman",
+          "alum": true,
+          "id": "p-a1be1608",
+          "private": false,
+          "stats": {},
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "tag": "goodnics"
+        },
+        {
+          "id": "p-5310cd2b",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "stats": {},
+          "name": "Christian Gatien",
+          "alum": true,
+          "tag": "SsnowyGG"
+        },
+        {
+          "name": "Joseph Wisniewski",
+          "games": [],
+          "alum": true,
+          "id": "p-a7fe3ce9",
+          "private": false,
+          "tag": "GoodName.mp4",
+          "stats": {}
+        }
+      ],
+      "week": "Semifinal",
+      "teamId": "t5",
+      "teamName": "Rocket League Varsity",
+      "seriesOnly": true,
+      "updatedAt": "2026-10-05T20:36:08.833Z",
+      "term": "fall",
+      "source": {},
+      "event": "MHSEL Fall 2023 State Championships at Oakland University",
+      "perGame": false,
+      "current": 5,
+      "status": "final",
+      "league": "MHSEL",
+      "stage": "playoffs",
+      "forfeit": null,
+      "result": "W",
+      "game": "rocket-league"
     }
   ]
 }

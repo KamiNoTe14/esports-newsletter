@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:10:30.174Z",
+  "updated": "2026-10-05T19:10:36.832Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -2939,20 +2939,36 @@
     },
     {
       "id": "WT88jIHRWGh924gAXmmo",
-      "result": "W",
+      "opponent": {
+        "short": "",
+        "abbr": "ANN",
+        "school": "Annapolis High School",
+        "logo": "",
+        "team": "AHS Cougars"
+      },
+      "teamId": "t5",
+      "game": "rocket-league",
+      "seriesOnly": true,
+      "current": 3,
+      "startsAt": "2025-04-03T20:00:00.000Z",
+      "perGame": false,
+      "source": {},
+      "league": "MHSEL",
+      "notes": "",
       "gameName": "Rocket League",
+      "term": "spring",
       "games": [
         {
-          "n": 1,
           "us": 0,
-          "winner": "us",
-          "them": 0
+          "n": 1,
+          "them": 0,
+          "winner": "us"
         },
         {
-          "us": 0,
+          "them": 0,
           "winner": "us",
-          "n": 2,
-          "them": 0
+          "us": 0,
+          "n": 2
         },
         {
           "them": 0,
@@ -2961,43 +2977,75 @@
           "n": 3
         }
       ],
-      "startsAt": "2025-04-03T20:00:00.000Z",
-      "week": "6",
-      "notes": "",
-      "season": "2024-25",
-      "opponent": {
-        "logo": "",
-        "abbr": "ANN",
-        "team": "AHS Cougars",
-        "school": "Annapolis High School",
-        "short": ""
-      },
-      "game": "rocket-league",
-      "clinched": "us",
+      "players": [
+        {
+          "id": "p-c0313a9e",
+          "name": "Dylan Reinwand",
+          "stats": {},
+          "private": false,
+          "tag": "Qyxical",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "stats": {},
+          "tag": "Ralax Itz C1",
+          "name": "James Petrucci",
+          "private": false,
+          "alum": true,
+          "id": "p-bd268108",
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "stats": {},
+          "tag": "SsnowyGG",
+          "name": "Christian Gatien",
+          "id": "p-5310cd2b",
+          "alum": true,
+          "games": [],
+          "private": false
+        },
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "TRE4TY.",
+          "id": "p-0b11aaef",
+          "stats": {},
+          "name": "Tavin Flanagan",
+          "private": false
+        }
+      ],
+      "status": "final",
+      "bestOf": 5,
       "forfeit": null,
       "stream": {
         "vod": "",
         "live": ""
       },
-      "players": [],
-      "status": "final",
-      "bestOf": 5,
-      "league": "MHSEL",
-      "source": {},
+      "season": "2024-25",
       "level": "Varsity",
       "score": {
         "us": 3,
         "them": 0
       },
-      "perGame": false,
+      "updatedAt": "2026-10-05T19:10:34.866Z",
       "teamName": "Rocket League Varsity",
-      "seriesOnly": true,
-      "stage": "regular",
-      "current": 3,
-      "term": "spring",
       "event": "MHSEL Spring 2025",
-      "updatedAt": "2026-10-05T19:10:28.450Z",
-      "teamId": "t5"
+      "result": "W",
+      "week": "6",
+      "stage": "regular",
+      "clinched": "us"
     }
   ]
 }

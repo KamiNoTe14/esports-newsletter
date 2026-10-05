@@ -341,6 +341,7 @@ export function startLegacy(site){
   const host = $("#allTime");
   watchFinals(site, fin => {
     document.querySelectorAll("[data-rival]").forEach(c => { const r = {school:c.dataset.rival}; const vs = fin.filter(m => rivalFor({rivals:[r]}, m)); c.querySelector("[data-rec]").textContent = vs.length ? wl(vs).text : "0–0"; });
+    document.querySelectorAll("[data-season-rec]").forEach(el => { const l = fin.filter(m => (m.season || seasonOf(m.startsAt)) === el.dataset.seasonRec); el.textContent = l.length ? wl(l).text : ""; });
     if (!host) return;
     if (!fin.length){ host.innerHTML = `<div class="empty">The record book fills in as soon as the first match is final.</div>`; return; }
     const seasons = [...new Set(fin.map(m => m.season || seasonOf(m.startsAt)))].sort().reverse();

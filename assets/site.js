@@ -127,10 +127,44 @@ function bracketsHTML(site){
       ${safe(b.link) ? `<a class="btn btn-line" style="align-self:flex-start" href="${esc(safe(b.link))}" target="_blank" rel="noopener">View bracket</a>` : ""}
     </article>`).join("")}</div></div></section>`;
 }
-function recordsHTML(site, limit){
-  const list = (site.records || []).slice(0, limit || 99);
-  if (!on(site, "records") || !list.length) return "";
-  return `<div class="grid g2">${list.map(r => `<div class="card record"><div class="trophy" aria-hidden="true">★</div><div>${(g => !g ? "" : g.icon ? `<img class="game-logo rec-game" src="${esc(url(g.icon))}" alt="${esc(g.name)}">` : `<p class="eyebrow" style="margin:0 0 4px">${esc(g.name)}</p>`)((site.games || []).find(g => g.key === r.game))}<b>${esc(r.title)}</b>${r.year ? `<span class="chip gold" style="margin-top:6px;display:inline-block">${esc(r.year)}</span>` : ""}${r.detail ? `<p class="muted" style="margin:8px 0 0;font-size:15px">${esc(r.detail)}</p>` : ""}</div></div>`).join("")}</div>`;
+/* ---------- Record book. Each entry in site.records has a type that decides where it shows:
+   championship / finish -> banners · record -> records table · honor -> lists grouped by title · everything -> timeline ---------- */
+function recs(site){ return on(site, "records") ? (site.records || []).filter(r => r.title) : []; }
+const recType = r => r.type || "milestone";
+const recGame = (site, r) => (site.games || []).find(g => g.key === r.game);
+/* "Fall 2024" -> 2024-25, "Spring 2026" / "March 2026" -> 2025-26. School years start in July. */
+function recSeason(r){
+  const t = String(r.year || ""), y = +(t.match(/\b(20\d\d)\b/) || [])[1]; if (!y) return "";
+  const m = t.toLowerCase().match(/spring|winter|jan|feb|mar|apr|may|jun/) ? y - 1 : y;
+  return `${m}-${String((m + 1) % 100).padStart(2, "0")}`;
+}
+function bannersHTML(site, limit, link){
+  const list = recs(site).filter(r => ["championship", "finish"].includes(recType(r))).sort((a, b) => (recType(a) === "finish") - (recType(b) === "finish")).slice(0, limit || 99);
+  if (!list.length) return "";
+  return `<div class="banners">${list.map((r, i) => { const g = recGame(site, r), inner = `${g?.icon ? `<img src="${esc(url(g.icon))}" alt="${esc(g.name)}">` : ""}${r.org ? `<small>${esc(r.org)}</small>` : ""}<b>${esc(r.title)}</b>${r.year ? `<i>${esc(r.year)}</i>` : ""}`;
+    return link ? `<a class="banner${recType(r) === "finish" ? " silver" : ""}" href="${BASE}legacy.html">${inner}</a>` : `<button type="button" class="banner${recType(r) === "finish" ? " silver" : ""}" data-story="${i}" aria-expanded="false">${inner}</button>`; }).join("")}</div>
+    ${link ? "" : `<div class="story" id="story" hidden></div><script type="application/json" id="stories">${JSON.stringify(list.map(r => ({h:[r.org, r.title, r.year].filter(Boolean).join(" · "), t:r.detail || ""}))).replace(/</g, "\\u003c")}<\/script>`}`;
+}
+function timelineHTML(site){
+  const by = {}; recs(site).forEach(r => { const se = recSeason(r); if (se && recType(r) !== "record") (by[se] = by[se] || []).push(r); });
+  const seasons = Object.keys(by).sort().reverse(); if (!seasons.length) return "";
+  const order = {championship:0, finish:1, milestone:2};
+  return `<div class="tl">${seasons.map(se => { const list = by[se], main = list.filter(r => recType(r) !== "honor").sort((a, b) => order[recType(a)] - order[recType(b)]), hon = {};
+    list.filter(r => recType(r) === "honor").forEach(r => (hon[r.title] = hon[r.title] || []).push(r));
+    return `<div><h3>${se.replace("-", "–")} <span data-season-rec="${se}"></span></h3><ul>${main.map(r => `<li>${recType(r) === "milestone" ? esc(r.title) : `<b>${esc([r.org, r.title].filter(Boolean).join(" "))}</b>${recGame(site, r) ? ` · ${esc(recGame(site, r).short || recGame(site, r).name)}` : ""}`}</li>`).join("")}${Object.entries(hon).map(([t, l]) => `<li>${esc(t)}: ${l.map(r => esc(r.detail || "")).filter(Boolean).join(", ")}</li>`).join("")}</ul></div>`; }).join("")}</div>`;
+}
+function recordTableHTML(site){
+  const list = recs(site).filter(r => recType(r) === "record"); if (!list.length) return "";
+  return `<div class="tbl-wrap"><table class="tbl rec"><tbody>${list.map(r => `<tr><td>${esc(r.title)}<small>${esc([recGame(site, r)?.short || recGame(site, r)?.name, r.detail, r.year].filter(Boolean).join(" · "))}</small></td><td class="n"><b>${esc(r.value || "")}</b></td></tr>`).join("")}</tbody></table></div>`;
+}
+function honorsHTML(site){
+  const groups = {}; recs(site).filter(r => recType(r) === "honor").forEach(r => (groups[r.title] = groups[r.title] || []).push(r));
+  return Object.entries(groups).map(([t, l]) => `<p class="sub">${esc(t)}</p><div class="tbl-wrap" style="margin-bottom:26px"><table class="tbl"><tbody>${l.sort((a, b) => recSeason(b).localeCompare(recSeason(a))).map(r => `<tr>${l.some(x => x.year) ? `<td style="white-space:nowrap">${esc(r.year || "")}</td>` : ""}<td>${esc(r.detail || "")}</td><td class="muted">${esc(recGame(site, r)?.name || "")}</td></tr>`).join("")}</tbody></table></div>`).join("");
+}
+function recordBookHTML(site){
+  const left = timelineHTML(site), right = (recordTableHTML(site) ? `<p class="sub">Records</p>${recordTableHTML(site)}<div style="height:26px"></div>` : "") + honorsHTML(site);
+  return `${bannersHTML(site) ? `<p class="sub" style="margin-top:38px">Banners</p>${bannersHTML(site)}` : ""}
+    ${left || right ? `<div class="grid g2 rb-cols">${left ? `<div><p class="sub">Program timeline</p>${left}</div>` : ""}${right ? `<div>${right}</div>` : ""}</div>` : ""}`;
 }
 function sponsorsHTML(site){
   const list = site.sponsors || [];
@@ -190,7 +224,7 @@ function home(site, issues){
   <section class="section"><div class="wrap">${secH("Our teams", `<a class="more" href="${BASE}teams.html">Teams & leagues →</a>`)}${teamCards({...site, sections:{...site.sections, rosters:false}})}</div></section>
 
   ${newsHTML(site, 3) ? `<section class="section alt"><div class="wrap">${secH("In the news", `<a class="more" href="${BASE}media.html">All news →</a>`)}${newsHTML(site, 3)}</div></section>` : ""}
-  ${recordsHTML(site, 4) ? `<section class="section"><div class="wrap">${secH("Program records", `<a class="more" href="${BASE}legacy.html">Record book →</a>`)}${recordsHTML(site, 4)}</div></section>` : ""}
+  ${bannersHTML(site, 5, true) ? `<section class="section"><div class="wrap">${secH("Banners", `<a class="more" href="${BASE}legacy.html">Record book →</a>`)}${bannersHTML(site, 5, true)}</div></section>` : ""}
   <section class="section alt"><div class="wrap"><div class="grid g2">
     <a class="card news-item" href="${BASE}legacy.html"><p class="eyebrow">Legacy</p><h3>Record book, rivalries & alumni</h3><p class="muted" style="margin:0;font-size:15px">Our all-time record, the schools we love to beat, and the Eagles now playing in college.</p><span class="more">Explore →</span></a>
     <a class="card news-item" href="${BASE}future.html"><p class="eyebrow">Grades 6–8</p><h3>Future Eagles</h3><p class="muted" style="margin:0;font-size:15px">In middle school? Here's how to get ready for high school esports, and how parents can tell us you're interested.</p><span class="more">Get ready →</span></a>
@@ -276,7 +310,7 @@ function legacy(site){
   return pageH("Record book · Rivalries · Alumni", "Legacy", "Every final result since the program began, the schools we measure ourselves against, and where Eagles go after graduation.")
   + `<section class="section" id="recordBook"><div class="wrap">${secH("Record book")}
       <div id="allTime"><div class="loading">Adding up every final…</div></div>
-      ${recordsHTML(site) ? `<h3 class="res-h" style="margin-top:34px">Titles & milestones</h3>${recordsHTML(site)}` : ""}
+      ${recordBookHTML(site)}
     </div></section>`
   + (rv.length ? `<section class="section alt" id="rivalries"><div class="wrap">${secH("Rivalries")}
       <div class="grid g2">${rv.map(r => `<a class="card rival-card" href="${rivalHref(r)}" data-rival="${esc(r.school)}">
@@ -367,13 +401,18 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "legacy", "rival"].includes(PAGE)) import(BASE + "assets/live.js?v=18").then(L => {
+  if (["home", "schedule", "results", "player", "legacy", "rival"].includes(PAGE)) import(BASE + "assets/live.js?v=19").then(L => {
     if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#rival") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));
   heroSetup();
+  const stories = $("#stories") ? JSON.parse($("#stories").textContent) : [];
+  document.querySelectorAll(".banner[data-story]").forEach(b => b.onclick = () => { const st = stories[+b.dataset.story], box = $("#story"), was = b.getAttribute("aria-expanded") === "true";
+    document.querySelectorAll(".banner[data-story]").forEach(x => x.setAttribute("aria-expanded", "false"));
+    if (was || !st){ box.hidden = true; return; } b.setAttribute("aria-expanded", "true"); box.hidden = false;
+    box.innerHTML = `<small>${esc(st.h)}</small>${st.t ? `<p style="margin:6px 0 0">${esc(st.t)}</p>` : ""}`; });
   const btn = $(".nav-btn"), nav = $("#nav");
   btn?.addEventListener("click", () => { const o = nav.classList.toggle("open"); btn.setAttribute("aria-expanded", o); });
   $("#copyIcs")?.addEventListener("click", async e => { const i = $("#icsUrl"); try { await navigator.clipboard.writeText(i.value); e.target.textContent = "Copied"; } catch(err){ i.select(); } });

@@ -426,3 +426,29 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .alts .alt img{width:44px;height:44px;object-fit:contain;flex-shrink:0}
 @media (max-width:420px){.mains2{grid-template-columns:minmax(0,140px) 1fr;gap:12px}.rival-card{padding-right:22px}.rival-rec{position:static;text-align:left}}
 .rec-game{height:22px;margin:0 0 8px}
+.banners{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+.banner{width:200px;padding:20px 14px 46px;text-align:center;color:var(--text);text-decoration:none;font:inherit;cursor:pointer;background:linear-gradient(180deg,#003466,#00274C);border:2px solid var(--gold);border-top:8px solid var(--gold);clip-path:polygon(0 0,100% 0,100% 100%,50% calc(100% - 30px),0 100%);display:grid;gap:8px;justify-items:center;align-content:start;transition:transform .15s}
+.banner:hover,.banner[aria-expanded="true"]{transform:translateY(4px)}
+.banner[aria-expanded="true"]{background:linear-gradient(180deg,#00478C,#00305E)}
+.banner img{height:26px;width:auto}
+.banner small{font:700 12px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.banner b{font:800 27px/1.02 var(--display);text-transform:uppercase;letter-spacing:.02em}
+.banner i{font:800 32px/1 var(--display);font-style:normal;color:var(--gold)}
+.banner.silver{width:170px;border-color:#9FB2C8;background:linear-gradient(180deg,#16304F,#0E1E33)}
+.banner.silver small,.banner.silver i{color:#C9D6E3}.banner.silver b{font-size:22px}.banner.silver i{font-size:25px}
+.story{margin-top:18px;border-left:4px solid var(--gold);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 18px;max-width:820px}
+.story small{font:700 12px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.rb-cols{margin-top:44px;align-items:start;gap:40px}
+.tl{border-left:2px solid var(--line-2);margin-left:8px;display:grid;gap:22px;padding:4px 0}
+.tl>div{position:relative;padding-left:26px}
+.tl>div:before{content:"";position:absolute;left:-8px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--gold);border:3px solid var(--bg)}
+.tl h3{font-size:24px;margin:0;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.tl h3 span{font:600 15px var(--body);color:var(--muted);letter-spacing:0}
+.tl ul{margin:6px 0 0;padding-left:18px;color:#C9D6E3;display:grid;gap:3px}
+.tl li b{color:var(--text)}
+.sub{font:700 13px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+.rec td small{display:block;color:var(--muted);font-size:13.5px}
+.rec td.n b{font:800 22px var(--display);white-space:nowrap}
+@media (max-width:520px){.banners{gap:12px}.banner{width:calc(50% - 6px)}.banner.silver{width:calc(50% - 6px)}.banner b{font-size:22px}.banner i{font-size:26px}}
+.grid>*{min-width:0}
+.rb-cols .tbl,#allTime .tbl{min-width:0;width:100%}.rb-cols .tbl td{white-space:normal}

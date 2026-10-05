@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T15:53:20.024Z",
+  "updated": "2026-10-05T15:59:35.430Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -181,146 +181,238 @@
     },
     {
       "id": "LT5wVaqXchbWaHKUfOU6",
-      "perGame": true,
-      "bestOf": 5,
-      "level": "Varsity",
-      "event": "MHSEL Fall 2024",
-      "season": "2024-25",
-      "current": 5,
-      "stream": {
-        "vod": "",
-        "live": "https://youtube.com/live/o2BlGtjdre0?feature=share"
-      },
-      "notes": "",
-      "teamName": "Rocket League Varsity",
-      "result": "W",
-      "week": "2",
-      "opponent": {
-        "logo": "",
-        "school": "Houghton Lake High School",
-        "short": "",
-        "team": "Bobcats 1",
-        "abbr": "HL"
-      },
-      "source": {},
-      "gameName": "Rocket League",
-      "status": "final",
-      "league": "MHSEL",
-      "score": {
-        "us": 3,
-        "them": 2
-      },
-      "teamId": "t5",
-      "updatedAt": "2026-10-05T15:53:18.695Z",
-      "term": "fall",
-      "forfeit": null,
-      "stage": "regular",
-      "seriesOnly": false,
       "game": "rocket-league",
-      "startsAt": "2024-10-03T20:00:00.000Z",
+      "clinched": "us",
       "games": [
         {
+          "them": 3,
+          "n": 1,
+          "us": 4,
           "winner": "us",
           "p": {
+            "p-c63023bd": {
+              "goals": 1,
+              "saves": 3,
+              "shots": 1,
+              "assists": 0
+            },
             "p-c0313a9e": {
-              "saves": 1,
+              "assists": 0,
               "shots": 5,
+              "saves": 1,
+              "goals": 3
+            },
+            "p-bd268108": {
+              "goals": 0,
+              "saves": 4,
+              "shots": 2,
+              "assists": 2
+            }
+          }
+        },
+        {
+          "them": 2,
+          "p": {
+            "p-c0313a9e": {
               "goals": 3,
+              "shots": 8,
+              "saves": 1,
               "assists": 0
             },
             "p-bd268108": {
-              "assists": 2,
-              "goals": 0,
+              "assists": 1,
               "shots": 2,
-              "saves": 4
+              "saves": 1,
+              "goals": 2
             },
             "p-c63023bd": {
-              "assists": 0,
-              "goals": 1,
-              "saves": 3,
-              "shots": 1
+              "assists": 2,
+              "goals": 0,
+              "saves": 0,
+              "shots": 0
             }
           },
-          "us": 4,
-          "them": 3,
-          "n": 1
-        },
-        {
+          "us": 5,
           "n": 2,
-          "winner": "us",
-          "them": 2,
-          "us": 5
+          "winner": "us"
         },
         {
-          "them": 3,
+          "winner": "them",
           "us": 2,
-          "n": 3,
-          "winner": "them"
+          "p": {
+            "p-c0313a9e": {
+              "assists": 1,
+              "goals": 1,
+              "shots": 1,
+              "saves": 2
+            },
+            "p-bd268108": {
+              "assists": 0,
+              "saves": 0,
+              "shots": 3,
+              "goals": 1
+            },
+            "p-c63023bd": {
+              "goals": 0,
+              "saves": 2,
+              "shots": 2,
+              "assists": 0
+            }
+          },
+          "them": 3,
+          "n": 3
         },
         {
           "n": 4,
+          "them": 4,
           "us": 1,
-          "winner": "them",
-          "them": 4
+          "p": {
+            "p-bd268108": {
+              "assists": 0,
+              "goals": 0,
+              "shots": 0,
+              "saves": 3
+            },
+            "p-c0313a9e": {
+              "assists": 0,
+              "saves": 2,
+              "shots": 1,
+              "goals": 1
+            },
+            "p-c63023bd": {
+              "goals": 0,
+              "saves": 2,
+              "assists": 0,
+              "shots": 1
+            }
+          },
+          "winner": "them"
         },
         {
-          "them": 2,
-          "us": 3,
           "n": 5,
-          "winner": "us"
+          "winner": "us",
+          "p": {
+            "p-c0313a9e": {
+              "shots": 6,
+              "saves": 1,
+              "goals": 0,
+              "assists": 2
+            },
+            "p-bd268108": {
+              "saves": 2,
+              "assists": 0,
+              "shots": 5,
+              "goals": 3
+            },
+            "p-c63023bd": {
+              "assists": 0,
+              "goals": 0,
+              "saves": 0,
+              "shots": 1
+            }
+          },
+          "them": 2,
+          "us": 3
         }
       ],
-      "clinched": "us",
+      "bestOf": 5,
       "players": [
         {
           "tag": "Qyxical",
           "alum": true,
+          "private": false,
           "games": [
-            1
+            1,
+            2,
+            3,
+            4,
+            5
           ],
           "name": "Dylan Reinwand",
           "id": "p-c0313a9e",
-          "private": false,
           "stats": {
-            "saves": 1,
-            "shots": 5,
-            "assists": 0,
-            "goals": 3
+            "assists": 3,
+            "goals": 8,
+            "shots": 21,
+            "saves": 7
           }
         },
         {
-          "name": "James Petrucci",
-          "id": "p-bd268108",
-          "private": false,
-          "games": [
-            1
-          ],
-          "alum": true,
-          "tag": "Ralax Itz C1",
           "stats": {
-            "shots": 2,
-            "saves": 4,
-            "goals": 0,
-            "assists": 2
-          }
-        },
-        {
-          "id": "p-c63023bd",
-          "games": [
-            1
-          ],
-          "private": false,
-          "stats": {
-            "assists": 0,
-            "goals": 1,
-            "shots": 1,
-            "saves": 3
+            "saves": 10,
+            "shots": 12,
+            "assists": 3,
+            "goals": 6
           },
-          "name": "Adrian Amador",
-          "tag": "aamador0125",
+          "id": "p-bd268108",
+          "name": "James Petrucci",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "tag": "Ralax Itz C1",
+          "private": false,
           "alum": true
+        },
+        {
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "private": false,
+          "id": "p-c63023bd",
+          "tag": "aamador0125",
+          "alum": true,
+          "stats": {
+            "shots": 5,
+            "assists": 2,
+            "saves": 7,
+            "goals": 1
+          },
+          "name": "Adrian Amador"
         }
-      ]
+      ],
+      "startsAt": "2024-10-03T20:00:00.000Z",
+      "seriesOnly": false,
+      "season": "2024-25",
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/o2BlGtjdre0?feature=share"
+      },
+      "updatedAt": "2026-10-05T15:59:34.021Z",
+      "forfeit": null,
+      "result": "W",
+      "stage": "regular",
+      "league": "MHSEL",
+      "source": {},
+      "status": "final",
+      "term": "fall",
+      "teamId": "t5",
+      "opponent": {
+        "team": "Bobcats 1",
+        "abbr": "HL",
+        "short": "",
+        "school": "Houghton Lake High School",
+        "logo": ""
+      },
+      "score": {
+        "us": 3,
+        "them": 2
+      },
+      "gameName": "Rocket League",
+      "notes": "",
+      "teamName": "Rocket League Varsity",
+      "week": "2",
+      "current": 5,
+      "perGame": true,
+      "level": "Varsity",
+      "event": "MHSEL Fall 2024"
     }
   ]
 }

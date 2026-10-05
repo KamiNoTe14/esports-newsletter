@@ -138,17 +138,18 @@ function recSeason(r){
   const m = t.toLowerCase().match(/spring|winter|jan|feb|mar|apr|may|jun/) ? y - 1 : y;
   return `${m}-${String((m + 1) % 100).padStart(2, "0")}`;
 }
+const BANNER = {championship:[0, ""], tournament:[1, " white"], finish:[2, " silver"]};
 function bannersHTML(site, limit, link){
-  const list = recs(site).filter(r => ["championship", "finish"].includes(recType(r))).sort((a, b) => (recType(a) === "finish") - (recType(b) === "finish")).slice(0, limit || 99);
+  const list = recs(site).filter(r => recType(r) in BANNER).sort((a, b) => BANNER[recType(a)][0] - BANNER[recType(b)][0]).slice(0, limit || 99);
   if (!list.length) return "";
   return `<div class="banners">${list.map((r, i) => { const g = recGame(site, r), inner = `${g?.icon ? `<img src="${esc(url(g.icon))}" alt="${esc(g.name)}">` : ""}${r.org ? `<small>${esc(r.org)}</small>` : ""}<b>${esc(r.title)}</b>${r.year ? `<i>${esc(r.year)}</i>` : ""}`;
-    return link ? `<a class="banner${recType(r) === "finish" ? " silver" : ""}" href="${BASE}legacy.html">${inner}</a>` : `<button type="button" class="banner${recType(r) === "finish" ? " silver" : ""}" data-story="${i}" aria-expanded="false">${inner}</button>`; }).join("")}</div>
+    return link ? `<a class="banner${BANNER[recType(r)][1]}" href="${BASE}legacy.html">${inner}</a>` : `<button type="button" class="banner${BANNER[recType(r)][1]}" data-story="${i}" aria-expanded="false">${inner}</button>`; }).join("")}</div>
     ${link ? "" : `<div class="story" id="story" hidden></div><script type="application/json" id="stories">${JSON.stringify(list.map(r => ({h:[r.org, r.title, r.year].filter(Boolean).join(" · "), t:r.detail || ""}))).replace(/</g, "\\u003c")}<\/script>`}`;
 }
 function timelineHTML(site){
   const by = {}; recs(site).forEach(r => { const se = recSeason(r); if (se && recType(r) !== "record") (by[se] = by[se] || []).push(r); });
   const seasons = Object.keys(by).sort().reverse(); if (!seasons.length) return "";
-  const order = {championship:0, finish:1, milestone:2};
+  const order = {championship:0, tournament:1, finish:2, milestone:3};
   return `<div class="tl">${seasons.map(se => { const list = by[se], main = list.filter(r => recType(r) !== "honor").sort((a, b) => order[recType(a)] - order[recType(b)]), hon = {};
     list.filter(r => recType(r) === "honor").forEach(r => (hon[r.title] = hon[r.title] || []).push(r));
     return `<div><h3>${se.replace("-", "–")} <span data-season-rec="${se}"></span></h3><ul>${main.map(r => `<li>${recType(r) === "milestone" ? esc(r.title) : `<b>${esc([r.org, r.title].filter(Boolean).join(" "))}</b>${recGame(site, r) ? ` · ${esc(recGame(site, r).short || recGame(site, r).name)}` : ""}`}</li>`).join("")}${Object.entries(hon).map(([t, l]) => `<li>${esc(t)}: ${l.map(r => esc(r.detail || "")).filter(Boolean).join(", ")}</li>`).join("")}</ul></div>`; }).join("")}</div>`;

@@ -452,3 +452,6 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 @media (max-width:520px){.banners{gap:12px}.banner{width:calc(50% - 6px)}.banner.silver{width:calc(50% - 6px)}.banner b{font-size:22px}.banner i{font-size:26px}}
 .grid>*{min-width:0}
 .rb-cols .tbl,#allTime .tbl{min-width:0;width:100%}.rb-cols .tbl td{white-space:normal}
+.banner.white{width:170px;border-color:#EAF0F7}
+.banner.white small,.banner.white i{color:#EAF0F7}.banner.white b{font-size:22px}.banner.white i{font-size:25px}
+@media (max-width:520px){.banner.white{width:calc(50% - 6px)}}

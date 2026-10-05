@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-05T15:30:30.764Z",
+  "updated": "2026-10-05T15:32:35.693Z",
   "matches": [
     {
       "id": "GRXocyZWqtq6z2KErPiV",
@@ -1224,83 +1224,266 @@
     },
     {
       "id": "EHtbcXzII0HtgdyLcFcy",
-      "startsAt": "2025-11-24T21:00:00.000Z",
-      "result": "L",
-      "event": "MHSEL Fall 2025",
-      "teamId": "t5",
-      "level": "Varsity",
-      "perGame": false,
-      "stage": "playoffs",
-      "players": [],
+      "updatedAt": "2026-10-05T15:32:34.180Z",
       "clinched": "them",
+      "games": [
+        {
+          "them": 2,
+          "p": {
+            "p-811a5f77": {
+              "saves": 2,
+              "assists": 0,
+              "goals": 1,
+              "shots": 3
+            },
+            "p-c0313a9e": {
+              "goals": 0,
+              "shots": 2,
+              "saves": 2,
+              "assists": 1
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "saves": 3,
+              "shots": 3,
+              "goals": 0
+            }
+          },
+          "us": 1,
+          "winner": "them",
+          "n": 1
+        },
+        {
+          "p": {
+            "p-0b11aaef": {
+              "goals": 0,
+              "shots": 2,
+              "saves": 1,
+              "assists": 1
+            },
+            "p-811a5f77": {
+              "saves": 0,
+              "assists": 0,
+              "shots": 1,
+              "goals": 0
+            },
+            "p-c0313a9e": {
+              "shots": 2,
+              "goals": 1,
+              "assists": 0,
+              "saves": 1
+            }
+          },
+          "us": 1,
+          "them": 4,
+          "winner": "them",
+          "n": 2
+        },
+        {
+          "p": {
+            "p-c0313a9e": {
+              "assists": 0,
+              "saves": 3,
+              "goals": 0,
+              "shots": 1
+            },
+            "p-811a5f77": {
+              "shots": 1,
+              "goals": 0,
+              "assists": 0,
+              "saves": 1
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "saves": 1,
+              "goals": 0,
+              "shots": 0
+            }
+          },
+          "us": 0,
+          "winner": "them",
+          "them": 1,
+          "n": 3
+        },
+        {
+          "n": 4,
+          "them": 1,
+          "winner": "us",
+          "us": 3,
+          "p": {
+            "p-0b11aaef": {
+              "shots": 0,
+              "goals": 1,
+              "assists": 0,
+              "saves": 1
+            },
+            "p-c0313a9e": {
+              "assists": 2,
+              "shots": 5,
+              "goals": 1,
+              "saves": 4
+            },
+            "p-811a5f77": {
+              "shots": 1,
+              "goals": 1,
+              "saves": 1,
+              "assists": 0
+            }
+          }
+        },
+        {
+          "us": 3,
+          "n": 5,
+          "p": {
+            "p-0b11aaef": {
+              "saves": 1,
+              "goals": 2,
+              "shots": 3,
+              "assists": 0
+            },
+            "p-c0313a9e": {
+              "saves": 2,
+              "assists": 0,
+              "goals": 1,
+              "shots": 3
+            },
+            "p-811a5f77": {
+              "saves": 0,
+              "goals": 0,
+              "assists": 1,
+              "shots": 1
+            }
+          },
+          "winner": "us",
+          "them": 2
+        },
+        {
+          "them": 4,
+          "p": {
+            "p-811a5f77": {
+              "goals": 0,
+              "shots": 1,
+              "assists": 0,
+              "saves": 0
+            },
+            "p-c0313a9e": {
+              "saves": 2,
+              "assists": 0,
+              "goals": 2,
+              "shots": 3
+            },
+            "p-0b11aaef": {
+              "assists": 1,
+              "shots": 2,
+              "goals": 0,
+              "saves": 2
+            }
+          },
+          "n": 6,
+          "us": 2,
+          "winner": "them"
+        }
+      ],
+      "result": "L",
+      "notes": "",
+      "teamId": "t5",
+      "perGame": true,
+      "seriesOnly": false,
       "status": "final",
+      "players": [
+        {
+          "name": "Tavin Flanagan",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "private": false,
+          "tag": "TRE4TY.",
+          "id": "p-0b11aaef",
+          "stats": {
+            "goals": 3,
+            "shots": 10,
+            "saves": 9,
+            "assists": 2
+          }
+        },
+        {
+          "id": "p-811a5f77",
+          "alum": true,
+          "name": "Brandon Wood",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "tag": "VRTX_Angel",
+          "stats": {
+            "assists": 1,
+            "saves": 4,
+            "shots": 8,
+            "goals": 2
+          },
+          "private": false
+        },
+        {
+          "id": "p-c0313a9e",
+          "stats": {
+            "goals": 5,
+            "shots": 16,
+            "saves": 14,
+            "assists": 3
+          },
+          "private": false,
+          "alum": true,
+          "tag": "Qyxical",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "name": "Dylan Reinwand"
+        }
+      ],
+      "startsAt": "2025-11-24T21:00:00.000Z",
       "league": "MHSEL",
+      "stage": "playoffs",
+      "level": "Varsity",
       "score": {
         "us": 2,
         "them": 4
-      },
-      "game": "rocket-league",
-      "opponent": {
-        "team": "Byron Center Bulldogs",
-        "short": "",
-        "abbr": "BC",
-        "logo": "",
-        "school": "Byron Center High School"
       },
       "season": "2025-26",
       "stream": {
         "vod": "",
         "live": "https://youtube.com/live/J6uX-kfhXRU?feature=share"
       },
-      "week": "Round of 16",
-      "term": "fall",
+      "teamName": "Rocket League Varsity",
       "forfeit": null,
-      "gameName": "Rocket League",
-      "updatedAt": "2026-10-05T15:30:29.275Z",
-      "seriesOnly": false,
+      "term": "fall",
+      "week": "Round of 16",
       "source": {},
       "current": 6,
-      "teamName": "Rocket League Varsity",
+      "gameName": "Rocket League",
+      "game": "rocket-league",
+      "event": "MHSEL Fall 2025",
       "bestOf": 7,
-      "notes": "",
-      "games": [
-        {
-          "us": 1,
-          "winner": "them",
-          "n": 1,
-          "them": 2
-        },
-        {
-          "them": 4,
-          "n": 2,
-          "us": 1,
-          "winner": "them"
-        },
-        {
-          "us": 0,
-          "n": 3,
-          "them": 1,
-          "winner": "them"
-        },
-        {
-          "us": 3,
-          "n": 4,
-          "winner": "us",
-          "them": 1
-        },
-        {
-          "them": 2,
-          "us": 3,
-          "winner": "us",
-          "n": 5
-        },
-        {
-          "n": 6,
-          "winner": "them",
-          "us": 2,
-          "them": 4
-        }
-      ]
+      "opponent": {
+        "short": "",
+        "team": "Byron Center Bulldogs",
+        "abbr": "BC",
+        "school": "Byron Center High School",
+        "logo": ""
+      }
     },
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",

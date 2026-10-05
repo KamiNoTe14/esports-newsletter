@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-05T15:07:46.735Z",
+  "updated": "2026-10-05T15:08:39.816Z",
   "matches": [
     {
       "id": "GRXocyZWqtq6z2KErPiV",
@@ -310,177 +310,208 @@
     },
     {
       "id": "behhXlfuSQNoJ0qenD1D",
-      "opponent": {
-        "short": "",
-        "team": "Jenison Wildcats RL",
-        "school": "Jenison High School",
-        "abbr": "JEN",
-        "logo": ""
-      },
-      "updatedAt": "2026-10-05T15:07:45.197Z",
+      "clinched": "them",
+      "league": "MHSEL",
+      "current": 4,
+      "seriesOnly": false,
       "game": "rocket-league",
       "event": "MHSEL Fall 2025",
-      "gameName": "Rocket League",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "season": "2025-26",
+      "status": "final",
       "term": "fall",
       "week": "5",
-      "teamName": "Rocket League Varsity",
-      "players": [],
-      "source": {},
+      "teamId": "t5",
+      "result": "L",
       "score": {
         "us": 1,
         "them": 3
       },
-      "bestOf": 5,
-      "seriesOnly": false,
+      "forfeit": null,
       "level": "Varsity",
-      "perGame": true,
       "stage": "regular",
       "startsAt": "2025-10-23T20:00:00.000Z",
-      "forfeit": null,
-      "teamId": "t5",
-      "result": "L",
-      "notes": "",
+      "bestOf": 5,
+      "perGame": true,
+      "source": {},
+      "players": [
+        {
+          "tag": "TRE4TY.",
+          "private": false,
+          "name": "Tavin Flanagan",
+          "id": "p-0b11aaef",
+          "stats": {
+            "assists": 2,
+            "shots": 6,
+            "goals": 4,
+            "saves": 6
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "alum": true,
+          "stats": {
+            "saves": 6,
+            "shots": 3,
+            "goals": 2,
+            "assists": 2
+          },
+          "id": "p-811a5f77",
+          "name": "Brandon Wood",
+          "private": false,
+          "tag": "VRTX_Angel"
+        },
+        {
+          "id": "p-c0313a9e",
+          "alum": true,
+          "name": "Dylan Reinwand",
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "tag": "Qyxical",
+          "stats": {
+            "assists": 3,
+            "saves": 9,
+            "shots": 14,
+            "goals": 4
+          },
+          "private": false
+        }
+      ],
+      "teamName": "Rocket League Varsity",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
       "games": [
         {
+          "winner": "them",
+          "us": 2,
           "p": {
             "p-0b11aaef": {
+              "saves": 2,
               "goals": 2,
               "shots": 3,
-              "assists": 0,
-              "saves": 2
-            },
-            "p-811a5f77": {
-              "assists": 0,
-              "saves": 1,
-              "goals": 0,
-              "shots": 0
+              "assists": 0
             },
             "p-c0313a9e": {
               "saves": 1,
               "goals": 0,
               "shots": 2,
               "assists": 2
+            },
+            "p-811a5f77": {
+              "goals": 0,
+              "shots": 0,
+              "assists": 0,
+              "saves": 1
             }
           },
           "n": 1,
-          "them": 3,
-          "winner": "them",
-          "us": 2
+          "them": 3
         },
         {
-          "them": 4,
-          "us": 2,
           "p": {
             "p-0b11aaef": {
-              "goals": 1,
+              "assists": 1,
               "shots": 1,
-              "saves": 2,
-              "assists": 1
+              "goals": 1,
+              "saves": 2
             },
             "p-c0313a9e": {
               "saves": 5,
               "goals": 0,
-              "shots": 3,
-              "assists": 0
-            },
-            "p-811a5f77": {
-              "saves": 1,
-              "goals": 1,
-              "shots": 1,
-              "assists": 1
-            }
-          },
-          "n": 2,
-          "winner": "them"
-        },
-        {
-          "p": {
-            "p-811a5f77": {
-              "saves": 2,
-              "assists": 1,
-              "shots": 1,
-              "goals": 0
-            },
-            "p-c0313a9e": {
               "assists": 0,
-              "goals": 4,
-              "shots": 6,
-              "saves": 1
-            },
-            "p-0b11aaef": {
-              "saves": 1,
-              "assists": 1,
-              "shots": 0,
-              "goals": 0
-            }
-          },
-          "winner": "us",
-          "us": 4,
-          "n": 3,
-          "them": 2
-        },
-        {
-          "p": {
-            "p-c0313a9e": {
-              "saves": 2,
-              "goals": 0,
-              "shots": 3,
-              "assists": 1
+              "shots": 3
             },
             "p-811a5f77": {
+              "assists": 1,
+              "goals": 1,
               "shots": 1,
-              "goals": 1,
-              "saves": 2,
-              "assists": 0
-            },
-            "p-0b11aaef": {
-              "assists": 0,
-              "shots": 2,
-              "goals": 1,
               "saves": 1
             }
           },
+          "winner": "them",
           "them": 4,
-          "us": 2,
-          "n": 4,
-          "winner": "them"
+          "n": 2,
+          "us": 2
         },
         {
-          "them": 0,
-          "us": 0,
+          "us": 4,
+          "them": 2,
+          "n": 3,
+          "winner": "us",
           "p": {
             "p-811a5f77": {
               "saves": 2,
-              "goals": 1,
-              "shots": 1,
-              "assists": 0
+              "assists": 1,
+              "goals": 0,
+              "shots": 1
             },
             "p-c0313a9e": {
-              "shots": 3,
-              "goals": 0,
-              "assists": 1,
-              "saves": 2
+              "assists": 0,
+              "saves": 1,
+              "shots": 6,
+              "goals": 4
             },
             "p-0b11aaef": {
-              "goals": 1,
+              "saves": 1,
+              "goals": 0,
+              "shots": 0,
+              "assists": 1
+            }
+          }
+        },
+        {
+          "n": 4,
+          "p": {
+            "p-0b11aaef": {
+              "saves": 1,
               "assists": 0,
-              "shots": 2,
-              "saves": 1
+              "goals": 1,
+              "shots": 2
+            },
+            "p-811a5f77": {
+              "assists": 0,
+              "saves": 2,
+              "goals": 1,
+              "shots": 1
+            },
+            "p-c0313a9e": {
+              "goals": 0,
+              "shots": 3,
+              "saves": 2,
+              "assists": 1
             }
           },
-          "winner": null,
-          "n": 5
+          "winner": "them",
+          "us": 2,
+          "them": 4
         }
       ],
-      "current": 4,
-      "league": "MHSEL",
-      "status": "final",
-      "clinched": "them"
+      "season": "2025-26",
+      "notes": "",
+      "gameName": "Rocket League",
+      "updatedAt": "2026-10-05T15:08:38.323Z",
+      "opponent": {
+        "short": "",
+        "team": "Jenison Wildcats RL",
+        "abbr": "JEN",
+        "school": "Jenison High School",
+        "logo": ""
+      }
     },
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",

@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:25:59.192Z",
+  "updated": "2026-10-05T20:26:38.465Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -1408,71 +1408,141 @@
     },
     {
       "id": "sqqvvdTXH8Lm6CYOIGc2",
-      "players": [],
-      "game": "rocket-league",
-      "source": {},
-      "teamId": "t5",
-      "updatedAt": "2026-10-05T20:25:57.713Z",
-      "result": "W",
-      "stage": "playoffs",
-      "teamName": "Rocket League Varsity",
       "event": "MHSEL Fall 2023",
-      "term": "fall",
-      "week": "Round of 16",
-      "status": "final",
-      "league": "MHSEL",
-      "games": [
-        {
-          "us": 5,
-          "winner": "us",
-          "them": 0,
-          "n": 1
-        },
-        {
-          "n": 2,
-          "us": 4,
-          "winner": "us",
-          "them": 2
-        },
-        {
-          "us": 6,
-          "them": 0,
-          "n": 3,
-          "winner": "us"
-        },
-        {
-          "us": 5,
-          "winner": "us",
-          "them": 1,
-          "n": 4
-        }
-      ],
-      "startsAt": "2023-11-29T21:00:00.000Z",
-      "perGame": false,
-      "current": 4,
+      "stage": "playoffs",
+      "bestOf": 7,
+      "season": "2023-24",
+      "teamName": "Rocket League Varsity",
+      "seriesOnly": false,
       "stream": {
         "live": "",
         "vod": ""
       },
+      "forfeit": null,
+      "perGame": false,
+      "current": 4,
+      "level": "Varsity",
+      "notes": "",
+      "result": "W",
+      "startsAt": "2023-11-29T21:00:00.000Z",
+      "status": "final",
+      "league": "MHSEL",
+      "game": "rocket-league",
+      "week": "Round of 16",
+      "updatedAt": "2026-10-05T20:26:36.991Z",
+      "games": [
+        {
+          "winner": "us",
+          "them": 0,
+          "n": 1,
+          "us": 5
+        },
+        {
+          "winner": "us",
+          "them": 2,
+          "n": 2,
+          "us": 4
+        },
+        {
+          "us": 6,
+          "n": 3,
+          "them": 0,
+          "winner": "us"
+        },
+        {
+          "us": 5,
+          "them": 1,
+          "n": 4,
+          "winner": "us"
+        }
+      ],
+      "gameName": "Rocket League",
+      "clinched": "us",
+      "source": {},
+      "teamId": "t5",
+      "players": [
+        {
+          "private": false,
+          "tag": "Ksquiggly.RL",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "stats": {
+            "shots": 11,
+            "saves": 8,
+            "goals": 4,
+            "assists": 4
+          },
+          "alum": true,
+          "name": "Kyle Greig",
+          "id": "p-88ef0aea"
+        },
+        {
+          "private": false,
+          "tag": "goodnics",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-a1be1608",
+          "stats": {
+            "goals": 9,
+            "assists": 3,
+            "saves": 2,
+            "shots": 17
+          },
+          "name": "Lincoln Deman",
+          "alum": true
+        },
+        {
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "name": "Christian Gatien",
+          "alum": true,
+          "tag": "SsnowyGG",
+          "stats": {
+            "saves": 4,
+            "shots": 18,
+            "assists": 7,
+            "goals": 7
+          },
+          "id": "p-5310cd2b",
+          "private": false
+        },
+        {
+          "tag": "GoodName.mp4",
+          "games": [],
+          "stats": {},
+          "private": false,
+          "alum": true,
+          "id": "p-a7fe3ce9",
+          "name": "Joseph Wisniewski"
+        }
+      ],
+      "term": "fall",
+      "opponent": {
+        "short": "",
+        "school": "Dakota High School",
+        "team": "Dakota High School",
+        "abbr": "DAK",
+        "logo": ""
+      },
       "score": {
         "us": 4,
         "them": 0
-      },
-      "forfeit": null,
-      "gameName": "Rocket League",
-      "clinched": "us",
-      "level": "Varsity",
-      "notes": "",
-      "seriesOnly": false,
-      "opponent": {
-        "team": "Dakota High School",
-        "school": "Dakota High School",
-        "logo": "",
-        "short": "",
-        "abbr": "DAK"
-      },
-      "bestOf": 7,
-      "season": "2023-24"
+      }
     }
   ]
 }

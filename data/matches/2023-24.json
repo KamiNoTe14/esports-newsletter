@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:17:47.419Z",
+  "updated": "2026-10-05T20:18:25.253Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -900,111 +900,146 @@
     },
     {
       "id": "flN7Q3gtoYOBvUjhQUXR",
-      "game": "rocket-league",
-      "league": "MHSEL",
-      "status": "final",
-      "startsAt": "2023-11-09T21:00:00.000Z",
-      "notes": "",
-      "result": "W",
-      "level": "Varsity",
-      "score": {
-        "us": 1,
-        "them": 0
-      },
-      "opponent": {
-        "logo": "",
-        "abbr": "DCC",
-        "team": "Detroit Catholic Central",
-        "school": "Detroit Catholic Central",
-        "short": ""
-      },
-      "term": "fall",
+      "result": "T",
       "players": [
         {
-          "games": [],
-          "stats": {},
-          "id": "p-88ef0aea",
-          "alum": true,
-          "name": "Kyle Greig",
           "tag": "Ksquiggly.RL",
-          "private": false
-        },
-        {
-          "tag": "goodnics",
-          "stats": {},
-          "id": "p-a1be1608",
+          "id": "p-88ef0aea",
           "private": false,
-          "name": "Lincoln Deman",
-          "alum": true,
           "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
+            1
+          ],
+          "stats": {
+            "goals": 0,
+            "saves": 2,
+            "assists": 0,
+            "shots": 1
+          },
+          "name": "Kyle Greig",
+          "alum": true
         },
         {
-          "id": "p-8a733446",
+          "id": "p-a1be1608",
+          "tag": "goodnics",
+          "games": [
+            1
+          ],
           "private": false,
-          "games": [],
+          "stats": {
+            "assists": 0,
+            "goals": 0,
+            "shots": 2,
+            "saves": 1
+          },
+          "alum": true,
+          "name": "Lincoln Deman"
+        },
+        {
           "name": "Troy Beaudoin",
           "alum": true,
+          "id": "p-8a733446",
+          "private": false,
           "stats": {},
+          "games": [],
           "tag": "Tyro."
         },
         {
-          "alum": true,
-          "name": "Christian Gatien",
-          "stats": {},
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "id": "p-5310cd2b",
           "tag": "SsnowyGG",
-          "private": false
+          "alum": true,
+          "stats": {
+            "goals": 1,
+            "shots": 2,
+            "saves": 2,
+            "assists": 0
+          },
+          "private": false,
+          "name": "Christian Gatien",
+          "games": [
+            1
+          ],
+          "id": "p-5310cd2b"
         },
         {
-          "tag": "GoodName.mp4",
           "stats": {},
-          "id": "p-a7fe3ce9",
-          "private": false,
-          "alum": true,
           "name": "Joseph Wisniewski",
-          "games": []
+          "alum": true,
+          "games": [],
+          "id": "p-a7fe3ce9",
+          "tag": "GoodName.mp4",
+          "private": false
         }
       ],
-      "teamId": "t5",
+      "status": "final",
+      "updatedAt": "2026-10-05T20:18:23.826Z",
+      "stage": "regular",
+      "league": "MHSEL",
+      "event": "MHSEL Fall 2023",
       "source": {},
+      "teamName": "Rocket League Varsity",
+      "teamId": "t5",
+      "term": "fall",
+      "forfeit": null,
+      "startsAt": "2023-11-09T21:00:00.000Z",
+      "week": "7",
+      "season": "2023-24",
+      "current": 2,
+      "level": "Varsity",
+      "perGame": true,
+      "seriesOnly": false,
+      "bestOf": 5,
+      "notes": "",
+      "score": {
+        "us": 1,
+        "them": 1
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "game": "rocket-league",
       "gameName": "Rocket League",
       "clinched": null,
       "games": [
         {
           "us": 1,
+          "p": {
+            "p-5310cd2b": {
+              "goals": 1,
+              "assists": 0,
+              "saves": 2,
+              "shots": 2
+            },
+            "p-a1be1608": {
+              "goals": 0,
+              "assists": 0,
+              "saves": 1,
+              "shots": 2
+            },
+            "p-88ef0aea": {
+              "goals": 0,
+              "assists": 0,
+              "saves": 2,
+              "shots": 1
+            }
+          },
+          "n": 1,
           "winner": "us",
-          "them": 0,
-          "n": 1
+          "them": 0
+        },
+        {
+          "them": 2,
+          "us": 1,
+          "n": 2,
+          "winner": "them"
         }
       ],
-      "updatedAt": "2026-10-05T20:17:45.095Z",
-      "week": "7",
-      "season": "2023-24",
-      "bestOf": 5,
-      "stage": "regular",
-      "seriesOnly": false,
-      "event": "MHSEL Fall 2023",
-      "current": 1,
-      "perGame": false,
-      "forfeit": null,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "teamName": "Rocket League Varsity"
+      "opponent": {
+        "short": "",
+        "team": "Detroit Catholic Central",
+        "abbr": "DCC",
+        "school": "Detroit Catholic Central",
+        "logo": ""
+      }
     }
   ]
 }

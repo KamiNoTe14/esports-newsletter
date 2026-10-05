@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:15:06.168Z",
+  "updated": "2026-10-05T19:16:56.167Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -3292,77 +3292,223 @@
     },
     {
       "id": "8IcCal3jQc2v0wq6iSTG",
-      "startsAt": "2025-04-21T20:00:00.000Z",
-      "season": "2024-25",
-      "opponent": {
-        "team": "Falcons Rocket League",
-        "school": "Rochester High School",
-        "short": "",
-        "logo": "",
-        "abbr": "ROC"
-      },
-      "games": [
-        {
-          "them": 2,
-          "n": 1,
-          "us": 1,
-          "winner": "them"
-        },
-        {
-          "n": 2,
-          "them": 2,
-          "winner": "us",
-          "us": 3
-        },
-        {
-          "n": 3,
-          "us": 3,
-          "them": 2,
-          "winner": "us"
-        },
-        {
-          "winner": "them",
-          "n": 4,
-          "them": 4,
-          "us": 0
-        },
-        {
-          "them": 1,
-          "winner": "them",
-          "us": 0,
-          "n": 5
-        }
-      ],
-      "gameName": "Rocket League",
-      "week": "8",
-      "notes": "",
-      "result": "L",
       "teamId": "t5",
-      "perGame": false,
       "teamName": "Rocket League Varsity",
+      "level": "Varsity",
+      "updatedAt": "2026-10-05T19:16:54.654Z",
+      "game": "rocket-league",
+      "clinched": "them",
       "score": {
         "us": 2,
         "them": 3
       },
-      "seriesOnly": false,
-      "level": "Varsity",
-      "current": 5,
-      "game": "rocket-league",
-      "players": [],
-      "stage": "regular",
-      "clinched": "them",
-      "league": "MHSEL",
-      "updatedAt": "2026-10-05T19:15:04.648Z",
+      "result": "L",
+      "perGame": true,
       "source": {},
+      "startsAt": "2025-04-21T20:00:00.000Z",
+      "games": [
+        {
+          "us": 1,
+          "p": {
+            "p-5310cd2b": {
+              "shots": 1,
+              "saves": 1,
+              "assists": 0,
+              "goals": 0
+            },
+            "p-bd268108": {
+              "saves": 1,
+              "goals": 1,
+              "assists": 0,
+              "shots": 3
+            },
+            "p-c0313a9e": {
+              "assists": 1,
+              "shots": 2,
+              "saves": 4,
+              "goals": 0
+            }
+          },
+          "them": 2,
+          "n": 1,
+          "winner": "them"
+        },
+        {
+          "p": {
+            "p-5310cd2b": {
+              "goals": 2,
+              "assists": 0,
+              "saves": 2,
+              "shots": 4
+            },
+            "p-bd268108": {
+              "goals": 1,
+              "saves": 0,
+              "assists": 2,
+              "shots": 3
+            },
+            "p-c0313a9e": {
+              "shots": 2,
+              "assists": 0,
+              "saves": 4,
+              "goals": 0
+            }
+          },
+          "them": 2,
+          "us": 3,
+          "n": 2,
+          "winner": "us"
+        },
+        {
+          "n": 3,
+          "winner": "us",
+          "p": {
+            "p-5310cd2b": {
+              "goals": 2,
+              "saves": 1,
+              "shots": 2,
+              "assists": 1
+            },
+            "p-c0313a9e": {
+              "assists": 1,
+              "shots": 1,
+              "saves": 2,
+              "goals": 1
+            },
+            "p-bd268108": {
+              "shots": 0,
+              "assists": 0,
+              "goals": 0,
+              "saves": 2
+            }
+          },
+          "them": 2,
+          "us": 3
+        },
+        {
+          "p": {
+            "p-c0313a9e": {
+              "goals": 0,
+              "saves": 2,
+              "shots": 1,
+              "assists": 0
+            },
+            "p-bd268108": {
+              "shots": 2,
+              "assists": 0,
+              "goals": 0,
+              "saves": 1
+            },
+            "p-5310cd2b": {
+              "assists": 0,
+              "shots": 0,
+              "saves": 1,
+              "goals": 0
+            }
+          },
+          "us": 0,
+          "n": 4,
+          "them": 4,
+          "winner": "them"
+        },
+        {
+          "winner": "them",
+          "n": 5,
+          "us": 0,
+          "them": 1
+        }
+      ],
+      "notes": "",
+      "status": "final",
+      "season": "2024-25",
+      "opponent": {
+        "short": "",
+        "school": "Rochester High School",
+        "team": "Falcons Rocket League",
+        "logo": "",
+        "abbr": "ROC"
+      },
+      "bestOf": 5,
+      "stage": "regular",
+      "event": "MHSEL Spring 2025",
       "forfeit": null,
       "term": "spring",
+      "league": "MHSEL",
+      "seriesOnly": false,
+      "players": [
+        {
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "alum": true,
+          "name": "Dylan Reinwand",
+          "id": "p-c0313a9e",
+          "stats": {
+            "assists": 2,
+            "shots": 6,
+            "saves": 12,
+            "goals": 1
+          },
+          "private": false,
+          "tag": "Qyxical"
+        },
+        {
+          "stats": {
+            "assists": 2,
+            "goals": 2,
+            "saves": 4,
+            "shots": 8
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "id": "p-bd268108",
+          "alum": true,
+          "private": false,
+          "tag": "Ralax Itz C1",
+          "name": "James Petrucci"
+        },
+        {
+          "id": "p-5310cd2b",
+          "stats": {
+            "assists": 1,
+            "saves": 5,
+            "goals": 4,
+            "shots": 7
+          },
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "tag": "SsnowyGG",
+          "name": "Christian Gatien",
+          "private": false
+        },
+        {
+          "games": [],
+          "private": false,
+          "name": "Tavin Flanagan",
+          "stats": {},
+          "tag": "TRE4TY.",
+          "id": "p-0b11aaef"
+        }
+      ],
+      "week": "8",
+      "current": 5,
       "stream": {
-        "vod": "",
-        "live": ""
+        "live": "",
+        "vod": ""
       },
-      "status": "final",
-      "bestOf": 5,
-      "event": "MHSEL Spring 2025"
+      "gameName": "Rocket League"
     }
   ]
 }

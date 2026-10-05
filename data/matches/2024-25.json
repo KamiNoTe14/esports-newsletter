@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:27:01.090Z",
+  "updated": "2026-10-05T19:30:53.129Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -4241,59 +4241,74 @@
     },
     {
       "id": "fiEYbseL3m0cMzacod0p",
-      "result": "L",
-      "games": [
-        {
-          "us": 0,
-          "them": 0,
-          "n": 1,
-          "winner": "them"
-        },
-        {
-          "them": 0,
-          "n": 2,
-          "winner": "them",
-          "us": 0
-        },
-        {
-          "winner": "them",
-          "us": 0,
-          "them": 0,
-          "n": 3
-        },
-        {
-          "winner": "them",
-          "us": 0,
-          "them": 0,
-          "n": 4
-        }
-      ],
-      "updatedAt": "2026-10-05T19:26:59.879Z",
-      "opponent": {
-        "short": "",
-        "abbr": "DAK",
-        "logo": "",
-        "team": "Dakota High School",
-        "school": "Dakota High School"
-      },
       "teamId": "t5",
-      "game": "rocket-league",
-      "perGame": false,
-      "gameName": "Rocket League",
       "score": {
         "us": 0,
         "them": 4
       },
+      "updatedAt": "2026-10-05T19:26:59.879Z",
+      "forfeit": null,
+      "result": "L",
       "level": "Varsity",
+      "term": "spring",
+      "gameName": "Rocket League",
       "seriesOnly": true,
+      "opponent": {
+        "team": "Dakota High School",
+        "short": "",
+        "logo": "",
+        "school": "Dakota High School",
+        "abbr": "DAK"
+      },
       "source": {},
-      "clinched": "them",
-      "bestOf": 7,
+      "games": [
+        {
+          "winner": "them",
+          "them": 0,
+          "us": 0,
+          "n": 1
+        },
+        {
+          "n": 2,
+          "winner": "them",
+          "them": 0,
+          "us": 0
+        },
+        {
+          "winner": "them",
+          "n": 3,
+          "us": 0,
+          "them": 0
+        },
+        {
+          "winner": "them",
+          "n": 4,
+          "us": 0,
+          "them": 0
+        }
+      ],
+      "week": "Semifinal",
       "players": [
         {
+          "id": "p-c0313a9e",
+          "private": false,
+          "stats": {},
           "alum": true,
           "name": "Dylan Reinwand",
-          "id": "p-c0313a9e",
+          "tag": "Qyxical",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "private": false,
+          "alum": true,
+          "name": "James Petrucci",
+          "id": "p-bd268108",
           "games": [
             1,
             2,
@@ -4301,65 +4316,130 @@
             4,
             5
           ],
-          "private": false,
-          "tag": "Qyxical",
+          "tag": "Ralax Itz C1",
           "stats": {}
         },
         {
-          "stats": {},
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "id": "p-bd268108",
           "alum": true,
-          "private": false,
-          "name": "James Petrucci",
-          "tag": "Ralax Itz C1"
-        },
-        {
-          "tag": "SsnowyGG",
           "name": "Christian Gatien",
-          "alum": true,
-          "private": false,
           "games": [],
-          "stats": {},
-          "id": "p-5310cd2b"
+          "tag": "SsnowyGG",
+          "private": false,
+          "id": "p-5310cd2b",
+          "stats": {}
         },
         {
-          "name": "Tavin Flanagan",
           "tag": "TRE4TY.",
           "private": false,
           "id": "p-0b11aaef",
+          "name": "Tavin Flanagan",
+          "stats": {},
           "games": [
             1,
             2,
             3,
             4,
             5
-          ],
-          "stats": {}
+          ]
         }
       ],
       "current": 4,
-      "term": "spring",
       "season": "2024-25",
-      "teamName": "Rocket League Varsity",
-      "status": "final",
       "stage": "playoffs",
       "event": "MHSEL Spring 2025",
-      "forfeit": null,
+      "status": "final",
+      "startsAt": "2025-05-10T20:00:00.000Z",
+      "game": "rocket-league",
+      "notes": "",
+      "perGame": false,
+      "bestOf": 7,
+      "teamName": "Rocket League Varsity",
+      "league": "MHSEL",
+      "clinched": "them",
       "stream": {
         "vod": "",
         "live": ""
+      }
+    },
+    {
+      "id": "0fKfNPliGhZG1Rnr0uv2",
+      "level": "Varsity",
+      "status": "final",
+      "forfeit": null,
+      "season": "2024-25",
+      "bestOf": 7,
+      "gameName": "Rocket League",
+      "week": "Round of 32",
+      "score": {
+        "us": 4,
+        "them": 2
       },
-      "startsAt": "2025-05-10T20:00:00.000Z",
+      "league": "PlayVS Cup",
+      "players": [],
+      "current": 6,
+      "opponent": {
+        "short": "Tewksbury",
+        "logo": "",
+        "abbr": "TM",
+        "team": "Tewksbury Memorial High School",
+        "school": "Tewksbury Memorial High School"
+      },
+      "term": "spring",
+      "stream": {
+        "live": "https://youtube.com/live/toLueu-bxqg?feature=share",
+        "vod": ""
+      },
+      "games": [
+        {
+          "us": 1,
+          "them": 0,
+          "n": 1,
+          "winner": "us"
+        },
+        {
+          "us": 2,
+          "winner": "us",
+          "them": 1,
+          "n": 2
+        },
+        {
+          "n": 3,
+          "us": 3,
+          "winner": "them",
+          "them": 4
+        },
+        {
+          "us": 1,
+          "them": 3,
+          "winner": "them",
+          "n": 4
+        },
+        {
+          "n": 5,
+          "winner": "us",
+          "us": 4,
+          "them": 2
+        },
+        {
+          "winner": "us",
+          "n": 6,
+          "us": 4,
+          "them": 3
+        }
+      ],
       "notes": "",
-      "league": "MHSEL",
-      "week": "Semifinal"
+      "teamId": "t5",
+      "perGame": false,
+      "stage": "playoffs",
+      "event": "PlayVS Cup 2025",
+      "seriesOnly": false,
+      "startsAt": "2025-05-21T20:00:00.000Z",
+      "result": "W",
+      "source": {},
+      "teamName": "Rocket League Varsity",
+      "updatedAt": "2026-10-05T19:30:51.638Z",
+      "game": "rocket-league",
+      "clinched": "us"
     }
   ]
 }

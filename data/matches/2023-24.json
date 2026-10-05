@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:11:57.593Z",
+  "updated": "2026-10-05T20:13:05.891Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -493,65 +493,198 @@
     },
     {
       "id": "2RcaPpAUyFSu0FENEVj7",
-      "seriesOnly": false,
-      "opponent": {
-        "team": "Rockford High School",
-        "short": "",
-        "abbr": "ROC",
-        "logo": "",
-        "school": "Rockford High School"
-      },
-      "game": "rocket-league",
-      "season": "2023-24",
-      "stage": "regular",
-      "event": "MHSEL Fall 2023",
-      "bestOf": 5,
-      "gameName": "Rocket League",
-      "clinched": "us",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "forfeit": null,
-      "term": "fall",
-      "week": "4",
-      "current": 3,
-      "perGame": false,
-      "startsAt": "2023-10-19T20:00:00.000Z",
-      "result": "W",
-      "teamName": "Rocket League Varsity",
-      "status": "final",
-      "league": "MHSEL",
-      "level": "Varsity",
-      "notes": "",
-      "source": {},
       "score": {
         "us": 3,
         "them": 0
       },
-      "updatedAt": "2026-10-05T20:11:56.168Z",
-      "players": [],
+      "startsAt": "2023-10-19T20:00:00.000Z",
+      "season": "2023-24",
       "games": [
         {
           "n": 1,
           "us": 6,
           "winner": "us",
-          "them": 2
+          "them": 2,
+          "p": {
+            "p-88ef0aea": {
+              "goals": 1,
+              "saves": 3,
+              "assists": 3,
+              "shots": 4
+            },
+            "p-a7fe3ce9": {
+              "goals": 0,
+              "saves": 0,
+              "assists": 1,
+              "shots": 4
+            },
+            "p-5310cd2b": {
+              "assists": 1,
+              "goals": 5,
+              "shots": 8,
+              "saves": 2
+            }
+          }
         },
         {
+          "p": {
+            "p-88ef0aea": {
+              "goals": 3,
+              "shots": 7,
+              "saves": 3,
+              "assists": 3
+            },
+            "p-a7fe3ce9": {
+              "goals": 1,
+              "assists": 0,
+              "saves": 0,
+              "shots": 2
+            },
+            "p-5310cd2b": {
+              "assists": 2,
+              "shots": 3,
+              "saves": 0,
+              "goals": 2
+            }
+          },
+          "us": 6,
+          "winner": "us",
           "them": 1,
-          "n": 2,
-          "winner": "us",
-          "us": 6
+          "n": 2
         },
         {
+          "p": {
+            "p-a7fe3ce9": {
+              "shots": 5,
+              "assists": 0,
+              "saves": 0,
+              "goals": 2
+            },
+            "p-88ef0aea": {
+              "saves": 0,
+              "shots": 8,
+              "goals": 0,
+              "assists": 0
+            },
+            "p-5310cd2b": {
+              "goals": 0,
+              "shots": 3,
+              "saves": 1,
+              "assists": 1
+            }
+          },
+          "them": 1,
           "n": 3,
-          "winner": "us",
           "us": 2,
-          "them": 1
+          "winner": "us"
         }
       ],
-      "teamId": "t5"
+      "bestOf": 5,
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "forfeit": null,
+      "seriesOnly": false,
+      "clinched": "us",
+      "gameName": "Rocket League",
+      "level": "Varsity",
+      "notes": "",
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "abbr": "ROC",
+        "school": "Rockford High School",
+        "team": "Rockford High School"
+      },
+      "current": 3,
+      "perGame": true,
+      "result": "W",
+      "status": "final",
+      "league": "MHSEL",
+      "game": "rocket-league",
+      "teamName": "Rocket League Varsity",
+      "source": {},
+      "week": "4",
+      "players": [
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "alum": true,
+          "name": "Kyle Greig",
+          "id": "p-88ef0aea",
+          "stats": {
+            "shots": 19,
+            "saves": 6,
+            "assists": 6,
+            "goals": 4
+          },
+          "private": false,
+          "tag": "Ksquiggly.RL"
+        },
+        {
+          "tag": "goodnics",
+          "id": "p-a1be1608",
+          "games": [],
+          "alum": true,
+          "name": "Lincoln Deman",
+          "private": false,
+          "stats": {}
+        },
+        {
+          "private": false,
+          "alum": true,
+          "tag": "Tyro.",
+          "name": "Troy Beaudoin",
+          "stats": {},
+          "id": "p-8a733446",
+          "games": []
+        },
+        {
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "SsnowyGG",
+          "id": "p-5310cd2b",
+          "stats": {
+            "saves": 3,
+            "assists": 4,
+            "shots": 14,
+            "goals": 7
+          },
+          "name": "Christian Gatien",
+          "alum": true
+        },
+        {
+          "name": "Joseph Wisniewski",
+          "private": false,
+          "stats": {
+            "goals": 3,
+            "assists": 1,
+            "saves": 0,
+            "shots": 11
+          },
+          "tag": "GoodName.mp4",
+          "alum": true,
+          "id": "p-a7fe3ce9",
+          "games": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "event": "MHSEL Fall 2023",
+      "updatedAt": "2026-10-05T20:13:04.463Z",
+      "teamId": "t5",
+      "stage": "regular",
+      "term": "fall"
     }
   ]
 }

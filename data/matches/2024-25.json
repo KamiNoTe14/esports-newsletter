@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:09:25.224Z",
+  "updated": "2026-10-05T19:10:20.044Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -2754,65 +2754,188 @@
     },
     {
       "id": "Vq1MEaSnZKcN4eH1eAAN",
-      "week": "4",
-      "games": [
-        {
-          "them": 3,
-          "us": 4,
-          "winner": "us",
-          "n": 1
-        },
-        {
-          "them": 0,
-          "n": 2,
-          "us": 4,
-          "winner": "us"
-        },
-        {
-          "n": 3,
-          "winner": "us",
-          "us": 3,
-          "them": 2
-        }
-      ],
       "teamName": "Rocket League Varsity",
-      "notes": "",
-      "season": "2024-25",
-      "seriesOnly": false,
-      "result": "W",
-      "clinched": "us",
-      "updatedAt": "2026-10-05T19:09:23.835Z",
-      "term": "spring",
       "stage": "regular",
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "abbr": "DCC",
-        "team": "DCC Varsity",
-        "school": "Detroit Catholic Central"
-      },
-      "startsAt": "2025-03-20T20:00:00.000Z",
-      "forfeit": null,
-      "teamId": "t5",
-      "players": [],
+      "result": "W",
+      "updatedAt": "2026-10-05T19:10:18.300Z",
       "event": "MHSEL Spring 2025",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "current": 3,
-      "bestOf": 5,
-      "status": "final",
-      "level": "Varsity",
-      "league": "MHSEL",
-      "perGame": false,
-      "gameName": "Rocket League",
+      "game": "rocket-league",
+      "clinched": "us",
+      "term": "spring",
       "score": {
         "us": 3,
         "them": 0
       },
-      "game": "rocket-league",
-      "source": {}
+      "level": "Varsity",
+      "season": "2024-25",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "current": 3,
+      "startsAt": "2025-03-20T20:00:00.000Z",
+      "status": "final",
+      "bestOf": 5,
+      "games": [
+        {
+          "winner": "us",
+          "them": 3,
+          "p": {
+            "p-c0313a9e": {
+              "goals": 1,
+              "shots": 5,
+              "assists": 2,
+              "saves": 2
+            },
+            "p-0b11aaef": {
+              "shots": 5,
+              "assists": 0,
+              "goals": 1,
+              "saves": 1
+            },
+            "p-bd268108": {
+              "saves": 3,
+              "shots": 3,
+              "assists": 0,
+              "goals": 2
+            }
+          },
+          "us": 4,
+          "n": 1
+        },
+        {
+          "us": 4,
+          "n": 2,
+          "winner": "us",
+          "p": {
+            "p-0b11aaef": {
+              "goals": 1,
+              "shots": 1,
+              "saves": 1,
+              "assists": 1
+            },
+            "p-bd268108": {
+              "goals": 2,
+              "shots": 3,
+              "assists": 1,
+              "saves": 2
+            },
+            "p-c0313a9e": {
+              "assists": 1,
+              "goals": 1,
+              "shots": 2,
+              "saves": 6
+            }
+          },
+          "them": 0
+        },
+        {
+          "n": 3,
+          "us": 3,
+          "them": 2,
+          "winner": "us",
+          "p": {
+            "p-c0313a9e": {
+              "saves": 2,
+              "assists": 2,
+              "shots": 1,
+              "goals": 1
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "goals": 0,
+              "shots": 2,
+              "saves": 5
+            },
+            "p-bd268108": {
+              "saves": 1,
+              "assists": 0,
+              "goals": 2,
+              "shots": 2
+            }
+          }
+        }
+      ],
+      "perGame": true,
+      "notes": "",
+      "league": "MHSEL",
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "abbr": "DCC",
+        "school": "Detroit Catholic Central",
+        "team": "DCC Varsity"
+      },
+      "source": {},
+      "gameName": "Rocket League",
+      "week": "4",
+      "forfeit": null,
+      "players": [
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "alum": true,
+          "tag": "Qyxical",
+          "id": "p-c0313a9e",
+          "private": false,
+          "stats": {
+            "saves": 10,
+            "assists": 5,
+            "goals": 3,
+            "shots": 8
+          },
+          "name": "Dylan Reinwand"
+        },
+        {
+          "alum": true,
+          "tag": "Ralax Itz C1",
+          "id": "p-bd268108",
+          "stats": {
+            "assists": 1,
+            "saves": 6,
+            "goals": 6,
+            "shots": 8
+          },
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "James Petrucci",
+          "private": false
+        },
+        {
+          "stats": {},
+          "alum": true,
+          "id": "p-5310cd2b",
+          "name": "Christian Gatien",
+          "games": [],
+          "tag": "SsnowyGG",
+          "private": false
+        },
+        {
+          "stats": {
+            "saves": 7,
+            "goals": 2,
+            "assists": 1,
+            "shots": 8
+          },
+          "tag": "TRE4TY.",
+          "private": false,
+          "name": "Tavin Flanagan",
+          "id": "p-0b11aaef",
+          "games": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "teamId": "t5",
+      "seriesOnly": false
     }
   ]
 }

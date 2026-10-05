@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:21:09.429Z",
+  "updated": "2026-10-05T19:23:06.901Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -3512,83 +3512,275 @@
     },
     {
       "id": "TfkNR1ujNAYYnAlSCbYm",
-      "status": "final",
-      "teamName": "Rocket League Varsity",
       "season": "2024-25",
+      "score": {
+        "us": 4,
+        "them": 2
+      },
       "term": "spring",
-      "updatedAt": "2026-10-05T19:21:07.925Z",
-      "current": 6,
-      "players": [],
-      "bestOf": 7,
-      "clinched": "us",
-      "week": "Round of 32",
-      "league": "MHSEL",
-      "seriesOnly": false,
-      "notes": "",
+      "status": "final",
       "startsAt": "2025-04-29T20:00:00.000Z",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "forfeit": null,
-      "event": "MHSEL Spring 2025",
-      "stage": "playoffs",
-      "teamId": "t5",
-      "game": "rocket-league",
-      "opponent": {
-        "short": "Tawas",
-        "abbr": "TA",
-        "logo": "",
-        "team": "Tawas Area High School",
-        "school": "Tawas Area High School"
-      },
+      "level": "Varsity",
+      "bestOf": 7,
+      "week": "Round of 32",
       "games": [
         {
-          "us": 3,
           "winner": "them",
+          "n": 1,
+          "p": {
+            "p-0b11aaef": {
+              "saves": 1,
+              "goals": 0,
+              "shots": 2,
+              "assists": 0
+            },
+            "p-c0313a9e": {
+              "shots": 3,
+              "saves": 3,
+              "goals": 1,
+              "assists": 1
+            },
+            "p-bd268108": {
+              "shots": 1,
+              "goals": 2,
+              "saves": 2,
+              "assists": 1
+            }
+          },
           "them": 5,
-          "n": 1
+          "us": 3
         },
         {
           "us": 4,
           "them": 1,
+          "p": {
+            "p-0b11aaef": {
+              "goals": 1,
+              "saves": 0,
+              "shots": 4,
+              "assists": 0
+            },
+            "p-bd268108": {
+              "shots": 3,
+              "assists": 1,
+              "saves": 1,
+              "goals": 2
+            },
+            "p-c0313a9e": {
+              "goals": 1,
+              "saves": 1,
+              "shots": 6,
+              "assists": 2
+            }
+          },
           "winner": "us",
           "n": 2
         },
         {
           "them": 4,
+          "p": {
+            "p-0b11aaef": {
+              "goals": 0,
+              "saves": 1,
+              "assists": 1,
+              "shots": 2
+            },
+            "p-c0313a9e": {
+              "assists": 0,
+              "shots": 7,
+              "saves": 0,
+              "goals": 0
+            },
+            "p-bd268108": {
+              "shots": 4,
+              "saves": 1,
+              "assists": 0,
+              "goals": 1
+            }
+          },
           "winner": "them",
-          "us": 1,
-          "n": 3
+          "n": 3,
+          "us": 1
         },
         {
-          "us": 3,
-          "them": 0,
           "winner": "us",
-          "n": 4
+          "p": {
+            "p-0b11aaef": {
+              "shots": 0,
+              "assists": 0,
+              "goals": 0,
+              "saves": 4
+            },
+            "p-c0313a9e": {
+              "saves": 0,
+              "assists": 1,
+              "goals": 2,
+              "shots": 7
+            },
+            "p-bd268108": {
+              "shots": 3,
+              "saves": 0,
+              "assists": 0,
+              "goals": 1
+            }
+          },
+          "them": 0,
+          "n": 4,
+          "us": 3
         },
         {
           "n": 5,
-          "us": 4,
+          "them": 0,
           "winner": "us",
-          "them": 0
+          "p": {
+            "p-0b11aaef": {
+              "saves": 0,
+              "goals": 2,
+              "assists": 0,
+              "shots": 4
+            },
+            "p-bd268108": {
+              "shots": 2,
+              "saves": 1,
+              "assists": 0,
+              "goals": 0
+            },
+            "p-c0313a9e": {
+              "assists": 1,
+              "shots": 4,
+              "goals": 2,
+              "saves": 1
+            }
+          },
+          "us": 4
         },
         {
           "us": 3,
-          "winner": "us",
+          "p": {
+            "p-c0313a9e": {
+              "shots": 2,
+              "assists": 2,
+              "goals": 1,
+              "saves": 1
+            },
+            "p-bd268108": {
+              "goals": 1,
+              "saves": 1,
+              "shots": 4,
+              "assists": 1
+            },
+            "p-0b11aaef": {
+              "goals": 1,
+              "assists": 0,
+              "saves": 0,
+              "shots": 2
+            }
+          },
           "them": 1,
+          "winner": "us",
           "n": 6
         }
       ],
-      "result": "W",
-      "source": {},
-      "level": "Varsity",
-      "score": {
-        "us": 4,
-        "them": 2
+      "teamName": "Rocket League Varsity",
+      "seriesOnly": false,
+      "league": "MHSEL",
+      "clinched": "us",
+      "perGame": true,
+      "stream": {
+        "vod": "",
+        "live": ""
       },
+      "game": "rocket-league",
+      "event": "MHSEL Spring 2025",
+      "stage": "playoffs",
+      "teamId": "t5",
+      "result": "W",
+      "current": 6,
+      "players": [
+        {
+          "stats": {
+            "saves": 6,
+            "goals": 7,
+            "assists": 7,
+            "shots": 29
+          },
+          "id": "p-c0313a9e",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "private": false,
+          "alum": true,
+          "tag": "Qyxical",
+          "name": "Dylan Reinwand"
+        },
+        {
+          "name": "James Petrucci",
+          "id": "p-bd268108",
+          "tag": "Ralax Itz C1",
+          "alum": true,
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "stats": {
+            "shots": 17,
+            "assists": 3,
+            "goals": 7,
+            "saves": 6
+          }
+        },
+        {
+          "private": false,
+          "tag": "SsnowyGG",
+          "id": "p-5310cd2b",
+          "stats": {},
+          "name": "Christian Gatien",
+          "alum": true,
+          "games": []
+        },
+        {
+          "id": "p-0b11aaef",
+          "tag": "TRE4TY.",
+          "private": false,
+          "name": "Tavin Flanagan",
+          "stats": {
+            "shots": 14,
+            "assists": 1,
+            "saves": 6,
+            "goals": 4
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "notes": "",
       "gameName": "Rocket League",
-      "perGame": false
+      "source": {},
+      "opponent": {
+        "school": "Tawas Area High School",
+        "logo": "",
+        "abbr": "TA",
+        "short": "Tawas",
+        "team": "Tawas Area High School"
+      },
+      "updatedAt": "2026-10-05T19:23:04.930Z",
+      "forfeit": null
     }
   ]
 }

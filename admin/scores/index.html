@@ -449,7 +449,7 @@ function setStatus(s){
   }
   const was = cur.status;
   change(m => { m.status = s; if (s === "live" && !(m.games || []).length) m.current = 1; });
-  if (s === "final" && was !== "final"){ toast(cur.result === "W" ? "Final. Eagles win! 🦅" : "Final saved."); setTimeout(() => archive(false), 1500); }
+  if (s === "final" && was !== "final"){ toast(cur.result === "W" ? "Final. Eagles win! 🦅" : "Final saved."); queueArchive(); }
 }
 
 /* players, stats, links */
@@ -584,7 +584,7 @@ function bindDetails(g){
     games.forEach(x => { if (oldP[x.n]) x.p = oldP[x.n]; });
     Object.keys(oldP).filter(n => !games.some(x => x.n === +n)).forEach(n => games.push({n:+n, us:0, them:0, winner:null, p:oldP[n]}));
     change(m => { m.games = games; m.seriesOnly = seriesOnly; m.forfeit = null; m.current = games.filter(x => x.winner).length || 1; m.status = "final"; });
-    toast(cur.result === "W" ? "Saved. Eagles win! 🦅" : "Saved as final."); setTimeout(() => archive(false), 1500);
+    toast(cur.result === "W" ? "Saved. Eagles win! 🦅" : "Saved as final."); queueArchive();
   };
   D.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { statTab = b.dataset.stab; keep(() => renderMatch()); });
   D.querySelectorAll("[data-gk]").forEach(inp => { const h = () => {
@@ -601,7 +601,7 @@ function bindDetails(g){
     p.stats = p.stats || {}; if (inp.value === "") delete p.stats[inp.dataset.stat]; else p.stats[inp.dataset.stat] = +inp.value; queueSave();
   });
   D.querySelectorAll("[data-link]").forEach(inp => inp.oninput = () => { cur.stream = cur.stream || {}; cur.stream[inp.dataset.link] = inp.value.trim(); queueSave(); });
-  D.querySelectorAll("[data-ff]").forEach(b => b.onclick = () => { if (confirm(b.textContent.trim() + "? This marks the match final.")){ change(m => { m.forfeit = b.dataset.ff; m.status = "final"; }); setTimeout(() => archive(false), 1500); } });
+  D.querySelectorAll("[data-ff]").forEach(b => b.onclick = () => { if (confirm(b.textContent.trim() + "? This marks the match final.")){ change(m => { m.forfeit = b.dataset.ff; m.status = "final"; }); queueArchive(); } });
   $("#resetg").onclick = () => { if (confirm("Clear every game score for this match? (Undo can bring it back.)")) change(m => { m.games = []; m.current = 1; }); };
 }
 
@@ -720,6 +720,10 @@ function readWhen(F){ const v = F.when.value; if (!v) return ""; const d = new D
 
 /* ---------- backup finished matches to the GitHub repo ---------- */
 function ghCfg(){ try { return JSON.parse(localStorage.getItem("eagles-gh")); } catch(e){ return null; } }
+/* Finals are copied to GitHub two minutes after the last one is saved, so entering a stack of old results makes one
+   site update instead of one per match. The hourly backup catches anything this misses. */
+let archiveTimer = 0;
+function queueArchive(){ clearTimeout(archiveTimer); archiveTimer = setTimeout(() => archive(false), 120000); }
 async function archive(loud){
   const c = ghCfg(); if (!c?.token || isMock()){ if (loud) toast(isMock() ? "Backups are off in test mode." : "Connect this device in the Site Manager first."); return; }
   const finals = matches.filter(m => m.status === "final").map(m => { const {updatedBy, ...rest} = m; return rest; }).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);

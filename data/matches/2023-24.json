@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:22:42.675Z",
+  "updated": "2026-10-05T20:22:49.269Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -1153,13 +1153,57 @@
     },
     {
       "id": "G71uwjLw4HJnYuvRcJ5X",
+      "league": "MHSEL",
+      "status": "final",
+      "notes": "",
+      "updatedAt": "2026-10-05T20:22:47.585Z",
+      "level": "Varsity",
+      "result": "L",
+      "current": 3,
+      "perGame": false,
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "teamId": "t5",
+      "teamName": "Rocket League Varsity",
+      "forfeit": "us",
       "source": {},
+      "games": [
+        {
+          "us": 1,
+          "n": 1,
+          "winner": "them",
+          "them": 7
+        },
+        {
+          "us": 0,
+          "n": 2,
+          "them": 6,
+          "winner": "them"
+        },
+        {
+          "them": 3,
+          "winner": "them",
+          "us": 0,
+          "n": 3
+        }
+      ],
+      "startsAt": "2023-11-16T21:00:00.000Z",
+      "season": "2023-24",
+      "bestOf": 5,
+      "week": "8",
+      "term": "fall",
+      "event": "MHSEL Fall 2023",
+      "stage": "regular",
+      "gameName": "Rocket League",
+      "clinched": "them",
       "players": [
         {
           "stats": {},
-          "private": false,
           "tag": "Ksquiggly.RL",
           "id": "p-88ef0aea",
+          "private": false,
           "alum": true,
           "name": "Kyle Greig",
           "games": [
@@ -1172,9 +1216,10 @@
         },
         {
           "stats": {},
+          "id": "p-a1be1608",
+          "private": false,
           "alum": true,
           "name": "Lincoln Deman",
-          "private": false,
           "tag": "goodnics",
           "games": [
             1,
@@ -1182,91 +1227,46 @@
             3,
             4,
             5
-          ],
-          "id": "p-a1be1608"
+          ]
         },
         {
+          "stats": {},
+          "private": false,
+          "id": "p-5310cd2b",
+          "alum": true,
+          "name": "Christian Gatien",
+          "tag": "SsnowyGG",
           "games": [
             1,
             2,
             3,
             4,
             5
-          ],
-          "alum": true,
-          "name": "Christian Gatien",
-          "private": false,
-          "id": "p-5310cd2b",
-          "stats": {},
-          "tag": "SsnowyGG"
+          ]
         },
         {
+          "alum": true,
+          "name": "Joseph Wisniewski",
+          "id": "p-a7fe3ce9",
           "stats": {},
           "private": false,
-          "id": "p-a7fe3ce9",
-          "name": "Joseph Wisniewski",
-          "alum": true,
           "games": [],
           "tag": "GoodName.mp4"
         }
       ],
-      "updatedAt": "2026-10-05T20:22:40.977Z",
-      "teamId": "t5",
-      "level": "Varsity",
-      "notes": "",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "teamName": "Rocket League Varsity",
-      "result": "L",
-      "games": [
-        {
-          "n": 1,
-          "winner": "them",
-          "us": 1,
-          "them": 7
-        },
-        {
-          "winner": "them",
-          "n": 2,
-          "us": 0,
-          "them": 6
-        },
-        {
-          "winner": "them",
-          "us": 0,
-          "them": 3,
-          "n": 3
-        }
-      ],
-      "status": "final",
-      "league": "MHSEL",
       "seriesOnly": false,
-      "startsAt": "2023-11-16T21:00:00.000Z",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "current": 3,
-      "term": "fall",
-      "perGame": false,
-      "week": "8",
-      "stage": "regular",
-      "event": "MHSEL Fall 2023",
-      "forfeit": null,
-      "gameName": "Rocket League",
-      "clinched": "them",
       "game": "rocket-league",
       "opponent": {
-        "logo": "",
-        "abbr": "SAL",
         "team": "Saline High School",
         "school": "Saline High School",
-        "short": ""
-      },
-      "season": "2023-24",
-      "bestOf": 5
+        "logo": "",
+        "short": "",
+        "abbr": "SAL"
+      }
     }
   ]
 }

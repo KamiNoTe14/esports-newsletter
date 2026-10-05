@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:22:49.269Z",
+  "updated": "2026-10-05T20:22:52.439Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -1153,28 +1153,99 @@
     },
     {
       "id": "G71uwjLw4HJnYuvRcJ5X",
-      "league": "MHSEL",
-      "status": "final",
-      "notes": "",
-      "updatedAt": "2026-10-05T20:22:47.585Z",
-      "level": "Varsity",
+      "event": "MHSEL Fall 2023",
       "result": "L",
-      "current": 3,
+      "stage": "regular",
+      "updatedAt": "2026-10-05T20:22:50.917Z",
+      "forfeit": null,
+      "status": "final",
       "perGame": false,
-      "score": {
-        "us": 0,
-        "them": 3
+      "league": "MHSEL",
+      "startsAt": "2023-11-16T21:00:00.000Z",
+      "current": 3,
+      "opponent": {
+        "team": "Saline High School",
+        "logo": "",
+        "short": "",
+        "school": "Saline High School",
+        "abbr": "SAL"
       },
-      "teamId": "t5",
-      "teamName": "Rocket League Varsity",
-      "forfeit": "us",
       "source": {},
+      "teamId": "t5",
+      "clinched": "them",
+      "gameName": "Rocket League",
+      "level": "Varsity",
+      "notes": "",
+      "bestOf": 5,
+      "players": [
+        {
+          "stats": {},
+          "name": "Kyle Greig",
+          "alum": true,
+          "id": "p-88ef0aea",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "tag": "Ksquiggly.RL",
+          "private": false
+        },
+        {
+          "tag": "goodnics",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "stats": {},
+          "private": false,
+          "alum": true,
+          "id": "p-a1be1608",
+          "name": "Lincoln Deman"
+        },
+        {
+          "tag": "SsnowyGG",
+          "alum": true,
+          "stats": {},
+          "name": "Christian Gatien",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-5310cd2b"
+        },
+        {
+          "private": false,
+          "tag": "GoodName.mp4",
+          "games": [],
+          "stats": {},
+          "id": "p-a7fe3ce9",
+          "name": "Joseph Wisniewski",
+          "alum": true
+        }
+      ],
+      "season": "2023-24",
+      "game": "rocket-league",
+      "week": "8",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
       "games": [
         {
-          "us": 1,
-          "n": 1,
+          "them": 7,
           "winner": "them",
-          "them": 7
+          "n": 1,
+          "us": 1
         },
         {
           "us": 0,
@@ -1183,89 +1254,18 @@
           "winner": "them"
         },
         {
+          "n": 3,
           "them": 3,
           "winner": "them",
-          "us": 0,
-          "n": 3
+          "us": 0
         }
       ],
-      "startsAt": "2023-11-16T21:00:00.000Z",
-      "season": "2023-24",
-      "bestOf": 5,
-      "week": "8",
-      "term": "fall",
-      "event": "MHSEL Fall 2023",
-      "stage": "regular",
-      "gameName": "Rocket League",
-      "clinched": "them",
-      "players": [
-        {
-          "stats": {},
-          "tag": "Ksquiggly.RL",
-          "id": "p-88ef0aea",
-          "private": false,
-          "alum": true,
-          "name": "Kyle Greig",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "stats": {},
-          "id": "p-a1be1608",
-          "private": false,
-          "alum": true,
-          "name": "Lincoln Deman",
-          "tag": "goodnics",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "stats": {},
-          "private": false,
-          "id": "p-5310cd2b",
-          "alum": true,
-          "name": "Christian Gatien",
-          "tag": "SsnowyGG",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "alum": true,
-          "name": "Joseph Wisniewski",
-          "id": "p-a7fe3ce9",
-          "stats": {},
-          "private": false,
-          "games": [],
-          "tag": "GoodName.mp4"
-        }
-      ],
+      "teamName": "Rocket League Varsity",
       "seriesOnly": false,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "game": "rocket-league",
-      "opponent": {
-        "team": "Saline High School",
-        "school": "Saline High School",
-        "logo": "",
-        "short": "",
-        "abbr": "SAL"
+      "term": "fall",
+      "score": {
+        "us": 0,
+        "them": 3
       }
     }
   ]

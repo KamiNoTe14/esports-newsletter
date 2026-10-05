@@ -130,7 +130,7 @@ function bracketsHTML(site){
 function recordsHTML(site, limit){
   const list = (site.records || []).slice(0, limit || 99);
   if (!on(site, "records") || !list.length) return "";
-  return `<div class="grid g2">${list.map(r => `<div class="card record"><div class="trophy" aria-hidden="true">★</div><div><b>${esc(r.title)}</b>${r.year ? `<span class="chip gold" style="margin-top:6px;display:inline-block">${esc(r.year)}</span>` : ""}${r.detail ? `<p class="muted" style="margin:8px 0 0;font-size:15px">${esc(r.detail)}</p>` : ""}</div></div>`).join("")}</div>`;
+  return `<div class="grid g2">${list.map(r => `<div class="card record"><div class="trophy" aria-hidden="true">★</div><div>${(g => !g ? "" : g.icon ? `<img class="game-logo rec-game" src="${esc(url(g.icon))}" alt="${esc(g.name)}">` : `<p class="eyebrow" style="margin:0 0 4px">${esc(g.name)}</p>`)((site.games || []).find(g => g.key === r.game))}<b>${esc(r.title)}</b>${r.year ? `<span class="chip gold" style="margin-top:6px;display:inline-block">${esc(r.year)}</span>` : ""}${r.detail ? `<p class="muted" style="margin:8px 0 0;font-size:15px">${esc(r.detail)}</p>` : ""}</div></div>`).join("")}</div>`;
 }
 function sponsorsHTML(site){
   const list = site.sponsors || [];

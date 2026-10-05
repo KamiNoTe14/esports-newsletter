@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:16:49.976Z",
+  "updated": "2026-10-05T20:16:53.289Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -900,77 +900,135 @@
     },
     {
       "id": "flN7Q3gtoYOBvUjhQUXR",
-      "source": {},
-      "teamId": "t5",
-      "result": "W",
-      "stage": "regular",
-      "updatedAt": "2026-10-05T20:16:48.467Z",
-      "event": "MHSEL Fall 2023",
-      "teamName": "Rocket League Varsity",
-      "players": [],
-      "league": "MHSEL",
       "status": "final",
-      "games": [
-        {
-          "winner": "us",
-          "them": 0,
-          "n": 1,
-          "us": 0
-        },
-        {
-          "n": 2,
-          "them": 0,
-          "us": 0,
-          "winner": "us"
-        },
-        {
-          "us": 0,
-          "winner": "us",
-          "them": 0,
-          "n": 3
-        },
-        {
-          "n": 4,
-          "us": 0,
-          "winner": "them",
-          "them": 0
-        },
-        {
-          "them": 0,
-          "n": 5,
-          "winner": "them",
-          "us": 0
-        }
-      ],
-      "term": "fall",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
+      "forfeit": null,
+      "league": "MHSEL",
+      "level": "Varsity",
+      "current": 5,
+      "notes": "",
+      "perGame": false,
+      "result": "W",
+      "teamId": "t5",
       "score": {
         "us": 3,
         "them": 2
       },
-      "startsAt": "2023-11-09T21:00:00.000Z",
+      "source": {},
+      "teamName": "Rocket League Varsity",
+      "games": [
+        {
+          "winner": "us",
+          "n": 1,
+          "us": 0,
+          "them": 0
+        },
+        {
+          "n": 2,
+          "winner": "us",
+          "us": 0,
+          "them": 0
+        },
+        {
+          "winner": "us",
+          "n": 3,
+          "them": 0,
+          "us": 0
+        },
+        {
+          "n": 4,
+          "them": 0,
+          "winner": "them",
+          "us": 0
+        },
+        {
+          "n": 5,
+          "winner": "them",
+          "them": 0,
+          "us": 0
+        }
+      ],
+      "season": "2023-24",
       "week": "7",
-      "game": "rocket-league",
-      "notes": "",
-      "seriesOnly": true,
-      "opponent": {
-        "abbr": "DCC",
-        "school": "Detroit Catholic Central",
-        "short": "",
-        "logo": "",
-        "team": "Detroit Catholic Central"
-      },
-      "level": "Varsity",
-      "forfeit": null,
       "bestOf": 5,
-      "perGame": false,
-      "current": 5,
+      "event": "MHSEL Fall 2023",
+      "seriesOnly": true,
+      "players": [
+        {
+          "id": "p-88ef0aea",
+          "tag": "Ksquiggly.RL",
+          "alum": true,
+          "name": "Kyle Greig",
+          "stats": {},
+          "games": [],
+          "private": false
+        },
+        {
+          "name": "Lincoln Deman",
+          "alum": true,
+          "stats": {},
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-a1be1608",
+          "private": false,
+          "tag": "goodnics"
+        },
+        {
+          "private": false,
+          "games": [],
+          "alum": true,
+          "name": "Troy Beaudoin",
+          "tag": "Tyro.",
+          "id": "p-8a733446",
+          "stats": {}
+        },
+        {
+          "tag": "SsnowyGG",
+          "stats": {},
+          "name": "Christian Gatien",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-5310cd2b",
+          "private": false
+        },
+        {
+          "games": [],
+          "id": "p-a7fe3ce9",
+          "private": false,
+          "stats": {},
+          "alum": true,
+          "name": "Joseph Wisniewski",
+          "tag": "GoodName.mp4"
+        }
+      ],
+      "startsAt": "2023-11-09T21:00:00.000Z",
+      "term": "fall",
+      "stage": "regular",
+      "updatedAt": "2026-10-05T20:16:51.939Z",
+      "opponent": {
+        "team": "Detroit Catholic Central",
+        "school": "Detroit Catholic Central",
+        "logo": "",
+        "short": "",
+        "abbr": "DCC"
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "game": "rocket-league",
       "clinched": "us",
-      "gameName": "Rocket League",
-      "season": "2023-24"
+      "gameName": "Rocket League"
     }
   ]
 }

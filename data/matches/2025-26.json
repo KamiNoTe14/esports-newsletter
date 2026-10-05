@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-05T15:27:12.304Z",
+  "updated": "2026-10-05T15:29:00.075Z",
   "matches": [
     {
       "id": "GRXocyZWqtq6z2KErPiV",
@@ -1020,71 +1020,207 @@
     },
     {
       "id": "Ui6edqsDmsoanUcsn3Z7",
-      "league": "MHSEL",
       "opponent": {
         "team": "Sparta Orchard Knights",
+        "school": "Sparta Senior High School",
         "logo": "",
         "short": "",
-        "school": "Sparta Senior High School",
         "abbr": "SPA"
       },
-      "updatedAt": "2026-10-05T15:27:10.830Z",
-      "status": "final",
-      "notes": "",
+      "game": "rocket-league",
+      "gameName": "Rocket League",
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/diMDosYj1M4?feature=share"
+      },
+      "season": "2025-26",
+      "week": "Round of 32",
       "games": [
         {
-          "us": 10,
-          "n": 1,
+          "winner": "us",
+          "p": {
+            "p-c0313a9e": {
+              "assists": 2,
+              "shots": 6,
+              "goals": 5,
+              "saves": 0
+            },
+            "p-61bdc66e": {
+              "saves": 0,
+              "assists": 2,
+              "goals": 3,
+              "shots": 5
+            },
+            "p-0b11aaef": {
+              "saves": 1,
+              "shots": 3,
+              "goals": 2,
+              "assists": 1
+            }
+          },
           "them": 1,
+          "us": 10,
+          "n": 1
+        },
+        {
+          "them": 0,
+          "us": 2,
+          "p": {
+            "p-c0313a9e": {
+              "saves": 1,
+              "goals": 0,
+              "shots": 0,
+              "assists": 0
+            },
+            "p-61bdc66e": {
+              "assists": 0,
+              "saves": 1,
+              "shots": 3,
+              "goals": 1
+            },
+            "p-0b11aaef": {
+              "saves": 0,
+              "assists": 0,
+              "goals": 1,
+              "shots": 3
+            }
+          },
+          "n": 2,
           "winner": "us"
         },
         {
-          "us": 2,
-          "n": 2,
-          "winner": "us",
-          "them": 0
-        },
-        {
-          "us": 6,
-          "winner": "us",
+          "p": {
+            "p-c0313a9e": {
+              "assists": 2,
+              "goals": 2,
+              "shots": 3,
+              "saves": 1
+            },
+            "p-61bdc66e": {
+              "assists": 0,
+              "shots": 3,
+              "goals": 3,
+              "saves": 0
+            },
+            "p-0b11aaef": {
+              "assists": 1,
+              "saves": 1,
+              "goals": 1,
+              "shots": 3
+            }
+          },
           "them": 0,
+          "winner": "us",
+          "us": 6,
           "n": 3
         },
         {
-          "n": 4,
+          "p": {
+            "p-c0313a9e": {
+              "saves": 1,
+              "goals": 3,
+              "shots": 4,
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "saves": 0,
+              "assists": 2,
+              "goals": 0,
+              "shots": 2
+            },
+            "p-61bdc66e": {
+              "shots": 1,
+              "goals": 1,
+              "assists": 2,
+              "saves": 0
+            }
+          },
           "winner": "us",
-          "us": 4,
-          "them": 2
+          "n": 4,
+          "them": 2,
+          "us": 4
         }
       ],
-      "gameName": "Rocket League",
-      "teamId": "t5",
-      "game": "rocket-league",
-      "teamName": "Rocket League Varsity",
-      "result": "W",
-      "players": [],
-      "week": "Round of 32",
-      "seriesOnly": false,
       "term": "fall",
-      "perGame": false,
+      "notes": "",
+      "teamName": "Rocket League Varsity",
+      "source": {},
+      "players": [
+        {
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "name": "Tavin Flanagan",
+          "stats": {
+            "saves": 2,
+            "assists": 4,
+            "shots": 11,
+            "goals": 4
+          },
+          "private": false,
+          "tag": "TRE4TY.",
+          "id": "p-0b11aaef"
+        },
+        {
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "private": false,
+          "stats": {
+            "goals": 8,
+            "shots": 12,
+            "saves": 1,
+            "assists": 4
+          },
+          "name": "Fred Nikitin",
+          "tag": "Stupid Nonsense",
+          "id": "p-61bdc66e"
+        },
+        {
+          "id": "p-c0313a9e",
+          "private": false,
+          "stats": {
+            "saves": 3,
+            "goals": 10,
+            "shots": 13,
+            "assists": 4
+          },
+          "tag": "Qyxical",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "name": "Dylan Reinwand"
+        }
+      ],
+      "perGame": true,
       "bestOf": 7,
-      "forfeit": null,
       "startsAt": "2025-11-20T21:00:00.000Z",
+      "level": "Varsity",
+      "stage": "playoffs",
+      "forfeit": null,
+      "result": "W",
+      "teamId": "t5",
       "score": {
         "us": 4,
         "them": 0
       },
-      "level": "Varsity",
-      "source": {},
-      "stage": "playoffs",
-      "season": "2025-26",
-      "event": "MHSEL Fall 2025",
-      "stream": {
-        "live": "https://youtube.com/live/diMDosYj1M4?feature=share",
-        "vod": ""
-      },
       "current": 4,
-      "clinched": "us"
+      "status": "final",
+      "updatedAt": "2026-10-05T15:28:58.541Z",
+      "league": "MHSEL",
+      "clinched": "us",
+      "event": "MHSEL Fall 2025",
+      "seriesOnly": false
     },
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",

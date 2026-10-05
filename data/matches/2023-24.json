@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:00:18.304Z",
+  "updated": "2026-10-05T20:11:19.917Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -301,64 +301,194 @@
     },
     {
       "id": "b89q52rFBiWj0OOCx6eE",
-      "result": "W",
-      "opponent": {
-        "logo": "",
-        "abbr": "NB",
-        "team": "North Branch High School",
-        "short": "",
-        "school": "North Branch High School"
-      },
-      "updatedAt": "2026-10-05T20:00:16.900Z",
-      "current": 3,
-      "gameName": "Rocket League",
-      "teamName": "Rocket League Varsity",
       "status": "final",
-      "perGame": false,
-      "stage": "regular",
+      "event": "MHSEL Fall 2023",
       "source": {},
-      "game": "rocket-league",
       "league": "MHSEL",
-      "term": "fall",
-      "bestOf": 5,
-      "games": [
+      "level": "Varsity",
+      "players": [
         {
-          "them": 0,
-          "winner": "us",
-          "n": 1,
-          "us": 7
+          "name": "Kyle Greig",
+          "id": "p-88ef0aea",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "alum": true,
+          "stats": {
+            "assists": 6,
+            "saves": 2,
+            "shots": 18,
+            "goals": 5
+          },
+          "tag": "Ksquiggly.RL"
         },
         {
+          "id": "p-a1be1608",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Lincoln Deman",
+          "tag": "goodnics",
+          "private": false,
+          "stats": {
+            "goals": 3,
+            "assists": 2,
+            "saves": 4,
+            "shots": 8
+          }
+        },
+        {
+          "name": "Troy Beaudoin",
+          "stats": {},
+          "private": false,
+          "id": "p-8a733446",
+          "alum": true,
+          "tag": "Tyro.",
+          "games": []
+        },
+        {
+          "name": "Christian Gatien",
+          "id": "p-5310cd2b",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "private": false,
+          "stats": {
+            "goals": 9,
+            "shots": 25,
+            "saves": 3,
+            "assists": 4
+          },
+          "tag": "SsnowyGG"
+        },
+        {
+          "alum": true,
+          "tag": "GoodName.mp4",
+          "private": false,
+          "games": [],
+          "name": "Joseph Wisniewski",
+          "id": "p-a7fe3ce9",
+          "stats": {}
+        }
+      ],
+      "result": "W",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "notes": "",
+      "week": "3",
+      "season": "2023-24",
+      "startsAt": "2023-10-12T20:00:00.000Z",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "bestOf": 5,
+      "clinched": "us",
+      "forfeit": null,
+      "seriesOnly": false,
+      "term": "fall",
+      "stage": "regular",
+      "perGame": true,
+      "teamName": "Rocket League Varsity",
+      "game": "rocket-league",
+      "updatedAt": "2026-10-05T20:11:18.482Z",
+      "games": [
+        {
+          "winner": "us",
+          "them": 0,
+          "n": 1,
+          "us": 7,
+          "p": {
+            "p-88ef0aea": {
+              "goals": 2,
+              "assists": 1,
+              "shots": 8,
+              "saves": 2
+            },
+            "p-a1be1608": {
+              "shots": 3,
+              "saves": 4,
+              "assists": 2,
+              "goals": 1
+            },
+            "p-5310cd2b": {
+              "assists": 1,
+              "shots": 8,
+              "saves": 0,
+              "goals": 4
+            }
+          }
+        },
+        {
+          "p": {
+            "p-a1be1608": {
+              "saves": 0,
+              "shots": 1,
+              "assists": 0,
+              "goals": 1
+            },
+            "p-88ef0aea": {
+              "assists": 3,
+              "goals": 2,
+              "shots": 7,
+              "saves": 0
+            },
+            "p-5310cd2b": {
+              "assists": 2,
+              "goals": 3,
+              "saves": 2,
+              "shots": 12
+            }
+          },
           "winner": "us",
           "them": 0,
           "us": 6,
           "n": 2
         },
         {
+          "p": {
+            "p-5310cd2b": {
+              "goals": 2,
+              "saves": 1,
+              "shots": 5,
+              "assists": 1
+            },
+            "p-a1be1608": {
+              "goals": 1,
+              "shots": 4
+            },
+            "p-88ef0aea": {
+              "assists": 2,
+              "shots": 3,
+              "goals": 1
+            }
+          },
           "winner": "us",
           "them": 1,
-          "n": 3,
-          "us": 4
+          "us": 4,
+          "n": 3
         }
       ],
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "season": "2023-24",
-      "event": "MHSEL Fall 2023",
-      "seriesOnly": false,
-      "week": "3",
-      "forfeit": null,
-      "clinched": "us",
-      "level": "Varsity",
-      "startsAt": "2023-10-12T20:00:00.000Z",
+      "gameName": "Rocket League",
       "teamId": "t5",
-      "players": [],
-      "notes": "",
-      "score": {
-        "us": 3,
-        "them": 0
+      "current": 3,
+      "opponent": {
+        "short": "",
+        "team": "North Branch High School",
+        "abbr": "NB",
+        "school": "North Branch High School",
+        "logo": ""
       }
     }
   ]

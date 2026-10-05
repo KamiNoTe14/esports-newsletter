@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:06:57.744Z",
+  "updated": "2026-10-05T19:07:22.388Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -2430,65 +2430,142 @@
     },
     {
       "id": "1QYI4yixSpZ5C8bJeX1U",
-      "league": "MHSEL",
+      "notes": "",
+      "opponent": {
+        "abbr": "CP",
+        "school": "Comstock Park High School",
+        "logo": "",
+        "short": "",
+        "team": "Comstock Park RL"
+      },
+      "seriesOnly": false,
+      "teamId": "t5",
       "games": [
         {
-          "us": 9,
-          "winner": "us",
+          "n": 1,
           "them": 2,
-          "n": 1
-        },
-        {
-          "us": 4,
-          "them": 0,
-          "n": 2,
+          "p": {
+            "p-bd268108": {
+              "goals": 4,
+              "shots": 7,
+              "assists": 2,
+              "saves": 0
+            },
+            "p-0b11aaef": {
+              "goals": 0,
+              "assists": 2,
+              "shots": 4,
+              "saves": 0
+            },
+            "p-c0313a9e": {
+              "saves": 0,
+              "shots": 9,
+              "goals": 5,
+              "assists": 1
+            }
+          },
+          "us": 9,
           "winner": "us"
         },
         {
+          "us": 4,
+          "winner": "us",
+          "n": 2,
+          "them": 0
+        },
+        {
+          "them": 2,
           "winner": "us",
           "us": 4,
-          "n": 3,
-          "them": 2
+          "n": 3
         }
       ],
+      "startsAt": "2025-03-06T21:00:00.000Z",
+      "bestOf": 5,
+      "status": "final",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
       "week": "2",
       "source": {},
-      "players": [],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
       "gameName": "Rocket League",
-      "notes": "",
-      "status": "final",
-      "bestOf": 5,
+      "league": "MHSEL",
       "forfeit": null,
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "abbr": "CP",
-        "school": "Comstock Park High School",
-        "team": "Comstock Park RL"
-      },
-      "current": 3,
-      "teamId": "t5",
-      "startsAt": "2025-03-06T21:00:00.000Z",
-      "perGame": false,
-      "stage": "regular",
-      "term": "spring",
       "event": "MHSEL Spring 2025",
-      "result": "W",
-      "clinched": "us",
+      "players": [
+        {
+          "games": [
+            1
+          ],
+          "alum": true,
+          "tag": "Qyxical",
+          "id": "p-c0313a9e",
+          "private": false,
+          "name": "Dylan Reinwand",
+          "stats": {
+            "goals": 5,
+            "shots": 9,
+            "saves": 0,
+            "assists": 1
+          }
+        },
+        {
+          "alum": true,
+          "tag": "Ralax Itz C1",
+          "stats": {
+            "saves": 0,
+            "assists": 2,
+            "goals": 4,
+            "shots": 7
+          },
+          "id": "p-bd268108",
+          "games": [
+            1
+          ],
+          "private": false,
+          "name": "James Petrucci"
+        },
+        {
+          "name": "Christian Gatien",
+          "private": false,
+          "games": [],
+          "stats": {},
+          "id": "p-5310cd2b",
+          "tag": "SsnowyGG",
+          "alum": true
+        },
+        {
+          "private": false,
+          "stats": {
+            "assists": 2,
+            "shots": 4,
+            "goals": 0,
+            "saves": 0
+          },
+          "games": [
+            1
+          ],
+          "id": "p-0b11aaef",
+          "name": "Tavin Flanagan",
+          "tag": "TRE4TY."
+        }
+      ],
+      "stage": "regular",
+      "updatedAt": "2026-10-05T19:07:21.046Z",
       "season": "2024-25",
+      "teamName": "Rocket League Varsity",
+      "game": "rocket-league",
+      "perGame": true,
       "score": {
         "us": 3,
         "them": 0
       },
-      "teamName": "Rocket League Varsity",
       "level": "Varsity",
-      "updatedAt": "2026-10-05T19:06:56.252Z",
-      "game": "rocket-league",
-      "seriesOnly": false
+      "result": "W",
+      "term": "spring",
+      "clinched": "us",
+      "current": 3
     }
   ]
 }

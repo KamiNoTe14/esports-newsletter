@@ -1,6 +1,6 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-05T20:24:31.357Z",
+  "updated": "2026-10-05T20:24:53.284Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
@@ -1270,71 +1270,141 @@
     },
     {
       "id": "gp0ZrpypmuOMLgu8FNbw",
-      "result": "W",
-      "teamName": "Rocket League Varsity",
-      "games": [
+      "players": [
         {
-          "n": 1,
-          "us": 8,
-          "winner": "us",
-          "them": 1
+          "name": "Kyle Greig",
+          "alum": true,
+          "stats": {
+            "assists": 0,
+            "goals": 4,
+            "shots": 8,
+            "saves": 0
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-88ef0aea",
+          "private": false,
+          "tag": "Ksquiggly.RL"
         },
         {
-          "n": 2,
-          "them": 1,
-          "us": 8,
-          "winner": "us"
+          "name": "Lincoln Deman",
+          "alum": true,
+          "id": "p-a1be1608",
+          "stats": {
+            "assists": 0,
+            "goals": 2,
+            "shots": 4,
+            "saves": 3
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "tag": "goodnics",
+          "private": false
         },
         {
-          "them": 1,
-          "n": 3,
-          "us": 3,
-          "winner": "us"
+          "alum": true,
+          "name": "Christian Gatien",
+          "stats": {
+            "goals": 2,
+            "assists": 6,
+            "saves": 1,
+            "shots": 7
+          },
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-5310cd2b",
+          "tag": "SsnowyGG"
         },
         {
-          "us": 5,
-          "n": 4,
-          "them": 3,
-          "winner": "us"
+          "name": "Joseph Wisniewski",
+          "alum": true,
+          "id": "p-a7fe3ce9",
+          "stats": {},
+          "private": false,
+          "games": [],
+          "tag": "GoodName.mp4"
         }
       ],
-      "game": "rocket-league",
-      "league": "MHSEL",
-      "status": "final",
+      "updatedAt": "2026-10-05T20:24:51.909Z",
       "score": {
         "us": 4,
         "them": 0
       },
+      "season": "2023-24",
+      "bestOf": 7,
+      "teamName": "Rocket League Varsity",
+      "games": [
+        {
+          "them": 1,
+          "n": 1,
+          "winner": "us",
+          "us": 8
+        },
+        {
+          "us": 8,
+          "them": 1,
+          "n": 2,
+          "winner": "us"
+        },
+        {
+          "n": 3,
+          "us": 3,
+          "winner": "us",
+          "them": 1
+        },
+        {
+          "winner": "us",
+          "us": 5,
+          "them": 3,
+          "n": 4
+        }
+      ],
+      "stream": {
+        "live": "https://youtu.be/PL9CjheFQ0w",
+        "vod": ""
+      },
       "notes": "",
       "level": "Varsity",
-      "players": [],
-      "week": "Round of 32",
-      "source": {},
-      "updatedAt": "2026-10-05T20:24:29.923Z",
-      "term": "fall",
-      "teamId": "t5",
-      "clinched": "us",
-      "gameName": "Rocket League",
       "seriesOnly": false,
       "opponent": {
+        "logo": "",
+        "abbr": "BEL",
         "team": "Belleville High School",
         "school": "Belleville High School",
-        "short": "",
-        "abbr": "BEL",
-        "logo": ""
+        "short": ""
       },
-      "bestOf": 7,
-      "season": "2023-24",
+      "current": 4,
+      "result": "W",
+      "perGame": false,
+      "league": "MHSEL",
+      "status": "final",
+      "game": "rocket-league",
+      "clinched": "us",
+      "gameName": "Rocket League",
+      "forfeit": null,
+      "source": {},
+      "week": "Round of 32",
       "startsAt": "2023-11-27T21:00:00.000Z",
       "event": "MHSEL Fall 2023",
-      "stream": {
-        "vod": "",
-        "live": "https://youtu.be/PL9CjheFQ0w"
-      },
+      "term": "fall",
       "stage": "playoffs",
-      "perGame": false,
-      "current": 4,
-      "forfeit": null
+      "teamId": "t5"
     }
   ]
 }

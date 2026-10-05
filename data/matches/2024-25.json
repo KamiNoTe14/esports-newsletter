@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:10:36.832Z",
+  "updated": "2026-10-05T19:10:49.467Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -2939,79 +2939,79 @@
     },
     {
       "id": "WT88jIHRWGh924gAXmmo",
-      "opponent": {
-        "short": "",
-        "abbr": "ANN",
-        "school": "Annapolis High School",
-        "logo": "",
-        "team": "AHS Cougars"
+      "teamName": "Rocket League Varsity",
+      "level": "Varsity",
+      "score": {
+        "us": 3,
+        "them": 0
       },
       "teamId": "t5",
       "game": "rocket-league",
-      "seriesOnly": true,
-      "current": 3,
-      "startsAt": "2025-04-03T20:00:00.000Z",
-      "perGame": false,
+      "term": "spring",
+      "status": "final",
+      "bestOf": 5,
+      "clinched": "us",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "event": "MHSEL Spring 2025",
+      "stage": "regular",
       "source": {},
       "league": "MHSEL",
+      "updatedAt": "2026-10-05T19:10:47.017Z",
+      "startsAt": "2025-04-03T20:00:00.000Z",
+      "current": 3,
+      "seriesOnly": true,
+      "season": "2024-25",
+      "perGame": false,
+      "opponent": {
+        "abbr": "ANN",
+        "school": "Annapolis High School",
+        "logo": "",
+        "short": "",
+        "team": "AHS Cougars"
+      },
       "notes": "",
+      "week": "6",
       "gameName": "Rocket League",
-      "term": "spring",
-      "games": [
-        {
-          "us": 0,
-          "n": 1,
-          "them": 0,
-          "winner": "us"
-        },
-        {
-          "them": 0,
-          "winner": "us",
-          "us": 0,
-          "n": 2
-        },
-        {
-          "them": 0,
-          "us": 0,
-          "winner": "us",
-          "n": 3
-        }
-      ],
+      "result": "W",
+      "forfeit": "them",
       "players": [
         {
-          "id": "p-c0313a9e",
-          "name": "Dylan Reinwand",
-          "stats": {},
-          "private": false,
-          "tag": "Qyxical",
-          "alum": true,
           "games": [
             1,
             2,
             3
-          ]
+          ],
+          "id": "p-c0313a9e",
+          "alum": true,
+          "tag": "Qyxical",
+          "stats": {},
+          "name": "Dylan Reinwand",
+          "private": false
         },
         {
-          "stats": {},
-          "tag": "Ralax Itz C1",
           "name": "James Petrucci",
-          "private": false,
-          "alum": true,
           "id": "p-bd268108",
           "games": [
             1,
             2,
             3
-          ]
+          ],
+          "stats": {},
+          "tag": "Ralax Itz C1",
+          "alum": true,
+          "private": false
         },
         {
-          "stats": {},
-          "tag": "SsnowyGG",
           "name": "Christian Gatien",
-          "id": "p-5310cd2b",
-          "alum": true,
           "games": [],
-          "private": false
+          "private": false,
+          "stats": {},
+          "id": "p-5310cd2b",
+          "tag": "SsnowyGG",
+          "alum": true
         },
         {
           "games": [
@@ -3019,33 +3019,33 @@
             2,
             3
           ],
-          "tag": "TRE4TY.",
+          "name": "Tavin Flanagan",
+          "private": false,
           "id": "p-0b11aaef",
           "stats": {},
-          "name": "Tavin Flanagan",
-          "private": false
+          "tag": "TRE4TY."
         }
       ],
-      "status": "final",
-      "bestOf": 5,
-      "forfeit": null,
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "season": "2024-25",
-      "level": "Varsity",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "updatedAt": "2026-10-05T19:10:34.866Z",
-      "teamName": "Rocket League Varsity",
-      "event": "MHSEL Spring 2025",
-      "result": "W",
-      "week": "6",
-      "stage": "regular",
-      "clinched": "us"
+      "games": [
+        {
+          "them": 0,
+          "winner": "us",
+          "n": 1,
+          "us": 0
+        },
+        {
+          "winner": "us",
+          "them": 0,
+          "us": 0,
+          "n": 2
+        },
+        {
+          "them": 0,
+          "winner": "us",
+          "n": 3,
+          "us": 0
+        }
+      ]
     }
   ]
 }

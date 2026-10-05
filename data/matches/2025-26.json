@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-05T15:02:25.170Z",
+  "updated": "2026-10-05T15:07:46.735Z",
   "matches": [
     {
       "id": "GRXocyZWqtq6z2KErPiV",
@@ -310,71 +310,177 @@
     },
     {
       "id": "behhXlfuSQNoJ0qenD1D",
-      "season": "2025-26",
-      "level": "Varsity",
+      "opponent": {
+        "short": "",
+        "team": "Jenison Wildcats RL",
+        "school": "Jenison High School",
+        "abbr": "JEN",
+        "logo": ""
+      },
+      "updatedAt": "2026-10-05T15:07:45.197Z",
+      "game": "rocket-league",
+      "event": "MHSEL Fall 2025",
+      "gameName": "Rocket League",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "game": "rocket-league",
-      "perGame": false,
-      "gameName": "Rocket League",
-      "stage": "regular",
-      "week": "5",
+      "season": "2025-26",
       "term": "fall",
+      "week": "5",
+      "teamName": "Rocket League Varsity",
       "players": [],
+      "source": {},
       "score": {
         "us": 1,
         "them": 3
       },
-      "opponent": {
-        "team": "Jenison Wildcats RL",
-        "short": "",
-        "abbr": "JEN",
-        "logo": "",
-        "school": "Jenison High School"
-      },
       "bestOf": 5,
-      "source": {},
-      "event": "MHSEL Fall 2025",
-      "teamName": "Rocket League Varsity",
-      "result": "L",
-      "teamId": "t5",
-      "current": 4,
+      "seriesOnly": false,
+      "level": "Varsity",
+      "perGame": true,
+      "stage": "regular",
       "startsAt": "2025-10-23T20:00:00.000Z",
+      "forfeit": null,
+      "teamId": "t5",
+      "result": "L",
       "notes": "",
       "games": [
         {
-          "winner": "them",
+          "p": {
+            "p-0b11aaef": {
+              "goals": 2,
+              "shots": 3,
+              "assists": 0,
+              "saves": 2
+            },
+            "p-811a5f77": {
+              "assists": 0,
+              "saves": 1,
+              "goals": 0,
+              "shots": 0
+            },
+            "p-c0313a9e": {
+              "saves": 1,
+              "goals": 0,
+              "shots": 2,
+              "assists": 2
+            }
+          },
           "n": 1,
           "them": 3,
+          "winner": "them",
           "us": 2
         },
         {
-          "us": 2,
-          "winner": "them",
-          "n": 2,
-          "them": 4
-        },
-        {
-          "them": 2,
-          "us": 4,
-          "winner": "us",
-          "n": 3
-        },
-        {
-          "winner": "them",
           "them": 4,
           "us": 2,
-          "n": 4
+          "p": {
+            "p-0b11aaef": {
+              "goals": 1,
+              "shots": 1,
+              "saves": 2,
+              "assists": 1
+            },
+            "p-c0313a9e": {
+              "saves": 5,
+              "goals": 0,
+              "shots": 3,
+              "assists": 0
+            },
+            "p-811a5f77": {
+              "saves": 1,
+              "goals": 1,
+              "shots": 1,
+              "assists": 1
+            }
+          },
+          "n": 2,
+          "winner": "them"
+        },
+        {
+          "p": {
+            "p-811a5f77": {
+              "saves": 2,
+              "assists": 1,
+              "shots": 1,
+              "goals": 0
+            },
+            "p-c0313a9e": {
+              "assists": 0,
+              "goals": 4,
+              "shots": 6,
+              "saves": 1
+            },
+            "p-0b11aaef": {
+              "saves": 1,
+              "assists": 1,
+              "shots": 0,
+              "goals": 0
+            }
+          },
+          "winner": "us",
+          "us": 4,
+          "n": 3,
+          "them": 2
+        },
+        {
+          "p": {
+            "p-c0313a9e": {
+              "saves": 2,
+              "goals": 0,
+              "shots": 3,
+              "assists": 1
+            },
+            "p-811a5f77": {
+              "shots": 1,
+              "goals": 1,
+              "saves": 2,
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "shots": 2,
+              "goals": 1,
+              "saves": 1
+            }
+          },
+          "them": 4,
+          "us": 2,
+          "n": 4,
+          "winner": "them"
+        },
+        {
+          "them": 0,
+          "us": 0,
+          "p": {
+            "p-811a5f77": {
+              "saves": 2,
+              "goals": 1,
+              "shots": 1,
+              "assists": 0
+            },
+            "p-c0313a9e": {
+              "shots": 3,
+              "goals": 0,
+              "assists": 1,
+              "saves": 2
+            },
+            "p-0b11aaef": {
+              "goals": 1,
+              "assists": 0,
+              "shots": 2,
+              "saves": 1
+            }
+          },
+          "winner": null,
+          "n": 5
         }
       ],
-      "clinched": "them",
-      "seriesOnly": false,
-      "status": "final",
+      "current": 4,
       "league": "MHSEL",
-      "forfeit": null,
-      "updatedAt": "2026-10-05T15:02:23.700Z"
+      "status": "final",
+      "clinched": "them"
     },
     {
       "id": "ONMRqI4bf9DqoC4Ag6Bi",

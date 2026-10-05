@@ -195,7 +195,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 
 <script type="module">
 import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=11";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=12";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -629,6 +629,7 @@ window.addEventListener("pagehide", () => { if (pendingSaves.size) flush(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden && pendingSaves.size) flush(); });
 
 /* ---------- create / edit form ---------- */
+function myLeagues(){ try { return (JSON.parse(localStorage.getItem("eagles-leagues") || "[]") || []).filter(x => typeof x === "string"); } catch(e){ return []; } }
 function renderForm(){
   if (!draft){ location.hash = ""; return; }
   const teams = site.teams || [];
@@ -637,7 +638,7 @@ function renderForm(){
   const oppTeams = [...new Set([...Object.keys(known), ...matches.map(m => m.opponent?.team).filter(Boolean)])].sort();
   const past = !!draft._past || (!!openId && !draft.teamId) || (!teams.some(t => t.id === draft.teamId) && !!draft.teamName && !!openId);
   const team = past ? {} : (teams.find(t => t.id === draft.teamId) || {});
-  const leagues = [...new Set([...String(team.leagues || "").split(",").map(s => s.trim()).filter(Boolean), ...LEAGUES, draft.league].filter(Boolean))];
+  const leagues = [...new Set([...String(team.leagues || "").split(",").map(s => s.trim()).filter(Boolean), ...LEAGUES, ...String(site.program?.leagues || "").split(",").map(s => s.trim()), ...myLeagues(), ...matches.map(m => m.league), draft.league].filter(Boolean))];
   const isNew = !openId;
   $("#app").innerHTML = `<div class="mhead"><button class="back" type="button" id="cancel1" aria-label="Back">←</button><div class="t"><b>${isNew ? "New match" : "Edit match"}</b><span>${esc(seasonLabel(draft.season))} season</span></div></div>
     <form class="form" id="mf" autocomplete="off">
@@ -656,7 +657,7 @@ function renderForm(){
       </div>
       <label class="f"><span>Date & time</span><input type="datetime-local" name="when" value="${esc(localInput(draft.startsAt))}" required></label>
       <div class="two">
-        <label class="f"><span>League / event</span><select name="league">${leagues.map(l => `<option${l === draft.league ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+        <label class="f"><span>League / event</span><select name="league" id="leagueSel">${leagues.map(l => `<option${l === draft.league ? " selected" : ""}>${esc(l)}</option>`).join("")}<option value="__new">＋ Add a league or event…</option></select></label>
         <label class="f"><span>Stage</span><select name="stage">${STAGES.map(([v, l]) => `<option value="${v}"${v === draft.stage ? " selected" : ""}>${l}</option>`).join("")}</select></label>
       </div>
       <div class="two">
@@ -675,6 +676,13 @@ function renderForm(){
   const F = $("#mf");
   const cancel = () => location.hash = openId ? "m/" + openId : "";
   $("#cancel1").onclick = cancel; $("#cancel2").onclick = cancel;
+  { const sel = $("#leagueSel"); let last = sel.value;
+    sel.onchange = () => { if (sel.value !== "__new"){ last = sel.value; return; }
+      const name = (prompt("Name of the league or event (for example: PlayVS Cup)") || "").trim().slice(0, 60);
+      if (!name){ sel.value = last; return; }
+      let o = [...sel.options].find(x => x.value.toLowerCase() === name.toLowerCase());
+      if (!o){ o = new Option(name, name); sel.add(o, sel.options[sel.options.length - 1]); try { localStorage.setItem("eagles-leagues", JSON.stringify([...new Set([...myLeagues(), name])])); } catch(e){} }
+      sel.value = last = o.value; }; }
   F.teamId.onchange = () => { const isPast = F.teamId.value === "__past", t = teams.find(x => x.id === F.teamId.value); const keep = {opponent:readOpp(F), startsAt:readWhen(F) || draft.startsAt, stream:{live:F.live.value.trim(), vod:draft.stream?.vod || ""}, notes:F.notes.value, week:F.week.value};
     const nb = blankMatch(site, t, keep.startsAt); draft = {...draft, ...nb, ...keep, status:draft.status, games:draft.games, players:isNew ? [] : draft.players, _past:isPast};
     if (isPast){ draft.teamId = ""; draft.teamName = ""; draft.game = (site.games || [])[0]?.key || ""; } renderForm(); };

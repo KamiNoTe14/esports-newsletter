@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:38:11.250Z",
+  "updated": "2026-10-05T19:39:43.910Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -4907,76 +4907,245 @@
     },
     {
       "id": "c426IU4Y27NlQQu0G9wv",
+      "teamId": "t5",
+      "updatedAt": "2026-10-05T19:39:42.388Z",
+      "stage": "playoffs",
+      "gameName": "Rocket League",
+      "opponent": {
+        "logo": "",
+        "school": "Timpanogos High School",
+        "team": "Timpanogos Varsity Rocket League",
+        "short": "",
+        "abbr": "TIM"
+      },
+      "perGame": true,
+      "week": "Quarterfinal",
       "current": 5,
-      "league": "PlayVS Cup",
-      "source": {},
+      "seriesOnly": false,
+      "teamName": "Rocket League Varsity",
       "games": [
         {
+          "us": 2,
+          "p": {
+            "p-0b11aaef": {
+              "assists": 0,
+              "goals": 0,
+              "saves": 2,
+              "shots": 1
+            },
+            "p-c0313a9e": {
+              "goals": 2,
+              "saves": 5,
+              "shots": 4,
+              "assists": 0
+            },
+            "p-bd268108": {
+              "assists": 0,
+              "shots": 0,
+              "saves": 4,
+              "goals": 0
+            }
+          },
           "them": 1,
           "n": 1,
-          "us": 2,
           "winner": "us"
         },
         {
+          "winner": "them",
+          "p": {
+            "p-c0313a9e": {
+              "saves": 3,
+              "shots": 4,
+              "goals": 0,
+              "assists": 0
+            },
+            "p-bd268108": {
+              "goals": 0,
+              "saves": 2,
+              "shots": 1,
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "goals": 0,
+              "saves": 1,
+              "shots": 2
+            }
+          },
           "us": 0,
-          "them": 3,
           "n": 2,
-          "winner": "them"
+          "them": 3
         },
         {
-          "them": 5,
-          "winner": "them",
           "n": 3,
-          "us": 0
-        },
-        {
-          "them": 2,
+          "us": 0,
           "winner": "them",
-          "n": 4,
-          "us": 1
+          "them": 5,
+          "p": {
+            "p-c0313a9e": {
+              "assists": 0,
+              "shots": 1,
+              "saves": 4,
+              "goals": 0
+            },
+            "p-bd268108": {
+              "assists": 0,
+              "saves": 2,
+              "shots": 1,
+              "goals": 0
+            },
+            "p-0b11aaef": {
+              "goals": 0,
+              "shots": 1,
+              "saves": 1,
+              "assists": 0
+            }
+          }
         },
         {
-          "them": 5,
           "us": 1,
-          "n": 5,
-          "winner": "them"
+          "winner": "them",
+          "p": {
+            "p-c0313a9e": {
+              "assists": 1,
+              "goals": 0,
+              "shots": 1,
+              "saves": 4
+            },
+            "p-bd268108": {
+              "saves": 2,
+              "shots": 3,
+              "goals": 1,
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "saves": 4,
+              "shots": 0,
+              "goals": 0,
+              "assists": 0
+            }
+          },
+          "them": 2,
+          "n": 4
+        },
+        {
+          "us": 1,
+          "winner": "them",
+          "p": {
+            "p-0b11aaef": {
+              "goals": 0,
+              "assists": 0,
+              "shots": 0,
+              "saves": 2
+            },
+            "p-bd268108": {
+              "saves": 1,
+              "assists": 0,
+              "shots": 0,
+              "goals": 0
+            },
+            "p-c0313a9e": {
+              "goals": 1,
+              "assists": 0,
+              "saves": 0,
+              "shots": 1
+            }
+          },
+          "them": 5,
+          "n": 5
         }
       ],
-      "status": "final",
-      "result": "L",
-      "perGame": false,
+      "level": "Varsity",
+      "event": "PlayVS Cup 2025",
       "season": "2024-25",
       "stream": {
-        "live": "https://youtube.com/live/eH8-hO2mbpw?feature=share",
-        "vod": ""
+        "vod": "",
+        "live": "https://youtube.com/live/eH8-hO2mbpw?feature=share"
       },
-      "stage": "playoffs",
-      "clinched": "them",
-      "week": "Quarterfinal",
       "bestOf": 7,
-      "seriesOnly": false,
+      "players": [
+        {
+          "alum": true,
+          "id": "p-c0313a9e",
+          "name": "Dylan Reinwand",
+          "tag": "Qyxical",
+          "stats": {
+            "assists": 1,
+            "saves": 16,
+            "shots": 11,
+            "goals": 3
+          },
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "name": "James Petrucci",
+          "stats": {
+            "assists": 0,
+            "shots": 5,
+            "saves": 11,
+            "goals": 1
+          },
+          "id": "p-bd268108",
+          "alum": true,
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "tag": "Ralax Itz C1"
+        },
+        {
+          "name": "Christian Gatien",
+          "id": "p-5310cd2b",
+          "alum": true,
+          "games": [],
+          "private": false,
+          "tag": "SsnowyGG",
+          "stats": {}
+        },
+        {
+          "stats": {
+            "shots": 4,
+            "saves": 10,
+            "goals": 0,
+            "assists": 0
+          },
+          "private": false,
+          "tag": "TRE4TY.",
+          "id": "p-0b11aaef",
+          "name": "Tavin Flanagan",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "term": "spring",
+      "source": {},
       "startsAt": "2025-05-28T20:00:00.000Z",
-      "updatedAt": "2026-10-05T19:38:08.941Z",
+      "notes": "",
+      "status": "final",
+      "game": "rocket-league",
+      "league": "PlayVS Cup",
+      "clinched": "them",
       "forfeit": null,
+      "result": "L",
       "score": {
         "us": 1,
         "them": 4
-      },
-      "term": "spring",
-      "notes": "",
-      "players": [],
-      "teamName": "Rocket League Varsity",
-      "game": "rocket-league",
-      "level": "Varsity",
-      "gameName": "Rocket League",
-      "teamId": "t5",
-      "event": "PlayVS Cup 2025",
-      "opponent": {
-        "short": "",
-        "school": "Timpanogos High School",
-        "team": "Timpanogos Varsity Rocket League",
-        "abbr": "TIM",
-        "logo": ""
       }
     }
   ]

@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T19:34:51.323Z",
+  "updated": "2026-10-05T19:36:27.586Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -4635,83 +4635,275 @@
     },
     {
       "id": "BUEefNCKsb9kXC9vYzQ4",
+      "clinched": "us",
       "current": 6,
-      "league": "PlayVS Cup",
-      "updatedAt": "2026-10-05T19:34:49.722Z",
-      "source": {},
-      "status": "final",
-      "level": "Varsity",
-      "result": "W",
-      "week": "Round of 16",
-      "event": "PlayVS Cup 2025",
-      "perGame": false,
-      "season": "2024-25",
+      "stage": "playoffs",
+      "startsAt": "2025-05-23T20:00:00.000Z",
+      "term": "spring",
+      "seriesOnly": false,
+      "teamId": "t5",
+      "updatedAt": "2026-10-05T19:36:25.861Z",
+      "perGame": true,
+      "games": [
+        {
+          "n": 1,
+          "us": 2,
+          "them": 1,
+          "p": {
+            "p-bd268108": {
+              "goals": 2,
+              "saves": 2,
+              "shots": 4,
+              "assists": 0
+            },
+            "p-c0313a9e": {
+              "goals": 0,
+              "assists": 0,
+              "shots": 2,
+              "saves": 2
+            },
+            "p-5310cd2b": {
+              "goals": 0,
+              "assists": 0,
+              "saves": 3,
+              "shots": 5
+            }
+          },
+          "winner": "us"
+        },
+        {
+          "n": 2,
+          "us": 2,
+          "them": 0,
+          "winner": "us",
+          "p": {
+            "p-bd268108": {
+              "shots": 1,
+              "saves": 2,
+              "goals": 1,
+              "assists": 0
+            },
+            "p-c0313a9e": {
+              "shots": 1,
+              "saves": 2,
+              "goals": 0,
+              "assists": 2
+            },
+            "p-5310cd2b": {
+              "assists": 0,
+              "goals": 1,
+              "saves": 2,
+              "shots": 4
+            }
+          }
+        },
+        {
+          "p": {
+            "p-5310cd2b": {
+              "shots": 2,
+              "saves": 2,
+              "goals": 0,
+              "assists": 1
+            },
+            "p-bd268108": {
+              "assists": 0,
+              "goals": 2,
+              "shots": 5,
+              "saves": 1
+            },
+            "p-c0313a9e": {
+              "shots": 2,
+              "saves": 0,
+              "assists": 1,
+              "goals": 0
+            }
+          },
+          "them": 3,
+          "winner": "them",
+          "us": 2,
+          "n": 3
+        },
+        {
+          "p": {
+            "p-bd268108": {
+              "assists": 0,
+              "saves": 0,
+              "shots": 0,
+              "goals": 0
+            },
+            "p-c0313a9e": {
+              "goals": 0,
+              "saves": 2,
+              "assists": 0,
+              "shots": 4
+            },
+            "p-5310cd2b": {
+              "assists": 0,
+              "saves": 2,
+              "shots": 2,
+              "goals": 0
+            }
+          },
+          "them": 1,
+          "us": 0,
+          "n": 4,
+          "winner": "them"
+        },
+        {
+          "winner": "us",
+          "them": 1,
+          "us": 2,
+          "n": 5,
+          "p": {
+            "p-bd268108": {
+              "shots": 4,
+              "saves": 0,
+              "assists": 1,
+              "goals": 0
+            },
+            "p-c0313a9e": {
+              "shots": 3,
+              "saves": 2,
+              "goals": 2,
+              "assists": 0
+            },
+            "p-5310cd2b": {
+              "assists": 0,
+              "saves": 1,
+              "shots": 4,
+              "goals": 0
+            }
+          }
+        },
+        {
+          "winner": "us",
+          "p": {
+            "p-c0313a9e": {
+              "shots": 2,
+              "saves": 2,
+              "goals": 1,
+              "assists": 1
+            },
+            "p-bd268108": {
+              "assists": 0,
+              "saves": 6,
+              "shots": 3,
+              "goals": 2
+            },
+            "p-5310cd2b": {
+              "goals": 0,
+              "assists": 2,
+              "saves": 3,
+              "shots": 2
+            }
+          },
+          "us": 3,
+          "n": 6,
+          "them": 1
+        }
+      ],
+      "game": "rocket-league",
       "stream": {
         "vod": "",
         "live": "https://youtube.com/live/Sh-aY-X9BYI?feature=share"
       },
+      "season": "2024-25",
+      "gameName": "Rocket League",
+      "forfeit": null,
+      "opponent": {
+        "school": "Bentonville High School",
+        "short": "",
+        "logo": "",
+        "team": "Bentonville RL Black",
+        "abbr": "BEN"
+      },
+      "event": "PlayVS Cup 2025",
+      "teamName": "Rocket League Varsity",
+      "bestOf": 7,
+      "level": "Varsity",
+      "players": [
+        {
+          "name": "Dylan Reinwand",
+          "private": false,
+          "id": "p-c0313a9e",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "stats": {
+            "shots": 14,
+            "saves": 10,
+            "assists": 4,
+            "goals": 3
+          },
+          "tag": "Qyxical"
+        },
+        {
+          "name": "James Petrucci",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "tag": "Ralax Itz C1",
+          "stats": {
+            "assists": 1,
+            "shots": 17,
+            "saves": 11,
+            "goals": 7
+          },
+          "id": "p-bd268108",
+          "private": false
+        },
+        {
+          "id": "p-5310cd2b",
+          "name": "Christian Gatien",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "alum": true,
+          "stats": {
+            "assists": 3,
+            "saves": 13,
+            "shots": 19,
+            "goals": 1
+          },
+          "tag": "SsnowyGG"
+        },
+        {
+          "tag": "TRE4TY.",
+          "name": "Tavin Flanagan",
+          "stats": {},
+          "private": false,
+          "id": "p-0b11aaef",
+          "games": []
+        }
+      ],
       "score": {
         "us": 4,
         "them": 2
       },
-      "clinched": "us",
-      "notes": "",
-      "startsAt": "2025-05-23T20:00:00.000Z",
-      "bestOf": 7,
-      "seriesOnly": false,
-      "game": "rocket-league",
-      "forfeit": null,
-      "stage": "playoffs",
-      "players": [],
-      "teamName": "Rocket League Varsity",
-      "games": [
-        {
-          "them": 1,
-          "winner": "us",
-          "n": 1,
-          "us": 2
-        },
-        {
-          "n": 2,
-          "winner": "us",
-          "us": 2,
-          "them": 0
-        },
-        {
-          "n": 3,
-          "them": 3,
-          "winner": "them",
-          "us": 2
-        },
-        {
-          "them": 1,
-          "winner": "them",
-          "n": 4,
-          "us": 0
-        },
-        {
-          "us": 2,
-          "n": 5,
-          "them": 1,
-          "winner": "us"
-        },
-        {
-          "them": 1,
-          "winner": "us",
-          "n": 6,
-          "us": 3
-        }
-      ],
-      "term": "spring",
-      "gameName": "Rocket League",
-      "teamId": "t5",
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "abbr": "BEN",
-        "school": "Bentonville High School",
-        "team": "Bentonville RL Black"
-      }
+      "league": "PlayVS Cup",
+      "status": "final",
+      "source": {},
+      "week": "Round of 16",
+      "result": "W",
+      "notes": ""
     }
   ]
 }

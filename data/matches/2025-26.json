@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-05T15:19:46.234Z",
+  "updated": "2026-10-05T15:21:05.666Z",
   "matches": [
     {
       "id": "GRXocyZWqtq6z2KErPiV",
@@ -691,39 +691,99 @@
     },
     {
       "id": "611TlxmYshR2BuYRSj0f",
-      "stage": "regular",
-      "level": "Varsity",
-      "forfeit": null,
-      "status": "final",
       "score": {
         "us": 0,
         "them": 3
       },
+      "forfeit": null,
       "startsAt": "2025-11-06T21:00:00.000Z",
+      "stage": "regular",
       "league": "MHSEL",
+      "status": "final",
+      "level": "Varsity",
       "seriesOnly": false,
-      "clinched": "them",
       "event": "MHSEL Fall 2025",
+      "clinched": "them",
       "current": 3,
-      "result": "L",
       "teamId": "t5",
+      "result": "L",
+      "term": "fall",
       "gameName": "Rocket League",
-      "source": {},
-      "updatedAt": "2026-10-05T15:19:44.760Z",
+      "week": "7",
       "games": [
         {
+          "winner": "them",
           "n": 1,
           "us": 2,
-          "winner": "them",
+          "p": {
+            "p-0b11aaef": {
+              "goals": 2,
+              "shots": 2,
+              "saves": 2,
+              "assists": 0
+            },
+            "p-c0313a9e": {
+              "saves": 4,
+              "shots": 0,
+              "goals": 0,
+              "assists": 2
+            },
+            "p-811a5f77": {
+              "assists": 0,
+              "goals": 0,
+              "shots": 1,
+              "saves": 0
+            }
+          },
           "them": 4
         },
         {
           "winner": "them",
-          "us": 1,
           "n": 2,
-          "them": 6
+          "them": 6,
+          "p": {
+            "p-c0313a9e": {
+              "shots": 1,
+              "goals": 1,
+              "saves": 8,
+              "assists": 0
+            },
+            "p-811a5f77": {
+              "goals": 0,
+              "shots": 0,
+              "saves": 2,
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "goals": 0,
+              "shots": 1,
+              "assists": 0,
+              "saves": 3
+            }
+          },
+          "us": 1
         },
         {
+          "p": {
+            "p-0b11aaef": {
+              "assists": 0,
+              "saves": 1,
+              "shots": 2,
+              "goals": 0
+            },
+            "p-c0313a9e": {
+              "assists": 0,
+              "saves": 1,
+              "shots": 4,
+              "goals": 1
+            },
+            "p-811a5f77": {
+              "saves": 0,
+              "goals": 0,
+              "shots": 0,
+              "assists": 0
+            }
+          },
           "winner": "them",
           "them": 2,
           "us": 1,
@@ -731,20 +791,74 @@
         }
       ],
       "notes": "",
+      "source": {},
+      "game": "rocket-league",
       "opponent": {
-        "team": "Dakota High School",
+        "logo": "",
+        "abbr": "DAK",
         "short": "",
         "school": "Dakota High School",
-        "logo": "",
-        "abbr": "DAK"
+        "team": "Dakota High School"
       },
       "bestOf": 5,
-      "term": "fall",
-      "week": "7",
-      "players": [],
-      "game": "rocket-league",
+      "updatedAt": "2026-10-05T15:21:04.089Z",
+      "players": [
+        {
+          "stats": {
+            "assists": 0,
+            "saves": 6,
+            "goals": 2,
+            "shots": 5
+          },
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "id": "p-0b11aaef",
+          "private": false,
+          "tag": "TRE4TY.",
+          "name": "Tavin Flanagan"
+        },
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "id": "p-c0313a9e",
+          "alum": true,
+          "stats": {
+            "saves": 13,
+            "shots": 5,
+            "goals": 2,
+            "assists": 2
+          },
+          "name": "Dylan Reinwand",
+          "private": false,
+          "tag": "Qyxical"
+        },
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "id": "p-811a5f77",
+          "stats": {
+            "saves": 2,
+            "goals": 0,
+            "shots": 1,
+            "assists": 0
+          },
+          "alum": true,
+          "name": "Brandon Wood",
+          "private": false,
+          "tag": "VRTX_Angel"
+        }
+      ],
       "teamName": "Rocket League Varsity",
-      "perGame": false,
+      "perGame": true,
       "season": "2025-26",
       "stream": {
         "vod": "",

@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T18:28:25.572Z",
+  "updated": "2026-10-05T18:34:59.625Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -1441,20 +1441,17 @@
     },
     {
       "id": "LGSGqeUSQlr8FEs7n6hv",
-      "current": 4,
-      "clinched": "us",
-      "result": "W",
-      "perGame": true,
-      "updatedAt": "2026-10-05T18:23:23.130Z",
-      "teamName": "Rocket League Varsity",
-      "week": "Round of 32",
       "games": [
         {
-          "n": 1,
-          "us": 3,
           "them": 1,
-          "winner": "us",
+          "us": 3,
           "p": {
+            "p-c0313a9e": {
+              "shots": 2,
+              "goals": 0,
+              "assists": 1,
+              "saves": 1
+            },
             "p-0b11aaef": {
               "shots": 1,
               "goals": 1,
@@ -1463,45 +1460,43 @@
             },
             "p-bd268108": {
               "saves": 0,
+              "shots": 3,
               "assists": 0,
-              "goals": 2,
-              "shots": 3
-            },
-            "p-c0313a9e": {
-              "shots": 2,
-              "goals": 0,
-              "saves": 1,
-              "assists": 1
+              "goals": 2
             }
-          }
+          },
+          "winner": "us",
+          "n": 1
         },
         {
-          "them": 2,
-          "winner": "us",
           "n": 2,
+          "us": 4,
+          "winner": "us",
+          "them": 2,
           "p": {
-            "p-c0313a9e": {
-              "goals": 2,
-              "shots": 2,
-              "saves": 0,
-              "assists": 1
-            },
             "p-0b11aaef": {
               "shots": 4,
               "goals": 1,
-              "saves": 0,
-              "assists": 2
+              "assists": 2,
+              "saves": 0
             },
             "p-bd268108": {
               "shots": 1,
               "assists": 0,
               "goals": 1,
               "saves": 0
+            },
+            "p-c0313a9e": {
+              "goals": 2,
+              "shots": 2,
+              "saves": 0,
+              "assists": 1
             }
-          },
-          "us": 4
+          }
         },
         {
+          "us": 9,
+          "winner": "us",
           "p": {
             "p-c0313a9e": {
               "goals": 2,
@@ -1509,359 +1504,444 @@
               "shots": 2,
               "saves": 0
             },
-            "p-0b11aaef": {
-              "saves": 0,
-              "shots": 10,
-              "assists": 1,
-              "goals": 7
-            },
             "p-bd268108": {
               "saves": 1,
-              "assists": 0,
+              "shots": 0,
               "goals": 0,
-              "shots": 0
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "shots": 10,
+              "goals": 7,
+              "assists": 1,
+              "saves": 0
             }
           },
-          "winner": "us",
-          "us": 9,
           "them": 3,
           "n": 3
         },
         {
+          "winner": "us",
           "p": {
             "p-c0313a9e": {
+              "goals": 0,
               "assists": 1,
-              "saves": 0,
               "shots": 2,
-              "goals": 0
-            },
-            "p-0b11aaef": {
-              "assists": 0,
-              "saves": 1,
-              "shots": 0,
-              "goals": 2
+              "saves": 0
             },
             "p-bd268108": {
               "saves": 0,
               "assists": 0,
               "shots": 2,
               "goals": 1
+            },
+            "p-0b11aaef": {
+              "saves": 1,
+              "goals": 2,
+              "assists": 0,
+              "shots": 0
             }
           },
-          "them": 1,
           "us": 3,
-          "winner": "us",
-          "n": 4
+          "n": 4,
+          "them": 1
         }
       ],
-      "forfeit": null,
+      "result": "W",
+      "week": "Round of 32",
       "notes": "",
+      "clinched": "us",
+      "seriesOnly": false,
+      "season": "2024-25",
+      "teamName": "Rocket League Varsity",
+      "league": "MHSEL",
+      "source": {},
+      "current": 4,
+      "stage": "playoffs",
+      "event": "MHSEL Fall 2024",
+      "gameName": "Rocket League",
+      "stream": {
+        "live": "https://youtube.com/live/hVJADtJW80c?feature=share",
+        "vod": ""
+      },
+      "updatedAt": "2026-10-05T18:31:17.187Z",
+      "term": "fall",
+      "bestOf": 7,
+      "status": "final",
+      "perGame": true,
+      "opponent": {
+        "logo": "",
+        "abbr": "OH",
+        "team": "Ogemaw Heights Falcons",
+        "short": "",
+        "school": "Ogemaw Heights High School"
+      },
+      "game": "rocket-league",
+      "teamId": "t5",
+      "startsAt": "2024-11-25T21:00:00.000Z",
       "players": [
         {
-          "alum": true,
+          "name": "Dylan Reinwand",
           "games": [
             1,
             2,
             3,
             4
           ],
-          "tag": "Qyxical",
-          "id": "p-c0313a9e",
-          "private": false,
-          "name": "Dylan Reinwand",
           "stats": {
             "shots": 8,
-            "assists": 6,
             "goals": 4,
+            "assists": 6,
             "saves": 1
+          },
+          "id": "p-c0313a9e",
+          "private": false,
+          "tag": "Qyxical",
+          "alum": true
+        },
+        {
+          "id": "p-bd268108",
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "alum": true,
+          "tag": "Ralax Itz C1",
+          "name": "James Petrucci",
+          "private": false,
+          "stats": {
+            "saves": 1,
+            "assists": 0,
+            "goals": 4,
+            "shots": 6
           }
         },
         {
-          "alum": true,
-          "stats": {
-            "goals": 4,
-            "shots": 6,
-            "saves": 1,
-            "assists": 0
-          },
-          "tag": "Ralax Itz C1",
           "games": [
             1,
             2,
             3,
             4
           ],
-          "id": "p-bd268108",
           "private": false,
-          "name": "James Petrucci"
-        },
-        {
           "name": "Tavin Flanagan",
-          "id": "p-0b11aaef",
           "stats": {
             "goals": 11,
+            "assists": 4,
             "shots": 15,
-            "saves": 1,
-            "assists": 4
+            "saves": 1
           },
-          "private": false,
           "tag": "TRE4TY.",
-          "games": [
-            1,
-            2,
-            3,
-            4
-          ]
+          "id": "p-0b11aaef"
         }
       ],
-      "season": "2024-25",
-      "stream": {
-        "vod": "",
-        "live": "https://youtube.com/live/hVJADtJW80c?feature=share"
-      },
-      "gameName": "Rocket League",
-      "status": "final",
-      "bestOf": 5,
       "score": {
         "us": 4,
         "them": 0
       },
-      "league": "MHSEL",
-      "level": "Varsity",
-      "game": "rocket-league",
-      "source": {},
-      "stage": "playoffs",
-      "startsAt": "2024-11-25T21:00:00.000Z",
-      "term": "fall",
-      "opponent": {
-        "school": "Ogemaw Heights High School",
-        "team": "Ogemaw Heights Falcons",
-        "logo": "",
-        "abbr": "OH",
-        "short": ""
-      },
-      "seriesOnly": false,
-      "event": "MHSEL Fall 2024",
-      "teamId": "t5"
+      "forfeit": null,
+      "level": "Varsity"
     },
     {
       "id": "qeRdMIYiLxKDH3FJ9Xoh",
-      "clinched": "us",
-      "result": "W",
-      "week": "Round of 16",
-      "seriesOnly": false,
-      "teamName": "Rocket League Varsity",
       "notes": "",
-      "season": "2024-25",
+      "term": "fall",
+      "source": {},
+      "gameName": "Rocket League",
+      "perGame": true,
+      "league": "MHSEL",
+      "status": "final",
+      "bestOf": 7,
+      "stream": {
+        "live": "https://youtube.com/live/XPzibKMnJls?feature=share",
+        "vod": ""
+      },
+      "current": 4,
       "games": [
         {
           "p": {
-            "p-c0313a9e": {
-              "shots": 1,
-              "assists": 2,
-              "goals": 0,
-              "saves": 1
-            },
             "p-0b11aaef": {
-              "assists": 0,
               "saves": 1,
-              "shots": 5,
-              "goals": 2
+              "assists": 0,
+              "goals": 2,
+              "shots": 5
             },
             "p-bd268108": {
-              "assists": 1,
               "shots": 4,
+              "assists": 1,
               "goals": 1,
+              "saves": 1
+            },
+            "p-c0313a9e": {
+              "goals": 0,
+              "shots": 1,
+              "assists": 2,
               "saves": 1
             }
           },
+          "us": 3,
           "winner": "us",
           "them": 1,
-          "us": 3,
           "n": 1
         },
         {
-          "them": 1,
-          "n": 2,
           "us": 5,
+          "them": 1,
           "winner": "us",
           "p": {
-            "p-0b11aaef": {
-              "saves": 2,
-              "goals": 1,
-              "assists": 1,
-              "shots": 3
-            },
-            "p-bd268108": {
-              "shots": 2,
-              "goals": 1,
-              "assists": 0,
+            "p-c0313a9e": {
+              "shots": 7,
+              "goals": 3,
+              "assists": 2,
               "saves": 1
             },
-            "p-c0313a9e": {
-              "assists": 2,
-              "saves": 1,
-              "shots": 7,
-              "goals": 3
+            "p-0b11aaef": {
+              "goals": 1,
+              "shots": 3,
+              "assists": 1,
+              "saves": 2
+            },
+            "p-bd268108": {
+              "goals": 1,
+              "assists": 0,
+              "shots": 2,
+              "saves": 1
             }
-          }
+          },
+          "n": 2
         },
         {
+          "them": 1,
           "n": 3,
-          "us": 2,
+          "winner": "us",
           "p": {
             "p-5310cd2b": {
-              "shots": 4,
               "goals": 1,
               "assists": 0,
-              "saves": 1
-            },
-            "p-bd268108": {
-              "saves": 2,
               "shots": 4,
-              "assists": 2,
-              "goals": 0
+              "saves": 1
             },
             "p-c0313a9e": {
               "shots": 2,
               "goals": 1,
               "assists": 0,
               "saves": 0
+            },
+            "p-bd268108": {
+              "assists": 2,
+              "saves": 2,
+              "shots": 4,
+              "goals": 0
             }
           },
-          "winner": "us",
-          "them": 1
+          "us": 2
         },
         {
-          "us": 3,
+          "them": 2,
           "p": {
             "p-5310cd2b": {
               "goals": 2,
+              "assists": 1,
               "shots": 6,
-              "saves": 3,
-              "assists": 1
+              "saves": 3
+            },
+            "p-bd268108": {
+              "saves": 0,
+              "assists": 1,
+              "shots": 2,
+              "goals": 1
             },
             "p-c0313a9e": {
               "saves": 1,
-              "assists": 1,
               "goals": 0,
-              "shots": 2
-            },
-            "p-bd268108": {
               "assists": 1,
-              "shots": 2,
-              "goals": 1,
-              "saves": 0
+              "shots": 2
             }
           },
-          "winner": "us",
-          "them": 2,
-          "n": 4
+          "us": 3,
+          "n": 4,
+          "winner": "us"
         }
       ],
-      "forfeit": null,
-      "bestOf": 5,
-      "status": "final",
-      "level": "Varsity",
-      "score": {
-        "us": 4,
-        "them": 0
-      },
-      "gameName": "Rocket League",
+      "teamId": "t5",
       "players": [
         {
-          "id": "p-c0313a9e",
+          "stats": {
+            "saves": 3,
+            "shots": 12,
+            "goals": 4,
+            "assists": 5
+          },
+          "private": false,
+          "name": "Dylan Reinwand",
           "tag": "Qyxical",
           "alum": true,
-          "stats": {
-            "goals": 4,
-            "shots": 12,
-            "assists": 5,
-            "saves": 3
-          },
           "games": [
             1,
             2,
             3,
             4
           ],
-          "private": false,
-          "name": "Dylan Reinwand"
+          "id": "p-c0313a9e"
         },
         {
+          "games": [
+            1,
+            2,
+            3,
+            4
+          ],
           "alum": true,
-          "tag": "Ralax Itz C1",
           "id": "p-bd268108",
-          "stats": {
-            "saves": 4,
-            "assists": 4,
-            "goals": 3,
-            "shots": 12
-          },
-          "games": [
-            1,
-            2,
-            3,
-            4
-          ],
+          "name": "James Petrucci",
           "private": false,
-          "name": "James Petrucci"
+          "tag": "Ralax Itz C1",
+          "stats": {
+            "goals": 3,
+            "shots": 12,
+            "saves": 4,
+            "assists": 4
+          }
         },
         {
-          "games": [
-            3,
-            4
-          ],
-          "alum": true,
-          "name": "Christian Gatien",
-          "private": false,
-          "id": "p-5310cd2b",
-          "tag": "SsnowyGG",
           "stats": {
             "assists": 1,
             "saves": 4,
             "shots": 10,
             "goals": 3
-          }
+          },
+          "private": false,
+          "name": "Christian Gatien",
+          "tag": "SsnowyGG",
+          "alum": true,
+          "games": [
+            3,
+            4
+          ],
+          "id": "p-5310cd2b"
         },
         {
+          "name": "Tavin Flanagan",
           "id": "p-0b11aaef",
           "games": [
             1,
             2
           ],
-          "tag": "TRE4TY.",
           "private": false,
+          "tag": "TRE4TY.",
           "stats": {
-            "saves": 3,
-            "goals": 3,
+            "shots": 8,
             "assists": 1,
-            "shots": 8
-          },
-          "name": "Tavin Flanagan"
+            "goals": 3,
+            "saves": 3
+          }
         }
       ],
-      "stream": {
-        "live": "https://youtube.com/live/XPzibKMnJls?feature=share",
-        "vod": ""
-      },
-      "term": "fall",
-      "source": {},
-      "league": "MHSEL",
-      "game": "rocket-league",
-      "perGame": true,
-      "event": "MHSEL Fall 2024",
-      "updatedAt": "2026-10-05T18:28:24.083Z",
       "startsAt": "2024-12-03T21:00:00.000Z",
-      "current": 4,
-      "teamId": "t5",
+      "forfeit": null,
+      "game": "rocket-league",
       "opponent": {
-        "team": "OHS RL Varsity",
-        "school": "Oakridge High School",
         "abbr": "OAK",
         "short": "",
+        "logo": "",
+        "school": "Oakridge High School",
+        "team": "OHS RL Varsity"
+      },
+      "week": "Round of 16",
+      "clinched": "us",
+      "updatedAt": "2026-10-05T18:31:10.485Z",
+      "event": "MHSEL Fall 2024",
+      "result": "W",
+      "stage": "playoffs",
+      "season": "2024-25",
+      "level": "Varsity",
+      "score": {
+        "us": 4,
+        "them": 0
+      },
+      "teamName": "Rocket League Varsity",
+      "seriesOnly": false
+    },
+    {
+      "id": "lmvqgqUtVXCwatNQL4Qm",
+      "teamId": "t5",
+      "game": "rocket-league",
+      "gameName": "Rocket League",
+      "opponent": {
+        "school": "Anchor Bay High School",
+        "short": "",
+        "team": "Anchor Bay",
+        "abbr": "AB",
         "logo": ""
       },
+      "source": {},
+      "league": "MHSEL",
+      "notes": "",
+      "startsAt": "2024-12-07T15:00:00.000Z",
+      "term": "fall",
+      "games": [
+        {
+          "them": 0,
+          "n": 1,
+          "winner": "us",
+          "us": 0
+        },
+        {
+          "n": 2,
+          "us": 0,
+          "winner": "us",
+          "them": 0
+        },
+        {
+          "n": 3,
+          "them": 0,
+          "winner": "us",
+          "us": 0
+        },
+        {
+          "them": 0,
+          "winner": "us",
+          "n": 4,
+          "us": 0
+        },
+        {
+          "us": 0,
+          "winner": "them",
+          "n": 5,
+          "them": 0
+        },
+        {
+          "them": 0,
+          "n": 6,
+          "us": 0,
+          "winner": "them"
+        }
+      ],
+      "bestOf": 7,
+      "status": "final",
+      "stream": {
+        "vod": "",
+        "live": "https://youtu.be/IPfxl3J5YeE"
+      },
+      "season": "2024-25",
+      "updatedAt": "2026-10-05T18:34:58.005Z",
+      "level": "Varsity",
+      "current": 6,
+      "score": {
+        "us": 4,
+        "them": 2
+      },
+      "perGame": false,
+      "clinched": "us",
+      "event": "MHSEL Fall 2024 State Championship at MSU",
+      "seriesOnly": true,
+      "result": "W",
+      "teamName": "Rocket League Varsity",
+      "week": "Quarterfinal",
+      "players": [],
+      "forfeit": null,
       "stage": "playoffs"
     }
   ]

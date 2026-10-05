@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T18:15:24.674Z",
+  "updated": "2026-10-05T18:18:18.327Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -1265,124 +1265,16 @@
     },
     {
       "id": "gCpC6AjW7uESJYv3aGXf",
-      "games": [
-        {
-          "winner": "them",
-          "n": 1,
-          "them": 3,
-          "us": 2,
-          "p": {
-            "p-bd268108": {
-              "shots": 3,
-              "assists": 1,
-              "saves": 1,
-              "goals": 1
-            },
-            "p-c0313a9e": {
-              "shots": 5,
-              "assists": 1,
-              "goals": 0,
-              "saves": 1
-            },
-            "p-0b11aaef": {
-              "shots": 2,
-              "assists": 0,
-              "saves": 0,
-              "goals": 1
-            }
-          }
-        },
-        {
-          "winner": "them",
-          "p": {
-            "p-bd268108": {
-              "assists": 1,
-              "shots": 4,
-              "goals": 0,
-              "saves": 2
-            },
-            "p-0b11aaef": {
-              "goals": 1,
-              "saves": 1,
-              "shots": 1,
-              "assists": 0
-            },
-            "p-c0313a9e": {
-              "shots": 4,
-              "assists": 0,
-              "goals": 0,
-              "saves": 2
-            }
-          },
-          "them": 2,
-          "n": 2,
-          "us": 1
-        },
-        {
-          "us": 1,
-          "p": {
-            "p-c0313a9e": {
-              "saves": 0,
-              "goals": 0,
-              "assists": 0,
-              "shots": 0
-            },
-            "p-0b11aaef": {
-              "shots": 0,
-              "goals": 0,
-              "saves": 0,
-              "assists": 0
-            },
-            "p-bd268108": {
-              "assists": 0,
-              "shots": 0,
-              "saves": 0,
-              "goals": 0
-            }
-          },
-          "them": 2,
-          "winner": "them",
-          "n": 3
-        }
-      ],
-      "seriesOnly": false,
-      "perGame": true,
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "gameName": "Rocket League",
-      "opponent": {
-        "team": "Jenison Wildcats RL",
-        "short": "",
-        "abbr": "JEN",
-        "school": "Jenison High School",
-        "logo": ""
-      },
-      "teamName": "Rocket League Varsity",
-      "stream": {
-        "live": "https://youtube.com/live/Fw6t-VEx8MY?feature=share",
-        "vod": ""
-      },
-      "event": "MHSEL Fall 2024",
-      "status": "final",
-      "startsAt": "2024-11-14T21:00:00.000Z",
-      "updatedAt": "2026-10-05T18:15:23.201Z",
-      "forfeit": null,
-      "teamId": "t5",
       "notes": "",
-      "source": {},
       "clinched": "them",
-      "league": "MHSEL",
-      "current": 3,
-      "term": "fall",
-      "stage": "regular",
       "season": "2024-25",
-      "game": "rocket-league",
+      "result": "L",
+      "bestOf": 5,
+      "teamId": "t5",
+      "current": 3,
+      "source": {},
       "players": [
         {
-          "tag": "Qyxical",
-          "private": false,
           "id": "p-c0313a9e",
           "games": [
             1,
@@ -1390,54 +1282,162 @@
             3
           ],
           "name": "Dylan Reinwand",
+          "tag": "Qyxical",
+          "private": false,
           "stats": {
-            "saves": 3,
-            "goals": 0,
-            "shots": 9,
-            "assists": 1
+            "shots": 11,
+            "assists": 2,
+            "saves": 6,
+            "goals": 0
           },
           "alum": true
         },
         {
-          "private": false,
-          "id": "p-bd268108",
           "name": "James Petrucci",
-          "alum": true,
+          "tag": "Ralax Itz C1",
           "games": [
             1,
             2,
             3
           ],
-          "tag": "Ralax Itz C1",
+          "alum": true,
+          "private": false,
           "stats": {
-            "assists": 2,
+            "shots": 9,
+            "goals": 2,
             "saves": 3,
-            "goals": 1,
-            "shots": 7
-          }
+            "assists": 2
+          },
+          "id": "p-bd268108"
         },
         {
+          "tag": "TRE4TY.",
+          "stats": {
+            "saves": 2,
+            "goals": 2,
+            "assists": 0,
+            "shots": 4
+          },
           "id": "p-0b11aaef",
           "games": [
             1,
             2,
             3
           ],
-          "stats": {
-            "shots": 3,
-            "assists": 0,
-            "goals": 2,
-            "saves": 1
-          },
           "private": false,
-          "name": "Tavin Flanagan",
-          "tag": "TRE4TY."
+          "name": "Tavin Flanagan"
         }
       ],
-      "bestOf": 5,
-      "result": "L",
       "level": "Varsity",
-      "week": "8"
+      "stage": "regular",
+      "league": "MHSEL",
+      "gameName": "Rocket League",
+      "games": [
+        {
+          "them": 3,
+          "p": {
+            "p-bd268108": {
+              "goals": 1,
+              "saves": 1,
+              "assists": 1,
+              "shots": 3
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "saves": 0,
+              "goals": 1,
+              "shots": 2
+            },
+            "p-c0313a9e": {
+              "shots": 5,
+              "assists": 1,
+              "goals": 0,
+              "saves": 1
+            }
+          },
+          "us": 2,
+          "winner": "them",
+          "n": 1
+        },
+        {
+          "us": 1,
+          "winner": "them",
+          "p": {
+            "p-c0313a9e": {
+              "goals": 0,
+              "saves": 2,
+              "assists": 0,
+              "shots": 4
+            },
+            "p-0b11aaef": {
+              "shots": 1,
+              "assists": 0,
+              "goals": 1,
+              "saves": 1
+            },
+            "p-bd268108": {
+              "shots": 4,
+              "saves": 2,
+              "assists": 1,
+              "goals": 0
+            }
+          },
+          "n": 2,
+          "them": 2
+        },
+        {
+          "p": {
+            "p-bd268108": {
+              "assists": 0,
+              "shots": 2,
+              "goals": 1,
+              "saves": 0
+            },
+            "p-c0313a9e": {
+              "shots": 2,
+              "assists": 1,
+              "saves": 3,
+              "goals": 0
+            },
+            "p-0b11aaef": {
+              "goals": 0,
+              "saves": 1,
+              "assists": 0,
+              "shots": 1
+            }
+          },
+          "winner": "them",
+          "us": 1,
+          "n": 3,
+          "them": 2
+        }
+      ],
+      "perGame": true,
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/Fw6t-VEx8MY?feature=share"
+      },
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "team": "Jenison Wildcats RL",
+        "abbr": "JEN",
+        "school": "Jenison High School"
+      },
+      "status": "final",
+      "seriesOnly": false,
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "updatedAt": "2026-10-05T18:18:16.850Z",
+      "event": "MHSEL Fall 2024",
+      "week": "8",
+      "startsAt": "2024-11-14T21:00:00.000Z",
+      "game": "rocket-league",
+      "teamName": "Rocket League Varsity",
+      "term": "fall",
+      "forfeit": null
     }
   ]
 }

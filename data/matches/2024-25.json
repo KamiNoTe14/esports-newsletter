@@ -1,6 +1,6 @@
 {
   "season": "2024-25",
-  "updated": "2026-10-05T18:10:14.926Z",
+  "updated": "2026-10-05T18:11:46.882Z",
   "matches": [
     {
       "id": "Tia9tztKhkyUkaxkjQ9C",
@@ -1031,77 +1031,237 @@
     },
     {
       "id": "MgCogXLTvxU0Dl1Dp9RT",
-      "event": "MHSEL Fall 2024",
       "score": {
         "us": 3,
         "them": 2
       },
-      "current": 5,
-      "status": "final",
-      "clinched": "us",
-      "stream": {
-        "vod": "",
-        "live": "https://youtube.com/live/4hQgP93pOqw?feature=share"
-      },
-      "updatedAt": "2026-10-05T18:10:13.481Z",
+      "perGame": true,
       "games": [
         {
-          "us": 1,
           "n": 1,
+          "p": {
+            "p-bd268108": {
+              "saves": 2,
+              "assists": 1,
+              "goals": 0,
+              "shots": 4
+            },
+            "p-c0313a9e": {
+              "goals": 1,
+              "saves": 4,
+              "assists": 0,
+              "shots": 2
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "goals": 0,
+              "saves": 2,
+              "shots": 1
+            }
+          },
+          "winner": "them",
           "them": 2,
-          "winner": "them"
+          "us": 1
         },
         {
           "n": 2,
           "us": 0,
           "winner": "them",
-          "them": 2
+          "them": 2,
+          "p": {
+            "p-c0313a9e": {
+              "goals": 0,
+              "saves": 3,
+              "assists": 0,
+              "shots": 0
+            },
+            "p-0b11aaef": {
+              "saves": 0,
+              "goals": 0,
+              "assists": 0,
+              "shots": 4
+            },
+            "p-bd268108": {
+              "shots": 1,
+              "assists": 0,
+              "goals": 0,
+              "saves": 0
+            }
+          }
         },
         {
           "winner": "us",
-          "n": 3,
+          "p": {
+            "p-0b11aaef": {
+              "saves": 1,
+              "goals": 1,
+              "shots": 2,
+              "assists": 1
+            },
+            "p-c0313a9e": {
+              "shots": 5,
+              "assists": 0,
+              "saves": 0,
+              "goals": 2
+            },
+            "p-bd268108": {
+              "goals": 0,
+              "saves": 2,
+              "shots": 2,
+              "assists": 0
+            }
+          },
           "them": 2,
+          "n": 3,
           "us": 3
         },
         {
-          "n": 4,
-          "winner": "us",
+          "p": {
+            "p-bd268108": {
+              "shots": 2,
+              "assists": 0,
+              "goals": 1,
+              "saves": 1
+            },
+            "p-c0313a9e": {
+              "goals": 0,
+              "saves": 2,
+              "assists": 1,
+              "shots": 3
+            },
+            "p-0b11aaef": {
+              "assists": 0,
+              "shots": 1,
+              "goals": 1,
+              "saves": 4
+            }
+          },
           "them": 1,
-          "us": 2
+          "us": 2,
+          "winner": "us",
+          "n": 4
         },
         {
           "n": 5,
-          "winner": "us",
           "them": 1,
-          "us": 3
+          "us": 3,
+          "winner": "us",
+          "p": {
+            "p-0b11aaef": {
+              "shots": 0,
+              "assists": 0,
+              "goals": 0,
+              "saves": 1
+            },
+            "p-c0313a9e": {
+              "goals": 2,
+              "saves": 2,
+              "assists": 1,
+              "shots": 3
+            },
+            "p-bd268108": {
+              "goals": 1,
+              "saves": 3,
+              "shots": 2,
+              "assists": 2
+            }
+          }
         }
       ],
-      "seriesOnly": false,
-      "players": [],
-      "stage": "regular",
-      "league": "MHSEL",
-      "perGame": false,
-      "teamName": "Rocket League Varsity",
-      "level": "Varsity",
-      "startsAt": "2024-11-07T21:00:00.000Z",
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/4hQgP93pOqw?feature=share"
+      },
+      "clinched": "us",
+      "game": "rocket-league",
+      "week": "7",
+      "event": "MHSEL Fall 2024",
+      "forfeit": null,
+      "term": "fall",
+      "status": "final",
+      "updatedAt": "2026-10-05T18:11:45.435Z",
       "source": {},
+      "seriesOnly": false,
+      "startsAt": "2024-11-07T21:00:00.000Z",
       "teamId": "t5",
+      "teamName": "Rocket League Varsity",
+      "notes": "",
+      "league": "MHSEL",
+      "current": 5,
+      "level": "Varsity",
+      "stage": "regular",
+      "gameName": "Rocket League",
+      "opponent": {
+        "logo": "",
+        "school": "Dakota High School",
+        "short": "",
+        "team": "Dakota High School",
+        "abbr": "DAK"
+      },
+      "players": [
+        {
+          "name": "Dylan Reinwand",
+          "private": false,
+          "tag": "Qyxical",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-c0313a9e",
+          "stats": {
+            "goals": 5,
+            "saves": 11,
+            "shots": 13,
+            "assists": 2
+          },
+          "alum": true
+        },
+        {
+          "private": false,
+          "name": "James Petrucci",
+          "tag": "Ralax Itz C1",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-bd268108",
+          "alum": true,
+          "stats": {
+            "assists": 3,
+            "saves": 8,
+            "goals": 2,
+            "shots": 11
+          }
+        },
+        {
+          "name": "Tavin Flanagan",
+          "tag": "TRE4TY.",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "private": false,
+          "id": "p-0b11aaef",
+          "stats": {
+            "shots": 8,
+            "assists": 1,
+            "goals": 2,
+            "saves": 8
+          }
+        }
+      ],
       "bestOf": 5,
       "result": "W",
-      "season": "2024-25",
-      "term": "fall",
-      "game": "rocket-league",
-      "forfeit": null,
-      "opponent": {
-        "school": "Dakota High School",
-        "abbr": "DAK",
-        "team": "Dakota High School",
-        "short": "",
-        "logo": ""
-      },
-      "notes": "",
-      "gameName": "Rocket League",
-      "week": "7"
+      "season": "2024-25"
     }
   ]
 }

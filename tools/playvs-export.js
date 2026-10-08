@@ -66,10 +66,11 @@
     if (Array.isArray(o)) return o.map(x => scrub(x, keepNames));
     if (!o || typeof o !== "object") return o;
     const out = {};
-    const team = o.teamId || o.team?.id;
+    const team = o.teamId || o.team?.id || ("roster" in o || "players" in o ? o.id : undefined);
     const mine = team ? ours.has(team) : keepNames;
     for (const [k, v] of Object.entries(o)){
       if (k === "__typename" || /avatar|logo|Url$/i.test(k)) continue;
+      if ((k === "roster" || k === "players") && team && !ours.has(team)) continue;   // other schools' rosters
       if (k === "userProviderAccounts"){ if (mine) out.gamertags = [...new Set((v || []).map(a => a.providerName + ":" + (a.providerDisplayName || "")).filter(s => !/:$/.test(s) && !/^(Spin|Discord|Twitch|Youtube):/.test(s)))]; continue; }
       if (k === "player" && v && typeof v === "object" && team && !ours.has(team)){ out.player = {id:"opponent"}; continue; }
       out[k] = scrub(v, mine && k !== "teams" && k !== "otherTeams");

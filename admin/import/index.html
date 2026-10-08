@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Import from PlayVS · Hartland Esports</title>
+<link rel="icon" href="../../assets/eagle.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+:root{--navy:#00274C;--bg:#061423;--surface:#0D2238;--surface-2:#13304D;--line:#1E3D5E;--line-2:#2C5279;--text:#F2F6FA;--muted:#9DB0C6;--gold:#FFBC05;--ok:#3DDC84;--bad:#FF6B6B;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--body:"Barlow",Arial,Helvetica,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 var(--body)}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--gold)}
+.top{display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,var(--navy),#00203F);border-bottom:3px solid var(--gold)}
+.top img{width:34px}.top h1{margin:0;flex:1;font:800 22px var(--display);letter-spacing:.04em;text-transform:uppercase}
+.top a{font-size:14px}
+main{max-width:1080px;margin:0 auto;padding:20px 16px 80px}
+h2{font:800 26px var(--display);text-transform:uppercase;letter-spacing:.03em;margin:28px 0 8px}
+h3{font:700 19px var(--display);text-transform:uppercase;letter-spacing:.04em;margin:18px 0 8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.muted{color:var(--muted)}.small{font-size:14px}
+.btn{display:inline-block;border:0;border-radius:10px;padding:11px 18px;font:700 16px var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:var(--surface-2);border:1px solid var(--line-2)}
+.btn-gold{background:var(--gold);color:#00274C;border-color:var(--gold)}
+.btn:disabled{opacity:.5;cursor:default}
+input[type=text],select{background:var(--bg);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;width:100%}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font:700 12px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.opts label{display:flex;gap:10px;align-items:center;margin:6px 0}
+.pill{display:inline-block;font:700 11px var(--body);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.pill.new{background:rgba(61,220,132,.15);color:var(--ok)}.pill.have{background:rgba(255,188,5,.13);color:var(--gold)}
+.W{color:var(--gold);font-weight:700}.L{color:var(--muted);font-weight:700}
+details.season{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:10px 0}
+details.season>summary{cursor:pointer;padding:12px 16px;font:700 20px var(--display);text-transform:uppercase;letter-spacing:.03em;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+details.season>div{padding:0 12px 12px;overflow-x:auto}
+.bar{position:sticky;bottom:0;background:linear-gradient(0deg,var(--bg) 70%,transparent);padding:16px 0 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.drop{border:2px dashed var(--line-2);border-radius:14px;padding:36px 18px;text-align:center}
+.prog{height:10px;background:var(--surface-2);border-radius:6px;overflow:hidden;margin:10px 0}.prog i{display:block;height:100%;background:var(--gold);width:0;transition:width .2s}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#fff;color:#00274C;padding:10px 16px;border-radius:10px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.mock{background:#5a3d00;color:#FFE39A;text-align:center;padding:6px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="mock" id="mockbar" hidden>Test mode: nothing here touches the real database.</div>
+<header class="top"><img src="../../assets/eagle.png" alt=""><h1>Import from PlayVS</h1><a href="../scores/">← Scorekeeper</a></header>
+<main id="app"><p class="muted">Loading…</p></main>
+<div id="toast" hidden></div>
+<script type="module">
+import {backend, EDITORS, settle, seasonLabel, seasonOf, scoreboardFrom, seasonDocFrom, isMock, fmtDay} from "../../assets/matches.js?v=12";
+import {convert, defaultTeams, findExisting} from "../../assets/playvs-import.js?v=1";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SITE = new URL("../../", location.href).href;
+function toast(m, ms = 3500){ const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms); }
+
+let site = {teams:[], games:[]}, be, user = null, dir = {alumni:[], seasons:[]};
+let exp = null, teamMap = {}, result = null, existing = [], picks = new Set(), opts = {pre:false, scrim:false, other:true}, remap = {}, privateNew = new Set();
+
+(async () => {
+  if (isMock()) $("#mockbar").hidden = false;
+  try { site = await (await fetch(SITE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
+  be = await backend();
+  be.onUser(u => { user = u; if (u && EDITORS.includes(u.email)) be.watchDirectory(d => { dir = {alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : []}; }); render(); });
+})();
+
+function people(){
+  const map = new Map();
+  (site.teams || []).forEach(t => (t.roster || []).forEach(p => { if (p.name || p.tag) map.set(p.id || p.name, {id:p.id || p.name, name:p.name || "", tag:p.tag || "", private:!!p.private}); }));
+  (dir.alumni || []).forEach(p => { if (!map.has(p.id)) map.set(p.id, {id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true}); });
+  return map;
+}
+
+function render(){
+  if (!user){ $("#app").innerHTML = `<div class="card"><h2 style="margin-top:0">Coaches only</h2><p>Sign in with your school Google account.</p><button class="btn btn-gold" id="signin">Sign in with Google</button></div>`;
+    $("#signin").onclick = () => be.signIn().catch(e => toast("Couldn't sign in. " + (e.code || e.message || ""))); return; }
+  if (!EDITORS.includes(user.email)){ $("#app").innerHTML = `<div class="card">${esc(user.email)} can't import results.</div>`; return; }
+  if (!exp) return renderPick();
+  renderPreview();
+}
+
+function renderPick(){
+  $("#app").innerHTML = `<h2>1. Choose the export file</h2>
+    <p class="muted">Use <b>playvs-export.json</b>, made by running the export script on PlayVS. Nothing is saved until you press Import on the next screen.</p>
+    <label class="drop" style="display:block;cursor:pointer"><input type="file" id="file" accept=".json,application/json" hidden><b>Click to choose playvs-export.json</b><br><span class="muted small">or drop it here</span></label>`;
+  const take = async f => { try { exp = JSON.parse(await f.text()); if (!Array.isArray(exp.matches)) throw 0; } catch(e){ exp = null; toast("That isn't a PlayVS export file."); return; } await prepare(); };
+  $("#file").onchange = e => e.target.files[0] && take(e.target.files[0]);
+  const drop = $(".drop"); drop.ondragover = e => e.preventDefault(); drop.ondrop = e => { e.preventDefault(); e.dataTransfer.files[0] && take(e.dataTransfer.files[0]); };
+}
+
+/* Read what's already in the scorekeeper for every season in the file, so nothing is entered twice. */
+function loadSeason(se){ return new Promise(res => { let un = null, done = false; const t = setTimeout(() => finish([]), 15000);
+  function finish(list){ if (done) return; done = true; clearTimeout(t); setTimeout(() => un && un(), 0); res(list); }
+  un = be.watchSeason(se, (list, meta) => { if (!meta || !meta.fromCache) finish(list); }); }); }
+
+async function prepare(){
+  $("#app").innerHTML = `<p class="muted">Reading the file and checking what's already entered…</p>`;
+  teamMap = defaultTeams(site, exp);
+  result = convert(site, exp, people(), teamMap);
+  const seasons = [...new Set(result.matches.map(m => m.season))];
+  existing = (await Promise.all(seasons.map(loadSeason))).flat();
+  picks = new Set(); remap = {}; privateNew = new Set();
+  result.newPlayers.forEach(p => remap[p.id] = "");
+  resetPicks(); renderPreview();
+}
+function rebuild(){ result = convert(site, exp, people(), teamMap); }
+const known = m => (site.games || []).some(g => g.key === m.game);
+function wanted(m){ return !findExisting(m, existing) && (opts.pre || !m._pv.preseason) && (opts.scrim || !m._pv.scrim) && (opts.other || known(m)); }
+function resetPicks(){ picks = new Set(result.matches.filter(wanted).map(m => m.source.playvs)); }
+
+function renderPreview(){
+  const ms = result.matches, have = ms.filter(m => findExisting(m, existing));
+  const bySeason = {}; ms.forEach(m => (bySeason[m.season] = bySeason[m.season] || []).push(m));
+  const pvTeams = (exp.teams || []).filter(t => teamMap[t.id] && ms.some(m => m._pv.pvTeam === t.id));
+  const usedNew = result.newPlayers.filter(p => ms.some(m => picks.has(m.source.playvs) && m.players.some(x => x.id === p.id)));
+  const everyone = [...people().values()].sort((a, b) => (a.name || a.tag).localeCompare(b.name || b.tag));
+  $("#app").innerHTML = `
+    <h2>2. Check before importing</h2>
+    <p class="muted">${ms.length} finished PlayVS matches found. ${have.length} are already in the scorekeeper and will be left alone. ${result.skipped.length} were skipped (byes, cancelled or rescheduled matches, and forfeits with no winner).</p>
+    <div class="card opts"><h3 style="margin-top:0">What to include</h3>
+      <label><input type="checkbox" checked disabled> Regular season and playoff matches</label>
+      <label><input type="checkbox" id="oPre"${opts.pre ? " checked" : ""}> Preseason matches</label>
+      <label><input type="checkbox" id="oScrim"${opts.scrim ? " checked" : ""}> Scrimmages</label>
+      <label><input type="checkbox" id="oOther"${opts.other ? " checked" : ""}> Games the website doesn't track yet (Splatoon, Overwatch, Madden, Street Fighter…), as scores only</label>
+    </div>
+    <div class="card"><h3 style="margin-top:0">Team names on the website</h3>
+      <p class="muted small" style="margin-top:0">How each PlayVS team will be listed on the Results page. Rename any of them here.</p>
+      <table><thead><tr><th>PlayVS team</th><th>Game</th><th>Shows on the website as</th></tr></thead><tbody>
+      ${pvTeams.map(t => `<tr><td>${esc(t.name)}</td><td class="muted">${esc(teamMap[t.id].gameName)}</td><td><input type="text" data-team="${esc(t.id)}" value="${esc(teamMap[t.id].teamName)}"></td></tr>`).join("")}
+      </tbody></table></div>
+    ${usedNew.length ? `<div class="card"><h3 style="margin-top:0">${usedNew.length} player${usedNew.length === 1 ? "" : "s"} not in your rosters or past players</h3>
+      <p class="muted small" style="margin-top:0">They'll be added to Past players. If one is someone you already have under a different spelling, pick them instead. Tick <b>Gamertag only</b> for anyone whose name shouldn't be shown.</p>
+      <table><thead><tr><th>Name on PlayVS</th><th>Gamertag</th><th>Add as</th><th>Gamertag only</th></tr></thead><tbody>
+      ${usedNew.map(p => `<tr><td>${esc(p.name)}</td><td class="muted">${esc(p.tag || "–")}</td><td><select data-remap="${esc(p.id)}"><option value="">New past player</option>${everyone.map(e => `<option value="${esc(e.id)}"${remap[p.id] === e.id ? " selected" : ""}>Same as ${esc(e.name || e.tag)}</option>`).join("")}</select></td><td><input type="checkbox" data-priv="${esc(p.id)}"${privateNew.has(p.id) ? " checked" : ""}${remap[p.id] ? " disabled" : ""}></td></tr>`).join("")}
+      </tbody></table></div>` : ""}
+    <h3>Matches by season</h3>
+    ${Object.keys(bySeason).sort().reverse().map(se => { const l = bySeason[se].sort((a, b) => a.startsAt < b.startsAt ? -1 : 1), n = l.filter(m => picks.has(m.source.playvs)).length;
+      return `<details class="season"><summary>${esc(seasonLabel(se))} <span class="pill new">${n} to import</span><span class="pill">${l.length} on PlayVS</span></summary><div><table>
+        <thead><tr><th></th><th>Date</th><th>Team</th><th>Opponent</th><th>Result</th><th>Type</th></tr></thead><tbody>
+        ${l.map(m => { const ex = findExisting(m, existing); return `<tr><td><input type="checkbox" data-pick="${esc(m.source.playvs)}"${picks.has(m.source.playvs) ? " checked" : ""}${ex ? " disabled" : ""}></td>
+          <td style="white-space:nowrap">${esc(fmtDay(m.startsAt))}</td><td>${esc(m.teamName)}</td><td>${esc(m.opponent.school || m.opponent.team)}${m.opponent.school ? `<div class="muted small">${esc(m.opponent.team)}</div>` : ""}</td>
+          <td><span class="${m.result}">${m.result}</span> ${m.score.us}–${m.score.them}${m.forfeit ? ` <span class="pill">forfeit</span>` : ""}</td>
+          <td>${ex ? `<span class="pill have">Already entered</span>` : ""}${m._pv.scrim ? `<span class="pill">Scrimmage</span>` : m._pv.preseason ? `<span class="pill">Preseason</span>` : m.stage === "playoffs" ? `<span class="pill">Playoffs</span>` : ""}${!known(m) ? ` <span class="pill">Scores only</span>` : ""}</td></tr>`; }).join("")}
+        </tbody></table></div></details>`; }).join("")}
+    <div class="bar"><button class="btn btn-gold" id="go"${picks.size ? "" : " disabled"}>Import ${picks.size} match${picks.size === 1 ? "" : "es"}</button><button class="btn" id="again">Choose a different file</button>
+      <span class="muted small">Matches you import can be edited or deleted in the scorekeeper like any other.</span></div>`;
+
+  const re = () => { resetPicks(); renderPreview(); };
+  $("#oPre").onchange = e => { opts.pre = e.target.checked; re(); };
+  $("#oScrim").onchange = e => { opts.scrim = e.target.checked; re(); };
+  $("#oOther").onchange = e => { opts.other = e.target.checked; re(); };
+  document.querySelectorAll("[data-team]").forEach(i => i.onchange = () => { teamMap[i.dataset.team].teamName = i.value.trim() || teamMap[i.dataset.team].teamName; const keep = new Set(picks); rebuild(); picks = keep; renderPreview(); });
+  document.querySelectorAll("[data-remap]").forEach(s => s.onchange = () => { remap[s.dataset.remap] = s.value; renderPreview(); });
+  document.querySelectorAll("[data-priv]").forEach(c => c.onchange = () => { c.checked ? privateNew.add(c.dataset.priv) : privateNew.delete(c.dataset.priv); });
+  document.querySelectorAll("[data-pick]").forEach(c => c.onchange = () => { c.checked ? picks.add(c.dataset.pick) : picks.delete(c.dataset.pick); $("#go").textContent = `Import ${picks.size} match${picks.size === 1 ? "" : "es"}`; $("#go").disabled = !picks.size; });
+  $("#again").onclick = () => { exp = null; render(); };
+  $("#go").onclick = run;
+}
+
+async function run(){
+  const all = people();
+  const list = result.matches.filter(m => picks.has(m.source.playvs)).map(m0 => {
+    const {_pv, ...m} = JSON.parse(JSON.stringify(m0));
+    const swap = id => remap[id] || id;
+    m.players = [...new Map(m.players.map(p => { const id = swap(p.id), real = all.get(id); const priv = real ? real.private : privateNew.has(p.id);
+      return [id, {...p, id, name:priv ? "" : (real?.name || p.name), tag:real?.tag || p.tag, private:!!priv}]; })).values()];
+    m.games.forEach(g => { if (g.p) g.p = Object.fromEntries(Object.entries(g.p).map(([k, v]) => [swap(k), v])); });
+    m.id = "pv" + m.source.playvs.replace(/-/g, "").slice(0, 18);
+    return settle(m);
+  });
+  if (!list.length) return;
+  const newbies = result.newPlayers.filter(p => !remap[p.id] && list.some(m => m.players.some(x => x.id === p.id)) && !(dir.alumni || []).some(a => a.id === p.id))
+    .map(({_new, alum, ...p}) => ({...p, private:privateNew.has(p.id)}));
+  const seasons = [...new Set(list.map(m => m.season))].sort();
+  $("#app").innerHTML = `<h2>Importing…</h2><div class="prog"><i id="pbar"></i></div><p class="muted" id="pmsg">Saving past players…</p><p class="muted small">Keep this tab open until it finishes.</p>`;
+  const step = (f, msg) => { $("#pbar").style.width = Math.round(f * 100) + "%"; $("#pmsg").textContent = msg; };
+  try {
+    dir = {alumni:[...(dir.alumni || []), ...newbies], seasons:[...new Set([...(dir.seasons || []), ...seasons])].sort().reverse()};
+    await be.saveDirectory(dir);
+    for (let i = 0; i < seasons.length; i++){
+      const se = seasons[i], mine = list.filter(m => m.season === se);
+      step(i / seasons.length, `Saving ${seasonLabel(se)} (${mine.length} matches)…`);
+      await be.saveMany(mine, user.email);
+      const everything = [...existing.filter(e => e.season === se && !mine.some(m => m.id === e.id)), ...mine].map(m => settle({...m}));
+      let doc = seasonDocFrom(everything, se);
+      /* Firestore documents top out at 1 MB. If a season is that big, the summary drops per-game stats (totals stay). */
+      if (JSON.stringify(doc).length > 900000) doc = {...doc, matches:doc.matches.map(m => ({...m, games:(m.games || []).map(({p, ...g}) => g)}))};
+      await be.syncSummaries(se === seasonOf() ? scoreboardFrom(everything, site) : null, doc);
+    }
+    step(1, "Done.");
+    $("#app").innerHTML = `<h2>Imported ${list.length} matches</h2>
+      <p>${seasons.map(seasonLabel).join(", ")}. ${newbies.length ? `${newbies.length} past player${newbies.length === 1 ? " was" : "s were"} added.` : ""}</p>
+      <p class="muted">They're on the Results, Legacy and player pages now. The site's backup copy catches up within the hour.</p>
+      <p><a class="btn btn-gold" href="${SITE}results.html" target="_blank">See results</a> <a class="btn" href="../scores/">Back to the scorekeeper</a></p>`;
+  } catch(e){
+    console.error(e);
+    $("#app").insertAdjacentHTML("beforeend", `<div class="card" style="border-color:var(--bad)"><b>The import stopped:</b> ${esc(e.code || e.message || e)}<br><span class="muted">Anything already saved stays saved. Running the import again picks up where it left off without making duplicates.</span></div>`);
+  }
+}
+</script>
+</body>
+</html>

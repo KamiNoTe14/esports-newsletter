@@ -328,7 +328,7 @@ function renderList(){
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
     + alumniHTML(openAl)
-    + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div>
+    + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div><div class="foot"><span>Old results on PlayVS?</span><a class="linkbtn" href="../import/${location.search}">Import history from PlayVS →</a></div>
     <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
   $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };

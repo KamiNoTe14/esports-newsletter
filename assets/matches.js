@@ -204,6 +204,14 @@ async function firebaseBackend(){
       if (seasonDoc) b.set(fb.doc(db, "public", "season-" + seasonDoc.season), strip(seasonDoc));
       await b.commit();
     },
+    /* Many matches at once (history imports). Firestore takes up to 500 writes per batch. */
+    async saveMany(list, by){
+      for (let i = 0; i < list.length; i += 400){
+        const b = fb.writeBatch(db), at = new Date().toISOString();
+        list.slice(i, i + 400).forEach(m => { const {id, ...data} = m; b.set(fb.doc(db, "matches", id), strip({...data, updatedAt:at, updatedBy:by || ""})); });
+        await b.commit();
+      }
+    },
     async syncSummaries(scoreboard, seasonDoc){
       const b = fb.writeBatch(db);
       if (scoreboard) b.set(fb.doc(db, "public", "scoreboard"), strip(scoreboard));
@@ -237,6 +245,7 @@ function mockBackend(){
     newId(){ return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
     async save(m, scoreboard, by, seasonDoc){ const all = read(), {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
     async remove(id, scoreboard, seasonDoc){ const all = read(); delete all[id]; localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
+    async saveMany(list, by){ const all = read(); list.forEach(m => { const {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); }); localStorage.setItem(K, JSON.stringify(all)); emit(); },
     async syncSummaries(scoreboard, seasonDoc){ if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); if (seasonDoc) localStorage.setItem("eagles-mock-season-" + seasonDoc.season, JSON.stringify(seasonDoc)); },
     watchDirectory(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-directory")) || {}); } catch(e){ cb({}); } }; dirSubs.add(f); setTimeout(f, 0); return () => dirSubs.delete(f); },
     async saveDirectory(dir){ localStorage.setItem("eagles-mock-directory", JSON.stringify(dir)); dirSubs.forEach(f => f()); }

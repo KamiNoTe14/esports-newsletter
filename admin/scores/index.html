@@ -128,6 +128,7 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .rchip{display:inline-flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;border-radius:999px;background:var(--bg);border:1px solid var(--line-2);font-weight:600}
 .rchip button{width:26px;height:26px;border-radius:50%;color:var(--muted);font-size:18px;line-height:1}.rchip button:hover{color:var(--text);background:var(--surface-2)}
 .radd{flex:1;min-width:180px;min-height:46px;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);padding:0 10px}
+.tmsg{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:rgba(255,188,5,.1);border:1px solid rgba(255,188,5,.4);margin-bottom:8px}.tmsg b{flex:1 1 220px}.tmsg .btn{min-height:40px;padding:0 12px;font-size:14px}
 details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -201,7 +202,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 
 <script type="module">
 import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=14";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=15";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -213,6 +214,7 @@ function toast(m, ms = 3200){ const t = $("#toast"); t.textContent = m; t.hidden
 const NOW = seasonOf();  // the current season; "season" below is the one being viewed
 let site = {teams:[], games:[]}, be = null, user = null, season = NOW, matches = [], unwatch = null;
 let dir = {alumni:[], seasons:[], rosters:{}}, lastEntry = null;
+let tick = {messages:[]};
 let view = "list", openId = null, cur = null, draft = null, undo = {}, saveTimer = null, saving = false, dirtyIds = new Set();
 const pendingSaves = new Map(); // match id -> latest local copy not yet written
 
@@ -226,6 +228,7 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
     user = u; renderWho();
     if (unwatch){ unwatch(); unwatch = null; }
     if (u && EDITORS.includes(u.email)){ unwatch = be.watchSeason(season, onMatches, onState);
+      be.watchTicker(t => { tick = {messages:Array.isArray(t.messages) ? t.messages : []}; if (view === "list" && !document.activeElement?.closest?.("#tickBox")) renderList(); });
       be.watchDirectory(d => { dir = {...d, alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : [], rosters:d.rosters && typeof d.rosters === "object" ? d.rosters : {}}; if (view === "list") renderList(); }); }
     route();
   });
@@ -331,6 +334,7 @@ function renderList(){
   const openAl = $("#alumniBox")?.open;
   const openRo = $("#rosterBox")?.open;
   $("#app").innerHTML = `<label class="seasonbar"><span>Season</span><select id="seasonSel">${seasonList(dir.seasons).map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}${se === NOW ? " (current)" : dir.seasons.includes(se) ? " ✓" : ""}</option>`).join("")}</select><b>${done.length ? rec : ""}</b></label>`
+    + tickerHTML()
     + (live.length ? sec("Live now", live, "") : "")
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
@@ -340,9 +344,31 @@ function renderList(){
     <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
   $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };
-  bindAlumni(); bindRosters();
+  bindAlumni(); bindRosters(); bindTicker();
   $("#app").querySelectorAll("[data-open]").forEach(b => b.onclick = () => location.hash = "m/" + b.dataset.open);
   $("#backup") && ($("#backup").onclick = () => archive(true));
+}
+
+/* Stream ticker announcements (public/ticker). The ticker overlay shows these the moment they're saved. */
+const activeMsgs = () => (tick.messages || []).filter(x => x.text && (!x.until || new Date(x.until) > new Date()));
+function tickerHTML(){
+  const list = activeMsgs();
+  return `<details class="sec" id="tickBox"${list.length ? " open" : ""}><summary>Stream ticker${list.length ? `<span class="pill-live" style="font-size:12px">On air</span>` : `<span>No announcement</span>`}</summary><div class="secb">
+    ${list.map(x => `<div class="tmsg"><b>${x.pinned ? "📌 " : "📣 "}${esc(x.text)}</b><span class="hint">${x.pinned ? "Pinned (scrolling paused)" : "Scrolling"}${x.until ? ` · until ${esc(fmtTime(x.until))}` : ""}</span><button type="button" class="btn btn-line tdel" data-tid="${esc(x.id)}">Remove</button></div>`).join("")}
+    <label class="f" style="margin-top:6px"><span>Announcement</span><input id="tText" maxlength="120" placeholder="Technical difficulties: we'll be right back!"></label>
+    <div class="tools" style="flex-wrap:wrap;align-items:center"><label class="tog"><input type="checkbox" id="tPin"> Pin it (stops the scores and shows only this)</label>
+      <select id="tFor" class="radd" style="flex:0 1 200px"><option value="30">For 30 minutes</option><option value="60" selected>For 1 hour</option><option value="180">For 3 hours</option><option value="0">Until I remove it</option></select>
+      <button class="btn btn-gold" type="button" id="tGo">Put on ticker</button></div>
+    <p class="hint" style="margin:10px 0 0">Shows on the stream's score ticker right away. Overlay link for OBS (Browser Source, 1920 × 1080): <a href="${SITE}overlay/ticker.html" target="_blank" rel="noopener">${esc(SITE)}overlay/ticker.html</a></p>
+  </div></details>`;
+}
+function bindTicker(){
+  if (!$("#tGo")) return;
+  const save = async msgs => { tick = {messages:msgs, updated:new Date().toISOString()}; try { await be.saveTicker(tick); renderList(); } catch(e){ toast("Couldn't update the ticker. Check the connection."); } };
+  $("#tGo").onclick = () => { const text = $("#tText").value.trim(); if (!text){ $("#tText").focus(); return; }
+    const mins = +$("#tFor").value, until = mins ? new Date(Date.now() + mins * 6e4).toISOString() : "";
+    save([...activeMsgs().filter(x => !($("#tPin").checked && x.pinned)), {id:Date.now().toString(36), text, pinned:$("#tPin").checked, until, at:new Date().toISOString(), by:user?.email || ""}]); toast("On the ticker."); };
+  document.querySelectorAll(".tdel").forEach(b => b.onclick = () => save(activeMsgs().filter(x => x.id !== b.dataset.tid)));
 }
 
 /* Season rosters: who was on each team that season. Saved with the past players (public/directory) under

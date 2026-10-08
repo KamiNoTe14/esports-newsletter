@@ -36,6 +36,8 @@ async function watchDoc(id, mockKey, cb){
 export function watchBoard(cb){ return watchDoc("scoreboard", "eagles-mock-scoreboard", cb); }
 /* Every finished match of a season in full detail (lineups, stats), updated the moment a match goes final. */
 export function watchSeason(season, cb){ return watchDoc("season-" + season, "eagles-mock-season-" + season, cb); }
+/* Stream ticker announcements, written from the scorekeeper. */
+export function watchTicker(cb){ return watchDoc("ticker", "eagles-mock-ticker", cb); }
 /* Past players and the list of seasons that have results. */
 export function watchDirectory(cb){ return watchDoc("directory", "eagles-mock-directory", d => cb({alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : []})); }
 /* Everyone we know by id (current rosters, then past players), so names stay right even if a match stored an old spelling. */

@@ -220,7 +220,10 @@ async function firebaseBackend(){
     },
     /* public/directory: past players (alumni) and the list of seasons that have results */
     watchDirectory(cb){ return fb.onSnapshot(fb.doc(db, "public", "directory"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
-    async saveDirectory(dir){ await fb.setDoc(fb.doc(db, "public", "directory"), strip(dir)); }
+    async saveDirectory(dir){ await fb.setDoc(fb.doc(db, "public", "directory"), strip(dir)); },
+    /* public/ticker: announcements for the stream ticker */
+    watchTicker(cb){ return fb.onSnapshot(fb.doc(db, "public", "ticker"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
+    async saveTicker(t){ await fb.setDoc(fb.doc(db, "public", "ticker"), strip(t)); }
   };
 }
 
@@ -228,7 +231,7 @@ async function firebaseBackend(){
 function mockBackend(){
   const K = "eagles-mock-matches", SB = "eagles-mock-scoreboard";
   const read = () => { try { return JSON.parse(localStorage.getItem(K)) || {}; } catch(e){ return {}; } };
-  const subs = new Set(), dirSubs = new Set();
+  const subs = new Set(), dirSubs = new Set(), tickSubs = new Set();
   const emit = () => subs.forEach(f => f());
   window.addEventListener("storage", e => { if (e.key === K) emit(); });
   let user = null; const userSubs = new Set();
@@ -248,6 +251,8 @@ function mockBackend(){
     async saveMany(list, by){ const all = read(); list.forEach(m => { const {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); }); localStorage.setItem(K, JSON.stringify(all)); emit(); },
     async syncSummaries(scoreboard, seasonDoc){ if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); if (seasonDoc) localStorage.setItem("eagles-mock-season-" + seasonDoc.season, JSON.stringify(seasonDoc)); },
     watchDirectory(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-directory")) || {}); } catch(e){ cb({}); } }; dirSubs.add(f); setTimeout(f, 0); return () => dirSubs.delete(f); },
-    async saveDirectory(dir){ localStorage.setItem("eagles-mock-directory", JSON.stringify(dir)); dirSubs.forEach(f => f()); }
+    async saveDirectory(dir){ localStorage.setItem("eagles-mock-directory", JSON.stringify(dir)); dirSubs.forEach(f => f()); },
+    watchTicker(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-ticker")) || {}); } catch(e){ cb({}); } }; f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-ticker") f(); }); tickSubs.add(f); return () => tickSubs.delete(f); },
+    async saveTicker(t){ localStorage.setItem("eagles-mock-ticker", JSON.stringify(t)); tickSubs.forEach(f => f()); }
   };
 }

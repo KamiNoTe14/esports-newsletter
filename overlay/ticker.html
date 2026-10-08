@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Score ticker · Hartland Esports</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap">
+<!-- Stream overlay: an ESPN-style score ticker. Add it in OBS as a Browser Source (1920 x 1080 or 1920 x 80),
+     it sits at the bottom with a transparent background. Live scores update the moment the scorekeeper changes them.
+     Options: ?speed=110 (pixels per second), ?height=64, ?top=1 (put the bar at the top), ?bg=1 (solid page background, for testing). -->
+<style>
+:root{--navy:#00274C;--navy-2:#00315F;--gold:#FFBC05;--white:#fff;--live:#FF3B3B;--h:64px;--f:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
+html,body{margin:0;height:100%;background:transparent;overflow:hidden}
+body.bg{background:#333 url() center/cover}
+.bar{position:fixed;left:0;right:0;bottom:0;height:var(--h);display:flex;align-items:stretch;font-family:var(--f);color:var(--white);
+  background:linear-gradient(180deg,#003A70,var(--navy) 55%,#001F3D);border-top:4px solid var(--gold);box-shadow:0 -6px 18px rgba(0,0,0,.35)}
+body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:4px solid var(--gold)}
+.brand{flex:none;display:flex;align-items:center;gap:10px;padding:0 22px 0 16px;background:var(--gold);color:var(--navy);
+  clip-path:polygon(0 0,100% 0,calc(100% - 18px) 100%,0 100%);padding-right:38px;position:relative;z-index:2}
+.brand img{height:calc(var(--h) * .62)}
+.brand b{font-weight:800;font-size:calc(var(--h) * .42);letter-spacing:.04em;text-transform:uppercase;line-height:.9}
+.brand small{display:block;font-size:calc(var(--h) * .24);letter-spacing:.14em;font-weight:700}
+.track{flex:1;overflow:hidden;position:relative;margin-left:-18px;
+  mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent);-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent)}
+.run{position:absolute;top:0;bottom:0;left:0;display:flex;align-items:center;white-space:nowrap;will-change:transform}
+.it{display:inline-flex;align-items:center;gap:12px;padding:0 26px;font-size:calc(var(--h) * .44);font-weight:700;letter-spacing:.02em;height:100%;position:relative}
+.it+.it:before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;background:var(--gold);opacity:.55;transform:skewX(-14deg)}
+.g{font-size:calc(var(--h) * .26);font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:2px solid rgba(255,188,5,.55);border-radius:4px;padding:1px 6px}
+.tm{text-transform:uppercase}
+.sc{font-weight:800;font-variant-numeric:tabular-nums}
+.win{color:var(--gold)}
+.lose{opacity:.72}
+.st{font-size:calc(var(--h) * .3);font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.12)}
+.st.live{background:var(--live);animation:pulse 1.6s infinite}
+.st.fin{background:rgba(255,255,255,.9);color:var(--navy)}
+.tag{font-size:calc(var(--h) * .26);letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.it.ann{color:var(--navy);background:var(--gold);padding:0 30px;font-weight:800;text-transform:uppercase}
+.it.ann:before{display:none}
+.it.ann+.it:before{display:none}
+.alert{position:absolute;inset:0;display:flex;align-items:center;gap:16px;padding:0 30px 0 44px;background:var(--gold);color:var(--navy);
+  font-size:calc(var(--h) * .46);font-weight:800;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alert span{background:var(--navy);color:var(--gold);font-size:calc(var(--h) * .28);letter-spacing:.14em;padding:3px 9px;border-radius:4px}
+.clock{flex:none;display:flex;align-items:center;padding:0 18px;font-size:calc(var(--h) * .36);font-weight:700;background:rgba(0,0,0,.25);border-left:3px solid var(--gold);font-variant-numeric:tabular-nums}
+@keyframes pulse{50%{opacity:.6}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="brand"><img src="../assets/eagle.png" alt=""><div><b>Eagles</b><small>Esports scores</small></div></div>
+  <div class="track" id="track"><div class="run" id="run"></div></div>
+  <div class="clock" id="clock"></div>
+</div>
+<script type="module">
+import {watchBoard, watchTicker} from "../assets/live.js?v=21";
+import {gameFor, oppShort, postseason, rivalFor, fmtTime} from "../assets/matches.js?v=15";
+const q = new URLSearchParams(location.search);
+const SPEED = +q.get("speed") || 110;
+if (q.get("height")) document.documentElement.style.setProperty("--h", (+q.get("height")) + "px");
+if (q.get("top")) document.body.classList.add("top");
+if (q.get("bg")) document.body.classList.add("bg");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TZ = "America/Detroit";
+const day = d => new Date(d).toLocaleDateString("en-CA", {timeZone:TZ});
+
+let site = {games:[], teams:[]}, board = {matches:[]}, ticker = {messages:[]};
+try { site = await (await fetch("../data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
+
+const clock = () => { document.getElementById("clock").textContent = new Date().toLocaleTimeString("en-US", {timeZone:TZ, hour:"numeric", minute:"2-digit"}); };
+clock(); setInterval(clock, 10000);
+
+/* One ticker item per match: game · Hartland team score · opponent score · status */
+function item(m){
+  const g = gameFor(site, m.game), live = m.status === "live", fin = m.status === "final";
+  const team = String(m.teamName || "").replace(new RegExp("^" + (g.short || g.name || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*", "i"), "") || m.level || "";
+  const us = m.score?.us ?? 0, them = m.score?.them ?? 0, W = fin && m.result === "W", L = fin && m.result === "L";
+  const cg = live ? (m.current || null) : null;
+  const status = live ? `<span class="st live">Live${cg?.n ? ` · ${esc((g.unit || "Game")[0])}${cg.n}` : ""}</span>`
+    : fin ? `<span class="st fin">Final${m.forfeit ? " · FF" : ""}</span>`
+    : `<span class="st">${day(m.startsAt) === day(Date.now()) ? esc(fmtTime(m.startsAt)) : new Date(m.startsAt).toLocaleDateString("en-US", {timeZone:TZ, weekday:"short"}) + " " + esc(fmtTime(m.startsAt))}</span>`;
+  const ps = postseason(m), rv = rivalFor(site, m);
+  const extra = ps ? `<span class="tag">🏆 ${esc(ps.label)}</span>` : rv ? `<span class="tag">⚔ ${esc(rv.title || "Rivalry")}</span>` : "";
+  const scored = live || fin;
+  return `<span class="it"><span class="g">${esc(g.abbr || g.short || g.name)}</span>
+    <span class="tm${W ? " win" : L ? " lose" : ""}">Hartland ${esc(team)}</span>${scored ? `<span class="sc${W ? " win" : L ? " lose" : ""}">${us}</span>` : ""}
+    <span class="tm${L ? " win" : W ? " lose" : ""}">${esc(oppShort(m))}</span>${scored ? `<span class="sc${L ? " win" : W ? " lose" : ""}">${them}</span>` : ""}
+    ${status}${extra}</span>`;
+}
+
+/* What's on the ticker: live matches, then today's finals (or the latest few), then what's coming up in the next two days. */
+function pickMatches(){
+  const all = board.matches || [], now = Date.now(), today = day(now);
+  const live = all.filter(m => m.status === "live");
+  const fins = all.filter(m => m.status === "final").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
+  const todayFin = fins.filter(m => day(m.startsAt) === today);
+  const recent = todayFin.length ? todayFin : fins.filter(m => now - new Date(m.startsAt) < 7 * 864e5).slice(0, 8);
+  const up = all.filter(m => m.status === "upcoming" && new Date(m.startsAt) - now < 2 * 864e5 && new Date(m.startsAt) - now > -6 * 36e5).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
+  return [...live, ...recent, ...up];
+}
+const active = () => (ticker.messages || []).filter(x => x.text && (!x.until || new Date(x.until) > new Date()));
+
+function content(){
+  const msgs = active().filter(x => !x.pinned), ms = pickMatches();
+  const parts = ms.map(item);
+  /* announcements go first and again halfway through a long loop, so they're seen often */
+  const ann = msgs.map(x => `<span class="it ann">📣 ${esc(x.text)}</span>`);
+  if (ann.length){ parts.unshift(...ann); if (parts.length > 8) parts.splice(Math.ceil(parts.length / 2), 0, ...ann); }
+  if (!parts.length) parts.push(`<span class="it"><span class="tm">Hartland Eagles Esports</span><span class="tag">hartlandesports.com</span></span>`);
+  return parts.join("");
+}
+
+/* Scrolling: the strip is drawn twice back to back and slides left at a steady speed. New data waits for the end of a pass. */
+const run = document.getElementById("run"), track = document.getElementById("track");
+let x = 0, width = 0, next = null, last = performance.now(), pinnedEl = null;
+function setContent(html){ run.innerHTML = html + html; width = run.scrollWidth / 2; }
+function frame(t){
+  const dt = Math.min(64, t - last); last = t;
+  if (!pinnedEl){
+    x -= SPEED * dt / 1000;
+    if (width && -x >= width){ x += width; if (next !== null){ setContent(next); next = null; x = 0; } }
+    run.style.transform = `translateX(${x}px)`;
+  }
+  requestAnimationFrame(frame);
+}
+function refresh(now){
+  const pin = active().find(x => x.pinned);
+  if (pin){
+    if (!pinnedEl){ pinnedEl = document.createElement("div"); pinnedEl.className = "alert"; track.appendChild(pinnedEl); run.style.visibility = "hidden"; }
+    pinnedEl.innerHTML = `<span>Update</span>${esc(pin.text)}`;
+  } else if (pinnedEl){ pinnedEl.remove(); pinnedEl = null; run.style.visibility = ""; }
+  const html = content();
+  if (!run.innerHTML || now){ setContent(html); x = now && run.innerHTML ? 0 : track.clientWidth * 0.3; next = null; } else next = html;
+}
+watchBoard(b => { board = b || {matches:[]}; refresh(); });
+watchTicker(t => { ticker = t || {messages:[]}; refresh(true); });   // announcements show right away
+setInterval(refresh, 60000);   // expiry times and "today" roll over on their own
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

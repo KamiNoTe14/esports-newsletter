@@ -1,5 +1,4 @@
-// Builds feed.xml (RSS) from files already in the repo: final results in data/matches/, news in data/site.json
-// and newsletters in data/issues.json. Only FINAL matches are listed. Titles are short, headline-style lines so a
+// Builds feed.xml (RSS) from files already in the repo: final results in data/matches/ and news in data/site.json. Only FINAL matches are listed. Titles are short, headline-style lines so a
 // stream ticker can show them as they are.
 import fs from "node:fs";
 
@@ -22,8 +21,11 @@ for (const se of seasons) for (const m of read(`data/matches/${se}.json`, {}).ma
   items.push({title:title + (round ? ` (${round})` : ""), link:`${host}/results.html?season=${se}&m=${encodeURIComponent(m.id)}`, guid:`match-${m.id}`, date:new Date(m.startsAt || m.updatedAt), cat:"Result", desc:[m.league, m.gameName].filter(Boolean).join(" · ")});
 }
 for (const n of site.news || []) if (n.title) items.push({title:n.title, link:/^https?:/.test(n.link || "") ? n.link : `${host}/media.html`, guid:`news-${n.date}-${n.title}`, date:noon(n.date), cat:"News", desc:n.summary || n.source || ""});
-for (const i of issues) if (i.headline || i.title) items.push({title:`Week ${i.week} report: ${i.headline || i.title}`, link:`${host}/${String(i.path || "newsletters.html").replace(/^\/+/, "")}`, guid:`issue-${i.path || i.date}`, date:noon(i.date), cat:"Newsletter", desc:i.excerpt || ""});
 
+/* Only what's fresh: results from the last two weeks, news from the last two months. */
+const now = Date.now(), DAY = 864e5;
+const fresh = items.filter(i => now - i.date < (i.cat === "Result" ? 14 : 60) * DAY && i.date - now < DAY);
+items.length = 0; items.push(...fresh);
 items.sort((a, b) => b.date - a.date);
 const list = items.filter(i => !isNaN(i.date)).slice(0, 50);
 const body = `<?xml version="1.0" encoding="UTF-8"?>

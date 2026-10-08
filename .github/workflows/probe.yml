@@ -1,7 +1,7 @@
 name: Probe data sources (temporary)
 on: workflow_dispatch
 permissions:
-  contents: read
+  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -9,6 +9,7 @@ jobs:
       - name: Probe
         run: |
           set +e
+          exec > out.txt 2>&1
           UA="Mozilla/5.0 (HartlandEsportsTicker)"
           echo "=== hartlandeagles"; curl -sSL -A "$UA" https://hartlandeagles.com/ -o he.html -w "%{http_code} %{size_download}\n"
           grep -o 'href="[^"]*Event/[^"]*"' he.html | head -3
@@ -24,3 +25,7 @@ jobs:
           curl -sS -o cf.json "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=5"; python3 -c "import json;d=json.load(open('cf.json'));print('CFB B1G',len(d.get('events',[])),[e['shortName'] for e in d.get('events',[])][:5])"
           curl -sS -o cf2.json "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=15"; python3 -c "import json;d=json.load(open('cf2.json'));print('CFB MAC',len(d.get('events',[])),[e['shortName'] for e in d.get('events',[])][:5])"
           for f in https://www.esportsinsider.com/feed https://dotesports.com/feed https://www.dexerto.com/feed/ https://esports-news.co.uk/feed/ https://www.rocketleague.com/en/news/rss https://liquipedia.net/rocketleague/api.php; do echo "=== $f"; curl -sSL -A "$UA" -o f.xml -w "%{http_code} %{content_type} %{size_download}\n" "$f"; grep -o "<title>[^<]*</title>" f.xml | head -4; done
+      - name: Save output to a branch
+        if: always()
+        run: |
+          mkdir o && cp out.txt he.html o/ 2>/dev/null; cd o && git init -q -b probe-out && git add -A && git -c user.name=bot -c user.email=bot@x commit -qm probe && git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" probe-out

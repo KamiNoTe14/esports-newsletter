@@ -1,1454 +1,1327 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-08T08:56:03.124Z",
+  "updated": "2026-10-08T16:27:02.508Z",
   "matches": [
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
+      "gameName": "Rocket League",
+      "season": "2023-24",
       "source": {},
-      "forfeit": null,
-      "current": 3,
-      "stage": "regular",
-      "bestOf": 5,
-      "teamId": "t5",
-      "level": "Varsity",
-      "event": "MHSEL Fall 2023",
+      "game": "rocket-league",
       "term": "fall",
+      "week": "1",
+      "teamName": "Rocket League Varsity",
+      "event": "MHSEL Fall 2023",
+      "current": 3,
+      "result": "W",
+      "level": "Varsity",
       "notes": "",
-      "updatedAt": "2026-10-05T19:50:58.253Z",
-      "score": {
-        "them": 0,
-        "us": 3
-      },
+      "teamId": "t5",
+      "seriesOnly": true,
       "status": "final",
+      "league": "MHSEL",
+      "opponent": {
+        "school": "Fenton High School",
+        "logo": "",
+        "abbr": "FEN",
+        "team": "Fenton High School",
+        "short": ""
+      },
       "stream": {
         "live": "",
         "vod": ""
       },
-      "seriesOnly": true,
-      "teamName": "Rocket League Varsity",
-      "clinched": "us",
-      "gameName": "Rocket League",
-      "games": [
-        {
-          "them": 0,
-          "n": 1,
-          "winner": "us",
-          "us": 0
-        },
-        {
-          "winner": "us",
-          "them": 0,
-          "us": 0,
-          "n": 2
-        },
-        {
-          "them": 0,
-          "us": 0,
-          "n": 3,
-          "winner": "us"
-        }
-      ],
-      "result": "W",
-      "game": "rocket-league",
-      "perGame": false,
       "players": [
         {
           "stats": {
-            "goals": 9,
+            "assists": 3,
             "saves": 0,
             "shots": 14,
-            "assists": 3
-          },
-          "alum": true,
-          "private": false,
-          "name": "Kyle Greig",
-          "tag": "Ksquiggly.RL",
-          "id": "p-88ef0aea"
-        },
-        {
-          "alum": true,
-          "name": "Lincoln Deman",
-          "stats": {
-            "assists": 8,
-            "saves": 0,
-            "goals": 6,
-            "shots": 11
-          },
-          "tag": "goodnics",
-          "private": false,
-          "id": "p-a1be1608"
-        },
-        {
-          "id": "p-8a733446",
-          "private": false,
-          "stats": {
-            "shots": 5,
-            "saves": 0,
-            "goals": 3,
-            "assists": 2
-          },
-          "tag": "Tyro.",
-          "name": "Troy Beaudoin",
-          "alum": true
-        }
-      ],
-      "startsAt": "2023-09-28T20:00:00.000Z",
-      "week": "1",
-      "opponent": {
-        "short": "",
-        "team": "Fenton High School",
-        "school": "Fenton High School",
-        "abbr": "FEN",
-        "logo": ""
-      },
-      "season": "2023-24",
-      "league": "MHSEL"
-    },
-    {
-      "id": "qyECFNiPcsCIWZAIb0bN",
-      "stage": "regular",
-      "season": "2023-24",
-      "league": "MHSEL",
-      "perGame": true,
-      "level": "Varsity",
-      "teamName": "Rocket League Varsity",
-      "clinched": "us",
-      "result": "W",
-      "term": "fall",
-      "players": [
-        {
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "alum": true,
-          "name": "Kyle Greig",
-          "stats": {
-            "shots": 17,
-            "goals": 7,
-            "saves": 2,
-            "assists": 3
+            "goals": 9
           },
           "private": false,
           "id": "p-88ef0aea",
+          "name": "Kyle Greig",
+          "alum": true,
           "tag": "Ksquiggly.RL"
         },
         {
           "tag": "goodnics",
-          "name": "Lincoln Deman",
-          "stats": {},
           "alum": true,
-          "id": "p-a1be1608",
           "private": false,
-          "games": []
+          "stats": {
+            "saves": 0,
+            "shots": 11,
+            "goals": 6,
+            "assists": 8
+          },
+          "name": "Lincoln Deman",
+          "id": "p-a1be1608"
         },
         {
-          "games": [],
-          "name": "Troy Beaudoin",
           "id": "p-8a733446",
           "alum": true,
+          "tag": "Tyro.",
+          "stats": {
+            "goals": 3,
+            "shots": 5,
+            "assists": 2,
+            "saves": 0
+          },
+          "name": "Troy Beaudoin",
+          "private": false
+        }
+      ],
+      "updatedAt": "2026-10-05T19:50:58.253Z",
+      "stage": "regular",
+      "perGame": false,
+      "clinched": "us",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "bestOf": 5,
+      "forfeit": null,
+      "games": [
+        {
+          "us": 0,
+          "n": 1,
+          "winner": "us",
+          "them": 0
+        },
+        {
+          "them": 0,
+          "us": 0,
+          "winner": "us",
+          "n": 2
+        },
+        {
+          "winner": "us",
+          "us": 0,
+          "n": 3,
+          "them": 0
+        }
+      ],
+      "startsAt": "2023-09-28T20:00:00.000Z"
+    },
+    {
+      "id": "qyECFNiPcsCIWZAIb0bN",
+      "notes": "",
+      "level": "Varsity",
+      "bestOf": 5,
+      "players": [
+        {
+          "stats": {
+            "assists": 3,
+            "saves": 2,
+            "goals": 7,
+            "shots": 17
+          },
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Kyle Greig",
+          "id": "p-88ef0aea",
+          "private": false,
+          "alum": true,
+          "tag": "Ksquiggly.RL"
+        },
+        {
+          "tag": "goodnics",
+          "alum": true,
+          "games": [],
+          "stats": {},
+          "id": "p-a1be1608",
+          "private": false,
+          "name": "Lincoln Deman"
+        },
+        {
+          "name": "Troy Beaudoin",
+          "games": [],
           "stats": {},
           "tag": "Tyro.",
-          "private": false
+          "private": false,
+          "id": "p-8a733446",
+          "alum": true
         },
         {
+          "tag": "SsnowyGG",
+          "id": "p-5310cd2b",
           "alum": true,
+          "name": "Christian Gatien",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "private": false,
           "stats": {
+            "assists": 3,
             "shots": 18,
             "goals": 9,
-            "assists": 3,
             "saves": 2
-          },
-          "name": "Christian Gatien",
-          "private": false,
-          "tag": "SsnowyGG",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "id": "p-5310cd2b"
+          }
         },
         {
+          "stats": {
+            "saves": 0,
+            "goals": 1,
+            "shots": 10,
+            "assists": 5
+          },
           "private": false,
           "games": [
             1,
             2,
             3
           ],
-          "tag": "GoodName.mp4",
-          "alum": true,
-          "name": "Joseph Wisniewski",
           "id": "p-a7fe3ce9",
-          "stats": {
-            "goals": 1,
-            "saves": 0,
-            "shots": 10,
-            "assists": 5
+          "name": "Joseph Wisniewski",
+          "alum": true,
+          "tag": "GoodName.mp4"
+        }
+      ],
+      "seriesOnly": false,
+      "perGame": true,
+      "status": "final",
+      "gameName": "Rocket League",
+      "league": "MHSEL",
+      "event": "MHSEL Fall 2023",
+      "forfeit": null,
+      "updatedAt": "2026-10-05T19:59:41.580Z",
+      "teamName": "Rocket League Varsity",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "result": "W",
+      "clinched": "us",
+      "games": [
+        {
+          "us": 6,
+          "winner": "us",
+          "them": 2,
+          "n": 1,
+          "p": {
+            "p-a7fe3ce9": {
+              "assists": 1,
+              "saves": 0,
+              "goals": 0,
+              "shots": 2
+            },
+            "p-5310cd2b": {
+              "goals": 4,
+              "shots": 10,
+              "saves": 1,
+              "assists": 1
+            },
+            "p-88ef0aea": {
+              "assists": 1,
+              "shots": 6,
+              "goals": 2,
+              "saves": 0
+            }
+          }
+        },
+        {
+          "winner": "us",
+          "p": {
+            "p-a7fe3ce9": {
+              "assists": 4,
+              "saves": 0,
+              "shots": 4,
+              "goals": 0
+            },
+            "p-5310cd2b": {
+              "saves": 0,
+              "assists": 0,
+              "goals": 5,
+              "shots": 6
+            },
+            "p-88ef0aea": {
+              "goals": 3,
+              "shots": 5,
+              "assists": 1,
+              "saves": 1
+            }
+          },
+          "us": 8,
+          "them": 1,
+          "n": 2
+        },
+        {
+          "us": 3,
+          "n": 3,
+          "them": 2,
+          "winner": "us",
+          "p": {
+            "p-88ef0aea": {
+              "assists": 1,
+              "shots": 6,
+              "goals": 2,
+              "saves": 1
+            },
+            "p-5310cd2b": {
+              "shots": 2,
+              "goals": 0,
+              "saves": 1,
+              "assists": 2
+            },
+            "p-a7fe3ce9": {
+              "assists": 0,
+              "saves": 0,
+              "shots": 4,
+              "goals": 1
+            }
           }
         }
       ],
-      "notes": "",
-      "event": "MHSEL Fall 2023",
       "score": {
         "us": 3,
         "them": 0
       },
       "startsAt": "2023-10-05T20:00:00.000Z",
-      "games": [
-        {
-          "winner": "us",
-          "p": {
-            "p-a7fe3ce9": {
-              "assists": 1,
-              "shots": 2,
-              "saves": 0,
-              "goals": 0
-            },
-            "p-88ef0aea": {
-              "goals": 2,
-              "saves": 0,
-              "shots": 6,
-              "assists": 1
-            },
-            "p-5310cd2b": {
-              "saves": 1,
-              "goals": 4,
-              "assists": 1,
-              "shots": 10
-            }
-          },
-          "us": 6,
-          "them": 2,
-          "n": 1
-        },
-        {
-          "n": 2,
-          "them": 1,
-          "p": {
-            "p-88ef0aea": {
-              "assists": 1,
-              "saves": 1,
-              "goals": 3,
-              "shots": 5
-            },
-            "p-5310cd2b": {
-              "assists": 0,
-              "saves": 0,
-              "goals": 5,
-              "shots": 6
-            },
-            "p-a7fe3ce9": {
-              "goals": 0,
-              "saves": 0,
-              "shots": 4,
-              "assists": 4
-            }
-          },
-          "us": 8,
-          "winner": "us"
-        },
-        {
-          "p": {
-            "p-a7fe3ce9": {
-              "assists": 0,
-              "shots": 4,
-              "saves": 0,
-              "goals": 1
-            },
-            "p-88ef0aea": {
-              "shots": 6,
-              "goals": 2,
-              "saves": 1,
-              "assists": 1
-            },
-            "p-5310cd2b": {
-              "assists": 2,
-              "shots": 2,
-              "goals": 0,
-              "saves": 1
-            }
-          },
-          "them": 2,
-          "us": 3,
-          "n": 3,
-          "winner": "us"
-        }
-      ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "status": "final",
+      "teamId": "t5",
+      "current": 3,
       "opponent": {
+        "school": "Grandville High School",
         "logo": "",
         "abbr": "GRA",
-        "school": "Grandville High School",
-        "short": "",
-        "team": "Grandville High School"
+        "team": "Grandville High School",
+        "short": ""
       },
-      "forfeit": null,
-      "current": 3,
-      "game": "rocket-league",
-      "teamId": "t5",
-      "seriesOnly": false,
-      "updatedAt": "2026-10-05T19:59:41.580Z",
+      "season": "2023-24",
+      "stage": "regular",
       "week": "2",
-      "gameName": "Rocket League",
+      "game": "rocket-league",
       "source": {},
-      "bestOf": 5
+      "term": "fall"
     },
     {
       "id": "b89q52rFBiWj0OOCx6eE",
-      "week": "3",
       "games": [
         {
-          "winner": "us",
+          "them": 0,
+          "us": 7,
           "n": 1,
           "p": {
-            "p-88ef0aea": {
-              "goals": 2,
-              "saves": 2,
-              "shots": 8,
-              "assists": 1
-            },
             "p-5310cd2b": {
-              "goals": 4,
               "saves": 0,
+              "goals": 4,
               "shots": 8,
               "assists": 1
             },
             "p-a1be1608": {
-              "shots": 3,
-              "goals": 1,
               "saves": 4,
+              "goals": 1,
+              "shots": 3,
               "assists": 2
+            },
+            "p-88ef0aea": {
+              "assists": 1,
+              "saves": 2,
+              "shots": 8,
+              "goals": 2
             }
           },
-          "us": 7,
-          "them": 0
+          "winner": "us"
         },
         {
-          "us": 6,
+          "n": 2,
+          "winner": "us",
+          "them": 0,
           "p": {
-            "p-88ef0aea": {
-              "assists": 3,
-              "shots": 7,
-              "saves": 0,
-              "goals": 2
-            },
             "p-5310cd2b": {
-              "saves": 2,
               "assists": 2,
+              "saves": 2,
               "goals": 3,
               "shots": 12
             },
             "p-a1be1608": {
-              "saves": 0,
-              "goals": 1,
               "shots": 1,
-              "assists": 0
-            }
-          },
-          "them": 0,
-          "winner": "us",
-          "n": 2
-        },
-        {
-          "them": 1,
-          "winner": "us",
-          "p": {
-            "p-5310cd2b": {
-              "shots": 5,
-              "goals": 2,
-              "saves": 1,
-              "assists": 1
-            },
-            "p-a1be1608": {
               "goals": 1,
-              "shots": 4
+              "assists": 0,
+              "saves": 0
             },
             "p-88ef0aea": {
-              "assists": 2,
-              "goals": 1,
-              "shots": 3
-            }
-          },
-          "us": 4,
-          "n": 3
-        }
-      ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "status": "final",
-      "source": {},
-      "current": 3,
-      "forfeit": null,
-      "bestOf": 5,
-      "teamName": "Rocket League Varsity",
-      "clinched": "us",
-      "teamId": "t5",
-      "game": "rocket-league",
-      "term": "fall",
-      "players": [
-        {
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "alum": true,
-          "name": "Kyle Greig",
-          "tag": "Ksquiggly.RL",
-          "stats": {
-            "goals": 5,
-            "saves": 2,
-            "shots": 18,
-            "assists": 6
-          },
-          "id": "p-88ef0aea",
-          "private": false
-        },
-        {
-          "tag": "goodnics",
-          "id": "p-a1be1608",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "private": false,
-          "name": "Lincoln Deman",
-          "alum": true,
-          "stats": {
-            "shots": 8,
-            "assists": 2,
-            "saves": 4,
-            "goals": 3
-          }
-        },
-        {
-          "private": false,
-          "alum": true,
-          "stats": {},
-          "name": "Troy Beaudoin",
-          "tag": "Tyro.",
-          "games": [],
-          "id": "p-8a733446"
-        },
-        {
-          "name": "Christian Gatien",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "tag": "SsnowyGG",
-          "alum": true,
-          "id": "p-5310cd2b",
-          "private": false,
-          "stats": {
-            "assists": 4,
-            "shots": 25,
-            "saves": 3,
-            "goals": 9
-          }
-        },
-        {
-          "id": "p-a7fe3ce9",
-          "private": false,
-          "tag": "GoodName.mp4",
-          "stats": {},
-          "name": "Joseph Wisniewski",
-          "alum": true,
-          "games": []
-        }
-      ],
-      "stage": "regular",
-      "gameName": "Rocket League",
-      "season": "2023-24",
-      "level": "Varsity",
-      "league": "MHSEL",
-      "seriesOnly": false,
-      "event": "MHSEL Fall 2023",
-      "notes": "",
-      "result": "W",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "startsAt": "2023-10-12T20:00:00.000Z",
-      "updatedAt": "2026-10-05T20:11:18.482Z",
-      "perGame": true,
-      "opponent": {
-        "school": "North Branch High School",
-        "logo": "",
-        "team": "North Branch High School",
-        "abbr": "NB",
-        "short": ""
-      }
-    },
-    {
-      "id": "2RcaPpAUyFSu0FENEVj7",
-      "notes": "",
-      "event": "MHSEL Fall 2023",
-      "season": "2023-24",
-      "term": "fall",
-      "perGame": true,
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "league": "MHSEL",
-      "seriesOnly": false,
-      "players": [
-        {
-          "private": false,
-          "tag": "Ksquiggly.RL",
-          "name": "Kyle Greig",
-          "stats": {
-            "saves": 6,
-            "goals": 4,
-            "shots": 19,
-            "assists": 6
-          },
-          "alum": true,
-          "id": "p-88ef0aea",
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "stats": {},
-          "tag": "goodnics",
-          "id": "p-a1be1608",
-          "alum": true,
-          "name": "Lincoln Deman",
-          "games": [],
-          "private": false
-        },
-        {
-          "stats": {},
-          "name": "Troy Beaudoin",
-          "id": "p-8a733446",
-          "alum": true,
-          "tag": "Tyro.",
-          "games": [],
-          "private": false
-        },
-        {
-          "stats": {
-            "shots": 14,
-            "goals": 7,
-            "assists": 4,
-            "saves": 3
-          },
-          "private": false,
-          "alum": true,
-          "name": "Christian Gatien",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "id": "p-5310cd2b",
-          "tag": "SsnowyGG"
-        },
-        {
-          "tag": "GoodName.mp4",
-          "id": "p-a7fe3ce9",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "name": "Joseph Wisniewski",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 3,
-            "saves": 0,
-            "assists": 1,
-            "shots": 11
-          }
-        }
-      ],
-      "stage": "regular",
-      "teamName": "Rocket League Varsity",
-      "clinched": "us",
-      "level": "Varsity",
-      "result": "W",
-      "current": 3,
-      "forfeit": null,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "gameName": "Rocket League",
-      "status": "final",
-      "week": "4",
-      "source": {},
-      "games": [
-        {
-          "p": {
-            "p-5310cd2b": {
-              "saves": 2,
-              "goals": 5,
-              "assists": 1,
-              "shots": 8
-            },
-            "p-88ef0aea": {
-              "assists": 3,
-              "goals": 1,
-              "saves": 3,
-              "shots": 4
-            },
-            "p-a7fe3ce9": {
-              "shots": 4,
-              "assists": 1,
-              "saves": 0,
-              "goals": 0
-            }
-          },
-          "us": 6,
-          "winner": "us",
-          "n": 1,
-          "them": 2
-        },
-        {
-          "winner": "us",
-          "them": 1,
-          "p": {
-            "p-a7fe3ce9": {
-              "shots": 2,
-              "saves": 0,
-              "goals": 1,
-              "assists": 0
-            },
-            "p-88ef0aea": {
-              "assists": 3,
               "shots": 7,
-              "goals": 3,
-              "saves": 3
-            },
-            "p-5310cd2b": {
-              "assists": 2,
-              "saves": 0,
               "goals": 2,
-              "shots": 3
+              "assists": 3,
+              "saves": 0
             }
           },
-          "n": 2,
           "us": 6
         },
         {
           "them": 1,
-          "us": 2,
+          "n": 3,
           "p": {
-            "p-a7fe3ce9": {
-              "assists": 0,
-              "shots": 5,
-              "saves": 0,
-              "goals": 2
-            },
             "p-88ef0aea": {
-              "assists": 0,
-              "shots": 8,
-              "saves": 0,
-              "goals": 0
+              "assists": 2,
+              "shots": 3,
+              "goals": 1
             },
-            "p-5310cd2b": {
-              "assists": 1,
-              "goals": 0,
-              "saves": 1,
-              "shots": 3
-            }
-          },
-          "n": 3,
-          "winner": "us"
-        }
-      ],
-      "game": "rocket-league",
-      "bestOf": 5,
-      "startsAt": "2023-10-19T20:00:00.000Z",
-      "teamId": "t5",
-      "updatedAt": "2026-10-05T20:13:04.463Z",
-      "opponent": {
-        "logo": "",
-        "team": "Rockford High School",
-        "school": "Rockford High School",
-        "abbr": "ROC",
-        "short": ""
-      }
-    },
-    {
-      "id": "jAC7zYjwALdcPxj2Z3EQ",
-      "stage": "regular",
-      "season": "2023-24",
-      "league": "MHSEL",
-      "level": "Varsity",
-      "teamName": "Rocket League Varsity",
-      "result": "W",
-      "clinched": "us",
-      "seriesOnly": false,
-      "notes": "",
-      "event": "MHSEL Fall 2023",
-      "term": "fall",
-      "score": {
-        "them": 2,
-        "us": 3
-      },
-      "current": 5,
-      "forfeit": null,
-      "updatedAt": "2026-10-05T20:15:58.116Z",
-      "games": [
-        {
-          "them": 4,
-          "p": {
-            "p-5310cd2b": {
-              "shots": 4,
-              "saves": 1,
+            "p-a1be1608": {
               "goals": 1,
-              "assists": 1
-            },
-            "p-a1be1608": {
-              "goals": 0,
-              "saves": 1,
-              "shots": 0,
-              "assists": 0
-            }
-          },
-          "n": 1,
-          "us": 1,
-          "winner": "them"
-        },
-        {
-          "us": 2,
-          "p": {
-            "p-a1be1608": {
-              "assists": 0,
-              "shots": 5,
-              "saves": 0,
-              "goals": 2
+              "shots": 4
             },
             "p-5310cd2b": {
-              "saves": 0,
-              "goals": 0,
-              "shots": 4,
-              "assists": 2
-            }
-          },
-          "winner": "us",
-          "them": 1,
-          "n": 2
-        },
-        {
-          "winner": "us",
-          "n": 3,
-          "them": 1,
-          "p": {
-            "p-5310cd2b": {
-              "goals": 1,
-              "saves": 3,
-              "shots": 4,
-              "assists": 2
-            },
-            "p-a1be1608": {
-              "assists": 0,
-              "shots": 5,
-              "saves": 6,
-              "goals": 4
-            }
-          },
-          "us": 5
-        },
-        {
-          "n": 4,
-          "winner": "them",
-          "p": {
-            "p-5310cd2b": {
-              "shots": 2,
-              "saves": 1,
-              "goals": 0,
-              "assists": 0
-            },
-            "p-a1be1608": {
-              "goals": 0,
-              "saves": 2,
-              "assists": 1,
-              "shots": 2
-            }
-          },
-          "them": 2,
-          "us": 0
-        },
-        {
-          "us": 3,
-          "p": {
-            "p-5310cd2b": {
-              "shots": 5,
-              "saves": 2,
               "goals": 2,
-              "assists": 2
-            },
-            "p-a1be1608": {
-              "saves": 1,
+              "shots": 5,
               "assists": 1,
-              "goals": 1,
-              "shots": 2
+              "saves": 1
             }
           },
           "winner": "us",
-          "them": 0,
-          "n": 5
+          "us": 4
         }
       ],
-      "status": "final",
+      "teamId": "t5",
+      "current": 3,
+      "result": "W",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "stage": "regular",
+      "gameName": "Rocket League",
+      "source": {},
+      "season": "2023-24",
+      "teamName": "Rocket League Varsity",
+      "clinched": "us",
+      "notes": "",
+      "level": "Varsity",
+      "bestOf": 5,
+      "seriesOnly": false,
+      "startsAt": "2023-10-12T20:00:00.000Z",
+      "forfeit": null,
+      "week": "3",
+      "event": "MHSEL Fall 2023",
+      "opponent": {
+        "school": "North Branch High School",
+        "logo": "",
+        "abbr": "NB",
+        "team": "North Branch High School",
+        "short": ""
+      },
+      "game": "rocket-league",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "game": "rocket-league",
+      "term": "fall",
+      "perGame": true,
+      "league": "MHSEL",
+      "updatedAt": "2026-10-05T20:11:18.482Z",
+      "status": "final",
       "players": [
         {
-          "games": [],
           "alum": true,
-          "private": false,
-          "name": "Kyle Greig",
-          "stats": {},
-          "id": "p-88ef0aea",
-          "tag": "Ksquiggly.RL"
-        },
-        {
-          "private": false,
-          "id": "p-a1be1608",
-          "tag": "goodnics",
           "stats": {
-            "shots": 14,
-            "goals": 7,
-            "saves": 10,
-            "assists": 2
+            "saves": 2,
+            "assists": 6,
+            "shots": 18,
+            "goals": 5
           },
-          "name": "Lincoln Deman",
-          "alum": true,
+          "id": "p-88ef0aea",
           "games": [
             1,
             2,
-            3,
-            4,
-            5
-          ]
+            3
+          ],
+          "tag": "Ksquiggly.RL",
+          "private": false,
+          "name": "Kyle Greig"
         },
         {
-          "tag": "Tyro.",
+          "name": "Lincoln Deman",
+          "tag": "goodnics",
+          "id": "p-a1be1608",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "stats": {
+            "shots": 8,
+            "goals": 3,
+            "assists": 2,
+            "saves": 4
+          },
+          "private": false,
+          "alum": true
+        },
+        {
+          "stats": {},
           "games": [],
           "name": "Troy Beaudoin",
+          "tag": "Tyro.",
           "alum": true,
           "private": false,
-          "id": "p-8a733446",
-          "stats": {}
+          "id": "p-8a733446"
         },
         {
           "games": [
             1,
             2,
-            3,
-            4,
-            5
+            3
           ],
-          "id": "p-5310cd2b",
           "name": "Christian Gatien",
-          "alum": true,
-          "stats": {
-            "goals": 4,
-            "saves": 7,
-            "shots": 19,
-            "assists": 7
-          },
           "tag": "SsnowyGG",
-          "private": false
+          "stats": {
+            "shots": 25,
+            "goals": 9,
+            "assists": 4,
+            "saves": 3
+          },
+          "private": false,
+          "id": "p-5310cd2b",
+          "alum": true
         },
         {
           "stats": {},
+          "games": [],
           "private": false,
-          "id": "p-a7fe3ce9",
           "name": "Joseph Wisniewski",
-          "alum": true,
           "tag": "GoodName.mp4",
-          "games": []
+          "alum": true,
+          "id": "p-a7fe3ce9"
         }
-      ],
-      "gameName": "Rocket League",
-      "teamId": "t5",
-      "perGame": true,
-      "week": "6",
-      "source": {},
-      "opponent": {
-        "short": "",
-        "abbr": "MAR",
-        "team": "Marquette Senior High School",
-        "logo": "",
-        "school": "Marquette Senior High School"
-      },
-      "startsAt": "2023-11-02T20:00:00.000Z",
-      "bestOf": 5
+      ]
     },
     {
-      "id": "flN7Q3gtoYOBvUjhQUXR",
-      "week": "7",
-      "updatedAt": "2026-10-05T20:21:01.147Z",
+      "id": "2RcaPpAUyFSu0FENEVj7",
+      "startsAt": "2023-10-19T20:00:00.000Z",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "forfeit": null,
+      "games": [
+        {
+          "p": {
+            "p-88ef0aea": {
+              "goals": 1,
+              "shots": 4,
+              "assists": 3,
+              "saves": 3
+            },
+            "p-5310cd2b": {
+              "assists": 1,
+              "shots": 8,
+              "goals": 5,
+              "saves": 2
+            },
+            "p-a7fe3ce9": {
+              "saves": 0,
+              "goals": 0,
+              "shots": 4,
+              "assists": 1
+            }
+          },
+          "n": 1,
+          "winner": "us",
+          "them": 2,
+          "us": 6
+        },
+        {
+          "p": {
+            "p-88ef0aea": {
+              "saves": 3,
+              "assists": 3,
+              "goals": 3,
+              "shots": 7
+            },
+            "p-a7fe3ce9": {
+              "saves": 0,
+              "assists": 0,
+              "goals": 1,
+              "shots": 2
+            },
+            "p-5310cd2b": {
+              "assists": 2,
+              "saves": 0,
+              "shots": 3,
+              "goals": 2
+            }
+          },
+          "winner": "us",
+          "n": 2,
+          "them": 1,
+          "us": 6
+        },
+        {
+          "us": 2,
+          "n": 3,
+          "p": {
+            "p-88ef0aea": {
+              "saves": 0,
+              "goals": 0,
+              "shots": 8,
+              "assists": 0
+            },
+            "p-a7fe3ce9": {
+              "shots": 5,
+              "goals": 2,
+              "assists": 0,
+              "saves": 0
+            },
+            "p-5310cd2b": {
+              "saves": 1,
+              "assists": 1,
+              "goals": 0,
+              "shots": 3
+            }
+          },
+          "them": 1,
+          "winner": "us"
+        }
+      ],
+      "clinched": "us",
+      "bestOf": 5,
       "stream": {
         "live": "",
         "vod": ""
       },
-      "status": "final",
-      "clinched": "them",
-      "teamId": "t5",
-      "teamName": "Rocket League Varsity",
-      "forfeit": null,
-      "current": 5,
-      "bestOf": 5,
-      "games": [
-        {
-          "winner": "us",
-          "us": 1,
-          "n": 1,
-          "them": 0,
-          "p": {
-            "p-5310cd2b": {
-              "shots": 2,
-              "assists": 0,
-              "saves": 2,
-              "goals": 1
-            },
-            "p-a1be1608": {
-              "goals": 0,
-              "saves": 1,
-              "assists": 0,
-              "shots": 2
-            },
-            "p-88ef0aea": {
-              "shots": 1,
-              "saves": 2,
-              "goals": 0,
-              "assists": 0
-            }
-          }
-        },
-        {
-          "winner": "them",
-          "n": 2,
-          "p": {
-            "p-5310cd2b": {
-              "assists": 1,
-              "goals": 0,
-              "saves": 1,
-              "shots": 3
-            },
-            "p-a1be1608": {
-              "assists": 0,
-              "goals": 0,
-              "saves": 2,
-              "shots": 2
-            },
-            "p-88ef0aea": {
-              "goals": 1,
-              "saves": 4,
-              "shots": 4,
-              "assists": 0
-            }
-          },
-          "us": 1,
-          "them": 2
-        },
-        {
-          "us": 1,
-          "n": 3,
-          "winner": "them",
-          "them": 2,
-          "p": {
-            "p-5310cd2b": {
-              "saves": 3,
-              "goals": 1,
-              "assists": 0,
-              "shots": 3
-            },
-            "p-a1be1608": {
-              "assists": 0,
-              "saves": 1,
-              "goals": 0,
-              "shots": 1
-            },
-            "p-88ef0aea": {
-              "assists": 1,
-              "shots": 3,
-              "saves": 1,
-              "goals": 0
-            }
-          }
-        },
-        {
-          "us": 4,
-          "p": {
-            "p-88ef0aea": {
-              "assists": 1,
-              "goals": 3,
-              "saves": 0,
-              "shots": 6
-            },
-            "p-5310cd2b": {
-              "saves": 2,
-              "goals": 1,
-              "assists": 1,
-              "shots": 4
-            },
-            "p-a1be1608": {
-              "assists": 2,
-              "shots": 1,
-              "saves": 1,
-              "goals": 0
-            }
-          },
-          "n": 4,
-          "them": 3,
-          "winner": "us"
-        },
-        {
-          "n": 5,
-          "winner": "them",
-          "them": 2,
-          "p": {
-            "p-88ef0aea": {
-              "assists": 0,
-              "shots": 2,
-              "saves": 0,
-              "goals": 0
-            },
-            "p-5310cd2b": {
-              "assists": 0,
-              "shots": 1,
-              "saves": 1,
-              "goals": 0
-            },
-            "p-a1be1608": {
-              "shots": 1,
-              "saves": 1,
-              "goals": 0,
-              "assists": 0
-            }
-          },
-          "us": 0
-        }
-      ],
-      "source": {},
-      "game": "rocket-league",
-      "score": {
-        "us": 2,
-        "them": 3
-      },
-      "term": "fall",
-      "league": "MHSEL",
-      "season": "2023-24",
+      "perGame": true,
       "players": [
         {
-          "stats": {
-            "goals": 4,
-            "assists": 2,
-            "saves": 7,
-            "shots": 16
-          },
-          "alum": true,
-          "name": "Kyle Greig",
           "private": false,
+          "id": "p-88ef0aea",
+          "alum": true,
+          "stats": {
+            "saves": 6,
+            "assists": 6,
+            "goals": 4,
+            "shots": 19
+          },
           "games": [
             1,
             2,
-            3,
-            4,
-            5
+            3
           ],
-          "tag": "Ksquiggly.RL",
-          "id": "p-88ef0aea"
+          "name": "Kyle Greig",
+          "tag": "Ksquiggly.RL"
         },
         {
-          "alum": true,
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
+          "stats": {},
+          "games": [],
           "name": "Lincoln Deman",
           "tag": "goodnics",
-          "stats": {
-            "goals": 0,
-            "saves": 6,
-            "assists": 2,
-            "shots": 7
-          },
-          "id": "p-a1be1608",
-          "private": false
+          "alum": true,
+          "private": false,
+          "id": "p-a1be1608"
         },
         {
-          "private": false,
-          "stats": {},
-          "tag": "Tyro.",
           "alum": true,
+          "private": false,
           "id": "p-8a733446",
+          "tag": "Tyro.",
           "name": "Troy Beaudoin",
+          "stats": {},
           "games": []
         },
         {
           "tag": "SsnowyGG",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "id": "p-5310cd2b",
+          "alum": true,
           "name": "Christian Gatien",
-          "alum": true,
-          "private": false,
-          "stats": {
-            "assists": 2,
-            "shots": 13,
-            "goals": 3,
-            "saves": 9
-          }
-        },
-        {
-          "games": [],
-          "tag": "GoodName.mp4",
-          "id": "p-a7fe3ce9",
-          "alum": true,
-          "name": "Joseph Wisniewski",
-          "private": false,
-          "stats": {}
-        }
-      ],
-      "gameName": "Rocket League",
-      "event": "MHSEL Fall 2023",
-      "notes": "",
-      "result": "L",
-      "level": "Varsity",
-      "startsAt": "2023-11-09T21:00:00.000Z",
-      "perGame": true,
-      "stage": "regular",
-      "opponent": {
-        "short": "",
-        "team": "Detroit Catholic Central",
-        "abbr": "DCC",
-        "logo": "",
-        "school": "Detroit Catholic Central"
-      },
-      "seriesOnly": false
-    },
-    {
-      "id": "G71uwjLw4HJnYuvRcJ5X",
-      "players": [
-        {
-          "tag": "Ksquiggly.RL",
-          "id": "p-88ef0aea",
-          "stats": {},
-          "name": "Kyle Greig",
-          "alum": true,
-          "private": false,
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "private": false,
-          "stats": {},
-          "id": "p-a1be1608",
-          "alum": true,
-          "name": "Lincoln Deman",
-          "tag": "goodnics",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "private": false,
-          "stats": {},
           "id": "p-5310cd2b",
-          "alum": true,
           "games": [
             1,
             2,
-            3,
-            4,
-            5
+            3
           ],
-          "name": "Christian Gatien",
-          "tag": "SsnowyGG"
-        },
-        {
-          "stats": {},
-          "alum": true,
-          "name": "Joseph Wisniewski",
           "private": false,
-          "games": [],
-          "id": "p-a7fe3ce9",
-          "tag": "GoodName.mp4"
-        }
-      ],
-      "teamName": "Rocket League Varsity",
-      "term": "fall",
-      "clinched": "them",
-      "result": "L",
-      "games": [
-        {
-          "n": 1,
-          "us": 1,
-          "them": 7,
-          "winner": "them"
-        },
-        {
-          "winner": "them",
-          "them": 6,
-          "n": 2,
-          "us": 0
-        },
-        {
-          "us": 0,
-          "winner": "them",
-          "them": 3,
-          "n": 3
-        }
-      ],
-      "season": "2023-24",
-      "perGame": false,
-      "league": "MHSEL",
-      "source": {},
-      "notes": "",
-      "event": "MHSEL Fall 2023",
-      "bestOf": 5,
-      "week": "8",
-      "teamId": "t5",
-      "startsAt": "2023-11-16T21:00:00.000Z",
-      "seriesOnly": false,
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "opponent": {
-        "team": "Saline High School",
-        "abbr": "SAL",
-        "school": "Saline High School",
-        "short": "",
-        "logo": ""
-      },
-      "stage": "regular",
-      "forfeit": null,
-      "current": 3,
-      "updatedAt": "2026-10-05T20:22:50.917Z",
-      "game": "rocket-league",
-      "gameName": "Rocket League",
-      "status": "final",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "level": "Varsity"
-    },
-    {
-      "id": "gp0ZrpypmuOMLgu8FNbw",
-      "seriesOnly": false,
-      "games": [
-        {
-          "n": 1,
-          "us": 8,
-          "them": 1,
-          "winner": "us"
-        },
-        {
-          "us": 8,
-          "them": 1,
-          "winner": "us",
-          "n": 2
-        },
-        {
-          "us": 3,
-          "n": 3,
-          "them": 1,
-          "winner": "us"
-        },
-        {
-          "n": 4,
-          "winner": "us",
-          "them": 3,
-          "us": 5
-        }
-      ],
-      "perGame": false,
-      "status": "final",
-      "teamName": "Rocket League Varsity",
-      "stream": {
-        "live": "https://youtu.be/PL9CjheFQ0w",
-        "vod": ""
-      },
-      "clinched": "us",
-      "source": {},
-      "updatedAt": "2026-10-05T20:24:51.909Z",
-      "term": "fall",
-      "bestOf": 7,
-      "teamId": "t5",
-      "players": [
-        {
-          "id": "p-88ef0aea",
-          "tag": "Ksquiggly.RL",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "name": "Kyle Greig",
-          "private": false,
-          "alum": true,
           "stats": {
-            "assists": 0,
-            "saves": 0,
-            "goals": 4,
-            "shots": 8
-          }
-        },
-        {
-          "id": "p-a1be1608",
-          "name": "Lincoln Deman",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 2,
             "saves": 3,
-            "assists": 0,
-            "shots": 4
-          },
-          "tag": "goodnics",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "private": false,
-          "alum": true,
-          "name": "Christian Gatien",
-          "stats": {
-            "goals": 2,
-            "saves": 1,
-            "shots": 7,
-            "assists": 6
-          },
-          "tag": "SsnowyGG",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "id": "p-5310cd2b"
-        },
-        {
-          "id": "p-a7fe3ce9",
-          "name": "Joseph Wisniewski",
-          "games": [],
-          "alum": true,
-          "tag": "GoodName.mp4",
-          "private": false,
-          "stats": {}
-        }
-      ],
-      "stage": "playoffs",
-      "opponent": {
-        "school": "Belleville High School",
-        "team": "Belleville High School",
-        "abbr": "BEL",
-        "logo": "",
-        "short": ""
-      },
-      "startsAt": "2023-11-27T21:00:00.000Z",
-      "forfeit": null,
-      "current": 4,
-      "game": "rocket-league",
-      "season": "2023-24",
-      "league": "MHSEL",
-      "level": "Varsity",
-      "week": "Round of 32",
-      "event": "MHSEL Fall 2023",
-      "gameName": "Rocket League",
-      "notes": "",
-      "result": "W",
-      "score": {
-        "them": 0,
-        "us": 4
-      }
-    },
-    {
-      "id": "sqqvvdTXH8Lm6CYOIGc2",
-      "stage": "playoffs",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "status": "final",
-      "teamName": "Rocket League Varsity",
-      "clinched": "us",
-      "players": [
-        {
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "name": "Kyle Greig",
-          "tag": "Ksquiggly.RL",
-          "alum": true,
-          "private": false,
-          "id": "p-88ef0aea",
-          "stats": {
-            "goals": 4,
-            "saves": 8,
-            "shots": 11,
+            "shots": 14,
+            "goals": 7,
             "assists": 4
           }
         },
         {
-          "name": "Lincoln Deman",
-          "tag": "goodnics",
+          "alum": true,
+          "private": false,
+          "tag": "GoodName.mp4",
+          "id": "p-a7fe3ce9",
+          "name": "Joseph Wisniewski",
           "stats": {
-            "assists": 3,
-            "shots": 17,
-            "goals": 9,
-            "saves": 2
+            "goals": 3,
+            "shots": 11,
+            "assists": 1,
+            "saves": 0
           },
+          "games": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "opponent": {
+        "school": "Rockford High School",
+        "logo": "",
+        "abbr": "ROC",
+        "short": "",
+        "team": "Rockford High School"
+      },
+      "term": "fall",
+      "game": "rocket-league",
+      "stage": "regular",
+      "status": "final",
+      "week": "4",
+      "league": "MHSEL",
+      "seriesOnly": false,
+      "teamId": "t5",
+      "level": "Varsity",
+      "notes": "",
+      "result": "W",
+      "current": 3,
+      "source": {},
+      "teamName": "Rocket League Varsity",
+      "updatedAt": "2026-10-05T20:13:04.463Z",
+      "season": "2023-24",
+      "gameName": "Rocket League",
+      "event": "MHSEL Fall 2023"
+    },
+    {
+      "id": "jAC7zYjwALdcPxj2Z3EQ",
+      "source": {},
+      "opponent": {
+        "short": "",
+        "team": "Marquette Senior High School",
+        "abbr": "MAR",
+        "school": "Marquette Senior High School",
+        "logo": ""
+      },
+      "level": "Varsity",
+      "season": "2023-24",
+      "notes": "",
+      "clinched": "us",
+      "teamId": "t5",
+      "current": 5,
+      "seriesOnly": false,
+      "startsAt": "2023-11-02T20:00:00.000Z",
+      "result": "W",
+      "event": "MHSEL Fall 2023",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "gameName": "Rocket League",
+      "score": {
+        "us": 3,
+        "them": 2
+      },
+      "game": "rocket-league",
+      "perGame": true,
+      "term": "fall",
+      "week": "6",
+      "status": "final",
+      "games": [
+        {
+          "us": 1,
+          "winner": "them",
+          "them": 4,
+          "p": {
+            "p-a1be1608": {
+              "shots": 0,
+              "goals": 0,
+              "assists": 0,
+              "saves": 1
+            },
+            "p-5310cd2b": {
+              "goals": 1,
+              "shots": 4,
+              "saves": 1,
+              "assists": 1
+            }
+          },
+          "n": 1
+        },
+        {
+          "winner": "us",
+          "them": 1,
+          "us": 2,
+          "p": {
+            "p-5310cd2b": {
+              "shots": 4,
+              "goals": 0,
+              "assists": 2,
+              "saves": 0
+            },
+            "p-a1be1608": {
+              "assists": 0,
+              "goals": 2,
+              "shots": 5,
+              "saves": 0
+            }
+          },
+          "n": 2
+        },
+        {
+          "n": 3,
+          "us": 5,
+          "p": {
+            "p-5310cd2b": {
+              "assists": 2,
+              "shots": 4,
+              "goals": 1,
+              "saves": 3
+            },
+            "p-a1be1608": {
+              "saves": 6,
+              "assists": 0,
+              "goals": 4,
+              "shots": 5
+            }
+          },
+          "winner": "us",
+          "them": 1
+        },
+        {
+          "p": {
+            "p-a1be1608": {
+              "saves": 2,
+              "assists": 1,
+              "goals": 0,
+              "shots": 2
+            },
+            "p-5310cd2b": {
+              "shots": 2,
+              "goals": 0,
+              "assists": 0,
+              "saves": 1
+            }
+          },
+          "n": 4,
+          "us": 0,
+          "winner": "them",
+          "them": 2
+        },
+        {
+          "winner": "us",
+          "us": 3,
+          "them": 0,
+          "p": {
+            "p-a1be1608": {
+              "assists": 1,
+              "saves": 1,
+              "shots": 2,
+              "goals": 1
+            },
+            "p-5310cd2b": {
+              "shots": 5,
+              "goals": 2,
+              "assists": 2,
+              "saves": 2
+            }
+          },
+          "n": 5
+        }
+      ],
+      "league": "MHSEL",
+      "players": [
+        {
+          "name": "Kyle Greig",
+          "id": "p-88ef0aea",
+          "tag": "Ksquiggly.RL",
+          "games": [],
+          "stats": {},
+          "private": false,
+          "alum": true
+        },
+        {
+          "tag": "goodnics",
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "stats": {
+            "goals": 7,
+            "shots": 14,
+            "saves": 10,
+            "assists": 2
+          },
+          "private": false,
+          "name": "Lincoln Deman",
+          "id": "p-a1be1608"
+        },
+        {
+          "games": [],
+          "name": "Troy Beaudoin",
+          "stats": {},
+          "tag": "Tyro.",
+          "private": false,
+          "id": "p-8a733446",
+          "alum": true
+        },
+        {
+          "tag": "SsnowyGG",
+          "private": false,
+          "alum": true,
+          "name": "Christian Gatien",
+          "id": "p-5310cd2b",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "stats": {
+            "assists": 7,
+            "saves": 7,
+            "goals": 4,
+            "shots": 19
+          }
+        },
+        {
+          "games": [],
+          "id": "p-a7fe3ce9",
+          "tag": "GoodName.mp4",
+          "stats": {},
+          "alum": true,
+          "name": "Joseph Wisniewski",
+          "private": false
+        }
+      ],
+      "teamName": "Rocket League Varsity",
+      "updatedAt": "2026-10-05T20:15:58.116Z",
+      "stage": "regular",
+      "forfeit": null,
+      "bestOf": 5
+    },
+    {
+      "id": "flN7Q3gtoYOBvUjhQUXR",
+      "players": [
+        {
+          "alum": true,
+          "stats": {
+            "assists": 2,
+            "goals": 4,
+            "shots": 16,
+            "saves": 7
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "tag": "Ksquiggly.RL",
+          "name": "Kyle Greig",
+          "private": false,
+          "id": "p-88ef0aea"
+        },
+        {
+          "private": false,
+          "stats": {
+            "saves": 6,
+            "assists": 2,
+            "shots": 7,
+            "goals": 0
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "id": "p-a1be1608",
+          "name": "Lincoln Deman",
+          "alum": true,
+          "tag": "goodnics"
+        },
+        {
+          "alum": true,
+          "id": "p-8a733446",
+          "stats": {},
+          "private": false,
+          "games": [],
+          "name": "Troy Beaudoin",
+          "tag": "Tyro."
+        },
+        {
+          "private": false,
+          "id": "p-5310cd2b",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "alum": true,
+          "tag": "SsnowyGG",
+          "stats": {
+            "goals": 3,
+            "shots": 13,
+            "saves": 9,
+            "assists": 2
+          },
+          "name": "Christian Gatien"
+        },
+        {
+          "id": "p-a7fe3ce9",
+          "private": false,
+          "name": "Joseph Wisniewski",
+          "stats": {},
+          "games": [],
+          "alum": true,
+          "tag": "GoodName.mp4"
+        }
+      ],
+      "status": "final",
+      "league": "MHSEL",
+      "perGame": true,
+      "clinched": "them",
+      "event": "MHSEL Fall 2023",
+      "updatedAt": "2026-10-05T20:21:01.147Z",
+      "startsAt": "2023-11-09T21:00:00.000Z",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "notes": "",
+      "forfeit": null,
+      "opponent": {
+        "abbr": "DCC",
+        "team": "Detroit Catholic Central",
+        "short": "",
+        "logo": "",
+        "school": "Detroit Catholic Central"
+      },
+      "bestOf": 5,
+      "level": "Varsity",
+      "week": "7",
+      "game": "rocket-league",
+      "term": "fall",
+      "seriesOnly": false,
+      "stage": "regular",
+      "season": "2023-24",
+      "source": {},
+      "result": "L",
+      "gameName": "Rocket League",
+      "games": [
+        {
+          "us": 1,
+          "them": 0,
+          "p": {
+            "p-5310cd2b": {
+              "saves": 2,
+              "assists": 0,
+              "goals": 1,
+              "shots": 2
+            },
+            "p-a1be1608": {
+              "saves": 1,
+              "assists": 0,
+              "shots": 2,
+              "goals": 0
+            },
+            "p-88ef0aea": {
+              "goals": 0,
+              "shots": 1,
+              "assists": 0,
+              "saves": 2
+            }
+          },
+          "n": 1,
+          "winner": "us"
+        },
+        {
+          "winner": "them",
+          "them": 2,
+          "n": 2,
+          "us": 1,
+          "p": {
+            "p-a1be1608": {
+              "saves": 2,
+              "goals": 0,
+              "shots": 2,
+              "assists": 0
+            },
+            "p-5310cd2b": {
+              "assists": 1,
+              "saves": 1,
+              "shots": 3,
+              "goals": 0
+            },
+            "p-88ef0aea": {
+              "goals": 1,
+              "shots": 4,
+              "assists": 0,
+              "saves": 4
+            }
+          }
+        },
+        {
+          "p": {
+            "p-88ef0aea": {
+              "saves": 1,
+              "assists": 1,
+              "shots": 3,
+              "goals": 0
+            },
+            "p-5310cd2b": {
+              "goals": 1,
+              "shots": 3,
+              "saves": 3,
+              "assists": 0
+            },
+            "p-a1be1608": {
+              "goals": 0,
+              "shots": 1,
+              "saves": 1,
+              "assists": 0
+            }
+          },
+          "winner": "them",
+          "n": 3,
+          "us": 1,
+          "them": 2
+        },
+        {
+          "them": 3,
+          "us": 4,
+          "winner": "us",
+          "p": {
+            "p-5310cd2b": {
+              "shots": 4,
+              "goals": 1,
+              "assists": 1,
+              "saves": 2
+            },
+            "p-a1be1608": {
+              "shots": 1,
+              "goals": 0,
+              "saves": 1,
+              "assists": 2
+            },
+            "p-88ef0aea": {
+              "assists": 1,
+              "saves": 0,
+              "shots": 6,
+              "goals": 3
+            }
+          },
+          "n": 4
+        },
+        {
+          "n": 5,
+          "p": {
+            "p-a1be1608": {
+              "shots": 1,
+              "goals": 0,
+              "assists": 0,
+              "saves": 1
+            },
+            "p-5310cd2b": {
+              "saves": 1,
+              "assists": 0,
+              "goals": 0,
+              "shots": 1
+            },
+            "p-88ef0aea": {
+              "saves": 0,
+              "shots": 2,
+              "goals": 0,
+              "assists": 0
+            }
+          },
+          "winner": "them",
+          "them": 2,
+          "us": 0
+        }
+      ],
+      "teamName": "Rocket League Varsity",
+      "current": 5,
+      "score": {
+        "them": 3,
+        "us": 2
+      },
+      "teamId": "t5"
+    },
+    {
+      "id": "G71uwjLw4HJnYuvRcJ5X",
+      "perGame": false,
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "teamName": "Rocket League Varsity",
+      "players": [
+        {
+          "id": "p-88ef0aea",
+          "name": "Kyle Greig",
+          "tag": "Ksquiggly.RL",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "private": false,
+          "stats": {},
+          "alum": true
+        },
+        {
+          "stats": {},
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "name": "Lincoln Deman",
           "alum": true,
           "id": "p-a1be1608",
+          "tag": "goodnics"
+        },
+        {
+          "tag": "SsnowyGG",
+          "id": "p-5310cd2b",
+          "alum": true,
           "private": false,
+          "name": "Christian Gatien",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "stats": {}
+        },
+        {
+          "alum": true,
+          "id": "p-a7fe3ce9",
+          "tag": "GoodName.mp4",
+          "stats": {},
+          "name": "Joseph Wisniewski",
+          "games": [],
+          "private": false
+        }
+      ],
+      "updatedAt": "2026-10-05T20:22:50.917Z",
+      "notes": "",
+      "league": "MHSEL",
+      "status": "final",
+      "gameName": "Rocket League",
+      "level": "Varsity",
+      "forfeit": null,
+      "event": "MHSEL Fall 2023",
+      "bestOf": 5,
+      "week": "8",
+      "source": {},
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "game": "rocket-league",
+      "term": "fall",
+      "opponent": {
+        "school": "Saline High School",
+        "logo": "",
+        "team": "Saline High School",
+        "short": "",
+        "abbr": "SAL"
+      },
+      "season": "2023-24",
+      "games": [
+        {
+          "n": 1,
+          "us": 1,
+          "winner": "them",
+          "them": 7
+        },
+        {
+          "winner": "them",
+          "n": 2,
+          "them": 6,
+          "us": 0
+        },
+        {
+          "n": 3,
+          "them": 3,
+          "us": 0,
+          "winner": "them"
+        }
+      ],
+      "startsAt": "2023-11-16T21:00:00.000Z",
+      "teamId": "t5",
+      "seriesOnly": false,
+      "stage": "regular",
+      "result": "L",
+      "clinched": "them",
+      "current": 3
+    },
+    {
+      "id": "gp0ZrpypmuOMLgu8FNbw",
+      "opponent": {
+        "logo": "",
+        "school": "Belleville High School",
+        "abbr": "BEL",
+        "team": "Belleville High School",
+        "short": ""
+      },
+      "source": {},
+      "forfeit": null,
+      "seriesOnly": false,
+      "season": "2023-24",
+      "stage": "playoffs",
+      "teamId": "t5",
+      "perGame": false,
+      "score": {
+        "us": 4,
+        "them": 0
+      },
+      "clinched": "us",
+      "players": [
+        {
+          "name": "Kyle Greig",
+          "id": "p-88ef0aea",
+          "tag": "Ksquiggly.RL",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "stats": {
+            "shots": 8,
+            "goals": 4,
+            "saves": 0,
+            "assists": 0
+          },
+          "alum": true
+        },
+        {
+          "alum": true,
+          "private": false,
+          "tag": "goodnics",
+          "id": "p-a1be1608",
+          "stats": {
+            "goals": 2,
+            "shots": 4,
+            "saves": 3,
+            "assists": 0
+          },
+          "name": "Lincoln Deman",
           "games": [
             1,
             2,
@@ -1465,118 +1338,161 @@
             4,
             5
           ],
+          "tag": "SsnowyGG",
+          "alum": true,
+          "stats": {
+            "goals": 2,
+            "shots": 7,
+            "assists": 6,
+            "saves": 1
+          },
           "id": "p-5310cd2b",
           "name": "Christian Gatien",
-          "alum": true,
-          "tag": "SsnowyGG",
-          "stats": {
-            "saves": 4,
-            "goals": 7,
-            "assists": 7,
-            "shots": 18
-          },
           "private": false
         },
         {
-          "games": [],
           "alum": true,
-          "name": "Joseph Wisniewski",
-          "stats": {},
           "id": "p-a7fe3ce9",
+          "stats": {},
+          "games": [],
+          "tag": "GoodName.mp4",
           "private": false,
-          "tag": "GoodName.mp4"
+          "name": "Joseph Wisniewski"
         }
       ],
-      "level": "Varsity",
-      "teamId": "t5",
-      "term": "fall",
-      "seriesOnly": false,
-      "notes": "",
-      "event": "MHSEL Fall 2023",
-      "perGame": false,
-      "source": {},
-      "score": {
-        "them": 0,
-        "us": 4
-      },
-      "bestOf": 7,
+      "startsAt": "2023-11-27T21:00:00.000Z",
+      "updatedAt": "2026-10-05T20:24:51.909Z",
       "games": [
         {
           "n": 1,
-          "winner": "us",
-          "us": 5,
-          "them": 0
+          "them": 1,
+          "us": 8,
+          "winner": "us"
         },
         {
-          "us": 4,
-          "them": 2,
+          "us": 8,
           "winner": "us",
-          "n": 2
+          "n": 2,
+          "them": 1
         },
         {
           "n": 3,
           "winner": "us",
+          "them": 1,
+          "us": 3
+        },
+        {
+          "us": 5,
+          "n": 4,
+          "winner": "us",
+          "them": 3
+        }
+      ],
+      "result": "W",
+      "stream": {
+        "vod": "",
+        "live": "https://youtu.be/PL9CjheFQ0w"
+      },
+      "gameName": "Rocket League",
+      "event": "MHSEL Fall 2023",
+      "teamName": "Rocket League Varsity",
+      "league": "MHSEL",
+      "status": "final",
+      "current": 4,
+      "week": "Round of 32",
+      "term": "fall",
+      "game": "rocket-league",
+      "bestOf": 7,
+      "notes": "",
+      "level": "Varsity"
+    },
+    {
+      "id": "sqqvvdTXH8Lm6CYOIGc2",
+      "bestOf": 7,
+      "updatedAt": "2026-10-05T20:26:36.991Z",
+      "opponent": {
+        "abbr": "DAK",
+        "team": "Dakota High School",
+        "logo": "",
+        "short": "",
+        "school": "Dakota High School"
+      },
+      "stage": "playoffs",
+      "seriesOnly": false,
+      "status": "final",
+      "current": 4,
+      "clinched": "us",
+      "league": "MHSEL",
+      "games": [
+        {
+          "them": 0,
+          "winner": "us",
+          "us": 5,
+          "n": 1
+        },
+        {
+          "winner": "us",
+          "us": 4,
+          "n": 2,
+          "them": 2
+        },
+        {
+          "n": 3,
           "us": 6,
-          "them": 0
+          "them": 0,
+          "winner": "us"
         },
         {
           "them": 1,
-          "us": 5,
           "n": 4,
-          "winner": "us"
+          "winner": "us",
+          "us": 5
         }
       ],
-      "season": "2023-24",
-      "league": "MHSEL",
-      "startsAt": "2023-11-29T21:00:00.000Z",
-      "opponent": {
-        "short": "",
-        "school": "Dakota High School",
-        "logo": "",
-        "abbr": "DAK",
-        "team": "Dakota High School"
+      "week": "Round of 16",
+      "stream": {
+        "vod": "",
+        "live": ""
       },
       "game": "rocket-league",
+      "score": {
+        "them": 0,
+        "us": 4
+      },
+      "startsAt": "2023-11-29T21:00:00.000Z",
+      "term": "fall",
       "result": "W",
-      "week": "Round of 16",
-      "current": 4,
-      "forfeit": null,
-      "updatedAt": "2026-10-05T20:26:36.991Z",
-      "gameName": "Rocket League"
-    },
-    {
-      "id": "PdPmjhtDg8ejsvjfxxhB",
-      "perGame": true,
-      "updatedAt": "2026-10-05T20:33:43.869Z",
-      "week": "Quarterfinal",
-      "result": "W",
-      "clinched": "us",
-      "teamName": "Rocket League Varsity",
-      "game": "rocket-league",
-      "league": "MHSEL",
+      "gameName": "Rocket League",
+      "event": "MHSEL Fall 2023",
       "players": [
         {
+          "tag": "Ksquiggly.RL",
+          "alum": true,
           "games": [
             1,
             2,
             3,
             4,
-            5,
-            6
+            5
           ],
-          "private": false,
-          "alum": true,
-          "name": "Kyle Greig",
           "stats": {
-            "shots": 12,
-            "assists": 3,
-            "saves": 15,
-            "goals": 5
+            "assists": 4,
+            "goals": 4,
+            "shots": 11,
+            "saves": 8
           },
-          "tag": "Ksquiggly.RL",
+          "name": "Kyle Greig",
+          "private": false,
           "id": "p-88ef0aea"
         },
         {
+          "alum": true,
+          "stats": {
+            "assists": 3,
+            "saves": 2,
+            "goals": 9,
+            "shots": 17
+          },
           "private": false,
           "id": "p-a1be1608",
           "games": [
@@ -1584,312 +1500,104 @@
             2,
             3,
             4,
-            5,
-            6
+            5
           ],
-          "name": "Lincoln Deman",
-          "alum": true,
-          "stats": {
-            "goals": 5,
-            "saves": 9,
-            "assists": 4,
-            "shots": 12
-          },
-          "tag": "goodnics"
+          "tag": "goodnics",
+          "name": "Lincoln Deman"
         },
         {
-          "id": "p-5310cd2b",
+          "private": false,
+          "tag": "SsnowyGG",
           "games": [
             1,
             2,
             3,
             4,
-            5,
-            6
+            5
           ],
-          "name": "Christian Gatien",
-          "private": false,
+          "id": "p-5310cd2b",
           "alum": true,
-          "tag": "SsnowyGG",
           "stats": {
-            "shots": 22,
-            "assists": 6,
-            "saves": 7,
-            "goals": 9
-          }
+            "assists": 7,
+            "shots": 18,
+            "goals": 7,
+            "saves": 4
+          },
+          "name": "Christian Gatien"
         },
         {
-          "private": false,
-          "name": "Joseph Wisniewski",
-          "tag": "GoodName.mp4",
           "stats": {},
-          "alum": true,
           "id": "p-a7fe3ce9",
-          "games": []
+          "games": [],
+          "name": "Joseph Wisniewski",
+          "private": false,
+          "alum": true,
+          "tag": "GoodName.mp4"
         }
       ],
-      "season": "2023-24",
-      "games": [
-        {
-          "them": 5,
-          "us": 2,
-          "n": 1,
-          "winner": "them",
-          "p": {
-            "p-a1be1608": {
-              "goals": 0,
-              "saves": 0,
-              "shots": 1,
-              "assists": 0
-            },
-            "p-5310cd2b": {
-              "shots": 3,
-              "goals": 1,
-              "saves": 1,
-              "assists": 1
-            },
-            "p-88ef0aea": {
-              "goals": 1,
-              "saves": 4,
-              "shots": 1,
-              "assists": 0
-            }
-          }
-        },
-        {
-          "n": 2,
-          "winner": "us",
-          "p": {
-            "p-88ef0aea": {
-              "assists": 0,
-              "shots": 3,
-              "saves": 4,
-              "goals": 1
-            },
-            "p-5310cd2b": {
-              "shots": 1,
-              "saves": 4,
-              "goals": 0,
-              "assists": 0
-            },
-            "p-a1be1608": {
-              "shots": 3,
-              "saves": 0,
-              "goals": 2,
-              "assists": 1
-            }
-          },
-          "us": 3,
-          "them": 0
-        },
-        {
-          "us": 4,
-          "p": {
-            "p-88ef0aea": {
-              "saves": 2,
-              "goals": 0,
-              "shots": 1,
-              "assists": 0
-            },
-            "p-a1be1608": {
-              "assists": 1,
-              "shots": 2,
-              "goals": 1,
-              "saves": 2
-            },
-            "p-5310cd2b": {
-              "shots": 3,
-              "saves": 0,
-              "goals": 3,
-              "assists": 1
-            }
-          },
-          "them": 3,
-          "winner": "us",
-          "n": 3
-        },
-        {
-          "n": 4,
-          "winner": "them",
-          "them": 4,
-          "p": {
-            "p-88ef0aea": {
-              "shots": 2,
-              "goals": 1,
-              "saves": 0,
-              "assists": 1
-            },
-            "p-a1be1608": {
-              "goals": 1,
-              "saves": 3,
-              "shots": 2,
-              "assists": 1
-            },
-            "p-5310cd2b": {
-              "assists": 1,
-              "shots": 4,
-              "goals": 1,
-              "saves": 1
-            }
-          },
-          "us": 3
-        },
-        {
-          "p": {
-            "p-5310cd2b": {
-              "assists": 2,
-              "shots": 8,
-              "saves": 0,
-              "goals": 2
-            },
-            "p-a1be1608": {
-              "assists": 1,
-              "shots": 3,
-              "goals": 1,
-              "saves": 2
-            },
-            "p-88ef0aea": {
-              "goals": 1,
-              "saves": 1,
-              "shots": 1,
-              "assists": 0
-            }
-          },
-          "us": 4,
-          "n": 5,
-          "winner": "us",
-          "them": 1
-        },
-        {
-          "us": 3,
-          "n": 6,
-          "winner": "us",
-          "p": {
-            "p-5310cd2b": {
-              "goals": 2,
-              "saves": 1,
-              "shots": 3,
-              "assists": 1
-            },
-            "p-a1be1608": {
-              "saves": 2,
-              "goals": 0,
-              "shots": 1,
-              "assists": 0
-            },
-            "p-88ef0aea": {
-              "assists": 2,
-              "shots": 4,
-              "saves": 4,
-              "goals": 1
-            }
-          },
-          "them": 1
-        }
-      ],
-      "bestOf": 7,
-      "score": {
-        "us": 4,
-        "them": 2
-      },
-      "seriesOnly": false,
-      "source": {},
-      "forfeit": null,
-      "current": 6,
-      "notes": "",
-      "event": "MHSEL Fall 2023",
-      "term": "fall",
-      "gameName": "Rocket League",
+      "teamName": "Rocket League Varsity",
+      "perGame": false,
       "teamId": "t5",
+      "notes": "",
       "level": "Varsity",
+      "season": "2023-24",
+      "forfeit": null,
+      "source": {}
+    },
+    {
+      "id": "PdPmjhtDg8ejsvjfxxhB",
+      "game": "rocket-league",
+      "term": "fall",
+      "week": "Quarterfinal",
+      "league": "MHSEL",
+      "status": "final",
       "opponent": {
-        "short": "",
         "logo": "",
+        "school": "Divine Child High School",
         "abbr": "DC",
-        "team": "Divine Child High School",
-        "school": "Divine Child High School"
+        "short": "",
+        "team": "Divine Child High School"
       },
       "stream": {
         "vod": "",
         "live": "https://youtu.be/Trz7rZWNkTo"
       },
-      "status": "final",
-      "stage": "playoffs",
-      "startsAt": "2023-12-01T21:00:00.000Z"
-    },
-    {
-      "id": "QL52moN4rlOQ5UiFar42",
-      "clinched": "us",
-      "teamName": "Rocket League Varsity",
+      "event": "MHSEL Fall 2023",
       "forfeit": null,
-      "score": {
-        "us": 4,
-        "them": 1
-      },
-      "teamId": "t5",
-      "current": 5,
-      "event": "MHSEL Fall 2023 State Championships at Oakland University",
-      "notes": "",
+      "seriesOnly": false,
+      "clinched": "us",
       "bestOf": 7,
-      "week": "Semifinal",
-      "updatedAt": "2026-10-05T20:36:08.833Z",
-      "source": {},
-      "game": "rocket-league",
-      "level": "Varsity",
-      "status": "final",
-      "stream": {
-        "vod": "",
-        "live": "https://youtu.be/NBTij5eZnx4"
-      },
-      "seriesOnly": true,
-      "stage": "playoffs",
-      "result": "W",
-      "startsAt": "2023-12-09T15:00:00.000Z",
-      "perGame": false,
-      "term": "fall",
-      "opponent": {
-        "logo": "",
-        "abbr": "DCC",
-        "school": "Detroit Catholic Central",
-        "team": "Detroit Catholic Central",
-        "short": ""
-      },
-      "league": "MHSEL",
-      "season": "2023-24",
+      "updatedAt": "2026-10-05T20:33:43.869Z",
       "players": [
         {
-          "stats": {},
-          "name": "Kyle Greig",
-          "id": "p-88ef0aea",
           "alum": true,
+          "stats": {
+            "goals": 5,
+            "shots": 12,
+            "saves": 15,
+            "assists": 3
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
           "tag": "Ksquiggly.RL",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "private": false
+          "private": false,
+          "name": "Kyle Greig",
+          "id": "p-88ef0aea"
         },
         {
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "name": "Lincoln Deman",
-          "id": "p-a1be1608",
           "alum": true,
-          "tag": "goodnics",
-          "stats": {},
-          "private": false
-        },
-        {
+          "stats": {
+            "assists": 4,
+            "shots": 12,
+            "goals": 5,
+            "saves": 9
+          },
           "games": [
             1,
             2,
@@ -1898,48 +1606,334 @@
             5,
             6
           ],
+          "tag": "goodnics",
+          "id": "p-a1be1608",
+          "name": "Lincoln Deman",
+          "private": false
+        },
+        {
           "tag": "SsnowyGG",
           "private": false,
           "alum": true,
           "name": "Christian Gatien",
-          "stats": {},
-          "id": "p-5310cd2b"
+          "id": "p-5310cd2b",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "stats": {
+            "saves": 7,
+            "goals": 9,
+            "shots": 22,
+            "assists": 6
+          }
         },
         {
-          "stats": {},
-          "private": false,
-          "alum": true,
           "name": "Joseph Wisniewski",
+          "alum": true,
+          "stats": {},
+          "tag": "GoodName.mp4",
           "id": "p-a7fe3ce9",
           "games": [],
-          "tag": "GoodName.mp4"
+          "private": false
         }
       ],
+      "level": "Varsity",
+      "notes": "",
+      "startsAt": "2023-12-01T21:00:00.000Z",
+      "perGame": true,
       "gameName": "Rocket League",
+      "season": "2023-24",
+      "current": 6,
+      "stage": "playoffs",
+      "source": {},
+      "teamName": "Rocket League Varsity",
+      "score": {
+        "us": 4,
+        "them": 2
+      },
+      "result": "W",
+      "teamId": "t5",
+      "games": [
+        {
+          "p": {
+            "p-88ef0aea": {
+              "goals": 1,
+              "shots": 1,
+              "assists": 0,
+              "saves": 4
+            },
+            "p-5310cd2b": {
+              "saves": 1,
+              "assists": 1,
+              "goals": 1,
+              "shots": 3
+            },
+            "p-a1be1608": {
+              "goals": 0,
+              "shots": 1,
+              "assists": 0,
+              "saves": 0
+            }
+          },
+          "n": 1,
+          "us": 2,
+          "them": 5,
+          "winner": "them"
+        },
+        {
+          "n": 2,
+          "p": {
+            "p-a1be1608": {
+              "assists": 1,
+              "saves": 0,
+              "shots": 3,
+              "goals": 2
+            },
+            "p-5310cd2b": {
+              "shots": 1,
+              "assists": 0,
+              "goals": 0,
+              "saves": 4
+            },
+            "p-88ef0aea": {
+              "assists": 0,
+              "shots": 3,
+              "goals": 1,
+              "saves": 4
+            }
+          },
+          "winner": "us",
+          "us": 3,
+          "them": 0
+        },
+        {
+          "n": 3,
+          "p": {
+            "p-88ef0aea": {
+              "goals": 0,
+              "shots": 1,
+              "assists": 0,
+              "saves": 2
+            },
+            "p-5310cd2b": {
+              "saves": 0,
+              "assists": 1,
+              "goals": 3,
+              "shots": 3
+            },
+            "p-a1be1608": {
+              "assists": 1,
+              "shots": 2,
+              "goals": 1,
+              "saves": 2
+            }
+          },
+          "us": 4,
+          "winner": "us",
+          "them": 3
+        },
+        {
+          "them": 4,
+          "winner": "them",
+          "us": 3,
+          "n": 4,
+          "p": {
+            "p-5310cd2b": {
+              "saves": 1,
+              "assists": 1,
+              "goals": 1,
+              "shots": 4
+            },
+            "p-a1be1608": {
+              "shots": 2,
+              "goals": 1,
+              "assists": 1,
+              "saves": 3
+            },
+            "p-88ef0aea": {
+              "shots": 2,
+              "goals": 1,
+              "saves": 0,
+              "assists": 1
+            }
+          }
+        },
+        {
+          "them": 1,
+          "us": 4,
+          "winner": "us",
+          "n": 5,
+          "p": {
+            "p-5310cd2b": {
+              "assists": 2,
+              "goals": 2,
+              "shots": 8,
+              "saves": 0
+            },
+            "p-a1be1608": {
+              "shots": 3,
+              "goals": 1,
+              "assists": 1,
+              "saves": 2
+            },
+            "p-88ef0aea": {
+              "assists": 0,
+              "saves": 1,
+              "shots": 1,
+              "goals": 1
+            }
+          }
+        },
+        {
+          "them": 1,
+          "winner": "us",
+          "us": 3,
+          "n": 6,
+          "p": {
+            "p-5310cd2b": {
+              "saves": 1,
+              "assists": 1,
+              "shots": 3,
+              "goals": 2
+            },
+            "p-a1be1608": {
+              "assists": 0,
+              "saves": 2,
+              "shots": 1,
+              "goals": 0
+            },
+            "p-88ef0aea": {
+              "assists": 2,
+              "saves": 4,
+              "goals": 1,
+              "shots": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "QL52moN4rlOQ5UiFar42",
+      "startsAt": "2023-12-09T15:00:00.000Z",
+      "source": {},
+      "forfeit": null,
+      "notes": "",
+      "season": "2023-24",
+      "level": "Varsity",
+      "clinched": "us",
+      "perGame": false,
+      "teamId": "t5",
+      "players": [
+        {
+          "tag": "Ksquiggly.RL",
+          "alum": true,
+          "name": "Kyle Greig",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "id": "p-88ef0aea",
+          "stats": {}
+        },
+        {
+          "private": false,
+          "alum": true,
+          "id": "p-a1be1608",
+          "stats": {},
+          "tag": "goodnics",
+          "name": "Lincoln Deman",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "id": "p-5310cd2b",
+          "alum": true,
+          "tag": "SsnowyGG",
+          "name": "Christian Gatien",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "stats": {}
+        },
+        {
+          "private": false,
+          "alum": true,
+          "id": "p-a7fe3ce9",
+          "stats": {},
+          "tag": "GoodName.mp4",
+          "games": [],
+          "name": "Joseph Wisniewski"
+        }
+      ],
+      "week": "Semifinal",
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "team": "Detroit Catholic Central",
+        "abbr": "DCC",
+        "school": "Detroit Catholic Central"
+      },
+      "result": "W",
+      "event": "MHSEL Fall 2023 State Championships at Oakland University",
+      "term": "fall",
+      "game": "rocket-league",
+      "stream": {
+        "vod": "",
+        "live": "https://youtu.be/NBTij5eZnx4"
+      },
+      "score": {
+        "us": 4,
+        "them": 1
+      },
+      "seriesOnly": true,
+      "status": "final",
+      "current": 5,
       "games": [
         {
           "them": 0,
           "winner": "us",
-          "us": 0,
-          "n": 1
+          "n": 1,
+          "us": 0
         },
         {
           "them": 0,
-          "n": 2,
           "us": 0,
-          "winner": "us"
+          "winner": "us",
+          "n": 2
         },
         {
-          "us": 0,
           "winner": "us",
           "n": 3,
-          "them": 0
+          "them": 0,
+          "us": 0
         },
         {
-          "winner": "us",
           "us": 0,
           "n": 4,
-          "them": 0
+          "them": 0,
+          "winner": "us"
         },
         {
           "winner": "them",
@@ -1947,77 +1941,109 @@
           "them": 0,
           "n": 5
         }
-      ]
+      ],
+      "league": "MHSEL",
+      "teamName": "Rocket League Varsity",
+      "updatedAt": "2026-10-05T20:36:08.833Z",
+      "gameName": "Rocket League",
+      "stage": "playoffs",
+      "bestOf": 7
     },
     {
       "id": "sXH5skx5S8zgYVJHUIjo",
-      "bestOf": 7,
-      "source": {},
-      "level": "Varsity",
-      "updatedAt": "2026-10-05T20:41:32.639Z",
-      "stage": "playoffs",
-      "teamId": "t5",
-      "game": "rocket-league",
-      "score": {
-        "them": 4,
-        "us": 2
-      },
-      "week": "State Final",
-      "seriesOnly": true,
-      "clinched": "them",
-      "teamName": "Rocket League Varsity",
-      "forfeit": null,
       "current": 6,
-      "stream": {
-        "vod": "",
-        "live": "https://youtu.be/P6Rm-8SNoXU"
-      },
-      "event": "MHSEL Fall 2023 State Championship at Oakland University",
       "status": "final",
-      "notes": "",
+      "league": "MHSEL",
       "games": [
         {
-          "winner": "us",
-          "them": 0,
+          "us": 0,
           "n": 1,
-          "us": 0
+          "winner": "us",
+          "them": 0
         },
         {
           "n": 2,
-          "them": 0,
           "us": 0,
-          "winner": "us"
+          "winner": "us",
+          "them": 0
         },
         {
+          "us": 0,
+          "them": 0,
           "n": 3,
-          "them": 0,
-          "us": 0,
           "winner": "them"
         },
         {
+          "us": 0,
           "n": 4,
-          "us": 0,
           "winner": "them",
           "them": 0
         },
         {
+          "us": 0,
+          "winner": "them",
           "n": 5,
-          "winner": "them",
-          "us": 0,
           "them": 0
         },
         {
-          "n": 6,
           "them": 0,
           "us": 0,
-          "winner": "them"
+          "winner": "them",
+          "n": 6
         }
       ],
+      "updatedAt": "2026-10-05T20:41:32.639Z",
+      "seriesOnly": true,
+      "score": {
+        "us": 2,
+        "them": 4
+      },
+      "stream": {
+        "live": "https://youtu.be/P6Rm-8SNoXU",
+        "vod": ""
+      },
+      "opponent": {
+        "school": "Linden High School",
+        "logo": "",
+        "abbr": "LIN",
+        "team": "Linden High School",
+        "short": ""
+      },
+      "bestOf": 7,
+      "stage": "playoffs",
+      "startsAt": "2023-12-09T16:00:00.000Z",
+      "clinched": "them",
+      "level": "Varsity",
+      "notes": "",
+      "teamName": "Rocket League Varsity",
+      "season": "2023-24",
+      "forfeit": null,
+      "gameName": "Rocket League",
+      "source": {},
+      "result": "L",
+      "event": "MHSEL Fall 2023 State Championship at Oakland University",
+      "game": "rocket-league",
       "players": [
         {
-          "private": false,
+          "alum": true,
           "id": "p-88ef0aea",
+          "stats": {},
           "tag": "Ksquiggly.RL",
+          "private": false,
+          "name": "Kyle Greig",
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "name": "Lincoln Deman",
+          "private": false,
+          "tag": "goodnics",
           "games": [
             1,
             2,
@@ -2026,33 +2052,11 @@
             5,
             6
           ],
-          "name": "Kyle Greig",
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "name": "Lincoln Deman",
-          "private": false,
-          "tag": "goodnics",
-          "stats": {},
-          "alum": true,
           "id": "p-a1be1608",
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ]
+          "stats": {},
+          "alum": true
         },
         {
-          "stats": {},
-          "private": false,
-          "id": "p-5310cd2b",
-          "name": "Christian Gatien",
-          "alum": true,
-          "tag": "SsnowyGG",
           "games": [
             1,
             2,
@@ -2060,32 +2064,28 @@
             4,
             5,
             6
-          ]
+          ],
+          "name": "Christian Gatien",
+          "stats": {},
+          "id": "p-5310cd2b",
+          "tag": "SsnowyGG",
+          "private": false,
+          "alum": true
         },
         {
           "id": "p-a7fe3ce9",
-          "stats": {},
-          "tag": "GoodName.mp4",
-          "name": "Joseph Wisniewski",
           "private": false,
+          "name": "Joseph Wisniewski",
+          "stats": {},
           "alum": true,
-          "games": []
+          "games": [],
+          "tag": "GoodName.mp4"
         }
       ],
-      "gameName": "Rocket League",
-      "result": "L",
       "term": "fall",
       "perGame": false,
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "school": "Linden High School",
-        "abbr": "LIN",
-        "team": "Linden High School"
-      },
-      "league": "MHSEL",
-      "season": "2023-24",
-      "startsAt": "2023-12-09T16:00:00.000Z"
+      "week": "State Final",
+      "teamId": "t5"
     }
   ]
 }

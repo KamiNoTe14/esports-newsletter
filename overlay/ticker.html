@@ -4,104 +4,102 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <title>Score ticker · Hartland Esports</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap">
-<!-- Stream overlay: an ESPN-style score ticker. Add it in OBS as a Browser Source (1920 x 1080 or 1920 x 80),
-     it sits at the bottom with a transparent background. Live scores update the moment the scorekeeper changes them.
-     Options: ?speed=110 (pixels per second), ?height=64, ?top=1 (put the bar at the top), ?bg=1 (solid page background, for testing),
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&display=swap">
+<!-- Stream overlay: an ESPN BottomLine-style score ticker. Add it in OBS as a Browser Source at 1920 x 1080; the page is
+     transparent except for the bar. One score at a time flips into view, and the label on the left changes with each section
+     (Eagles Esports, Hartland Athletics, NFL, ...). Live scores update the moment the scorekeeper changes them.
+     Options: ?hold=6 (seconds per score), ?height=72, ?top=1 (bar at the top), ?bg=1 (grey page background, for testing),
      ?sections=esports,athletics,pro,college,news (leave any out to hide it; ?sections=esports shows only our matches). -->
 <style>
-:root{--navy:#00274C;--navy-2:#00315F;--gold:#FFBC05;--white:#fff;--live:#FF3B3B;--h:64px;--f:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
+:root{--navy:#00274C;--gold:#FFBC05;--white:#fff;--live:#E8202A;--h:72px;--f:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
 html,body{margin:0;height:100%;background:transparent;overflow:hidden}
-body.bg{background:#333 url() center/cover}
+body.bg{background:#555}
 .bar{position:fixed;left:0;right:0;bottom:0;height:var(--h);display:flex;align-items:stretch;font-family:var(--f);color:var(--white);
-  background:linear-gradient(180deg,#003A70,var(--navy) 55%,#001F3D);border-top:4px solid var(--gold);box-shadow:0 -6px 18px rgba(0,0,0,.35)}
-body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:4px solid var(--gold)}
-.brand{flex:none;display:flex;align-items:center;gap:10px;padding:0 22px 0 16px;background:var(--gold);color:var(--navy);
-  clip-path:polygon(0 0,100% 0,calc(100% - 18px) 100%,0 100%);padding-right:38px;position:relative;z-index:2}
-.brand img{height:calc(var(--h) * .62)}
-.brand b{font-weight:800;font-size:calc(var(--h) * .42);letter-spacing:.04em;text-transform:uppercase;line-height:.9}
-.brand small{display:block;font-size:calc(var(--h) * .24);letter-spacing:.14em;font-weight:700}
-.track{flex:1;overflow:hidden;position:relative;margin-left:-18px;
-  mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent);-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40px,#000 calc(100% - 40px),transparent)}
-.run{position:absolute;top:0;bottom:0;left:0;display:flex;align-items:center;white-space:nowrap;will-change:transform}
-.it{display:inline-flex;align-items:center;gap:12px;padding:0 26px;font-size:calc(var(--h) * .44);font-weight:700;letter-spacing:.02em;height:100%;position:relative}
-.it+.it:before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;background:var(--gold);opacity:.55;transform:skewX(-14deg)}
-.g{font-size:calc(var(--h) * .26);font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:2px solid rgba(255,188,5,.55);border-radius:4px;padding:1px 6px}
-.tm{text-transform:uppercase}
-.sc{font-weight:800;font-variant-numeric:tabular-nums}
-.win{color:var(--gold)}
-.lose{opacity:.72}
-.st{font-size:calc(var(--h) * .3);font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.12)}
+  background:linear-gradient(180deg,#0B3A6B 0%,var(--navy) 48%,#001A33 100%);border-top:3px solid var(--gold);box-shadow:0 -6px 20px rgba(0,0,0,.4)}
+body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:3px solid var(--gold)}
+.brand{flex:none;display:flex;align-items:center;gap:10px;padding:0 18px 0 14px;background:#001A33;border-right:2px solid rgba(255,188,5,.5)}
+.brand img{height:calc(var(--h) * .58)}
+.brand b{display:block;font-weight:800;font-size:calc(var(--h) * .36);letter-spacing:.05em;text-transform:uppercase;line-height:.95}
+.brand small{display:block;font-size:calc(var(--h) * .2);letter-spacing:.16em;font-weight:700;color:var(--gold);text-transform:uppercase}
+/* the section label (changes with each section, like ESPN's "NHL") */
+.lab{flex:none;width:calc(var(--h) * 3.2);position:relative;overflow:hidden;border-right:2px solid rgba(255,255,255,.18)}
+.lab div{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10px;font-weight:800;font-size:calc(var(--h) * .34);letter-spacing:.06em;text-transform:uppercase;line-height:1;color:var(--gold)}
+.lab div.ann{background:var(--gold);color:var(--navy)}
+/* the score area: one card at a time flips up into view */
+.main{flex:1;position:relative;overflow:hidden;min-width:0}
+.card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 22px;gap:1px}
+.l1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;font-size:calc(var(--h) * .46);font-weight:700;line-height:1.05}
+.l2{display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(var(--h) * .26);font-weight:600;color:#C9D6E3;letter-spacing:.02em;line-height:1.1}
+.l2 b{color:var(--gold);font-weight:700}
+.nm{text-transform:none}
+.sc{font-weight:800;font-variant-numeric:tabular-nums;min-width:1ch}
+.w{color:var(--gold)}
+.lo{color:#AFC0D3}
+.sep{width:2px;align-self:stretch;background:rgba(255,255,255,.35);margin:4px 4px}
+.st{font-size:calc(var(--h) * .27);font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:rgba(255,255,255,.14);align-self:center}
 .st.live{background:var(--live);animation:pulse 1.6s infinite}
-.st.fin{background:rgba(255,255,255,.9);color:var(--navy)}
-.tag{font-size:calc(var(--h) * .26);letter-spacing:.1em;text-transform:uppercase;opacity:.85}
-.sec{display:inline-flex;align-items:center;height:100%;padding:0 18px 0 22px;margin-left:10px;background:rgba(255,188,5,.16);color:var(--gold);font-size:calc(var(--h) * .34);font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-left:4px solid var(--gold)}
-.sec+.it:before{display:none}
-.it.n{font-weight:600}
+.st.fin{background:#fff;color:var(--navy)}
 .mi{color:var(--gold)}
-.it.ann{color:var(--navy);background:var(--gold);padding:0 30px;font-weight:800;text-transform:uppercase}
-.it.ann:before{display:none}
-.it.ann+.it:before{display:none}
-.alert{position:absolute;inset:0;display:flex;align-items:center;gap:16px;padding:0 30px 0 44px;background:var(--gold);color:var(--navy);
-  font-size:calc(var(--h) * .46);font-weight:800;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.alert span{background:var(--navy);color:var(--gold);font-size:calc(var(--h) * .28);letter-spacing:.14em;padding:3px 9px;border-radius:4px}
-.clock{flex:none;display:flex;align-items:center;padding:0 18px;font-size:calc(var(--h) * .36);font-weight:700;background:rgba(0,0,0,.25);border-left:3px solid var(--gold);font-variant-numeric:tabular-nums}
+.head{font-size:calc(var(--h) * .38);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.head.long{font-size:calc(var(--h) * .31)}
+.card.ann{background:var(--gold);color:var(--navy)}.card.ann .head{font-weight:800;text-transform:uppercase}.card.ann .l2{color:var(--navy)}
+/* "Up next" panel on the right, like ESPN's next-game promo */
+.next{flex:none;width:calc(var(--h) * 5.4);display:flex;align-items:center;gap:12px;padding:0 16px;background:linear-gradient(90deg,rgba(255,188,5,.12),rgba(255,188,5,.04));border-left:2px solid var(--gold);overflow:hidden}
+.next .ic{flex:none;font-weight:800;font-size:calc(var(--h) * .22);letter-spacing:.14em;text-transform:uppercase;color:var(--navy);background:var(--gold);padding:3px 7px;border-radius:3px;line-height:1.1;text-align:center}
+.next .tx{min-width:0;line-height:1.1}
+.next .tx b{display:block;font-size:calc(var(--h) * .24);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next .tx span{display:block;font-size:calc(var(--h) * .3);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next[hidden]{display:none}
+.clock{flex:none;display:flex;align-items:center;padding:0 16px;font-size:calc(var(--h) * .32);font-weight:700;background:#001A33;font-variant-numeric:tabular-nums}
+/* takeover for a pinned announcement */
+.alert{position:absolute;inset:0;display:flex;align-items:center;gap:16px;padding:0 26px;background:var(--gold);color:var(--navy);z-index:5;
+  font-size:calc(var(--h) * .44);font-weight:800;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alert span{background:var(--navy);color:var(--gold);font-size:calc(var(--h) * .26);letter-spacing:.14em;padding:3px 10px;border-radius:3px}
+/* flip animation */
+.in{animation:up .4s cubic-bezier(.2,.8,.2,1) .18s both}.out{animation:away .25s ease-in both}
+@keyframes up{from{transform:translateY(100%);opacity:0}to{transform:none;opacity:1}}
+@keyframes away{from{transform:none;opacity:1}to{transform:translateY(-100%);opacity:0}}
 @keyframes pulse{50%{opacity:.6}}
 </style>
 </head>
 <body>
 <div class="bar">
-  <div class="brand"><img src="../assets/eagle.png" alt=""><div><b>Eagles</b><small>Esports scores</small></div></div>
-  <div class="track" id="track"><div class="run" id="run"></div></div>
+  <div class="brand"><img src="../assets/eagle.png" alt=""><div><b>Eagles</b><small>Esports</small></div></div>
+  <div class="lab" id="lab"></div>
+  <div class="main" id="main"></div>
+  <div class="next" id="next" hidden></div>
   <div class="clock" id="clock"></div>
 </div>
 <script type="module">
 import {watchBoard, watchTicker} from "../assets/live.js?v=21";
-import {gameFor, oppShort, postseason, rivalFor, fmtTime} from "../assets/matches.js?v=15";
+import {gameFor, oppShort, postseason, rivalFor, fmtTime, roundLabel} from "../assets/matches.js?v=15";
 const q = new URLSearchParams(location.search);
-const SPEED = +q.get("speed") || 110;
+const HOLD = (+q.get("hold") || 6) * 1000;
 if (q.get("height")) document.documentElement.style.setProperty("--h", (+q.get("height")) + "px");
 if (q.get("top")) document.body.classList.add("top");
 if (q.get("bg")) document.body.classList.add("bg");
+const WANT = new Set((q.get("sections") || "esports,athletics,pro,college,news").split(",").map(x => x.trim()));
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const TZ = "America/Detroit";
 const day = d => new Date(d).toLocaleDateString("en-CA", {timeZone:TZ});
+const hm = d => new Date(d).toLocaleTimeString("en-US", {timeZone:TZ, hour:"numeric", minute:"2-digit"});
+const when = d => day(d) === day(Date.now()) ? hm(d) : new Date(d).toLocaleDateString("en-US", {timeZone:TZ, weekday:"short"}) + " " + hm(d);
 
 let site = {games:[], teams:[]}, board = {matches:[]}, ticker = {messages:[]};
+const extra = {athletics:[], news:[], leagues:{}};
 try { site = await (await fetch("../data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
-
-const clock = () => { document.getElementById("clock").textContent = new Date().toLocaleTimeString("en-US", {timeZone:TZ, hour:"numeric", minute:"2-digit"}); };
+const clock = () => { document.getElementById("clock").textContent = hm(Date.now()); };
 clock(); setInterval(clock, 10000);
 
-/* One ticker item per match: game · Hartland team score · opponent score · status */
-function item(m){
-  const g = gameFor(site, m.game), live = m.status === "live", fin = m.status === "final";
-  const team = String(m.teamName || "").replace(new RegExp("^" + (g.short || g.name || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*", "i"), "") || m.level || "";
-  const us = m.score?.us ?? 0, them = m.score?.them ?? 0, W = fin && m.result === "W", L = fin && m.result === "L";
-  const cg = live ? (m.current || null) : null;
-  const status = live ? `<span class="st live">Live${cg?.n ? ` · ${esc((g.unit || "Game")[0])}${cg.n}` : ""}</span>`
-    : fin ? `<span class="st fin">Final${m.forfeit ? " · FF" : ""}</span>`
-    : `<span class="st">${day(m.startsAt) === day(Date.now()) ? esc(fmtTime(m.startsAt)) : new Date(m.startsAt).toLocaleDateString("en-US", {timeZone:TZ, weekday:"short"}) + " " + esc(fmtTime(m.startsAt))}</span>`;
-  const ps = postseason(m), rv = rivalFor(site, m);
-  const tags = ps ? `<span class="tag">🏆 ${esc(ps.label)}</span>` : rv ? `<span class="tag">⚔ ${esc(rv.title || "Rivalry")}</span>` : "";
-  const scored = live || fin;
-  return `<span class="it"><span class="g">${esc(g.abbr || g.short || g.name)}</span>
-    <span class="tm${W ? " win" : L ? " lose" : ""}">Hartland ${esc(team)}</span>${scored ? `<span class="sc${W ? " win" : L ? " lose" : ""}">${us}</span>` : ""}
-    <span class="tm${L ? " win" : W ? " lose" : ""}">${esc(oppShort(m))}</span>${scored ? `<span class="sc${L ? " win" : W ? " lose" : ""}">${them}</span>` : ""}
-    ${status}${tags}</span>`;
-}
-
-/* ---- outside sections: Hartland Athletics, ESPN scores, esports news ---- */
-const WANT = new Set((q.get("sections") || "esports,athletics,pro,college,news").split(",").map(x => x.trim()));
-const extra = {athletics:[], news:[], leagues:{}};
+/* ---------- data sources ---------- */
 const ESPN = [
   {key:"nfl", label:"NFL", path:"football/nfl", kind:"pro"},
   {key:"mlb", label:"MLB", path:"baseball/mlb", kind:"pro"},
   {key:"nba", label:"NBA", path:"basketball/nba", kind:"pro"},
   {key:"nhl", label:"NHL", path:"hockey/nhl", kind:"pro"},
-  {key:"cfb", label:"Big Ten & MAC Football", path:"football/college-football", groups:[5, 15], kind:"college"},
-  {key:"cbb", label:"Big Ten & MAC Basketball", path:"basketball/mens-college-basketball", groups:[7, 14], kind:"college"},
-  {key:"wbb", label:"Big Ten & MAC Women's Basketball", path:"basketball/womens-college-basketball", groups:[7, 14], kind:"college"}
+  {key:"cfb", label:"College Football", path:"football/college-football", groups:[5, 15], kind:"college"},
+  {key:"cbb", label:"Men's College Hoops", path:"basketball/mens-college-basketball", groups:[7, 14], kind:"college"},
+  {key:"wbb", label:"Women's College Hoops", path:"basketball/womens-college-basketball", groups:[7, 14], kind:"college"}
 ];
 const MICHIGAN = /^(DET|MICH|MSU|WMU|EMU|CMU)$/;
 async function loadJSON(u){ const r = await fetch(u + (u.includes("?") ? "&" : "?") + "t=" + Date.now(), {cache:"no-store"}); if (!r.ok) throw 0; return r.json(); }
@@ -116,96 +114,128 @@ async function loadESPN(){
       const lists = await Promise.all((L.groups || [null]).map(g => loadJSON(`https://site.api.espn.com/apis/site/v2/sports/${L.path}/scoreboard${g ? `?groups=${g}` : ""}`)));
       const seen = new Set(), now = Date.now();
       extra.leagues[L.key] = lists.flatMap(d => d.events || []).filter(e => !seen.has(e.id) && seen.add(e.id))
-        /* today's games: anything live, plus games that start or ended within about a day */
         .filter(e => e.status?.type?.state === "in" || Math.abs(new Date(e.date) - now) < 30 * 36e5)
-        .sort((a, b) => (a.status?.type?.state === "in" ? -1 : 0) - (b.status?.type?.state === "in" ? -1 : 0) || (a.date < b.date ? -1 : 1));
-    } catch(e){ /* keep what we had */ }
+        .sort((a, b) => (b.status?.type?.state === "in") - (a.status?.type?.state === "in") || (a.date < b.date ? -1 : 1));
+    } catch(e){}
   }
 }
-function espnItem(e){
-  const c = e.competitions?.[0] || {}, st = e.status?.type || {}, teams = [...(c.competitors || [])].sort((a, b) => a.homeAway === "away" ? -1 : 1);
-  const live = st.state === "in", done = st.state === "post";
-  const best = done ? Math.max(...teams.map(t => +t.score || 0)) : null;
-  const side = t => { const ab = t.team?.abbreviation || t.team?.shortDisplayName || "", w = done && +t.score === best && teams.some(x => +x.score !== best);
-    return `<span class="tm${MICHIGAN.test(ab) ? " mi" : ""}${done && !w ? " lose" : ""}">${esc(ab)}</span>${st.state !== "pre" ? `<span class="sc${w ? " win" : done ? " lose" : ""}">${esc(t.score ?? "")}</span>` : ""}`; };
-  const status = live ? `<span class="st live">${esc(st.shortDetail || "Live")}</span>` : done ? `<span class="st fin">${esc(/final/i.test(st.shortDetail || "") ? st.shortDetail : "Final")}</span>`
-    : `<span class="st">${esc(new Date(e.date).toLocaleTimeString("en-US", {timeZone:TZ, hour:"numeric", minute:"2-digit"}))}</span>`;
-  return `<span class="it">${teams.map(side).join("")}${status}</span>`;
-}
-function athItem(a){
-  const t = [a.home, a.away], fin = a.final, best = fin ? Math.max(t[0].score, t[1].score) : null, tie = fin && t[0].score === t[1].score;
-  const side = x => { const us = /hartland/i.test(x.name), w = fin && !tie && x.score === best;
-    return `<span class="tm${us ? " mi" : ""}${fin && !w && !tie ? " lose" : ""}">${esc(x.name)}</span>${fin ? `<span class="sc${w ? " win" : !tie ? " lose" : ""}">${x.score}</span>` : ""}`; };
-  const at = new Date(a.at), today = a.at.slice(0, 10) === day(Date.now());
-  const status = fin ? `<span class="st fin">Final</span>` : `<span class="st">${today ? "" : at.toLocaleDateString("en-US", {weekday:"short"}) + " "}${at.toLocaleTimeString("en-US", {hour:"numeric", minute:"2-digit"})}</span>`;
-  return `<span class="it"><span class="g">${esc(a.sport)}</span>${side(t[0])}${side(t[1])}${status}</span>`;
-}
-function athPick(){
-  const now = Date.now(), list = extra.athletics.map(a => ({...a, t:new Date(a.at).getTime()}));
-  const fin = list.filter(a => a.final && now - a.t < 3 * 864e5).sort((a, b) => b.t - a.t).slice(0, 12);
-  const up = list.filter(a => !a.final && a.t - now < 864e5 && a.t - now > -5 * 36e5).sort((a, b) => a.t - b.t);
-  return [...up, ...fin];
-}
-const label = t => `<span class="sec">${esc(t)}</span>`;
+const active = () => (ticker.messages || []).filter(x => x.text && (!x.until || new Date(x.until) > new Date()));
 
-/* What's on the ticker: live matches, then today's finals (or the latest few), then what's coming up in the next two days. */
-function pickMatches(){
+/* ---------- cards: one score (or headline) each ---------- */
+const st = (kind, text) => `<span class="st ${kind}">${esc(text)}</span>`;
+function side(name, score, cls){ return `<span class="nm ${cls}">${esc(name)}</span>${score === null ? "" : `<span class="sc ${cls}">${esc(score)}</span>`}`; }
+function ourCard(m){
+  const g = gameFor(site, m.game), live = m.status === "live", fin = m.status === "final";
+  const us = live || fin ? (m.score?.us ?? 0) : null, them = live || fin ? (m.score?.them ?? 0) : null, W = fin && m.result === "W", L = fin && m.result === "L";
+  const team = String(m.teamName || "Eagles").trim();
+  const cg = live ? m.current : null;
+  const status = live ? st("live", `Live${cg?.n ? ` · ${(g.unit || "Game")[0]}${cg.n}` : ""}`) : fin ? st("fin", m.forfeit ? "Final · FF" : "Final") : st("", when(m.startsAt));
+  const ps = postseason(m), rv = rivalFor(site, m);
+  const bits = [g.name, m.league, ps ? `🏆 ${ps.label}` : roundLabel(m, false) || "", rv ? `⚔ ${rv.title || "Rivalry"}` : "", live && cg && g.points && (cg.us || cg.them) ? `${g.unit || "Game"} ${cg.n}: ${cg.us}–${cg.them}` : "", !live && !fin ? `Best of ${m.bestOf}` : ""].filter(Boolean);
+  return {sec:"Eagles Esports", key:"e" + m.id, live,
+    l1:`${side("Hartland " + team.replace(new RegExp("^" + (g.short || g.name || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*", "i"), ""), us, W ? "w" : L ? "lo" : "mi")}<span class="sep"></span>${side(oppShort(m), them, L ? "w" : W ? "lo" : "")}${status}`,
+    l2:bits.map(esc).join(" · ")};
+}
+function espnCard(L, e){
+  const c = e.competitions?.[0] || {}, s = e.status?.type || {}, t = [...(c.competitors || [])].sort((a) => a.homeAway === "away" ? -1 : 1);
+  const live = s.state === "in", done = s.state === "post", best = done ? Math.max(...t.map(x => +x.score || 0)) : null;
+  const one = x => { const ab = x.team?.abbreviation || "", w = done && +x.score === best && t.some(y => +y.score !== best);
+    return side(x.team?.shortDisplayName || x.team?.displayName || ab, s.state === "pre" ? null : (x.score ?? ""), w ? "w" : done ? "lo" : MICHIGAN.test(ab) ? "mi" : ""); };
+  const status = live ? st("live", s.shortDetail || "Live") : done ? st("fin", /final/i.test(s.shortDetail || "") ? s.shortDetail : "Final") : st("", hm(e.date));
+  const note = c.headlines?.[0]?.shortLinkText || c.notes?.[0]?.headline || (c.broadcasts?.[0]?.names || []).join(", ") || c.venue?.fullName || "";
+  return {sec:L.label, key:L.key + e.id, live, l1:`${one(t[0])}<span class="sep"></span>${one(t[1])}${status}`, l2:esc(note)};
+}
+function athCard(a){
+  const t = [a.home, a.away], fin = a.final, best = fin ? Math.max(t[0].score, t[1].score) : null, tie = fin && t[0].score === t[1].score;
+  const one = x => side(x.name, fin ? x.score : null, fin && !tie ? (x.score === best ? "w" : "lo") : /hartland/i.test(x.name) ? "mi" : "");
+  return {sec:"Hartland Athletics", key:"a" + a.link + a.at,
+    l1:`${one(t[0])}<span class="sep"></span>${one(t[1])}${fin ? st("fin", "Final") : st("", when(a.at))}`,
+    l2:`<b>${esc(a.sport)}</b> · ${esc(new Date(a.at).toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"}))}`};
+}
+function annCard(x){ return {sec:"Update", ann:true, key:"n" + x.id, l1:`<span class="head">📣 ${esc(x.text)}</span>`, l2:"Hartland Eagles Esports"}; }
+
+function pickOurs(){
   const all = board.matches || [], now = Date.now(), today = day(now);
   const live = all.filter(m => m.status === "live");
   const fins = all.filter(m => m.status === "final").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
   const todayFin = fins.filter(m => day(m.startsAt) === today);
-  const recent = todayFin.length ? todayFin : fins.filter(m => now - new Date(m.startsAt) < 7 * 864e5).slice(0, 8);
+  const recent = todayFin.length ? todayFin : fins.filter(m => now - new Date(m.startsAt) < 7 * 864e5).slice(0, 6);
   const up = all.filter(m => m.status === "upcoming" && new Date(m.startsAt) - now < 2 * 864e5 && new Date(m.startsAt) - now > -6 * 36e5).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
-  return [...live, ...recent, ...up];
+  return {live, list:[...live, ...recent, ...up], next:up[0] || null};
 }
-const active = () => (ticker.messages || []).filter(x => x.text && (!x.until || new Date(x.until) > new Date()));
+function athPick(){
+  const now = Date.now(), list = extra.athletics.map(a => ({...a, t:new Date(a.at).getTime()}));
+  return [...list.filter(a => !a.final && a.t - now < 864e5 && a.t - now > -5 * 36e5).sort((a, b) => a.t - b.t),
+          ...list.filter(a => a.final && now - a.t < 3 * 864e5).sort((a, b) => b.t - a.t).slice(0, 10)];
+}
 
-function content(){
-  const msgs = active().filter(x => !x.pinned), ms = WANT.has("esports") ? pickMatches() : [];
-  const ours = ms.length ? [label("Eagles Esports"), ...ms.map(item)].join("") : "";
-  const oursLive = ms.some(m => m.status === "live");
+/* The running order: announcements, our esports, then each other section in turn. While we're live, our live
+   match comes back between sections so it's never off screen for long. */
+function playlist(){
+  const ours = WANT.has("esports") ? pickOurs() : {live:[], list:[], next:null};
+  const anns = active().filter(x => !x.pinned).map(annCard);
+  const oursCards = ours.list.map(ourCard), liveCards = ours.live.map(ourCard);
   const others = [];
-  const ath = athPick(); if (ath.length) others.push([label("Hartland Athletics"), ...ath.map(athItem)].join(""));
-  for (const L of ESPN){ const ev = extra.leagues[L.key] || []; if (ev.length) others.push([label(L.label), ...ev.map(espnItem)].join("")); }
-  if (extra.news.length) others.push([label("Esports News"), ...extra.news.map(n => `<span class="it n">${esc(n.title)}</span>`)].join(""));
-  /* Our esports lead every pass; while one of our matches is live it comes back between every other section. */
-  const parts = ours ? [ours] : [];
-  others.forEach(o => { parts.push(o); if (oursLive && ours) parts.push(ours); });
-  /* announcements go first and again halfway through a long loop, so they're seen often */
-  const ann = msgs.map(x => `<span class="it ann">📣 ${esc(x.text)}</span>`);
-  if (ann.length){ parts.unshift(...ann); if (parts.length > 8) parts.splice(Math.ceil(parts.length / 2), 0, ...ann); }
-  if (!parts.length) parts.push(`<span class="it"><span class="tm">Hartland Eagles Esports</span><span class="tag">hartlandesports.com</span></span>`);
-  return parts.join("");
+  const ath = athPick(); if (ath.length) others.push(ath.map(athCard));
+  for (const L of ESPN){ const ev = extra.leagues[L.key] || []; if (ev.length) others.push(ev.map(e => espnCard(L, e))); }
+  if (extra.news.length) others.push(extra.news.map(n => ({sec:"Esports News", key:"x" + n.link, l1:`<span class="head${n.title.length > 64 ? " long" : ""}">${esc(n.title)}</span>`, l2:esc(n.source || ""), hold:1.5})));
+  const out = [...anns, ...oursCards];
+  others.forEach(o => { out.push(...o); if (liveCards.length) out.push(...liveCards, ...anns); });
+  if (!out.length) out.push({sec:"Eagles Esports", key:"idle", l1:`<span class="head">Hartland Eagles Esports</span>`, l2:"hartlandesports.com"});
+  return {cards:out, next:ours.next};
 }
 
-/* Scrolling: the strip is drawn twice back to back and slides left at a steady speed. New data waits for the end of a pass. */
-const run = document.getElementById("run"), track = document.getElementById("track");
-let x = 0, width = 0, next = null, last = performance.now(), pinnedEl = null;
-function setContent(html){ run.innerHTML = html + html; width = run.scrollWidth / 2; }
-function frame(t){
-  const dt = Math.min(64, t - last); last = t;
-  if (!pinnedEl){
-    x -= SPEED * dt / 1000;
-    if (width && -x >= width){ x += width; if (next !== null){ setContent(next); next = null; x = 0; } }
-    run.style.transform = `translateX(${x}px)`;
-  }
-  requestAnimationFrame(frame);
+/* ---------- display ---------- */
+const lab = document.getElementById("lab"), main = document.getElementById("main"), nextEl = document.getElementById("next");
+let list = [], i = -1, shown = null, labelText = "", timer = 0, pinned = null;
+function swap(host, html, cls){
+  const old = host.lastElementChild;
+  if (old){ old.classList.remove("in"); old.classList.add("out"); setTimeout(() => old.remove(), 300); }
+  host.insertAdjacentHTML("beforeend", html); host.lastElementChild.classList.add("in");
 }
-function refresh(now){
+function render(c){
+  if (c.sec !== labelText){ labelText = c.sec; swap(lab, `<div class="${c.ann ? "ann" : ""}">${esc(c.sec)}</div>`); }
+  swap(main, `<div class="card${c.ann ? " ann" : ""}"><div class="l1">${c.l1}</div>${c.l2 ? `<div class="l2">${c.l2}</div>` : ""}</div>`);
+  shown = c;
+}
+function upNext(n){
+  if (!n){ nextEl.hidden = true; return; }
+  const g = gameFor(site, n.game);
+  nextEl.hidden = false;
+  nextEl.innerHTML = `<span class="ic">Up<br>next</span><span class="tx"><b>${esc(n.teamName)}</b><span>vs ${esc(oppShort(n))} · ${esc(when(n.startsAt))}</span></span>`;
+}
+function step(){
+  clearTimeout(timer);
+  if (pinned){ timer = setTimeout(step, 2000); return; }
+  const p = playlist(); upNext(p.next);
+  /* keep our place in the running order when the list is rebuilt */
+  let at = -1;
+  if (shown) p.cards.forEach((c, k) => { if (c.key === shown.key && (at < 0 || Math.abs(k - i) < Math.abs(at - i))) at = k; });   // the same card may appear more than once
+  list = p.cards; i = (at >= 0 ? at : i) + 1; if (i >= list.length) i = 0;
+  if (!(shown && list.length === 1 && list[0].key === shown.key)) render(list[i]); else refreshShown();
+  timer = setTimeout(step, HOLD * (list[i].hold || 1));
+}
+/* A live score that changes while it's on screen updates in place instead of waiting for the next flip. */
+function refreshShown(){
+  if (!shown || pinned) return;
+  const fresh = playlist().cards.find(c => c.key === shown.key);
+  if (fresh && (fresh.l1 !== shown.l1 || fresh.l2 !== shown.l2)){ const card = main.lastElementChild; card.innerHTML = `<div class="l1">${fresh.l1}</div>${fresh.l2 ? `<div class="l2">${fresh.l2}</div>` : ""}`; shown = fresh; }
+}
+function checkPin(){
   const pin = active().find(x => x.pinned);
   if (pin){
-    if (!pinnedEl){ pinnedEl = document.createElement("div"); pinnedEl.className = "alert"; track.appendChild(pinnedEl); run.style.visibility = "hidden"; }
-    pinnedEl.innerHTML = `<span>Update</span>${esc(pin.text)}`;
-  } else if (pinnedEl){ pinnedEl.remove(); pinnedEl = null; run.style.visibility = ""; }
-  const html = content();
-  if (!run.innerHTML || now){ setContent(html); x = now && run.innerHTML ? 0 : track.clientWidth * 0.3; next = null; } else next = html;
+    if (!pinned){ pinned = document.createElement("div"); pinned.className = "alert in"; document.querySelector(".bar").appendChild(pinned); }
+    pinned.innerHTML = `<span>Update</span>${esc(pin.text)}`;
+  } else if (pinned){ pinned.remove(); pinned = null; }
 }
-watchBoard(b => { board = b || {matches:[]}; refresh(); });
-loadLocal().then(() => refresh(true)); setInterval(() => loadLocal(), 5 * 60000);
-loadESPN().then(() => refresh(true)); setInterval(() => loadESPN().then(() => refresh()), 60000);
-watchTicker(t => { ticker = t || {messages:[]}; refresh(true); });   // announcements show right away
-setInterval(refresh, 60000);   // expiry times and "today" roll over on their own
-requestAnimationFrame(frame);
+
+watchBoard(b => { board = b || {matches:[]}; refreshShown(); upNext(playlist().next); });
+watchTicker(t => { ticker = t || {messages:[]}; checkPin();
+  const fresh = active().filter(x => !x.pinned).map(x => "n" + x.id); if (fresh.length && !fresh.includes(shown?.key)){ shown = null; i = -1; step(); } });
+loadLocal(); setInterval(loadLocal, 5 * 60000);
+loadESPN().then(refreshShown); setInterval(() => loadESPN().then(refreshShown), 60000);
+setInterval(checkPin, 30000);
+setTimeout(step, 300);
 </script>
 </body>
 </html>

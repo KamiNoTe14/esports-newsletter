@@ -10,8 +10,7 @@ const OUT = "data/ticker";
 const UA = "Mozilla/5.0 (compatible; HartlandEsportsTicker/1.0; +https://hartlandesports.com)";
 const ATHLETICS = "https://hartlandeagles.com/";
 const NEWS = ["https://esports-news.co.uk/feed/"];
-/* Only headlines about games we care about, and nothing that trips the word filter. */
-const GAMES = /rocket league|\brlcs\b|smash|fortnite|marvel rivals|overwatch|valorant|splatoon|street fighter|brawlhalla|collegiate|scholastic|high school|esports world cup|\bewc\b/i;
+/* Headlines that trip this word filter are left out, so the stream stays school-appropriate. */
 const BLOCK = /\b(sex|sexual|nsfw|porn|nude|drugs?|cocaine|weed|kill(ed|ing)?|murder|suicide|shoot(ing)?|gun|gambl\w*|bet(ting)?|casino|skins? betting|lawsuit|arrest\w*|abuse\w*|harass\w*|racis\w*|slur|fuck|shit|damn|hell|ass)\b/i;
 
 fs.mkdirSync(OUT, {recursive:true});
@@ -69,11 +68,11 @@ async function news(){
       const link = text((/<link>([\s\S]*?)<\/link>/.exec(it) || [])[1]);
       const date = new Date(text((/<pubDate>([\s\S]*?)<\/pubDate>/.exec(it) || [])[1]));
       if (!title || isNaN(date) || Date.now() - date > 4 * 864e5) continue;
-      if (!GAMES.test(title) || BLOCK.test(title)) continue;
+      if (BLOCK.test(title)) continue;
       items.push({title, link, date:date.toISOString(), source:new URL(url).hostname.replace(/^www\./, "")});
     }
   }
-  items.sort((a, b) => a.date < b.date ? 1 : -1);
+  items.sort((a, b) => a.date < b.date ? 1 : -1);  // newest first
   write("news.json", {updated:new Date().toISOString(), items:items.slice(0, 10)});
 }
 

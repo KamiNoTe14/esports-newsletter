@@ -28,15 +28,17 @@ jobs:
         run: node .github/scripts/backup-matches.mjs
       - name: Rebuild the RSS feed
         run: node .github/scripts/build-feed.mjs
+      - name: Athletics scores and esports news for the stream ticker
+        run: node .github/scripts/fetch-ticker.mjs
       - name: Save changes
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/matches feed.xml
+          git add data/matches data/ticker feed.xml
           if git diff --cached --quiet; then echo "Nothing new"; exit 0; fi
-          git commit -m "Back up match results"
+          git commit -m "Back up match results and ticker data"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push
           gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" || echo "Pages will rebuild on its own"

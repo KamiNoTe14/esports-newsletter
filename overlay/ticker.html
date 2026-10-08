@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap">
 <!-- Stream overlay: an ESPN-style score ticker. Add it in OBS as a Browser Source (1920 x 1080 or 1920 x 80),
      it sits at the bottom with a transparent background. Live scores update the moment the scorekeeper changes them.
-     Options: ?speed=110 (pixels per second), ?height=64, ?top=1 (put the bar at the top), ?bg=1 (solid page background, for testing). -->
+     Options: ?speed=110 (pixels per second), ?height=64, ?top=1 (put the bar at the top), ?bg=1 (solid page background, for testing),
+     ?sections=esports,athletics,pro,college,news (leave any out to hide it; ?sections=esports shows only our matches). -->
 <style>
 :root{--navy:#00274C;--navy-2:#00315F;--gold:#FFBC05;--white:#fff;--live:#FF3B3B;--h:64px;--f:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
 html,body{margin:0;height:100%;background:transparent;overflow:hidden}
@@ -34,6 +35,10 @@ body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:4px solid var(--gold)
 .st.live{background:var(--live);animation:pulse 1.6s infinite}
 .st.fin{background:rgba(255,255,255,.9);color:var(--navy)}
 .tag{font-size:calc(var(--h) * .26);letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.sec{display:inline-flex;align-items:center;height:100%;padding:0 18px 0 22px;margin-left:10px;background:rgba(255,188,5,.16);color:var(--gold);font-size:calc(var(--h) * .34);font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-left:4px solid var(--gold)}
+.sec+.it:before{display:none}
+.it.n{font-weight:600}
+.mi{color:var(--gold)}
 .it.ann{color:var(--navy);background:var(--gold);padding:0 30px;font-weight:800;text-transform:uppercase}
 .it.ann:before{display:none}
 .it.ann+.it:before{display:none}
@@ -78,13 +83,70 @@ function item(m){
     : fin ? `<span class="st fin">Final${m.forfeit ? " · FF" : ""}</span>`
     : `<span class="st">${day(m.startsAt) === day(Date.now()) ? esc(fmtTime(m.startsAt)) : new Date(m.startsAt).toLocaleDateString("en-US", {timeZone:TZ, weekday:"short"}) + " " + esc(fmtTime(m.startsAt))}</span>`;
   const ps = postseason(m), rv = rivalFor(site, m);
-  const extra = ps ? `<span class="tag">🏆 ${esc(ps.label)}</span>` : rv ? `<span class="tag">⚔ ${esc(rv.title || "Rivalry")}</span>` : "";
+  const tags = ps ? `<span class="tag">🏆 ${esc(ps.label)}</span>` : rv ? `<span class="tag">⚔ ${esc(rv.title || "Rivalry")}</span>` : "";
   const scored = live || fin;
   return `<span class="it"><span class="g">${esc(g.abbr || g.short || g.name)}</span>
     <span class="tm${W ? " win" : L ? " lose" : ""}">Hartland ${esc(team)}</span>${scored ? `<span class="sc${W ? " win" : L ? " lose" : ""}">${us}</span>` : ""}
     <span class="tm${L ? " win" : W ? " lose" : ""}">${esc(oppShort(m))}</span>${scored ? `<span class="sc${L ? " win" : W ? " lose" : ""}">${them}</span>` : ""}
-    ${status}${extra}</span>`;
+    ${status}${tags}</span>`;
 }
+
+/* ---- outside sections: Hartland Athletics, ESPN scores, esports news ---- */
+const WANT = new Set((q.get("sections") || "esports,athletics,pro,college,news").split(",").map(x => x.trim()));
+const extra = {athletics:[], news:[], leagues:{}};
+const ESPN = [
+  {key:"nfl", label:"NFL", path:"football/nfl", kind:"pro"},
+  {key:"mlb", label:"MLB", path:"baseball/mlb", kind:"pro"},
+  {key:"nba", label:"NBA", path:"basketball/nba", kind:"pro"},
+  {key:"nhl", label:"NHL", path:"hockey/nhl", kind:"pro"},
+  {key:"cfb", label:"Big Ten & MAC Football", path:"football/college-football", groups:[5, 15], kind:"college"},
+  {key:"cbb", label:"Big Ten & MAC Basketball", path:"basketball/mens-college-basketball", groups:[7, 14], kind:"college"},
+  {key:"wbb", label:"Big Ten & MAC Women's Basketball", path:"basketball/womens-college-basketball", groups:[7, 14], kind:"college"}
+];
+const MICHIGAN = /^(DET|MICH|MSU|WMU|EMU|CMU)$/;
+async function loadJSON(u){ const r = await fetch(u + (u.includes("?") ? "&" : "?") + "t=" + Date.now(), {cache:"no-store"}); if (!r.ok) throw 0; return r.json(); }
+async function loadLocal(){
+  if (WANT.has("athletics")) try { extra.athletics = (await loadJSON("../data/ticker/athletics.json")).items || []; } catch(e){}
+  if (WANT.has("news")) try { extra.news = (await loadJSON("../data/ticker/news.json")).items || []; } catch(e){}
+}
+async function loadESPN(){
+  for (const L of ESPN){
+    if (!WANT.has(L.kind)) continue;
+    try {
+      const lists = await Promise.all((L.groups || [null]).map(g => loadJSON(`https://site.api.espn.com/apis/site/v2/sports/${L.path}/scoreboard${g ? `?groups=${g}` : ""}`)));
+      const seen = new Set(), now = Date.now();
+      extra.leagues[L.key] = lists.flatMap(d => d.events || []).filter(e => !seen.has(e.id) && seen.add(e.id))
+        /* today's games: anything live, plus games that start or ended within about a day */
+        .filter(e => e.status?.type?.state === "in" || Math.abs(new Date(e.date) - now) < 30 * 36e5)
+        .sort((a, b) => (a.status?.type?.state === "in" ? -1 : 0) - (b.status?.type?.state === "in" ? -1 : 0) || (a.date < b.date ? -1 : 1));
+    } catch(e){ /* keep what we had */ }
+  }
+}
+function espnItem(e){
+  const c = e.competitions?.[0] || {}, st = e.status?.type || {}, teams = [...(c.competitors || [])].sort((a, b) => a.homeAway === "away" ? -1 : 1);
+  const live = st.state === "in", done = st.state === "post";
+  const best = done ? Math.max(...teams.map(t => +t.score || 0)) : null;
+  const side = t => { const ab = t.team?.abbreviation || t.team?.shortDisplayName || "", w = done && +t.score === best && teams.some(x => +x.score !== best);
+    return `<span class="tm${MICHIGAN.test(ab) ? " mi" : ""}${done && !w ? " lose" : ""}">${esc(ab)}</span>${st.state !== "pre" ? `<span class="sc${w ? " win" : done ? " lose" : ""}">${esc(t.score ?? "")}</span>` : ""}`; };
+  const status = live ? `<span class="st live">${esc(st.shortDetail || "Live")}</span>` : done ? `<span class="st fin">${esc(/final/i.test(st.shortDetail || "") ? st.shortDetail : "Final")}</span>`
+    : `<span class="st">${esc(new Date(e.date).toLocaleTimeString("en-US", {timeZone:TZ, hour:"numeric", minute:"2-digit"}))}</span>`;
+  return `<span class="it">${teams.map(side).join("")}${status}</span>`;
+}
+function athItem(a){
+  const t = [a.home, a.away], fin = a.final, best = fin ? Math.max(t[0].score, t[1].score) : null, tie = fin && t[0].score === t[1].score;
+  const side = x => { const us = /hartland/i.test(x.name), w = fin && !tie && x.score === best;
+    return `<span class="tm${us ? " mi" : ""}${fin && !w && !tie ? " lose" : ""}">${esc(x.name)}</span>${fin ? `<span class="sc${w ? " win" : !tie ? " lose" : ""}">${x.score}</span>` : ""}`; };
+  const at = new Date(a.at), today = a.at.slice(0, 10) === day(Date.now());
+  const status = fin ? `<span class="st fin">Final</span>` : `<span class="st">${today ? "" : at.toLocaleDateString("en-US", {weekday:"short"}) + " "}${at.toLocaleTimeString("en-US", {hour:"numeric", minute:"2-digit"})}</span>`;
+  return `<span class="it"><span class="g">${esc(a.sport)}</span>${side(t[0])}${side(t[1])}${status}</span>`;
+}
+function athPick(){
+  const now = Date.now(), list = extra.athletics.map(a => ({...a, t:new Date(a.at).getTime()}));
+  const fin = list.filter(a => a.final && now - a.t < 3 * 864e5).sort((a, b) => b.t - a.t).slice(0, 12);
+  const up = list.filter(a => !a.final && a.t - now < 864e5 && a.t - now > -5 * 36e5).sort((a, b) => a.t - b.t);
+  return [...up, ...fin];
+}
+const label = t => `<span class="sec">${esc(t)}</span>`;
 
 /* What's on the ticker: live matches, then today's finals (or the latest few), then what's coming up in the next two days. */
 function pickMatches(){
@@ -99,8 +161,16 @@ function pickMatches(){
 const active = () => (ticker.messages || []).filter(x => x.text && (!x.until || new Date(x.until) > new Date()));
 
 function content(){
-  const msgs = active().filter(x => !x.pinned), ms = pickMatches();
-  const parts = ms.map(item);
+  const msgs = active().filter(x => !x.pinned), ms = WANT.has("esports") ? pickMatches() : [];
+  const ours = ms.length ? [label("Eagles Esports"), ...ms.map(item)].join("") : "";
+  const oursLive = ms.some(m => m.status === "live");
+  const others = [];
+  const ath = athPick(); if (ath.length) others.push([label("Hartland Athletics"), ...ath.map(athItem)].join(""));
+  for (const L of ESPN){ const ev = extra.leagues[L.key] || []; if (ev.length) others.push([label(L.label), ...ev.map(espnItem)].join("")); }
+  if (extra.news.length) others.push([label("Esports News"), ...extra.news.map(n => `<span class="it n">${esc(n.title)}</span>`)].join(""));
+  /* Our esports lead every pass; while one of our matches is live it comes back between every other section. */
+  const parts = ours ? [ours] : [];
+  others.forEach(o => { parts.push(o); if (oursLive && ours) parts.push(ours); });
   /* announcements go first and again halfway through a long loop, so they're seen often */
   const ann = msgs.map(x => `<span class="it ann">📣 ${esc(x.text)}</span>`);
   if (ann.length){ parts.unshift(...ann); if (parts.length > 8) parts.splice(Math.ceil(parts.length / 2), 0, ...ann); }
@@ -131,6 +201,8 @@ function refresh(now){
   if (!run.innerHTML || now){ setContent(html); x = now && run.innerHTML ? 0 : track.clientWidth * 0.3; next = null; } else next = html;
 }
 watchBoard(b => { board = b || {matches:[]}; refresh(); });
+loadLocal().then(() => refresh(true)); setInterval(() => loadLocal(), 5 * 60000);
+loadESPN().then(() => refresh(true)); setInterval(() => loadESPN().then(() => refresh()), 60000);
 watchTicker(t => { ticker = t || {messages:[]}; refresh(true); });   // announcements show right away
 setInterval(refresh, 60000);   // expiry times and "today" roll over on their own
 requestAnimationFrame(frame);

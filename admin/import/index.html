@@ -49,8 +49,8 @@ details.season>div{padding:0 12px 12px;overflow-x:auto}
 <main id="app"><p class="muted">Loading…</p></main>
 <div id="toast" hidden></div>
 <script type="module">
-import {backend, EDITORS, settle, seasonLabel, seasonOf, scoreboardFrom, seasonDocFrom, isMock, fmtDay} from "../../assets/matches.js?v=13";
-import {convert, defaultTeams, findExisting} from "../../assets/playvs-import.js?v=2";
+import {backend, EDITORS, settle, seasonLabel, seasonOf, scoreboardFrom, seasonDocFrom, isMock, fmtDay} from "../../assets/matches.js?v=14";
+import {convert, defaultTeams, findExisting} from "../../assets/playvs-import.js?v=3";
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const SITE = new URL("../../", location.href).href;
@@ -63,7 +63,7 @@ let exp = null, teamMap = {}, result = null, existing = [], picks = new Set(), o
   if (isMock()) $("#mockbar").hidden = false;
   try { site = await (await fetch(SITE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
   be = await backend();
-  be.onUser(u => { user = u; if (u && EDITORS.includes(u.email)) be.watchDirectory(d => { dir = {alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : []}; }); render(); });
+  be.onUser(u => { user = u; if (u && EDITORS.includes(u.email)) be.watchDirectory(d => { dir = {...d, alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : []}; }); render(); });
 })();
 
 function people(){

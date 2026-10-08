@@ -122,6 +122,12 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .clinch b{flex:1;font:800 22px/1.05 var(--display);text-transform:uppercase;letter-spacing:.03em}
 .clinch .btn{background:var(--navy);color:var(--white);min-height:50px}
 .clinch.them{background:var(--surface-2);color:var(--text)} .clinch.them .btn{background:var(--white);color:var(--navy)}
+.rteam{padding:12px 0;border-top:1px solid var(--line)}.rteam:first-of-type{border-top:0}
+.rhead{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}.rhead b{font:800 18px var(--display);letter-spacing:.04em;text-transform:uppercase}
+.rchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.rchip{display:inline-flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;border-radius:999px;background:var(--bg);border:1px solid var(--line-2);font-weight:600}
+.rchip button{width:26px;height:26px;border-radius:50%;color:var(--muted);font-size:18px;line-height:1}.rchip button:hover{color:var(--text);background:var(--surface-2)}
+.radd{flex:1;min-width:180px;min-height:46px;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);padding:0 10px}
 details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -195,7 +201,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 
 <script type="module">
 import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=13";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=14";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -206,7 +212,7 @@ function toast(m, ms = 3200){ const t = $("#toast"); t.textContent = m; t.hidden
 
 const NOW = seasonOf();  // the current season; "season" below is the one being viewed
 let site = {teams:[], games:[]}, be = null, user = null, season = NOW, matches = [], unwatch = null;
-let dir = {alumni:[], seasons:[]}, lastEntry = null;
+let dir = {alumni:[], seasons:[], rosters:{}}, lastEntry = null;
 let view = "list", openId = null, cur = null, draft = null, undo = {}, saveTimer = null, saving = false, dirtyIds = new Set();
 const pendingSaves = new Map(); // match id -> latest local copy not yet written
 
@@ -220,7 +226,7 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
     user = u; renderWho();
     if (unwatch){ unwatch(); unwatch = null; }
     if (u && EDITORS.includes(u.email)){ unwatch = be.watchSeason(season, onMatches, onState);
-      be.watchDirectory(d => { dir = {alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : []}; if (view === "list") renderList(); }); }
+      be.watchDirectory(d => { dir = {...d, alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : [], rosters:d.rosters && typeof d.rosters === "object" ? d.rosters : {}}; if (view === "list") renderList(); }); }
     route();
   });
   window.addEventListener("hashchange", route);
@@ -323,18 +329,72 @@ function renderList(){
   const gh = ghCfg();
   const rec = `${done.filter(m => m.result === "W").length}–${done.filter(m => m.result === "L").length}`;
   const openAl = $("#alumniBox")?.open;
+  const openRo = $("#rosterBox")?.open;
   $("#app").innerHTML = `<label class="seasonbar"><span>Season</span><select id="seasonSel">${seasonList(dir.seasons).map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}${se === NOW ? " (current)" : dir.seasons.includes(se) ? " ✓" : ""}</option>`).join("")}</select><b>${done.length ? rec : ""}</b></label>`
     + (live.length ? sec("Live now", live, "") : "")
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
+    + rostersHTML(openRo)
     + alumniHTML(openAl)
     + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div><div class="foot"><span>Old results on PlayVS?</span><a class="linkbtn" href="../import/${location.search}">Import history from PlayVS →</a></div>
     <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
   $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };
-  bindAlumni();
+  bindAlumni(); bindRosters();
   $("#app").querySelectorAll("[data-open]").forEach(b => b.onclick = () => location.hash = "m/" + b.dataset.open);
   $("#backup") && ($("#backup").onclick = () => archive(true));
+}
+
+/* Season rosters: who was on each team that season. Saved with the past players (public/directory) under
+   rosters["<season>|<team name>"], and used to fill in the lineup on that team's matches that don't have one. */
+const rKey = t => season + "|" + t;
+function seasonTeams(){ return [...new Set(matches.filter(m => m.status === "final" || m.status === "upcoming").map(m => m.teamName).filter(Boolean))].sort(); }
+function rosterFor(team){
+  if (Array.isArray(dir.rosters?.[rKey(team)])) return dir.rosters[rKey(team)];
+  /* Not set yet: start from everyone who shows up in this team's lineups this season. */
+  const seen = new Map(); matches.filter(m => m.teamName === team).forEach(m => (m.players || []).forEach(p => seen.set(p.id, (seen.get(p.id) || 0) + 1)));
+  return [...seen.keys()];
+}
+function rostersHTML(open){
+  const teams = seasonTeams(); if (!teams.length) return "";
+  const ppl = everyone(), sorted = [...ppl.values()].sort((a, b) => (a.name || a.tag).localeCompare(b.name || b.tag));
+  const label = id => { const p = ppl.get(id); return p ? (p.name || p.tag) : id; };
+  const missing = teams.reduce((n, t) => n + matches.filter(m => m.teamName === t && m.status === "final" && !(m.players || []).length).length, 0);
+  return `<details class="sec" id="rosterBox"${open ? " open" : ""}><summary>Season rosters<span>${missing ? `${missing} match${missing === 1 ? "" : "es"} with no lineup` : `${teams.length} team${teams.length === 1 ? "" : "s"}`}</span></summary><div class="secb">
+    <p class="hint" style="margin:0 0 10px">Who was on each team in ${esc(seasonLabel(season))}. Set it once, then <b>Fill lineups</b> puts these players on every one of that team's matches that doesn't have a lineup yet. Matches with a lineup already are left alone.</p>
+    ${teams.map(t => { const ids = rosterFor(t), set = Array.isArray(dir.rosters?.[rKey(t)]);
+      const empty = matches.filter(m => m.teamName === t && m.status === "final" && !(m.players || []).length).length;
+      return `<div class="rteam" data-team="${esc(t)}"><div class="rhead"><b>${esc(t)}</b><span class="hint">${empty ? `${empty} without a lineup` : "All lineups filled"}${set ? "" : " · suggested"}</span></div>
+        <div class="rchips">${ids.map(id => `<span class="rchip" data-pid="${esc(id)}">${esc(label(id))}<button type="button" aria-label="Remove ${esc(label(id))}">×</button></span>`).join("") || `<span class="hint">No players yet.</span>`}</div>
+        <div class="tools" style="flex-wrap:wrap"><select class="radd" aria-label="Add a player to ${esc(t)}"><option value="">+ Add player…</option>${sorted.filter(p => !ids.includes(p.id)).map(p => `<option value="${esc(p.id)}">${esc(p.name || p.tag)}${p.alum ? " (past)" : ""}</option>`).join("")}</select>
+          <button class="btn btn-line rsave" type="button">Save roster</button>${empty ? `<button class="btn btn-gold rfill" type="button">Fill ${empty} lineup${empty === 1 ? "" : "s"}</button>` : ""}</div></div>`; }).join("")}
+  </div></details>`;
+}
+function bindRosters(){
+  const box = $("#rosterBox"); if (!box) return;
+  const ids = el => [...el.querySelectorAll(".rchip")].map(c => c.dataset.pid);
+  const keep = async (t, list) => { dir.rosters = {...(dir.rosters || {}), [rKey(t)]:list}; await be.saveDirectory(dir); };
+  box.querySelectorAll(".rteam").forEach(el => {
+    const t = el.dataset.team;
+    el.querySelectorAll(".rchip button").forEach(b => b.onclick = () => { b.parentElement.remove(); });
+    el.querySelector(".radd").onchange = e => { const id = e.target.value; if (!id) return; const p = everyone().get(id);
+      el.querySelector(".rchips").insertAdjacentHTML("beforeend", `<span class="rchip" data-pid="${esc(id)}">${esc(p?.name || p?.tag || id)}<button type="button">×</button></span>`);
+      el.querySelector(".rchips .rchip:last-child button").onclick = ev => ev.target.parentElement.remove(); e.target.value = ""; };
+    el.querySelector(".rsave").onclick = async () => { try { await keep(t, ids(el)); toast(`${t} roster saved.`); renderList(); } catch(e){ toast("Couldn't save. Check the connection."); } };
+    if (el.querySelector(".rfill")) el.querySelector(".rfill").onclick = async () => {
+      const list = ids(el); if (!list.length){ toast("Add at least one player first."); return; }
+      const ppl = everyone(), targets = matches.filter(m => m.teamName === t && m.status === "final" && !(m.players || []).length);
+      if (!confirm(`Put ${list.length} player${list.length === 1 ? "" : "s"} on ${targets.length} ${t} match${targets.length === 1 ? "" : "es"} that ${targets.length === 1 ? "has" : "have"} no lineup?`)) return;
+      try {
+        await keep(t, list);
+        const changed = targets.map(m => settle({...clone(m), players:list.map(id => ppl.get(id)).filter(Boolean).map(p => snap(p))}));
+        await be.saveMany(changed, user?.email);
+        const all = matches.map(m => changed.find(c => c.id === m.id) || m);
+        await be.syncSummaries(sb(all), seasonDocFrom(all, season));
+        toast(`Lineups filled on ${changed.length} match${changed.length === 1 ? "" : "es"}.`); queueArchive();
+      } catch(e){ console.error(e); toast("Couldn't save. Check the connection."); }
+    };
+  });
 }
 
 /* Past players (alumni). Kept in the score database so both coaches see the same list. */

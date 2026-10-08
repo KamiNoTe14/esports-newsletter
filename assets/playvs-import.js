@@ -1,6 +1,6 @@
 /* Turns a playvs-export.json file (made by tools/playvs-export.js) into scorekeeper matches.
    Pure functions only: nothing here reads or writes the database, so it can be tested on its own. */
-import {settle, seasonOf, termOf, shortSchool, slug, gameFor, teamLabel} from "./matches.js?v=13";
+import {settle, seasonOf, termOf, shortSchool, slug, gameFor, teamLabel} from "./matches.js?v=14";
 
 /* PlayVS game -> our game key and name. Games the site doesn't track still import (scores only). */
 const ESPORTS = {

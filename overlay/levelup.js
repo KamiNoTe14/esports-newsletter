@@ -11,9 +11,28 @@ const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const src = p => !p ? "" : /^https?:/.test(p) ? p : BASE + String(p).replace(/^\/+/, "");
 const app = document.getElementById("app");
-/* Only touch the page when something changed, so graphics animate in once instead of on every update. */
-let lastHTML = "";
-const out = {set html(h){ if (h === lastHTML) return; const first = !lastHTML; lastHTML = h; app.innerHTML = h; if (!first) app.firstElementChild?.classList.remove("in"); }};
+/* Only touch the page when something changed. The first draw (or a replay) gets class "enter", which plays the
+   entrance animation; later updates redraw quietly and only the part that changed animates. */
+let lastHTML = "", enterUntil = 0, held = null;
+const ENTRANCE_MS = 2600;   // longest entrance; updates that land during it wait so they don't cut it short
+const out = {set html(h){
+  if (h === lastHTML) return;
+  const first = !lastHTML;
+  if (!first && Date.now() < enterUntil){ clearTimeout(held); held = setTimeout(() => { held = null; app.innerHTML = h; }, enterUntil - Date.now()); lastHTML = h; return; }
+  lastHTML = h; app.innerHTML = h;
+  if (first){ app.firstElementChild?.classList.add("enter"); enterUntil = Date.now() + ENTRANCE_MS; countUp(); }
+}};
+/* Numbers on comparison rows count up from zero during the entrance. */
+function countUp(){
+  app.querySelectorAll("[data-count]").forEach((el, i) => {
+    const txt = el.textContent, m = /^([#]?)([\d,]*\.?\d+)(%?)$/.exec(txt.trim()); if (!m) return;
+    const end = parseFloat(m[2].replace(/,/g, "")), dec = (m[2].split(".")[1] || "").length, delay = 1150 + (+el.dataset.count || 0) * 90, dur = 900;
+    const show = v => el.textContent = m[1] + v.toLocaleString("en-US", {minimumFractionDigits:dec, maximumFractionDigits:dec}) + m[3];
+    show(0); const t0 = performance.now() + delay;
+    const step = now => { const k = Math.min(1, Math.max(0, (now - t0) / dur)); show(end * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); else el.textContent = txt; };
+    requestAnimationFrame(step);
+  });
+}
 
 let site = {};
 try { site = await (await fetch(BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
@@ -51,30 +70,42 @@ function charImg(g, name){
   const dir = String(g.charArt || g.charIcons || "").replace(/\/$/, ""); if (!dir || !name) return "";
   return BASE + dir + "/" + slug(name) + (g.key === "marvel-rivals" ? "-face.webp" : "-logo.webp");
 }
-const empty = msg => { lastHTML = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
+const gameLogo = g => g.icon ? src(g.icon) : "";
+/* Background artwork for full-screen graphics: this team's photo/art first, then the game's. */
+const artFor = (m, g) => src((site.teams || []).find(t => t.id === m.teamId)?.art || g.art || "");
+function frame(cls, m, g, {title = "", sub = "", body = "", foot = ""} = {}){
+  const art = artFor(m, g), gl = gameLogo(g);
+  return `<div class="full ${cls}">${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="streaks"></div><div class="vig"></div>
+    <div class="blade t"></div><div class="blade t2"></div><div class="blade b"></div><div class="blade b2"></div>
+    <header class="top">${gl ? `<img class="glogo" src="${esc(gl)}" alt="${esc(g.name)}">` : ""}${title ? `<b>${esc(title)}</b>` : ""}${sub ? `<small>${esc(sub)}</small>` : ""}</header>
+    ${body}${foot ? `<div class="foot">${foot}</div>` : ""}<div class="flash"></div></div>`;
+}
+const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
 
 /* ---------- score bug ---------- */
-let lastScores = "";
+let lastScores = null;
 function scorebug(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), need = Math.floor((+m.bestOf || 1) / 2) + 1, cur = (m.games || []).find(x => x.n === m.current);
-  const unit = (g.unit || "Game");
-  const live = m.status === "live", fin = m.status === "final";
-  const mid = fin ? `<b class="it">Final</b>` : live ? `<b class="it">${esc(unit)} ${m.current || 1}</b>${g.points && cur && (cur.us || cur.them) ? `<small>${esc(g.points)} ${station.swap ? `${cur.them}–${cur.us}` : `${cur.us}–${cur.them}`}</small>` : `<small>Best of ${m.bestOf}</small>`}`
-    : `<b class="it">${esc(fmtTime(m.startsAt))}</b><small>Best of ${m.bestOf}</small>`;
-  const nm = (s, r) => `<div class="nm it${r ? " r" : ""}"><b>${esc(s.name)}</b>${s.now ? `<small>${r ? "" : charImg(g, s.now.char) ? `<img src="${esc(charImg(g, s.now.char))}" alt="">` : ""}${esc(s.now.name)}${r && charImg(g, s.now.char) ? `<img src="${esc(charImg(g, s.now.char))}" alt="">` : ""}</small>` : `<small>${esc(s.us ? s.team : s.team || s.school)}</small>`}</div>`;
-  const pips = (s, rev) => `<span class="pips">${Array.from({length:need}, (_, i) => `<i class="${(rev ? need - 1 - i : i) < s.won ? "on" : ""}"></i>`).join("")}</span>`;
-  const scores = `${L.score}-${R.score}`;
-  out.html = `<div class="bug in">
-      <div class="ev it">${esc(eventLine(m))}</div>
-      <div class="bar">
-        <div class="lg">${logoHTML(L.logo, L.name)}</div>${nm(L)}<div class="sc it" id="sl">${L.score}</div>
-        <div class="mid">${mid}</div>
-        <div class="sc it" id="sr">${R.score}</div>${nm(R, true)}<div class="lg r">${logoHTML(R.logo, R.name)}</div>
-      </div>
-      <div class="sub it">${pips(L)}<span>${esc(g.short || g.name)} · Best of ${m.bestOf}</span>${pips(R, true)}</div>
+  const unit = g.unit || "Game", live = m.status === "live", fin = m.status === "final", gl = gameLogo(g);
+  const state = fin ? `<b class="fin">Final</b>` : live ? `<b>${esc(unit)} ${m.current || 1}${g.points && cur && (cur.us || cur.them) ? ` · ${station.swap ? `${cur.them}-${cur.us}` : `${cur.us}-${cur.them}`}` : ""}</b>` : `<b>${esc(fmtTime(m.startsAt))}</b>`;
+  const who = (s, r) => { const pic = s.now ? charImg(g, s.now.char) : "", img = pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : "";
+    return s.now ? `<small>${r ? "" : img}${esc(s.now.name)}${s.now.char ? ` · ${esc(s.now.char)}` : ""}${r ? img : ""}</small>` : `<small>${esc(s.us ? s.team : s.team || s.school)}</small>`; };
+  const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b>${esc(s.name)}</b>${who(s, r)}</div>`, sc = `<div class="sc" data-side="${r ? "r" : "l"}"><span>${s.score}</span></div>`;
+    return `<div class="wing ${r ? "r" : "l"} ${s.us ? "us" : "them"}">${r ? sc + nm + lg : lg + nm + sc}</div>`; };
+  const pips = (s, rev) => `<span class="pips">${Array.from({length:need}, (_, i) => { const k = rev ? need - 1 - i : i; return `<i class="${k < s.won ? "on" : ""}" data-k="${k}"></i>`; }).join("")}</span>`;
+  out.html = `<div class="bug">
+      <div class="ev">${live ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
+      <div class="bar">${wing(L)}<div class="mid">${gl ? `<img src="${esc(gl)}" alt="${esc(g.name)}">` : `<span class="gname">${esc(g.short || g.name)}</span>`}${state}</div>${wing(R, true)}</div>
+      <div class="sub">${pips(L)}<span>Best of <em>${esc(m.bestOf)}</em></span>${pips(R, true)}</div>
     </div>`;
-  if (lastScores && lastScores !== scores){ const [a, b] = lastScores.split("-"); if (+a !== L.score) document.getElementById("sl").classList.add("pop"); if (+b !== R.score) document.getElementById("sr").classList.add("pop"); }
-  lastScores = scores;
+  /* a score that just changed rolls in with a gold flash; a newly won game lights its pip */
+  if (lastScores){
+    [["l", L, 0], ["r", R, 1]].forEach(([side, s, idx]) => {
+      if (s.score !== lastScores[idx].score){ const el = app.querySelector(`.sc[data-side="${side}"]`); el?.classList.add("hit"); }
+      if (s.won > lastScores[idx].won){ const box = app.querySelectorAll(".sub .pips")[idx]; box?.querySelector(`i[data-k="${s.won - 1}"]`)?.classList.add("new"); }
+    });
+  }
+  lastScores = [{score:L.score, won:L.won}, {score:R.score, won:R.won}];
 }
 
 /* ---------- season numbers ---------- */
@@ -94,18 +125,17 @@ function standingFor(m){
 
 /* ---------- VS screen ---------- */
 function vs(m){
-  const [L, R] = sides(m), mine = teamSeason(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), st = standingFor(m);
-  const ourLine = mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l} · #${st.rank} in the league` : "";
+  const g = gameFor(site, m.game), [L, R] = sides(m), mine = teamSeason(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), st = standingFor(m);
+  const ourLine = mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l}, #${st.rank} in the league` : "";
   const lineup = s => s.us ? (m.players || []).map(p => tagOf(p) || nameOf(p)) : listOf(station.oppLineup);
-  const side = (s, c) => `<div class="side ${c}">${logoHTML(s.logo, s.name)}<b class="it">${esc(s.name)}</b><small>${esc(s.us ? s.team : s.team || s.school)}</small>
+  const side = (s, c) => `<div class="side ${c}"><div class="crest"><div class="glow"></div><div class="halo"></div>${logoHTML(s.logo, s.name)}</div>
+    <b>${esc(s.name)}</b><span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>
     ${(s.us ? ourLine : theirLine) ? `<span class="rec">${esc(s.us ? ourLine : theirLine)}</span>` : ""}
-    ${lineup(s).length ? `<div class="names">${lineup(s).map(n => `<span>${esc(n)}</span>`).join("")}</div>` : ""}</div>`;
+    ${lineup(s).length ? `<div class="names">${lineup(s).map((n, i) => `<span style="--i:${i}">${esc(n)}</span>`).join("")}</div>` : ""}</div>`;
   const hh = record(h2h);
-  out.html = `<div class="full vs in"><div class="stripe" style="top:0"></div>
-      <div class="top"><small>${esc(eventLine(m))}</small><b class="it">${esc(gameFor(site, m.game).name)}</b></div>
-      ${side(L, "l")}<div class="mid it">VS</div>${side(R, "r")}
-      <div class="foot">Best of ${m.bestOf}${m.status === "upcoming" ? ` · ${esc(fmtTime(m.startsAt))}` : ""}${h2h.length ? ` · All-time ${hh.w > hh.l ? `${US.short} leads` : hh.w < hh.l ? `${oppShort(m)} leads` : "series tied"} ${Math.max(hh.w, hh.l)}–${Math.min(hh.w, hh.l)}` : ""}</div>
-      <div class="stripe" style="bottom:0"></div></div>`;
+  const foot = [`Best of <em>${esc(m.bestOf)}</em>`, m.status === "upcoming" ? esc(fmtTime(m.startsAt)) : "",
+    h2h.length ? (hh.w === hh.l ? `All-time series tied ${hh.w}–${hh.l}` : `All-time: ${esc(hh.w > hh.l ? US.short : oppShort(m))} leads ${Math.max(hh.w, hh.l)}–${Math.min(hh.w, hh.l)}`) : "First meeting"].filter(Boolean).join(" &nbsp;/&nbsp; ");
+  out.html = frame("vs", m, g, {sub:eventLine(m), body:`${side(L, "l")}<div class="vsx gold-text">VS</div>${side(R, "r")}`, foot});
 }
 
 /* ---------- starting lineups ---------- */
@@ -118,30 +148,31 @@ function mainChar(m, id){
 function mainRole(m, id){ const c = {}; (m.games || []).forEach(x => { const r = x.p?.[id]?.role; if (r) c[r] = (c[r] || 0) + 1; }); return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] || ""; }
 function lineups(m){
   const g = gameFor(site, m.game), [L, R] = sides(m);
-  const ours = (m.players || []).map(p => { const ch = mainChar(m, p.id), role = mainRole(m, p.id), yr = site.profiles?.[p.id]?.gradYear;
-    return `<div class="p"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="" onerror="this.remove()">` : `<span class="it">${monogram(nameOf(p))}</span>`}</div>
-      <div><b class="it">${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", yr ? `Class of ${yr}` : "", ch].filter(Boolean).join(" · "))}</small></div>
-      <div class="tag it">${role && g.roleIcons?.[role] ? `<img src="${esc(src(g.roleIcons[role]))}" alt="">${esc(role)}` : ""}</div></div>`; }).join("");
-  const theirs = listOf(station.oppLineup).map(n => `<div class="p"><div><b class="it">${esc(n)}</b></div></div>`).join("");
-  const col = (s, html, c) => `<div class="col ${c}"><h2 class="it">${logoHTML(s.logo, s.name)}${esc(s.name)}</h2>${html || `<div class="p"><div><small>Lineup to come</small></div></div>`}</div>`;
-  out.html = `<div class="full lu in"><div class="stripe" style="top:0"></div><div class="top"><small>${esc(eventLine(m))}</small><b class="it">Starting lineups</b></div>
-    <div class="cols" style="--h:${Math.min(112, Math.floor(720 / Math.max(1, (m.players || []).length, listOf(station.oppLineup).length)) - 14)}px">${L.us ? col(L, ours, "l") + col(R, theirs, "r") : col(L, theirs, "r") + col(R, ours, "l")}</div><div class="stripe" style="bottom:0"></div></div>`;
+  const ours = (m.players || []).map((p, i) => { const ch = mainChar(m, p.id), role = mainRole(m, p.id), yr = site.profiles?.[p.id]?.gradYear;
+    return `<div class="p" style="--i:${i}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="" onerror="this.remove()">` : `<span>${monogram(nameOf(p))}</span>`}</div>
+      <div><b>${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", yr ? `Class of ${yr}` : ""].filter(Boolean).join(", "))}</small></div>
+      <div class="tag">${role && g.roleIcons?.[role] ? `<img src="${esc(src(g.roleIcons[role]))}" alt="${esc(role)}">` : ""}${esc(ch)}</div></div>`; }).join("");
+  const theirs = listOf(station.oppLineup).map((n, i) => `<div class="p" style="--i:${i}"><div><b>${esc(n)}</b></div></div>`).join("");
+  const col = (s, html, c) => `<div class="col ${c}"><h2>${logoHTML(s.logo, s.name)}${esc(s.name)}</h2>${html || `<div class="p"><div><small>Lineup to come</small></div></div>`}</div>`;
+  const n = Math.max(1, (m.players || []).length, listOf(station.oppLineup).length), h = Math.min(104, Math.floor(640 / n) - 12);
+  out.html = frame("lu", m, g, {title:"Starting lineups", sub:eventLine(m),
+    body:`<div class="cols" style="--h:${h}px">${L.us ? col(L, ours, "l") + col(R, theirs, "r") : col(L, theirs, "l") + col(R, ours, "r")}</div>`});
 }
 
 /* ---------- comparisons ---------- */
 function rowsHTML(rows){
   /* Longer bar = better. For "lower is better" rows (deaths, league rank) the bar is flipped. Rows missing a side get no bars. */
-  return rows.map(r => { const gap = r.fa === "–" || r.fb === "–", a = gap ? 0 : +r.a || 0, b = gap ? 0 : +r.b || 0;
+  return rows.map((r, i) => { const gap = r.fa === "–" || r.fb === "–", a = gap ? 0 : +r.a || 0, b = gap ? 0 : +r.b || 0;
     const better = gap ? "" : r.lower ? (a < b ? "a" : b < a ? "b" : "") : (a > b ? "a" : b > a ? "b" : "");
     const w = v => { if (gap) return 0; if (r.lower){ const lo = Math.min(a, b); return v > 0 ? Math.round(lo / v * 100) : 100; } const hi = Math.max(a, b); return hi > 0 ? Math.round(v / hi * 100) : 0; };
-    return `<div class="row"><div class="v l${better === "a" ? " best" : ""}"><span>${esc(r.fa ?? r.a)}</span><i style="--w:${w(a)}%"></i></div><div class="k">${esc(r.k)}</div><div class="v r${better === "b" ? " best" : ""}"><i style="--w:${w(b)}%"></i><span>${esc(r.fb ?? r.b)}</span></div></div>`; }).join("");
+    return `<div class="row" style="--i:${i}"><div class="v l${better === "a" ? " best" : ""}"><span data-count="${i}">${esc(r.fa ?? r.a)}</span><i style="--w:${w(a)}%"></i></div><div class="k">${esc(r.k)}</div><div class="v r${better === "b" ? " best" : ""}"><i style="--w:${w(b)}%"></i><span data-count="${i}">${esc(r.fb ?? r.b)}</span></div></div>`; }).join("");
 }
 function teamCompare(m){
-  const [L, R] = sides(m), mine = teamSeason(m), st = standingFor(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), hh = record(h2h);
+  const g = gameFor(site, m.game), [L, R] = sides(m), mine = teamSeason(m), st = standingFor(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), hh = record(h2h);
   const our = record(mine), form = mine.slice(-5).map(x => x.result).join(" ");
-  const usRows = {rec:our.text, w:our.w, rank:"", rating:"", h2h:hh.w};
-  const thRows = {rec:st ? `${st.w}–${st.l}` : "–", w:st ? +st.w : 0, rank:st ? `#${st.rank}` : "–", rating:st?.rating || "–", h2h:hh.l};
-  const ourSt = (site.standings || []).flatMap(t => (t.rows || []).filter(r => r.us && String(t.title || "").toLowerCase().includes(String(gameFor(site, m.game).short || "").split(/\s+/)[0].toLowerCase())))[0];
+  const usRows = {rec:our.text, w:our.w, rank:"", rating:""};
+  const thRows = {rec:st ? `${st.w}–${st.l}` : "–", w:st ? +st.w : 0, rank:st ? `#${st.rank}` : "–", rating:st?.rating || "–"};
+  const ourSt = (site.standings || []).flatMap(t => (t.rows || []).filter(r => r.us && String(t.title || "").toLowerCase().includes(String(g.short || "").split(/\s+/)[0].toLowerCase())))[0];
   if (ourSt){ usRows.rank = `#${ourSt.rank}`; usRows.rating = ourSt.rating; }
   const rows = [
     {k:"Season record", a:usRows.w, b:thRows.w, fa:usRows.rec, fb:thRows.rec},
@@ -151,10 +182,9 @@ function teamCompare(m){
     ...(form ? [{k:"Last 5", a:mine.slice(-5).filter(x => x.result === "W").length, b:0, fa:form, fb:"–"}] : [])
   ];
   const ordered = L.us ? rows : rows.map(r => ({...r, a:r.b, b:r.a, fa:r.fb, fb:r.fa}));
-  out.html = `<div class="full cmp in"><div class="stripe" style="top:0"></div><div class="top"><small>${esc(eventLine(m))}</small><b class="it">Tale of the tape</b></div>
-    <div class="heads"><div class="h">${logoHTML(L.logo, L.name)}<div><b class="it">${esc(L.name)}</b><small>${esc(L.team || L.school)}</small></div></div><div class="vsx it">VS</div>
-      <div class="h r">${logoHTML(R.logo, R.name)}<div><b class="it">${esc(R.name)}</b><small>${esc(R.team || R.school)}</small></div></div></div>
-    <div class="rows">${rowsHTML(ordered)}</div>${h2h.length ? "" : `<div class="foot">First meeting</div>`}<div class="stripe" style="bottom:0"></div></div>`;
+  const head = (s, c) => `<div class="h ${c}"><div class="pic crest">${logoHTML(s.logo, s.name)}</div><div><b>${esc(s.name)}</b><small>${esc(s.team || s.school)}</small></div></div>`;
+  out.html = frame("cmp", m, g, {title:"Tale of the tape", sub:eventLine(m), foot:h2h.length ? "" : "First meeting",
+    body:`<div class="heads">${head(L, "l")}<div class="vsx gold-text">VS</div>${head(R, "r")}</div><div class="rows">${rowsHTML(ordered)}</div>`});
 }
 function playerStats(m, id){
   const g = gameFor(site, m.game), se = m.season || seasonOf(m.startsAt);
@@ -174,22 +204,30 @@ function playerCompare(m){
   const fmt = (d, v) => v === null || v === undefined ? "–" : d.avg ? `${Math.round(v)}%` : (Math.round(v * 10) / 10).toLocaleString("en-US");
   const rows = [{k:"Matches", a:A.n, b:B.n}, {k:"Record", a:A.rec.w, b:B.rec.w, fa:A.rec.text, fb:B.rec.text},
     ...(g.statList || []).filter(d => A.per[d.key] !== null || B.per[d.key] !== null).map(d => ({k:d.label.replace(/\s*%\s*$/, ""), a:A.per[d.key] || 0, b:B.per[d.key] || 0, fa:fmt(d, A.per[d.key]), fb:fmt(d, B.per[d.key]), lower:/death/i.test(d.label)}))].slice(0, 6);
-  const head = (p, r) => { const ch = mainChar(m, p.id); return `<div class="h${r ? " r" : ""}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="">` : `<div class="mono">${monogram(nameOf(p))}</div>`}</div><div><b class="it">${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", ch].filter(Boolean).join(" · "))}</small></div></div>`; };
-  out.html = `<div class="full cmp in"><div class="stripe" style="top:0"></div><div class="top"><small>${esc(m.teamName)} · ${esc(g.name)}</small><b class="it">Player comparison</b></div>
-    <div class="heads">${head(a)}<div class="vsx it">VS</div>${head(b, true)}</div><div class="rows">${rowsHTML(rows)}</div>
-    <div class="foot">This season · per match</div><div class="stripe" style="bottom:0"></div></div>`;
+  const head = (p, r) => { const ch = mainChar(m, p.id); return `<div class="h ${r ? "r" : "l"}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="">` : `<div class="mono">${monogram(nameOf(p))}</div>`}</div><div><b>${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", ch].filter(Boolean).join(", "))}</small></div></div>`; };
+  out.html = frame("cmp", m, g, {title:"Player comparison", sub:`${m.teamName}, this season`, foot:"Averages per match",
+    body:`<div class="heads">${head(a)}<div class="vsx gold-text">VS</div>${head(b, true)}</div><div class="rows">${rowsHTML(rows)}</div>`});
 }
 
 /* ---------- wiring ---------- */
 const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare};
+/* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */
+let finalsReady = LAYER === "scorebug";
+setTimeout(() => { if (!finalsReady){ finalsReady = true; draw(); } }, 2500);
 function draw(){
+  if (!finalsReady) return;
   if (!station.matchId){ empty(`Station ${STATION} has no match on it. Pick one in the scorekeeper.`); return; }
   if (!match){ empty("Loading the match…"); return; }
   (LAYERS[LAYER] || scorebug)(match);
 }
+/* Replay the entrance: OBS tells a Browser Source when its scene goes live, so every cut to this graphic animates in. */
+function replay(){ clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; lastScores = null; draw(); }
+window.addEventListener("obsSourceActiveChanged", e => { if (e.detail?.active) replay(); });
+window.addEventListener("obsSourceVisibleChanged", e => { if (e.detail?.visible) replay(); });
+if (q.get("bg")) document.addEventListener("keydown", e => { if (e.key === "r") replay(); });   // preview: press R to replay
 watchBroadcast(b => {
   const next = (b.stations || {})[STATION] || {};
-  if (next.matchId !== station.matchId){ lastScores = ""; match = null; if (stopMatch) Promise.resolve(stopMatch).then(f => f && f()); stopMatch = watchMatch(next.matchId, mm => { match = mm; draw(); }); }
+  if (next.matchId !== station.matchId){ lastScores = null; lastHTML = ""; match = null; if (stopMatch) Promise.resolve(stopMatch).then(f => f && f()); stopMatch = watchMatch(next.matchId, mm => { match = mm; draw(); }); }
   station = next; draw();
 });
-if (LAYER !== "scorebug") watchFinals(site, list => { finals = list; draw(); });
+if (LAYER !== "scorebug") watchFinals(site, list => { finals = list; finalsReady = true; draw(); });

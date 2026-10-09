@@ -34,6 +34,7 @@ img{display:block}
 .logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
 .mono{height:100%;max-width:100%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;
   font:400 1em/1 var(--d);color:var(--navy);background:radial-gradient(circle at 35% 30%,var(--gold-hi),var(--gold) 55%,var(--ember));box-shadow:inset 0 -4px 0 rgba(0,0,0,.2)}
+.mono.m3{font-size:.7em}
 .grunge{-webkit-mask-image:var(--grunge);mask-image:var(--grunge);-webkit-mask-size:420px;mask-size:420px}
 .gold-text{background:linear-gradient(180deg,#FFF3C4 0%,var(--gold-hi) 25%,var(--gold) 60%,var(--ember) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 /* claw slashes (the gold scratch marks from the team's thumbnails) */
@@ -83,7 +84,7 @@ img{display:block}
 .bug .lg{height:96px;padding:14px 12px 14px 40px;font-size:38px}
 .bug .lg .logo{width:100%;height:100%}.bug .lg .mono{height:84%}
 .bug .wing.r .lg{padding:14px 40px 14px 12px}
-.bug .nm{display:grid;gap:5px;padding:0 18px;min-width:0}
+.bug .nm{display:grid;gap:5px;padding:0 14px;min-width:0}
 .bug .wing.r .nm{justify-items:end;text-align:right}
 .bug .nm b{font:400 54px/.92 var(--d);text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .bug .nm small{display:flex;align-items:center;gap:8px;font:600 20px/1 var(--t);letter-spacing:.02em;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -275,7 +276,7 @@ img{display:block}
 .bug .goal small{grid-column:3;font:600 18px/1.2 var(--t);letter-spacing:.04em;text-transform:uppercase;color:#4A6280}
 .bug .goal small:empty{display:none}
 /* spectated player: boost ring and match stats, bottom left */
-.pcard{position:absolute;left:36px;bottom:36px;display:grid;grid-template-columns:132px 1fr;align-items:center;gap:18px;width:560px;padding:14px 22px 14px 14px;
+.pcard{position:absolute;left:36px;bottom:var(--card-y,104px);display:grid;grid-template-columns:132px 1fr;align-items:center;gap:18px;width:560px;padding:14px 22px 14px 14px;
   background:linear-gradient(180deg,var(--navy-hi),var(--navy) 55%,var(--mid));border-left:8px solid var(--rl-blue);clip-path:polygon(0 0,100% 0,calc(100% - 26px) 100%,0 100%);
   filter:drop-shadow(0 10px 18px rgba(0,0,0,.5));animation:slideL .4s var(--snap) both}
 .pcard.orange{border-left-color:var(--rl-orange)}
@@ -308,7 +309,7 @@ img{display:block}
 .bug.gen .mid img{max-width:190px;max-height:46px}
 .bug.gen .mid .state{font:600 17px/1 var(--t);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .bug.gen .mid .state.up{color:var(--ice)}
-.bug.gen .mid b.fin{font:400 40px/1 var(--script);color:var(--gold)}
+.bug.gen .mid b.fin{font:400 34px/1 var(--script);color:var(--gold)}
 .bug .goal i.us{background:var(--gold)}
 .bug .goal i.them{background:var(--steel)}
 /* player cards for one-on-one games: character portrait in the ring, ours bottom left, theirs bottom right */

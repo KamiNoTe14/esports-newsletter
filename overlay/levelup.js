@@ -8,6 +8,8 @@ import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=2";
 const q = new URLSearchParams(location.search);
 const STATION = q.get("station") || "1", LAYER = document.body.dataset.layer;
 if (q.get("bg")) document.body.classList.add("bg");
+/* Player cards sit above the stream ticker by default; ?cardY=36 puts them at the very bottom when there's no ticker. */
+if (q.get("cardY")) document.documentElement.style.setProperty("--card-y", (+q.get("cardY") || 0) + "px");
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const src = p => !p ? "" : /^https?:/.test(p) ? p : BASE + String(p).replace(/^\/+/, "");
@@ -47,7 +49,7 @@ let station = {}, match = null, finals = [], stopMatch = null, people = new Map(
 const nameOf = p => { const r = people.get(p.id) || p; return r.private || !r.name ? (r.tag || p.tag || "Player") : r.name; };
 const tagOf = p => (people.get(p.id) || p).private ? "" : ((people.get(p.id) || p).tag || p.tag || "");
 const monogram = t => esc(String(t || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 3).toUpperCase());
-const logoHTML = (img, name) => `<div class="logo">${img ? `<img src="${esc(src(img))}" alt="" onerror="this.parentElement.innerHTML='<div class=&quot;mono&quot;>${monogram(name)}</div>'">` : `<div class="mono">${monogram(name)}</div>`}</div>`;
+const logoHTML = (img, name) => `<div class="logo">${img ? `<img src="${esc(src(img))}" alt="" onerror="this.parentElement.innerHTML='<div class=&quot;mono${monogram(name).length > 2 ? " m3" : ""}&quot;>${monogram(name)}</div>'">` : `<div class="mono${monogram(name).length > 2 ? " m3" : ""}">${monogram(name)}</div>`}</div>`;
 function eventLine(m){
   const ev = String(m.event || m.league || "").replace(/\b(Fall|Spring|Winter|Summer)\s+20(\d\d)\b/i, (_, s, y) => `${s} '${y}`);
   const r = postseason(m)?.label || roundLabel(m, false) || "";
@@ -77,7 +79,7 @@ const claw = cls => `<svg class="claw ${cls || ""}" viewBox="0 0 640 430" preser
 /* Hand-brushed underline drawn under titles. */
 const BRUSH = `<svg viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M8 17 C 120 6, 260 4, 380 9 S 560 14, 592 8"/></svg>`;
 /* Shrink long team names so "Byron Center" fits instead of being cut off (Anton is about half an em per letter). */
-const fitName = (name, max, room) => Math.max(34, Math.min(max, Math.floor(room / (String(name || "").length * .5 || 1))));
+const fitName = (name, max, room) => Math.max(24, Math.min(max, Math.floor(room / (String(name || "").length * .5 || 1))));
 const gameLogo = g => g.icon ? src(g.icon) : "";
 /* Background artwork for full-screen graphics: this team's photo/art first, then the game's. */
 const artFor = (m, g) => src((site.teams || []).find(t => t.id === m.teamId)?.art || g.art || "");
@@ -112,13 +114,13 @@ function scorebug(m){
     const other = i ? L : R, lead = s.won > other.won ? `Leads ${s.won}–${other.won}` : s.won === other.won ? `Series tied ${s.won}–${other.won}` : `Trails ${s.won}–${other.won}`;
     banner = {us:!!s.us, title:`${unit} ${decided}!`, name:s.name, note:lead}; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => { banner = null; draw(); }, 8000); } });
   if (fin) banner = null;
-  const card = (s, r) => { if (!s.now || q.get("card") === "0") return ""; const pic = charImg(g, s.now.char);
+  const card = (s, r) => { if (!s.now || !live || q.get("card") === "0") return ""; const pic = charImg(g, s.now.char);
     return `<div class="pcard char${r ? " r" : ""}${s.us ? " us" : " them"}"><div class="ring">${pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : `<b>${monogram(s.now.name)}</b>`}</div>
-      <div class="pinfo"><b>${esc(s.now.name)}</b><div class="pst"><span><em>${esc(s.now.char || "—")}</em>${esc(g.charLabel || "Character")}</span><span><em>${esc(s.name)}</em>${esc(unit)} ${n}</span></div></div></div>`; };
+      <div class="pinfo"><b>${esc(s.now.name)}</b><div class="pst"><span><em>${esc(s.now.char || "—")}</em>${esc(g.charLabel || "Character")}</span><span><em>${s.won}</em>${esc(unit)}s won</span></div></div></div>`; };
   out.html = `<div class="bug gen">
       <div class="ev">${live ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
       <div class="bar">${wing(L)}<div class="mid">${gl ? `<img src="${esc(gl)}" alt="${esc(g.name)}">` : `<span class="gname">${esc(g.short || g.name)}</span>`}${state}</div>${wing(R, true)}</div>
-      <div class="sub">${pips(L)}<span>${esc(unit)} <em>${n}</em> &nbsp;|&nbsp; Best of <em>${esc(m.bestOf)}</em></span>${pips(R, true)}</div>
+      <div class="sub">${pips(L)}<span>${fin ? "" : `${esc(unit)} <em>${n}</em> &nbsp;|&nbsp; `}Best of <em>${esc(m.bestOf)}</em></span>${pips(R, true)}</div>
       ${banner ? `<div class="goal"><i class="${banner.us ? "us" : "them"}"></i><b>${esc(banner.title)}</b><span>${esc(banner.name)}</span><small>${esc(banner.note)}</small></div>` : ""}
     </div>${card(L)}${card(R, true)}`;
   /* a score that just changed rolls in with a gold flash and claw; a newly won game lights its pip */
@@ -194,7 +196,7 @@ function rlbug(m){
   const html = `<div class="bug rl">
       <div class="ev">${rl.on && rl.game && !rl.ended ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
       <div class="bar">${wing(sides[0])}<div class="mid"><b class="clock">5:00</b><small class="state"></small></div>${wing(sides[1], true)}</div>
-      <div class="sub">${pips(sides[0])}<span>Game <em>${gameNo}</em> &nbsp;|&nbsp; Best of <em>${esc(m.bestOf)}</em></span>${pips(sides[1], true)}</div>
+      <div class="sub">${pips(sides[0])}<span>${m.status === "final" ? "" : `Game <em>${gameNo}</em> &nbsp;|&nbsp; `}Best of <em>${esc(m.bestOf)}</em></span>${pips(sides[1], true)}</div>
       <div class="goal" hidden></div>
     </div>${q.get("card") === "0" ? "" : `<div class="pcard" hidden></div>`}`;
   if (html !== rlStatic){ rlStatic = html; out.html = html; rlLive = null; }

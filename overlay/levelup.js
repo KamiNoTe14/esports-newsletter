@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare. Add ?bg=1 to see an overlay on a grey test background. */
 import {gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=16";
 import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=24";
-import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=2";
+import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=3";
 
 const q = new URLSearchParams(location.search);
 const STATION = q.get("station") || "1", LAYER = document.body.dataset.layer;
@@ -135,10 +135,11 @@ function scorebug(m){
 
 /* ---------- Rocket League: live score bug fed by the game itself ----------
    Games marked liveFeed:"sos" in site.json get this bug instead: the game clock in the middle and the live goal score,
-   read from the SOS BakkesMod plugin on the PC running Rocket League (?sos=host:port, default localhost:49122).
+   read from Rocket League's official Stats API on the PC running the game (?feed=host:port, default localhost:49124;
+   the older SOS BakkesMod plugin still works with ?feed=localhost:49122).
    The series (game 2, best of 5, pips) still comes from the scorekeeper. Blue is always on the left, like the game.
    Which color Hartland is: the station setting in the scorekeeper, or worked out from player names in the lobby. */
-const SOS_ADDR = q.get("sos") || "localhost:49122";
+const SOS_ADDR = q.get("feed") || q.get("sos") || "localhost:49124";   // the game's own Stats API WebSocket
 const rl = {on:false, game:null, players:{}, goal:null, replay:false, ended:false, feed:null, tries:0, code:0, perm:"", msgs:0};
 const kph = v => Math.round(+v || 0);
 const clock = gm => { if (!gm) return "5:00"; const t = Math.max(0, Math.round(gm.time_seconds ?? 300)); return (gm.isOT ? "+" : "") + Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
@@ -155,6 +156,8 @@ function startSOS(){
         const wasReplay = rl.replay; rl.replay = !!rl.game?.isReplay;
         if (wasReplay && !rl.replay){ rl.goal = null; }
         if (rl.game && !rl.game.hasWinner && rl.game.time_seconds > 0) rl.ended = false;
+      } else if (ev === "game:clock"){
+        if (rl.game){ rl.game = {...rl.game, time_seconds:d.time_seconds, isOT:d.isOT}; }
       } else if (ev === "game:goal_scored"){
         rl.goal = {name:d?.scorer?.name || "", team:+(d?.scorer?.teamnum ?? -1), assist:d?.assister?.name || "", speed:kph(d?.goalspeed)};
         clearTimeout(goalTimer); goalTimer = setTimeout(() => { rl.goal = null; draw(); }, 9000);

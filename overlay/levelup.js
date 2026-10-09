@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare. Add ?bg=1 to see an overlay on a grey test background. */
 import {gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=16";
 import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=24";
-import {connectSOS} from "./sos.js?v=1";
+import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=2";
 
 const q = new URLSearchParams(location.search);
 const STATION = q.get("station") || "1", LAYER = document.body.dataset.layer;
@@ -125,15 +125,17 @@ function scorebug(m){
    The series (game 2, best of 5, pips) still comes from the scorekeeper. Blue is always on the left, like the game.
    Which color Hartland is: the station setting in the scorekeeper, or worked out from player names in the lobby. */
 const SOS_ADDR = q.get("sos") || "localhost:49122";
-const rl = {on:false, game:null, players:{}, goal:null, replay:false, ended:false, feed:null};
+const rl = {on:false, game:null, players:{}, goal:null, replay:false, ended:false, feed:null, tries:0, code:0, perm:"", msgs:0};
 const kph = v => Math.round(+v || 0);
 const clock = gm => { if (!gm) return "5:00"; const t = Math.max(0, Math.round(gm.time_seconds ?? 300)); return (gm.isOT ? "+" : "") + Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
 function startSOS(){
   if (rl.feed) return;
   let goalTimer = null;
   rl.feed = connectSOS(SOS_ADDR, {
-    status(ok){ rl.on = ok; if (!ok){ rl.game = null; } draw(); },
+    status(ok, code){ rl.on = ok; if (!ok){ rl.game = null; rl.code = code || 0; } draw(); },
+    attempt(n){ rl.tries = n; localAccessState().then(st => { rl.perm = st; diag(); }); },
     event(ev, d){
+      rl.msgs++;
       if (ev === "game:update_state"){
         rl.game = d?.hasGame ? d.game : null; rl.players = d?.players || {};
         const wasReplay = rl.replay; rl.replay = !!rl.game?.isReplay;
@@ -148,6 +150,15 @@ function startSOS(){
       draw();
     }
   });
+}
+/* Connection status, shown only in preview (?bg=1 or ?debug=1) so problems can be seen without developer tools. */
+function diag(){
+  if (!(q.get("bg") || q.get("debug"))) return;
+  let el = document.getElementById("sosdiag");
+  if (!el){ el = document.createElement("button"); el.id = "sosdiag"; el.type = "button"; document.body.appendChild(el);
+    el.onclick = () => { askLocalAccess(SOS_ADDR); setTimeout(() => localAccessState().then(st => { rl.perm = st; diag(); }), 1500); }; }
+  const permTxt = {granted:"allowed", denied:"BLOCKED (lock icon > Site settings > Local network access / Apps on device > Allow)", prompt:"not asked yet (click here)"}[rl.perm] || "no permission needed by this browser";
+  el.innerHTML = `<b>Game connection:</b> ${rl.on ? `connected to ws://${esc(SOS_ADDR)} ✓ (${rl.msgs} updates${rl.game ? "" : ", no match running"})` : `not connected to ws://${esc(SOS_ADDR)}, try ${rl.tries}${rl.code ? ` (closed, code ${rl.code})` : ""}`}<br><b>This site's access to apps on this PC:</b> ${permTxt}`;
 }
 /* Hartland's color in the lobby: 0 = blue, 1 = orange. */
 function ourTeamNum(m){
@@ -175,7 +186,7 @@ function rlbug(m){
       <div class="goal" hidden></div>
     </div>${q.get("card") === "0" ? "" : `<div class="pcard" hidden></div>`}`;
   if (html !== rlStatic){ rlStatic = html; out.html = html; rlLive = null; }
-  rlUpdate(us);
+  rlUpdate(us); diag();
 }
 /* Clock, live score, replay and goal banner change many times a second, so they're patched in place
    (redrawing the whole bug would restart its animations). */

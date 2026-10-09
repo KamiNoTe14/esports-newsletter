@@ -295,3 +295,6 @@ img{display:block}
 .pcard .pst{display:flex;gap:18px;margin-top:6px}
 .pcard .pst span{display:grid;font:600 14px/1 var(--t);letter-spacing:.08em;text-transform:uppercase;color:var(--ice)}
 .pcard .pst em{font:400 34px/1.05 var(--d);font-style:normal;color:#fff}
+
+#sosdiag{position:absolute;left:36px;top:260px;max-width:1100px;text-align:left;padding:12px 18px;background:rgba(0,10,25,.88);color:#fff;border:2px dashed var(--gold);border-radius:8px;font:500 20px/1.45 var(--t);cursor:pointer}
+#sosdiag b{color:var(--gold);font-weight:700}

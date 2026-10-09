@@ -216,7 +216,13 @@ function resultRow(site, m){
 /* Role names, with the game's role icon in front when Site Manager has one (Marvel Rivals). */
 function roleTags(g, list){ return list.map(r => `<span class="role">${g?.roleIcons?.[r] ? `<img src="${esc(BASE + g.roleIcons[r])}" alt="">` : ""}${esc(r)}</span>`).join(" "); }
 function boxScore(g, m){
-  const ps = m.players || [], cols = (g.statList || []).filter(c => ps.some(p => p.stats && c.key in p.stats)), roles = ps.some(p => (p.roles || []).length);
+  /* Games with roles (Marvel Rivals) list players by role, in the game's order (Vanguard, Duelist, Strategist), then by name. */
+  const order = String(g.roles || "").split(",").map(x => x.trim()).filter(Boolean);
+  /* a player's role here is the one they played most this match */
+  const main = p => { const c = {}; (m.games || []).forEach(x => { const r = x.p?.[p.id]?.role; if (r) c[r] = (c[r] || 0) + 1; });
+    return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] || (p.roles || [])[0]; };
+  const rank = p => { const i = order.indexOf(main(p)); return i < 0 ? order.length : i; };
+  const ps = order.length ? [...(m.players || [])].sort((a, b) => rank(a) - rank(b) || playerName(a).localeCompare(playerName(b))) : (m.players || []), cols = (g.statList || []).filter(c => ps.some(p => p.stats && c.key in p.stats)), roles = ps.some(p => (p.roles || []).length);
   if (!ps.length || (!cols.length && !roles)) return "";
   return `<div class="tbl-wrap box${cols.length > 4 ? " wide" : ""}"><table class="tbl"><thead><tr><th>Player</th>${roles ? "<th>Role</th>" : ""}${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${roles ? `<td class="muted">${roleTags(g, p.roles || [])}</td>` : ""}${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(fmtStat(c, p.stats[c.key])) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }

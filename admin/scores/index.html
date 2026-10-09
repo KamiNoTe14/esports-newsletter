@@ -129,6 +129,7 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .rchip button{width:26px;height:26px;border-radius:50%;color:var(--muted);font-size:18px;line-height:1}.rchip button:hover{color:var(--text);background:var(--surface-2)}
 .radd{flex:1;min-width:180px;min-height:46px;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);padding:0 10px}
 .tmsg{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:rgba(255,188,5,.1);border:1px solid rgba(255,188,5,.4);margin-bottom:8px}.tmsg b{flex:1 1 220px}.tmsg .btn{min-height:40px;padding:0 12px;font-size:14px}
+.slab{display:inline-flex;align-items:center;gap:5px}.slab svg{width:17px;height:17px;flex:none;fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -145,7 +146,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .prow .pn b{display:block;font-weight:600}
 .prow .pn small{color:var(--muted)}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:0 12px 12px}
-.stats label{font-size:12px;color:var(--muted);display:grid;gap:4px}
+.stats label{font-size:12px;color:var(--muted);display:grid;gap:4px;grid-template-rows:1fr auto;align-items:end}
 .stats input{width:100%;min-height:44px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);padding:0 10px;font:700 18px var(--display)}
 /* form */
 .form{display:grid;gap:14px}
@@ -560,6 +561,23 @@ function statTabs(g, unit){
     ${Array.from({length:n}, (_, i) => `<button type="button" data-stab="${i + 1}" aria-pressed="${String(statTab) === String(i + 1)}" class="${has(i + 1) ? "has" : ""}">${esc(unit[0])}${i + 1}</button>`).join("")}</div>
     <p class="hint" style="margin:0 0 10px">${statTab === "total" ? (cur.perGame ? `Totals are added up from each ${esc(unit.toLowerCase())}. Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to change them.` : `Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to enter stats for each ${esc(unit.toLowerCase())}, or type match totals here if that's all you have.`) : `Stats for ${esc(unit)} ${esc(statTab)}. Leave a player blank if they sat out.`}</p>`;
 }
+/* Small icons beside stat names, matching the in-game scoreboards (Marvel Rivals: swords = eliminations,
+   broken heart = deaths, …), so stats can be copied straight off the end-of-match screen. */
+const SI = {
+  eliminations:'<path d="M3 3l7 7M3 3h3.5M3 3v3.5M21 3l-7 7M21 3h-3.5M21 3v3.5M9 13l-5 5m1.5-6.5l6 6M15 13l5 5m-1.5-6.5l-6 6"/>',
+  kills:'<path d="M3 3l7 7M3 3h3.5M3 3v3.5M21 3l-7 7M21 3h-3.5M21 3v3.5M9 13l-5 5m1.5-6.5l6 6M15 13l5 5m-1.5-6.5l-6 6"/>',
+  deaths:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M12 7.4l-1.6 3.4 2.6 1.6-1.4 3.6"/>',
+  assists:'<path d="M7 20v-4l-3-3 2-6 6-3 6 3 2 6-3 3v4"/><path d="M9 11h2m2 0h2"/>',
+  final_hits:'<circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>',
+  damage:'<path d="M12 2l2.2 6.3L21 9l-5.3 4 1.9 6.6L12 16l-5.6 3.6L8.3 13 3 9l6.8-.7z"/>',
+  damage_blocked:'<path d="M12 3l8 3v6c0 4.5-3.5 7.8-8 9-4.5-1.2-8-4.5-8-9V6z"/>',
+  healing:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
+  accuracy:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".8" fill="currentColor"/>',
+  goals:'<circle cx="12" cy="12" r="8"/><path d="M12 7l3.5 2.5-1.3 4h-4.4l-1.3-4z"/>',
+  saves:'<path d="M12 3l8 3v6c0 4.5-3.5 7.8-8 9-4.5-1.2-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  shots:'<circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>'
+};
+const statLabel = st => SI[st.key] ? `<span class="slab"><svg viewBox="0 0 24 24" aria-hidden="true">${SI[st.key]}</svg>${esc(st.label)}</span>` : esc(st.label);
 function statInputs(g, p, on, unit){
   const stats = g.statList || [], roles = listOf(g.roles), charLabel = (g.charLabel || "").trim();
   if (!tracks(g)) return "";
@@ -568,13 +586,13 @@ function statInputs(g, p, on, unit){
       const cells = [...(on.roles?.length ? [`<span><small>Role</small>${esc(on.roles.join(" / "))}</span>`] : []), ...stats.filter(st => on.stats && st.key in on.stats).map(st => `<span><small>${esc(st.label)}</small>${esc(fmtStat(st, on.stats[st.key]))}</span>`)];
       return `<div class="stotals">${cells.join("") || `<span class="none">Sat out</span>`}${(on.games || []).length ? `<span class="in"><small>Played</small>${on.games.map(n => esc(unit[0]) + n).join(" ")}</span>` : ""}</div>`;
     }
-    return stats.length ? `<div class="stats">${stats.map(st => `<label>${esc(st.label)}<input type="number" inputmode="decimal" min="0" step="any" data-stat="${esc(st.key)}" data-pid="${esc(p.id)}" value="${esc(on.stats?.[st.key] ?? "")}"></label>`).join("")}</div>` : "";
+    return stats.length ? `<div class="stats">${stats.map(st => `<label>${statLabel(st)}<input type="number" inputmode="decimal" min="0" step="any" data-stat="${esc(st.key)}" data-pid="${esc(p.id)}" value="${esc(on.stats?.[st.key] ?? "")}"></label>`).join("")}</div>` : "";
   }
   const n = +statTab, row = ((cur.games || []).find(x => x.n === n)?.p || {})[p.id] || {};
   return `<div class="stats">
     ${roles.length ? `<label>Role<select data-gk="role" data-pid="${esc(p.id)}"><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></label>` : ""}
     ${charLabel ? `<label>${esc(charLabel)}<input type="text" list="charList" autocomplete="off" data-gk="hero" data-pid="${esc(p.id)}" value="${esc(row.hero || "")}"></label>` : ""}
-    ${stats.map(st => `<label>${esc(st.label)}<input type="number" inputmode="decimal" min="0" step="any" data-gk="${esc(st.key)}" data-num="1" data-pid="${esc(p.id)}" value="${esc(row[st.key] ?? "")}"></label>`).join("")}
+    ${stats.map(st => `<label>${statLabel(st)}<input type="number" inputmode="decimal" min="0" step="any" data-gk="${esc(st.key)}" data-num="1" data-pid="${esc(p.id)}" value="${esc(row[st.key] ?? "")}"></label>`).join("")}
   </div>`;
 }
 function detailsHTML(g, them){

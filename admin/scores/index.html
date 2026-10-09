@@ -130,6 +130,9 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .radd{flex:1;min-width:180px;min-height:46px;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);padding:0 10px}
 .tmsg{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:rgba(255,188,5,.1);border:1px solid rgba(255,188,5,.4);margin-bottom:8px}.tmsg b{flex:1 1 220px}.tmsg .btn{min-height:40px;padding:0 12px;font-size:14px}
 .slab{display:inline-flex;align-items:center;gap:5px}.slab svg{width:17px;height:17px;flex:none;fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rolepick{grid-column:1/-1;display:grid;gap:4px;font-size:12px;color:var(--muted)}.rolepick>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
+.rbtn{min-width:0;overflow:hidden;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);color:var(--muted);font:700 14px var(--display);letter-spacing:.05em;text-transform:uppercase}
+.rbtn img{width:28px;height:28px;flex:none;opacity:.55}.rbtn small{font:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media (max-width:440px){.rbtn small{display:none}}.rbtn.on{border-color:var(--gold);background:rgba(255,188,5,.14);color:var(--text);box-shadow:0 0 0 1px var(--gold) inset}.rbtn.on img{opacity:1}
 details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -590,7 +593,8 @@ function statInputs(g, p, on, unit){
   }
   const n = +statTab, row = ((cur.games || []).find(x => x.n === n)?.p || {})[p.id] || {};
   return `<div class="stats">
-    ${roles.length ? `<label>Role<select data-gk="role" data-pid="${esc(p.id)}"><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></label>` : ""}
+    ${roles.length ? (g.roleIcons ? `<div class="rolepick" role="group" aria-label="Role"><span>Role</span><div>${roles.map(r => `<button type="button" class="rbtn${row.role === r ? " on" : ""}" data-rpick="${esc(r)}" data-pid="${esc(p.id)}" title="${esc(r)}" aria-pressed="${row.role === r}">${g.roleIcons[r] ? `<img src="${esc(SITE + g.roleIcons[r])}" alt="">` : ""}<small>${esc(r)}</small></button>`).join("")}</div><select data-gk="role" data-pid="${esc(p.id)}" hidden><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></div>`
+      : `<label>Role<select data-gk="role" data-pid="${esc(p.id)}"><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></label>`) : ""}
     ${charLabel ? `<label>${esc(charLabel)}<input type="text" list="charList" autocomplete="off" data-gk="hero" data-pid="${esc(p.id)}" value="${esc(row.hero || "")}"></label>` : ""}
     ${stats.map(st => `<label>${statLabel(st)}<input type="number" inputmode="decimal" min="0" step="any" data-gk="${esc(st.key)}" data-num="1" data-pid="${esc(p.id)}" value="${esc(row[st.key] ?? "")}"></label>`).join("")}
   </div>`;
@@ -691,6 +695,10 @@ function bindDetails(g){
     toast(cur.result === "W" ? "Saved. Eagles win! 🦅" : "Saved as final."); queueArchive();
   };
   D.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { statTab = b.dataset.stab; keep(() => renderMatch()); });
+  /* role icon buttons: tap to pick, tap again to clear; they drive the hidden role list underneath */
+  D.querySelectorAll("[data-rpick]").forEach(b => b.onclick = () => { const box = b.closest(".rolepick"), sel = box.querySelector("select"), on = b.classList.contains("on");
+    sel.value = on ? "" : b.dataset.rpick; box.querySelectorAll(".rbtn").forEach(x => { const sel2 = !on && x === b; x.classList.toggle("on", sel2); x.setAttribute("aria-pressed", sel2); });
+    sel.dispatchEvent(new Event("change", {bubbles:true})); });
   D.querySelectorAll("[data-gk]").forEach(inp => { const h = () => {
     const n = +statTab, gm = gameRec(cur, n); gm.p = gm.p || {}; const row = gm.p[inp.dataset.pid] = gm.p[inp.dataset.pid] || {};
     const v = inp.value.trim(); if (v === "") delete row[inp.dataset.gk]; else row[inp.dataset.gk] = inp.dataset.num ? +v : v;

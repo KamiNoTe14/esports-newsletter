@@ -213,10 +213,12 @@ function resultRow(site, m){
     </div></details>`;
 }
 
+/* Role names, with the game's role icon in front when Site Manager has one (Marvel Rivals). */
+function roleTags(g, list){ return list.map(r => `<span class="role">${g?.roleIcons?.[r] ? `<img src="${esc(BASE + g.roleIcons[r])}" alt="">` : ""}${esc(r)}</span>`).join(" "); }
 function boxScore(g, m){
   const ps = m.players || [], cols = (g.statList || []).filter(c => ps.some(p => p.stats && c.key in p.stats)), roles = ps.some(p => (p.roles || []).length);
   if (!ps.length || (!cols.length && !roles)) return "";
-  return `<div class="tbl-wrap box${cols.length > 4 ? " wide" : ""}"><table class="tbl"><thead><tr><th>Player</th>${roles ? "<th>Role</th>" : ""}${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${roles ? `<td class="muted">${esc((p.roles || []).join(" / "))}</td>` : ""}${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(fmtStat(c, p.stats[c.key])) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  return `<div class="tbl-wrap box${cols.length > 4 ? " wide" : ""}"><table class="tbl"><thead><tr><th>Player</th>${roles ? "<th>Role</th>" : ""}${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${roles ? `<td class="muted">${roleTags(g, p.roles || [])}</td>` : ""}${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(fmtStat(c, p.stats[c.key])) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
 /* ---------- "Eagles at the next level" (About page): alumni who are playing somewhere now ---------- */
@@ -309,7 +311,7 @@ function drawPlayer(site, host, all, dir){
       <h2 class="res-h">Stats</h2>
       ${Object.keys(byGame).length ? `<div class="grid g2">${Object.values(byGame).map(s => `<div class="card stat-card">${s.game.statArt || s.game.art ? `<img class="team-art" src="${esc(BASE + (s.game.statArt || s.game.art))}" alt="">` : ""}${s.game.icon ? `<img class="game-logo" src="${esc(/^https?:/.test(s.game.icon) ? s.game.icon : BASE + s.game.icon)}" alt="${esc(s.game.name)}">` : `<p class="eyebrow">${esc(s.game.name)}</p>`}
         <div class="stat-row"><div><b>${s.n}</b><small>Matches</small></div><div><b>${s.w}–${s.l}</b><small>Record</small></div>${(s.game.statList || []).filter(x => x.avg ? (s.avg[x.key] || []).length : x.key in s.tot).map(x => x.avg ? `<div><b>${(s.avg[x.key].reduce((a, b) => a + b, 0) / s.avg[x.key].length).toFixed(1)}%</b><small>${esc(x.label.replace(/\s*%\s*$/, ""))}<br>average</small></div>` : `<div><b>${s.tot[x.key].toLocaleString("en-US")}</b><small>${esc(x.label)}<br>${(s.tot[x.key] / (s.cnt[x.key] || s.n)).toLocaleString("en-US", {maximumFractionDigits:1})}/match</small></div>`).join("")}</div>
-        ${mainRoles(s.roles).length ? `<div class="stat-tags"><p><span>Role</span>${mainRoles(s.roles).map(esc).join(" · ")}</p></div>` : ""}</div>`).join("")}</div>`
+        ${mainRoles(s.roles).length ? `<div class="stat-tags"><p><span>Role</span>${roleTags(s.game, mainRoles(s.roles))}</p></div>` : ""}</div>`).join("")}</div>`
         : `<div class="empty">Stats show up here after ${esc(display)} plays a match.</div>`}
       ${played.length ? `<h2 class="res-h" style="margin-top:34px">Match log</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Team</th><th>Opponent</th><th class="n">Result</th><th>Stats</th></tr></thead><tbody>${played.map(m => { const st = (m.players.find(p => p.id === id) || {}).stats || {}, g = gameFor(site, m.game);
         const yr = new Date(m.startsAt).getFullYear();

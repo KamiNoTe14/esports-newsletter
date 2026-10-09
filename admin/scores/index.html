@@ -133,6 +133,15 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .rolepick{grid-column:1/-1;display:grid;gap:4px;font-size:12px;color:var(--muted)}.rolepick>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
 .rbtn{min-width:0;overflow:hidden;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);color:var(--muted);font:700 14px var(--display);letter-spacing:.05em;text-transform:uppercase}
 .rbtn img{width:28px;height:28px;flex:none;opacity:.55}.rbtn small{font:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media (max-width:440px){.rbtn small{display:none}}.rbtn.on{border-color:var(--gold);background:rgba(255,188,5,.14);color:var(--text);box-shadow:0 0 0 1px var(--gold) inset}.rbtn.on img{opacity:1}
+.hlab{grid-column:1/-1}.hpick{display:flex;align-items:center;gap:6px;position:relative}.hpick input{flex:1;min-width:0}.hpick img{width:40px;height:40px;border-radius:8px;flex:none;object-fit:cover;background:var(--navy)}
+.hbtn{flex:none;width:44px;min-height:44px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);color:var(--gold);font-size:20px}
+.picker{position:fixed;inset:0;z-index:80;background:rgba(0,10,25,.7);display:flex;align-items:flex-end;justify-content:center}
+.pk-in{width:min(760px,100%);max-height:86vh;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line-2);border-radius:18px 18px 0 0;overflow:hidden}
+.pk-h{display:flex;gap:8px;padding:12px;border-bottom:1px solid var(--line)}.pk-h input{flex:1;min-height:46px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);padding:0 12px}
+.pk-x{width:46px;font-size:26px;color:var(--muted)}
+.pk-grid{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:12px}
+.pk-grid button{display:grid;gap:4px;justify-items:center;padding:6px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font:700 12.5px/1.15 var(--body);text-align:center}
+.pk-grid button.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}.pk-grid img{width:72px;height:72px;border-radius:8px;object-fit:cover;background:var(--navy)}
 details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -205,7 +214,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 <div id="toast" class="toast" hidden role="status"></div>
 
 <script type="module">
-import {backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
+import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=15";
 
 const $ = s => document.querySelector(s);
@@ -581,6 +590,25 @@ const SI = {
   shots:'<circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>'
 };
 const statLabel = st => SI[st.key] ? `<span class="slab"><svg viewBox="0 0 24 24" aria-hidden="true">${SI[st.key]}</svg>${esc(st.label)}</span>` : esc(st.label);
+/* Character pictures: Marvel Rivals face crops, Smash stock icons. Used by the picture picker so heroes can be
+   matched by sight against the end-of-match screen. */
+function charThumb(g, name){
+  const dir = String(g.charArt || g.charIcons || "").replace(/\/$/, ""); if (!dir || !name) return "";
+  return SITE + dir + "/" + slug(name) + (g.key === "marvel-rivals" ? "-face.webp" : "-logo.webp");
+}
+function openCharPicker(g, input){
+  const names = listOf(g.chars).sort((a, b) => a.localeCompare(b));
+  const dlg = document.createElement("div"); dlg.className = "picker";
+  dlg.innerHTML = `<div class="pk-in" role="dialog" aria-label="Choose a ${esc(g.charLabel || "character")}"><div class="pk-h"><input type="search" placeholder="Search ${esc((g.charLabel || "character").toLowerCase())}es…" aria-label="Search"><button type="button" class="pk-x" aria-label="Close">×</button></div>
+    <div class="pk-grid">${names.map(n => `<button type="button" data-name="${esc(n)}"${n === input.value ? ' class="on"' : ""}><img src="${esc(charThumb(g, n))}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${esc(n)}</span></button>`).join("")}</div></div>`;
+  document.body.appendChild(dlg);
+  const close = () => dlg.remove();
+  dlg.onclick = e => { if (e.target === dlg) close(); };
+  dlg.querySelector(".pk-x").onclick = close;
+  const q = dlg.querySelector("input"); q.oninput = () => { const t = q.value.toLowerCase(); dlg.querySelectorAll(".pk-grid button").forEach(b => b.hidden = !b.dataset.name.toLowerCase().includes(t)); };
+  dlg.querySelectorAll(".pk-grid button").forEach(b => b.onclick = () => { input.value = b.dataset.name; input.dispatchEvent(new Event("change", {bubbles:true})); close(); renderMatch(); });
+  setTimeout(() => q.focus(), 50);
+}
 function statInputs(g, p, on, unit){
   const stats = g.statList || [], roles = listOf(g.roles), charLabel = (g.charLabel || "").trim();
   if (!tracks(g)) return "";
@@ -595,7 +623,7 @@ function statInputs(g, p, on, unit){
   return `<div class="stats">
     ${roles.length ? (g.roleIcons ? `<div class="rolepick" role="group" aria-label="Role"><span>Role</span><div>${roles.map(r => `<button type="button" class="rbtn${row.role === r ? " on" : ""}" data-rpick="${esc(r)}" data-pid="${esc(p.id)}" title="${esc(r)}" aria-pressed="${row.role === r}">${g.roleIcons[r] ? `<img src="${esc(SITE + g.roleIcons[r])}" alt="">` : ""}<small>${esc(r)}</small></button>`).join("")}</div><select data-gk="role" data-pid="${esc(p.id)}" hidden><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></div>`
       : `<label>Role<select data-gk="role" data-pid="${esc(p.id)}"><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></label>`) : ""}
-    ${charLabel ? `<label>${esc(charLabel)}<input type="text" list="charList" autocomplete="off" data-gk="hero" data-pid="${esc(p.id)}" value="${esc(row.hero || "")}"></label>` : ""}
+    ${charLabel ? `<label class="hlab">${esc(charLabel)}<span class="hpick">${charThumb(g, row.hero) ? `<img src="${esc(charThumb(g, row.hero))}" alt="" onerror="this.remove()">` : ""}<input type="text" list="charList" autocomplete="off" data-gk="hero" data-pid="${esc(p.id)}" value="${esc(row.hero || "")}"><button type="button" class="hbtn" data-hpick="${esc(p.id)}" aria-label="Choose from pictures">▦</button></span></label>` : ""}
     ${stats.map(st => `<label>${statLabel(st)}<input type="number" inputmode="decimal" min="0" step="any" data-gk="${esc(st.key)}" data-num="1" data-pid="${esc(p.id)}" value="${esc(row[st.key] ?? "")}"></label>`).join("")}
   </div>`;
 }
@@ -695,6 +723,7 @@ function bindDetails(g){
     toast(cur.result === "W" ? "Saved. Eagles win! 🦅" : "Saved as final."); queueArchive();
   };
   D.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => { statTab = b.dataset.stab; keep(() => renderMatch()); });
+  D.querySelectorAll("[data-hpick]").forEach(b => b.onclick = () => openCharPicker(g, b.parentElement.querySelector("input")));
   /* role icon buttons: tap to pick, tap again to clear; they drive the hidden role list underneath */
   D.querySelectorAll("[data-rpick]").forEach(b => b.onclick = () => { const box = b.closest(".rolepick"), sel = box.querySelector("select"), on = b.classList.contains("on");
     sel.value = on ? "" : b.dataset.rpick; box.querySelectorAll(".rbtn").forEach(x => { const sel2 = !on && x === b; x.classList.toggle("on", sel2); x.setAttribute("aria-pressed", sel2); });

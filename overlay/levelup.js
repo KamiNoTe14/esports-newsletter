@@ -3,6 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare. Add ?bg=1 to see an overlay on a grey test background. */
 import {gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=16";
 import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=24";
+import {connectSOS} from "./sos.js?v=1";
 
 const q = new URLSearchParams(location.search);
 const STATION = q.get("station") || "1", LAYER = document.body.dataset.layer;
@@ -75,6 +76,8 @@ const CLAW_D = ["M560,10 L538,21 L515,30 L491,39 L470,50 L455,70 L433,81 L412,92
 const claw = cls => `<svg class="claw ${cls || ""}" viewBox="0 0 640 430" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="sh" transform="translate(-10 12)">${CLAW_D.map(d => `<path d="${d}"/>`).join("")}</g><g>${CLAW_D.map(d => `<path d="${d}"/>`).join("")}</g></svg>`;
 /* Hand-brushed underline drawn under titles. */
 const BRUSH = `<svg viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M8 17 C 120 6, 260 4, 380 9 S 560 14, 592 8"/></svg>`;
+/* Shrink long team names so "Byron Center" fits instead of being cut off (Anton is about half an em per letter). */
+const fitName = (name, max, room) => Math.max(34, Math.min(max, Math.floor(room / (String(name || "").length * .5 || 1))));
 const gameLogo = g => g.icon ? src(g.icon) : "";
 /* Background artwork for full-screen graphics: this team's photo/art first, then the game's. */
 const artFor = (m, g) => src((site.teams || []).find(t => t.id === m.teamId)?.art || g.art || "");
@@ -88,7 +91,7 @@ function frame(cls, m, g, {script = "", title = "", sub = "", body = "", foot = 
       ${title ? `<div class="ttl${script ? " has-script" : ""}"><span class="bk"><b class="grunge">${esc(title)}</b></span>${script ? `<i>${esc(script)}</i>` : ""}${BRUSH}</div>` : ""}${sub ? `<small>${esc(sub)}</small>` : ""}</header>
     ${body}${foot ? `<div class="foot">${foot}</div>` : ""}<div class="flash"></div></div>`;
 }
-const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
+const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; rlStatic = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
 
 /* ---------- score bug ---------- */
 let lastScores = null;
@@ -98,7 +101,7 @@ function scorebug(m){
   const state = fin ? `<b class="fin">Final</b>` : live ? `<b>${esc(unit)} ${m.current || 1}${g.points && cur && (cur.us || cur.them) ? ` · ${station.swap ? `${cur.them}-${cur.us}` : `${cur.us}-${cur.them}`}` : ""}</b>` : `<b>${esc(fmtTime(m.startsAt))}</b>`;
   const who = (s, r) => { const pic = s.now ? charImg(g, s.now.char) : "", img = pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : "";
     return s.now ? `<small>${r ? "" : img}${esc(s.now.name)}${s.now.char ? ` · ${esc(s.now.char)}` : ""}${r ? img : ""}</small>` : `<small>${esc(s.us ? s.team : s.team || s.school)}</small>`; };
-  const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b>${esc(s.name)}</b>${who(s, r)}</div>`, sc = `<div class="sc" data-side="${r ? "r" : "l"}"><span>${s.score}</span></div>`;
+  const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b style="font-size:${fitName(s.name, 54, 290)}px">${esc(s.name)}</b>${who(s, r)}</div>`, sc = `<div class="sc" data-side="${r ? "r" : "l"}"><span>${s.score}</span></div>`;
     return `<div class="wing ${r ? "r" : "l"} ${s.us ? "us" : "them"}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };
   const pips = (s, rev) => `<span class="pips">${Array.from({length:need}, (_, i) => { const k = rev ? need - 1 - i : i; return `<i class="${k < s.won ? "on" : ""}" data-k="${k}"></i>`; }).join("")}</span>`;
   out.html = `<div class="bug">
@@ -114,6 +117,97 @@ function scorebug(m){
     });
   }
   lastScores = [{score:L.score, won:L.won}, {score:R.score, won:R.won}];
+}
+
+/* ---------- Rocket League: live score bug fed by the game itself ----------
+   Games marked liveFeed:"sos" in site.json get this bug instead: the game clock in the middle and the live goal score,
+   read from the SOS BakkesMod plugin on the PC running Rocket League (?sos=host:port, default localhost:49122).
+   The series (game 2, best of 5, pips) still comes from the scorekeeper. Blue is always on the left, like the game.
+   Which color Hartland is: the station setting in the scorekeeper, or worked out from player names in the lobby. */
+const SOS_ADDR = q.get("sos") || "localhost:49122";
+const rl = {on:false, game:null, players:{}, goal:null, replay:false, ended:false, feed:null};
+const kph = v => Math.round(+v || 0);
+const clock = gm => { if (!gm) return "5:00"; const t = Math.max(0, Math.round(gm.time_seconds ?? 300)); return (gm.isOT ? "+" : "") + Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
+function startSOS(){
+  if (rl.feed) return;
+  let goalTimer = null;
+  rl.feed = connectSOS(SOS_ADDR, {
+    status(ok){ rl.on = ok; if (!ok){ rl.game = null; } draw(); },
+    event(ev, d){
+      if (ev === "game:update_state"){
+        rl.game = d?.hasGame ? d.game : null; rl.players = d?.players || {};
+        const wasReplay = rl.replay; rl.replay = !!rl.game?.isReplay;
+        if (wasReplay && !rl.replay){ rl.goal = null; }
+        if (rl.game && !rl.game.hasWinner && rl.game.time_seconds > 0) rl.ended = false;
+      } else if (ev === "game:goal_scored"){
+        rl.goal = {name:d?.scorer?.name || "", team:+(d?.scorer?.teamnum ?? -1), assist:d?.assister?.name || "", speed:kph(d?.goalspeed)};
+        clearTimeout(goalTimer); goalTimer = setTimeout(() => { rl.goal = null; draw(); }, 9000);
+      } else if (ev === "game:replay_end"){ rl.goal = null; rl.replay = false; }
+      else if (ev === "game:match_ended"){ rl.ended = true; }
+      else if (ev === "game:match_destroyed" || ev === "game:initialized"){ rl.ended = false; rl.goal = null; }
+      draw();
+    }
+  });
+}
+/* Hartland's color in the lobby: 0 = blue, 1 = orange. */
+function ourTeamNum(m){
+  if (station.rlSide === "blue") return 0;
+  if (station.rlSide === "orange") return 1;
+  const ours = new Set((m.players || []).flatMap(p => [tagOf(p), nameOf(p), p.tag, p.name]).filter(Boolean).map(x => String(x).toLowerCase()));
+  const hits = [0, 0]; Object.values(rl.players).forEach(p => { if (ours.has(String(p.name || "").toLowerCase())) hits[p.team === 1 ? 1 : 0]++; });
+  return hits[1] > hits[0] ? 1 : 0;
+}
+let rlStatic = "", rlLive = null;
+function rlbug(m){
+  const g = gameFor(site, m.game), need = Math.floor((+m.bestOf || 1) / 2) + 1, us = ourTeamNum(m);
+  const usSide = {name:US.short, logo:US.logo, won:(m.games || []).filter(x => x.winner === "us").length};
+  const themSide = {name:oppShort(m), logo:station.oppLogo || m.opponent?.logo || "", won:(m.games || []).filter(x => x.winner === "them").length};
+  const sides = us === 0 ? [usSide, themSide] : [themSide, usSide];   // [blue, orange]
+  const decided = (m.games || []).filter(x => x.winner).length;
+  const gameNo = m.status === "final" ? decided : Math.min(+m.bestOf || 1, rl.ended ? Math.max(1, decided) : decided + 1);
+  const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b style="font-size:${fitName(s.name, 62, 300)}px">${esc(s.name)}</b></div>`, sc = `<div class="sc" data-side="${r ? 1 : 0}"><span>0</span></div>`;
+    return `<div class="wing ${r ? "r orange" : "l blue"}${(r ? 1 : 0) === us ? " us" : " them"}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };
+  const pips = (s, rev) => `<span class="pips">${Array.from({length:need}, (_, i) => { const k = rev ? need - 1 - i : i; return `<i class="${k < s.won ? "on" : ""}" data-k="${k}"></i>`; }).join("")}</span>`;
+  const html = `<div class="bug rl">
+      <div class="ev">${rl.on && rl.game && !rl.ended ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
+      <div class="bar">${wing(sides[0])}<div class="mid"><b class="clock">5:00</b><small class="state"></small></div>${wing(sides[1], true)}</div>
+      <div class="sub">${pips(sides[0])}<span>Game <em>${gameNo}</em> &nbsp;|&nbsp; Best of <em>${esc(m.bestOf)}</em></span>${pips(sides[1], true)}</div>
+      <div class="goal" hidden></div>
+    </div>${q.get("card") === "0" ? "" : `<div class="pcard" hidden></div>`}`;
+  if (html !== rlStatic){ rlStatic = html; out.html = html; rlLive = null; }
+  rlUpdate(us);
+}
+/* Clock, live score, replay and goal banner change many times a second, so they're patched in place
+   (redrawing the whole bug would restart its animations). */
+function rlUpdate(us){
+  const gm = rl.game, root = app.querySelector(".bug.rl"); if (!root) return;
+  const score = [gm?.teams?.[0]?.score ?? 0, gm?.teams?.[1]?.score ?? 0];
+  const state = !rl.on ? "Waiting for game" : !gm ? "Waiting for kickoff" : rl.ended || gm.hasWinner ? "Final" : rl.replay ? "Replay" : gm.isOT ? "Overtime" : "";
+  root.classList.toggle("ot", !!gm?.isOT); root.classList.toggle("replay", rl.replay); root.classList.toggle("idle", !rl.on || !gm);
+  const ck = root.querySelector(".clock"); const t = rl.ended || gm?.hasWinner ? "Final" : clock(gm);
+  if (ck.textContent !== t){ ck.textContent = t; ck.classList.toggle("fin", t === "Final"); }
+  const st = root.querySelector(".state"); if (st.textContent !== state) st.textContent = state;
+  [0, 1].forEach(i => { const el = root.querySelector(`.sc[data-side="${i}"]`), span = el.firstElementChild;
+    if (span.textContent !== String(score[i])){
+      const changed = rlLive && score[i] > rlLive[i]; span.textContent = score[i];
+      if (changed){ el.classList.remove("hit"); el.parentElement.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); el.parentElement.classList.add("hit"); }
+    } });
+  rlLive = score;
+  /* goal banner: scorer, assist, shot speed */
+  const gl = root.querySelector(".goal"), gk = rl.goal ? JSON.stringify(rl.goal) : "";
+  if (gl.dataset.k !== gk){ gl.dataset.k = gk; gl.hidden = !rl.goal;
+    if (rl.goal) gl.innerHTML = `<i class="${rl.goal.team === 1 ? "orange" : "blue"}"></i><b>Goal!</b><span>${esc(rl.goal.name)}</span><small>${[rl.goal.assist ? `Assist ${esc(rl.goal.assist)}` : "", rl.goal.speed ? `${rl.goal.speed} km/h` : ""].filter(Boolean).join(" &nbsp;/&nbsp; ")}</small>`; }
+  /* spectated player card */
+  const pc = app.querySelector(".pcard"); if (!pc) return;
+  const p = gm?.hasTarget ? rl.players[gm.target] : null, show = !!p && !rl.replay && !rl.ended;
+  pc.hidden = !show; if (!show) return;
+  const boost = Math.max(0, Math.min(100, Math.round(p.boost || 0))), C = 2 * Math.PI * 52;
+  const key = [p.id, p.name, p.team, p.goals, p.assists, p.saves, p.shots, p.score].join("|");
+  if (pc.dataset.k !== key){ pc.dataset.k = key; pc.className = `pcard ${p.team === 1 ? "orange" : "blue"}${(p.team === 1 ? 1 : 0) === us ? " us" : ""}`;
+    pc.innerHTML = `<div class="ring"><svg viewBox="0 0 120 120"><circle class="bgc" cx="60" cy="60" r="52"/><circle class="fg" cx="60" cy="60" r="52" stroke-dasharray="${C.toFixed(1)}"/></svg><b>0</b><small>Boost</small></div>
+      <div class="pinfo"><b>${esc(p.name)}</b><div class="pst">${[["Goals", p.goals], ["Assists", p.assists], ["Saves", p.saves], ["Shots", p.shots]].map(([k, v]) => `<span><em>${+v || 0}</em>${k}</span>`).join("")}</div></div>`; }
+  const fg = pc.querySelector(".fg"); fg.style.strokeDashoffset = (C * (1 - boost / 100)).toFixed(1);
+  pc.querySelector(".ring b").textContent = boost; pc.classList.toggle("maxed", boost >= 100); pc.classList.toggle("noboost", boost === 0);
 }
 
 /* ---------- season numbers ---------- */
@@ -226,16 +320,18 @@ function draw(){
   if (!finalsReady) return;
   if (!station.matchId){ empty(`Station ${STATION} has no match on it. Pick one in the scorekeeper.`); return; }
   if (!match){ empty("Loading the match…"); return; }
+  const g = gameFor(site, match.game);
+  if ((LAYER || "scorebug") === "scorebug" && g.liveFeed === "sos"){ startSOS(); rlbug(match); return; }
   (LAYERS[LAYER] || scorebug)(match);
 }
 /* Replay the entrance: OBS tells a Browser Source when its scene goes live, so every cut to this graphic animates in. */
-function replay(){ clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; lastScores = null; draw(); }
+function replay(){ clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; lastScores = null; rlStatic = ""; draw(); }
 window.addEventListener("obsSourceActiveChanged", e => { if (e.detail?.active) replay(); });
 window.addEventListener("obsSourceVisibleChanged", e => { if (e.detail?.visible) replay(); });
 if (q.get("bg")) document.addEventListener("keydown", e => { if (e.key === "r") replay(); });   // preview: press R to replay
 watchBroadcast(b => {
   const next = (b.stations || {})[STATION] || {};
-  if (next.matchId !== station.matchId){ lastScores = null; lastHTML = ""; match = null; if (stopMatch) Promise.resolve(stopMatch).then(f => f && f()); stopMatch = watchMatch(next.matchId, mm => { match = mm; draw(); }); }
+  if (next.matchId !== station.matchId){ lastScores = null; lastHTML = ""; rlStatic = ""; match = null; if (stopMatch) Promise.resolve(stopMatch).then(f => f && f()); stopMatch = watchMatch(next.matchId, mm => { match = mm; draw(); }); }
   station = next; draw();
 });
 if (LAYER !== "scorebug") watchFinals(site, list => { finals = list; finalsReady = true; draw(); });

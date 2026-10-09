@@ -421,7 +421,7 @@ function stationsHTML(){
   </div></details>`;
 }
 function bindCopy(root){ root.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast("Link copied."); } catch(e){ prompt("Copy this link:", b.dataset.copy); } }); }
-function freshStation(id){ return {matchId:id, swap:false, oppLineup:"", oppNow:"", oppChar:"", oppLogo:"", compare:{a:"", b:""}}; }
+function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppLogo:"", compare:{a:"", b:""}}; }
 function bindStations(){
   const box = $("#stBox"); if (!box) return;
   box.querySelectorAll("[data-st]").forEach(sel => sel.onchange = async () => {
@@ -733,7 +733,9 @@ function streamHTML(g, them){
   return `<details class="sec" id="onStream"${n ? " open" : ""}><summary>On stream${n ? `<span class="pill-live" style="font-size:12px">Station ${n}</span>` : `<span>Not on stream</span>`}</summary><div class="secb form">
     <div class="stpick" role="group" aria-label="Put this match on a station">${STATIONS.map(k => { const other = bc.stations[k]?.matchId && bc.stations[k].matchId !== cur.id;
       return `<button type="button" class="btn ${k === n ? "btn-gold" : "btn-line"}" data-station="${k}" aria-pressed="${k === n}">${k === n ? "✓ " : ""}Station ${k}${other ? "<small>in use</small>" : ""}</button>`; }).join("")}</div>
-    ${n ? `<label class="tog"><input type="checkbox" data-bc="swap"${st.swap ? " checked" : ""}> Hartland on the right side (we're the away team)</label>
+    ${n ? `${g.liveFeed === "sos" ? `<label class="f"><span>Hartland's color in the Rocket League lobby</span><select data-bc="rlSide"><option value="">Work it out from player names</option><option value="blue"${st.rlSide === "blue" ? " selected" : ""}>Blue (left side of the score bug)</option><option value="orange"${st.rlSide === "orange" ? " selected" : ""}>Orange (right side)</option></select></label>
+      <p class="hint" style="margin:0">The score bug reads the clock and goals straight from Rocket League (SOS BakkesMod plugin) on the PC running the game. Mark each game's winner here as usual for the series.</p>`
+      : `<label class="tog"><input type="checkbox" data-bc="swap"${st.swap ? " checked" : ""}> Hartland on the right side (we're the away team)</label>`}
       <label class="f"><span>${esc(them)} lineup (gamertags, commas between)</span><input data-bc="oppLineup" value="${esc(st.oppLineup || "")}" placeholder="Shown on the VS screen and starting lineups" autocomplete="off"></label>
       ${oneVone ? `<div class="two"><label class="f"><span>${esc(them)} player on now</span><input data-bc="oppNow" value="${esc(st.oppNow || "")}" autocomplete="off"></label>
         <label class="f"><span>Their ${esc(g.charLabel.toLowerCase())}</span><input data-bc="oppChar" list="charList" value="${esc(st.oppChar || "")}" autocomplete="off"></label></div>

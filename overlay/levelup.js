@@ -93,23 +93,35 @@ function frame(cls, m, g, {script = "", title = "", sub = "", body = "", foot = 
 }
 const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; rlStatic = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
 
-/* ---------- score bug ---------- */
-let lastScores = null;
+/* ---------- score bug (every game without a live game feed) ----------
+   Same build as the Rocket League bug: big names with a team-color stripe (gold for us, steel for them), the game's
+   logo in the middle with what's happening under it, "Set 2 | Best of 5" and pips underneath, a white result banner
+   when a game is won, and player cards along the bottom for one-on-one games like Smash. */
+let lastScores = null, banner = null, bannerTimer = null;
 function scorebug(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), need = Math.floor((+m.bestOf || 1) / 2) + 1, cur = (m.games || []).find(x => x.n === m.current);
   const unit = g.unit || "Game", live = m.status === "live", fin = m.status === "final", gl = gameLogo(g);
-  const state = fin ? `<b class="fin">Final</b>` : live ? `<b>${esc(unit)} ${m.current || 1}${g.points && cur && (cur.us || cur.them) ? ` · ${station.swap ? `${cur.them}-${cur.us}` : `${cur.us}-${cur.them}`}` : ""}</b>` : `<b>${esc(fmtTime(m.startsAt))}</b>`;
-  const who = (s, r) => { const pic = s.now ? charImg(g, s.now.char) : "", img = pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : "";
-    return s.now ? `<small>${r ? "" : img}${esc(s.now.name)}${s.now.char ? ` · ${esc(s.now.char)}` : ""}${r ? img : ""}</small>` : `<small>${esc(s.us ? s.team : s.team || s.school)}</small>`; };
-  const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b style="font-size:${fitName(s.name, 54, 290)}px">${esc(s.name)}</b>${who(s, r)}</div>`, sc = `<div class="sc" data-side="${r ? "r" : "l"}"><span>${s.score}</span></div>`;
+  const decided = (m.games || []).filter(x => x.winner).length, n = fin ? Math.max(1, decided) : Math.min(+m.bestOf || 1, m.current || decided + 1);
+  const pts = g.points && cur && (cur.us || cur.them) ? `${g.points} ${station.swap ? `${cur.them}–${cur.us}` : `${cur.us}–${cur.them}`}` : "";
+  const state = fin ? `<b class="fin">Final</b>` : live ? `<small class="state">${esc(pts || "Live")}</small>` : `<small class="state up">${esc(m.status === "upcoming" ? fmtTime(m.startsAt) : m.status)}</small>`;
+  const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b style="font-size:${fitName(s.name, 62, 300)}px">${esc(s.name)}</b></div>`, sc = `<div class="sc" data-side="${r ? "r" : "l"}"><span>${s.score}</span></div>`;
     return `<div class="wing ${r ? "r" : "l"} ${s.us ? "us" : "them"}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };
   const pips = (s, rev) => `<span class="pips">${Array.from({length:need}, (_, i) => { const k = rev ? need - 1 - i : i; return `<i class="${k < s.won ? "on" : ""}" data-k="${k}"></i>`; }).join("")}</span>`;
-  out.html = `<div class="bug">
+  /* a game just won: banner for 8 seconds */
+  if (lastScores && !fin) [L, R].forEach((s, i) => { if (s.won > lastScores[i].won){
+    const other = i ? L : R, lead = s.won > other.won ? `Leads ${s.won}–${other.won}` : s.won === other.won ? `Series tied ${s.won}–${other.won}` : `Trails ${s.won}–${other.won}`;
+    banner = {us:!!s.us, title:`${unit} ${decided}!`, name:s.name, note:lead}; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => { banner = null; draw(); }, 8000); } });
+  if (fin) banner = null;
+  const card = (s, r) => { if (!s.now || q.get("card") === "0") return ""; const pic = charImg(g, s.now.char);
+    return `<div class="pcard char${r ? " r" : ""}${s.us ? " us" : " them"}"><div class="ring">${pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : `<b>${monogram(s.now.name)}</b>`}</div>
+      <div class="pinfo"><b>${esc(s.now.name)}</b><div class="pst"><span><em>${esc(s.now.char || "—")}</em>${esc(g.charLabel || "Character")}</span><span><em>${esc(s.name)}</em>${esc(unit)} ${n}</span></div></div></div>`; };
+  out.html = `<div class="bug gen">
       <div class="ev">${live ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
       <div class="bar">${wing(L)}<div class="mid">${gl ? `<img src="${esc(gl)}" alt="${esc(g.name)}">` : `<span class="gname">${esc(g.short || g.name)}</span>`}${state}</div>${wing(R, true)}</div>
-      <div class="sub">${pips(L)}<span>Best of <em>${esc(m.bestOf)}</em></span>${pips(R, true)}</div>
-    </div>`;
-  /* a score that just changed rolls in with a gold flash; a newly won game lights its pip */
+      <div class="sub">${pips(L)}<span>${esc(unit)} <em>${n}</em> &nbsp;|&nbsp; Best of <em>${esc(m.bestOf)}</em></span>${pips(R, true)}</div>
+      ${banner ? `<div class="goal"><i class="${banner.us ? "us" : "them"}"></i><b>${esc(banner.title)}</b><span>${esc(banner.name)}</span><small>${esc(banner.note)}</small></div>` : ""}
+    </div>${card(L)}${card(R, true)}`;
+  /* a score that just changed rolls in with a gold flash and claw; a newly won game lights its pip */
   if (lastScores){
     [["l", L, 0], ["r", R, 1]].forEach(([side, s, idx]) => {
       if (s.score !== lastScores[idx].score){ const el = app.querySelector(`.sc[data-side="${side}"]`); el?.classList.add("hit"); el?.parentElement.classList.add("hit"); }

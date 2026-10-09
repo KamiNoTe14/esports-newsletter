@@ -4,35 +4,40 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <title>Score ticker · Hartland Esports</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&display=swap">
 <!-- Stream overlay: an ESPN BottomLine-style score ticker. Add it in OBS as a Browser Source at 1920 x 1080; the page is
      transparent except for the bar. One score at a time flips into view, and the label on the left changes with each section
      (Eagles Esports, Hartland Athletics, NFL, ...). Live scores update the moment the scorekeeper changes them.
      Options: ?hold=6 (seconds per score), ?height=72, ?top=1 (bar at the top), ?bg=1 (grey page background, for testing),
      ?sections=esports,athletics,pro,college,news (leave any out to hide it; ?sections=esports shows only our matches). -->
 <style>
-:root{--navy:#00274C;--gold:#FFBC05;--white:#fff;--live:#E8202A;--h:72px;--f:"Barlow Condensed","Arial Narrow",Arial,sans-serif}
-html,body{margin:0;height:100%;background:transparent;overflow:hidden}
+:root{--navy:#00274C;--gold:#FFBC05;--white:#fff;--live:#E8202A;--steel:#7F9BB8;--h:72px;--f:"Oswald","Arial Narrow",Arial,sans-serif;--d:"Anton",Impact,"Arial Narrow",sans-serif;--script:"Kaushan Script","Brush Script MT",cursive}
+/* Same fonts as the other LevelUP overlays, stored on the site (see assets/fonts). */
+@font-face{font-family:"Anton";src:url(../assets/fonts/anton-latin-400-normal.woff2) format("woff2");font-weight:100 900;font-display:block}
+@font-face{font-family:"Oswald";src:url(../assets/fonts/oswald-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:block}
+@font-face{font-family:"Oswald";src:url(../assets/fonts/oswald-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:block}
+@font-face{font-family:"Oswald";src:url(../assets/fonts/oswald-latin-700-normal.woff2) format("woff2");font-weight:700 900;font-display:block}
+@font-face{font-family:"Kaushan Script";src:url(../assets/fonts/kaushan-script-latin-400-normal.woff2) format("woff2");font-weight:100 900;font-display:block}
+html,body{margin:0;height:100%;background:transparent;overflow:hidden;font-synthesis:none}
 body.bg{background:#555}
 .bar{position:fixed;left:0;right:0;bottom:0;height:var(--h);display:flex;align-items:stretch;font-family:var(--f);color:var(--white);
   background:linear-gradient(180deg,#0B3A6B 0%,var(--navy) 48%,#001A33 100%);border-top:3px solid var(--gold);box-shadow:0 -6px 20px rgba(0,0,0,.4)}
 body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:3px solid var(--gold)}
 .brand{flex:none;display:flex;align-items:center;gap:10px;padding:0 18px 0 14px;background:#001A33;border-right:2px solid rgba(255,188,5,.5)}
 .brand img{height:calc(var(--h) * .58)}
-.brand b{display:block;font-weight:800;font-size:calc(var(--h) * .36);letter-spacing:.05em;text-transform:uppercase;line-height:.95}
+.brand b{display:block;font:400 calc(var(--h) * .4)/.95 var(--d);letter-spacing:.02em;text-transform:uppercase}
 .brand small{display:block;font-size:calc(var(--h) * .2);letter-spacing:.16em;font-weight:700;color:var(--gold);text-transform:uppercase}
 /* the section label (changes with each section, like ESPN's "NHL") */
 .lab{flex:none;width:calc(var(--h) * 3.2);position:relative;overflow:hidden;border-right:2px solid rgba(255,255,255,.18)}
-.lab div{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10px;font-weight:800;font-size:calc(var(--h) * .34);letter-spacing:.06em;text-transform:uppercase;line-height:1;color:var(--gold)}
-.lab div.ann{background:var(--gold);color:var(--navy)}
+.lab div{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10px;font:400 calc(var(--h) * .4)/1 var(--script);color:var(--gold);transform:rotate(-4deg)}
+.lab div.ann{background:var(--gold);color:var(--navy);transform:none}
 /* the score area: one card at a time flips up into view */
 .main{flex:1;position:relative;overflow:hidden;min-width:0}
 .card{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 22px;gap:1px}
-.l1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;font-size:calc(var(--h) * .46);font-weight:700;line-height:1.05}
+.l1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;font:400 calc(var(--h) * .46)/1.1 var(--d);letter-spacing:.01em}
 .l2{display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(var(--h) * .26);font-weight:600;color:#C9D6E3;letter-spacing:.02em;line-height:1.1}
 .l2 b{color:var(--gold);font-weight:700}
 .nm{text-transform:none}
-.sc{font-weight:800;font-variant-numeric:tabular-nums;min-width:1ch}
+.sc{font-weight:400;font-variant-numeric:tabular-nums;min-width:1ch}
 .w{color:var(--gold)}
 .lo{color:#AFC0D3}
 .sep{width:2px;align-self:stretch;background:rgba(255,255,255,.35);margin:4px 4px}
@@ -53,7 +58,7 @@ body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:3px solid var(--gold)
 .clock{flex:none;display:flex;align-items:center;padding:0 16px;font-size:calc(var(--h) * .32);font-weight:700;background:#001A33;font-variant-numeric:tabular-nums}
 /* takeover for a pinned announcement */
 .alert{position:absolute;inset:0;display:flex;align-items:center;gap:16px;padding:0 26px;background:var(--gold);color:var(--navy);z-index:5;
-  font-size:calc(var(--h) * .44);font-weight:800;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  font:400 calc(var(--h) * .46)/1.1 var(--d);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .alert span{background:var(--navy);color:var(--gold);font-size:calc(var(--h) * .26);letter-spacing:.14em;padding:3px 10px;border-radius:3px}
 /* flip animation */
 .in{animation:up .4s cubic-bezier(.2,.8,.2,1) .18s both}.out{animation:away .25s ease-in both}

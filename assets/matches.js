@@ -221,6 +221,9 @@ async function firebaseBackend(){
     /* public/directory: past players (alumni) and the list of seasons that have results */
     watchDirectory(cb){ return fb.onSnapshot(fb.doc(db, "public", "directory"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
     async saveDirectory(dir){ await fb.setDoc(fb.doc(db, "public", "directory"), strip(dir)); },
+    /* public/broadcast: LevelUP stations (which match each streaming PC shows, plus overlay options) */
+    watchBroadcast(cb){ return fb.onSnapshot(fb.doc(db, "public", "broadcast"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
+    async setStation(n, data){ await fb.setDoc(fb.doc(db, "public", "broadcast"), {stations:{[n]:strip(data)}, updated:new Date().toISOString()}, {merge:true}); },
     /* public/ticker: announcements for the stream ticker */
     watchTicker(cb){ return fb.onSnapshot(fb.doc(db, "public", "ticker"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
     async saveTicker(t){ await fb.setDoc(fb.doc(db, "public", "ticker"), strip(t)); }
@@ -252,6 +255,10 @@ function mockBackend(){
     async syncSummaries(scoreboard, seasonDoc){ if (scoreboard) localStorage.setItem(SB, JSON.stringify(scoreboard)); if (seasonDoc) localStorage.setItem("eagles-mock-season-" + seasonDoc.season, JSON.stringify(seasonDoc)); },
     watchDirectory(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-directory")) || {}); } catch(e){ cb({}); } }; dirSubs.add(f); setTimeout(f, 0); return () => dirSubs.delete(f); },
     async saveDirectory(dir){ localStorage.setItem("eagles-mock-directory", JSON.stringify(dir)); dirSubs.forEach(f => f()); },
+    watchBroadcast(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-broadcast")) || {}); } catch(e){ cb({}); } }; f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-broadcast") f(); }); tickSubs.add(f); return () => tickSubs.delete(f); },
+    async setStation(n, data){ let b = {}; try { b = JSON.parse(localStorage.getItem("eagles-mock-broadcast")) || {}; } catch(e){}
+      b.stations = b.stations || {}; b.stations[n] = {...(b.stations[n] || {}), ...JSON.parse(JSON.stringify(data))}; b.updated = new Date().toISOString();
+      localStorage.setItem("eagles-mock-broadcast", JSON.stringify(b)); tickSubs.forEach(f => f()); },
     watchTicker(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-ticker")) || {}); } catch(e){ cb({}); } }; f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-ticker") f(); }); tickSubs.add(f); return () => tickSubs.delete(f); },
     async saveTicker(t){ localStorage.setItem("eagles-mock-ticker", JSON.stringify(t)); tickSubs.forEach(f => f()); }
   };

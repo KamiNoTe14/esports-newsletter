@@ -71,8 +71,8 @@ body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:3px solid var(--gold)
   <div class="clock" id="clock"></div>
 </div>
 <script type="module">
-import {watchBoard, watchTicker} from "../assets/live.js?v=23";
-import {gameFor, oppShort, postseason, rivalFor, fmtTime, roundLabel} from "../assets/matches.js?v=15";
+import {watchBoard, watchTicker} from "../assets/live.js?v=24";
+import {gameFor, oppShort, postseason, rivalFor, fmtTime, roundLabel} from "../assets/matches.js?v=16";
 const q = new URLSearchParams(location.search);
 const HOLD = (+q.get("hold") || 6) * 1000;
 if (q.get("height")) document.documentElement.style.setProperty("--h", (+q.get("height")) + "px");

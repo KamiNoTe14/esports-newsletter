@@ -182,6 +182,12 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .newp{margin-top:12px;border:1px dashed var(--line-2);border-radius:12px;padding:12px}
 .newp>summary{cursor:pointer;font:700 16px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold);list-style:none}
 .newp>summary::-webkit-details-marker{display:none}
+.strow{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.strow:first-of-type{border-top:0}.strow select{min-height:46px;min-width:0;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);padding:0 10px}.strow .olk{grid-column:1/-1}
+.stpick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stpick .btn{min-height:52px;padding:0 6px;font-size:16px;display:grid;place-items:center;line-height:1.1}.stpick small{font-size:11px;opacity:.75;font-weight:600}
+@media (max-width:440px){.stpick{grid-template-columns:repeat(2,1fr)}}
+details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:14px;min-height:36px;display:flex;align-items:center}
+.olinks{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:14px;padding:4px 0}.olinks a{color:var(--text,inherit);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tog{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);min-height:44px}
 .tog input{width:22px;height:22px;accent-color:var(--gold)}
 .alist{display:grid;gap:8px;margin-bottom:12px}
@@ -215,7 +221,7 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=15";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=16";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -228,6 +234,7 @@ const NOW = seasonOf();  // the current season; "season" below is the one being 
 let site = {teams:[], games:[]}, be = null, user = null, season = NOW, matches = [], unwatch = null;
 let dir = {alumni:[], seasons:[], rosters:{}}, lastEntry = null;
 let tick = {messages:[]};
+let bc = {stations:{}};   // LevelUP: which match is on each streaming station
 let view = "list", openId = null, cur = null, draft = null, undo = {}, saveTimer = null, saving = false, dirtyIds = new Set();
 const pendingSaves = new Map(); // match id -> latest local copy not yet written
 
@@ -241,6 +248,9 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
     user = u; renderWho();
     if (unwatch){ unwatch(); unwatch = null; }
     if (u && EDITORS.includes(u.email)){ unwatch = be.watchSeason(season, onMatches, onState);
+      be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}};
+        if (view === "list" && !document.activeElement?.closest?.("#stBox")) renderList();
+        else if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
       be.watchTicker(t => { tick = {messages:Array.isArray(t.messages) ? t.messages : []}; if (view === "list" && !document.activeElement?.closest?.("#tickBox")) renderList(); });
       be.watchDirectory(d => { dir = {...d, alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : [], rosters:d.rosters && typeof d.rosters === "object" ? d.rosters : {}}; if (view === "list") renderList(); }); }
     route();
@@ -348,6 +358,7 @@ function renderList(){
   const openRo = $("#rosterBox")?.open;
   $("#app").innerHTML = `<label class="seasonbar"><span>Season</span><select id="seasonSel">${seasonList(dir.seasons).map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}${se === NOW ? " (current)" : dir.seasons.includes(se) ? " ✓" : ""}</option>`).join("")}</select><b>${done.length ? rec : ""}</b></label>`
     + tickerHTML()
+    + stationsHTML()
     + (live.length ? sec("Live now", live, "") : "")
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
@@ -357,7 +368,7 @@ function renderList(){
     <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
   $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };
-  bindAlumni(); bindRosters(); bindTicker();
+  bindAlumni(); bindRosters(); bindTicker(); bindStations();
   $("#app").querySelectorAll("[data-open]").forEach(b => b.onclick = () => location.hash = "m/" + b.dataset.open);
   $("#backup") && ($("#backup").onclick = () => archive(true));
 }
@@ -382,6 +393,43 @@ function bindTicker(){
     const mins = +$("#tFor").value, until = mins ? new Date(Date.now() + mins * 6e4).toISOString() : "";
     save([...activeMsgs().filter(x => !($("#tPin").checked && x.pinned)), {id:Date.now().toString(36), text, pinned:$("#tPin").checked, until, at:new Date().toISOString(), by:user?.email || ""}]); toast("On the ticker."); };
   document.querySelectorAll(".tdel").forEach(b => b.onclick = () => save(activeMsgs().filter(x => x.id !== b.dataset.tid)));
+}
+
+/* ---------- LevelUP stations ----------
+   A station is one streaming PC. Each one shows one match; every overlay on that PC (score bug, VS screen, lineups…)
+   follows it. Saved in public/broadcast so the overlays update the moment a coach changes something. */
+const STATIONS = ["1", "2", "3", "4"];
+const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "Starting lineups"], ["team-compare", "Team comparison"], ["player-compare", "Player comparison"]];
+const stationOf = id => STATIONS.find(n => bc.stations[n]?.matchId === id) || "";
+const overlayURL = (layer, n) => `${SITE}overlay/${layer}.html${n === "1" ? "" : `?station=${n}`}`;
+async function setStation(n, data, msg){
+  bc.stations[n] = data;
+  try { await be.setStation(n, data); if (msg) toast(msg); } catch(e){ console.error(e); toast("Couldn't update the stream overlays. Check the connection."); }
+}
+function linksHTML(n){
+  return `<div class="olinks">${OVERLAYS.map(([k, t]) => `<a href="${esc(overlayURL(k, n))}" target="_blank" rel="noopener">${esc(t)}</a><button type="button" class="linkbtn" data-copy="${esc(overlayURL(k, n))}">Copy</button>`).join("")}</div>`;
+}
+function stationsHTML(){
+  const on = STATIONS.filter(n => bc.stations[n]?.matchId);
+  const all = [...matches];
+  return `<details class="sec" id="stBox"${on.length ? " open" : ""}><summary>Stream overlays${on.length ? `<span class="pill-live" style="font-size:12px">${on.length} on air</span>` : `<span>LevelUP</span>`}</summary><div class="secb">
+    <p class="hint" style="margin:0 0 10px">Each streaming PC is a station. Pick a match for each one here, or open a match and tap its station under <b>On stream</b>. Every overlay on that PC follows its match.</p>
+    ${STATIONS.map(n => { const id = bc.stations[n]?.matchId, m = all.find(x => x.id === id);
+      return `<div class="strow"><b>Station ${n}</b><select data-st="${n}" aria-label="Match on station ${n}"><option value="">Nothing on this station</option>${all.filter(x => x.status !== "canceled").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1).slice(0, 40).map(x => `<option value="${esc(x.id)}"${x.id === id ? " selected" : ""}>${esc(x.teamName)} vs ${esc(oppName(x))} · ${esc(fmtDay(x.startsAt))}${x.status === "live" ? " (live)" : ""}</option>`).join("")}${id && !m ? `<option value="${esc(id)}" selected>A match from another season</option>` : ""}</select>
+        ${id ? `<details class="olk"><summary>OBS links</summary>${linksHTML(n)}</details>` : ""}</div>`; }).join("")}
+    <p class="hint" style="margin:10px 0 0">In OBS add each link as a Browser Source, 1920 × 1080. Add <code>?bg=1</code> to a link to preview it on a grey background.</p>
+  </div></details>`;
+}
+function bindCopy(root){ root.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast("Link copied."); } catch(e){ prompt("Copy this link:", b.dataset.copy); } }); }
+function freshStation(id){ return {matchId:id, swap:false, oppLineup:"", oppNow:"", oppChar:"", oppLogo:"", compare:{a:"", b:""}}; }
+function bindStations(){
+  const box = $("#stBox"); if (!box) return;
+  box.querySelectorAll("[data-st]").forEach(sel => sel.onchange = async () => {
+    const n = sel.dataset.st, id = sel.value;
+    if (id){ const old = stationOf(id); if (old && old !== n) await setStation(old, {matchId:""}); }
+    await setStation(n, id ? freshStation(id) : {matchId:""}, id ? `On station ${n}.` : `Station ${n} cleared.`); renderList(); $("#stBox").open = true;
+  });
+  bindCopy(box);
 }
 
 /* Season rosters: who was on each team that season. Saved with the past players (public/directory) under
@@ -668,6 +716,7 @@ function detailsHTML(g, them){
         <p class="hint" style="margin:0">Saved to your past players list, so you only type each person once.</p></div></details>
       ${stats.length ? "" : `<p class="hint" style="margin-top:10px">To track stats for this game, list them on the Games tab in the Site Manager.</p>`}
     </div></details>
+    ${streamHTML(g, them)}
     <details class="sec"><summary>Stream links<span>${cur.stream?.live || cur.stream?.vod ? "Added" : "None yet"}</span></summary><div class="secb form">
       <label class="f"><span>YouTube live link</span><input type="url" inputmode="url" data-link="live" value="${esc(cur.stream?.live || "")}" placeholder="https://youtube.com/live/…"></label>
       <label class="f"><span>Replay (VOD) link</span><input type="url" inputmode="url" data-link="vod" value="${esc(cur.stream?.vod || "")}" placeholder="Leave blank to use the live link"></label></div></details>
@@ -676,8 +725,48 @@ function detailsHTML(g, them){
       <button class="btn btn-line" type="button" data-ff="us">Hartland forfeited</button>
       <button class="btn btn-line" type="button" id="resetg">Clear all ${esc((g.unit || "game").toLowerCase())} scores</button></div></details>`;
 }
+/* "On stream" panel for the open match: which station shows it and what the overlays need that isn't in the score. */
+function streamHTML(g, them){
+  const n = stationOf(cur.id), st = n ? bc.stations[n] : null, ppl = cur.players || [];
+  const pname = p => p.tag || p.name || "Player";
+  const oneVone = (g.charLabel || "").trim() && +g.teamSize <= 3;
+  return `<details class="sec" id="onStream"${n ? " open" : ""}><summary>On stream${n ? `<span class="pill-live" style="font-size:12px">Station ${n}</span>` : `<span>Not on stream</span>`}</summary><div class="secb form">
+    <div class="stpick" role="group" aria-label="Put this match on a station">${STATIONS.map(k => { const other = bc.stations[k]?.matchId && bc.stations[k].matchId !== cur.id;
+      return `<button type="button" class="btn ${k === n ? "btn-gold" : "btn-line"}" data-station="${k}" aria-pressed="${k === n}">${k === n ? "✓ " : ""}Station ${k}${other ? "<small>in use</small>" : ""}</button>`; }).join("")}</div>
+    ${n ? `<label class="tog"><input type="checkbox" data-bc="swap"${st.swap ? " checked" : ""}> Hartland on the right side (we're the away team)</label>
+      <label class="f"><span>${esc(them)} lineup (gamertags, commas between)</span><input data-bc="oppLineup" value="${esc(st.oppLineup || "")}" placeholder="Shown on the VS screen and starting lineups" autocomplete="off"></label>
+      ${oneVone ? `<div class="two"><label class="f"><span>${esc(them)} player on now</span><input data-bc="oppNow" value="${esc(st.oppNow || "")}" autocomplete="off"></label>
+        <label class="f"><span>Their ${esc(g.charLabel.toLowerCase())}</span><input data-bc="oppChar" list="charList" value="${esc(st.oppChar || "")}" autocomplete="off"></label></div>
+        <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
+      <label class="f"><span>${esc(them)} logo link (optional)</span><input type="url" inputmode="url" data-bc="oppLogo" value="${esc(st.oppLogo || "")}" placeholder="https://… .png" autocomplete="off"></label>
+      ${ppl.length > 1 ? `<div class="two"><label class="f"><span>Compare player</span><select data-cmp="a"><option value="">—</option>${ppl.map(p => `<option value="${esc(p.id)}"${st.compare?.a === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label>
+        <label class="f"><span>with</span><select data-cmp="b"><option value="">—</option>${ppl.map(p => `<option value="${esc(p.id)}"${st.compare?.b === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label></div>` : ""}
+      <details class="olk"><summary>OBS links for station ${n}</summary>${linksHTML(n)}</details>`
+    : `<p class="hint" style="margin:0">Pick the streaming PC this match is on. The score bug, VS screen, lineups and comparisons on that PC switch to it.</p>`}
+  </div></details>`;
+}
+function bindStream(){
+  const box = $("#onStream"); if (!box) return;
+  const n = stationOf(cur.id);
+  box.querySelectorAll("[data-station]").forEach(b => b.onclick = async () => {
+    const k = b.dataset.station;
+    if (k === n){ await setStation(k, {matchId:""}, `Taken off station ${k}.`); renderMatch(); return; }
+    const other = bc.stations[k]?.matchId;
+    if (other && !confirm(`Station ${k} is showing another match. Switch it to this one?`)) return;
+    if (n) await setStation(n, {matchId:""});
+    await setStation(k, freshStation(cur.id), `On station ${k}. The overlays on that PC show this match now.`); renderMatch(); $("#onStream").open = true;
+  });
+  if (!n) return;
+  const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};
+    box.querySelectorAll("[data-bc]").forEach(i => st[i.dataset.bc] = i.type === "checkbox" ? i.checked : i.value.trim());
+    st.compare = {a:box.querySelector("[data-cmp=a]")?.value || "", b:box.querySelector("[data-cmp=b]")?.value || ""};
+    setStation(n, st); };
+  box.querySelectorAll("[data-bc],[data-cmp]").forEach(i => i.onchange = save);
+  bindCopy(box);
+}
 function bindDetails(g){
   const D = $("#details");
+  bindStream();
   const keep = fn => { const o = [...D.querySelectorAll("details")].map(d => d.open); fn(); $("#details").querySelectorAll("details").forEach((d, i) => { if (o[i]) d.open = true; }); };
   const addPlayer = (p, extra) => keep(() => change(m => { m.players = m.players || []; if (!m.players.some(x => x.id === p.id)) m.players.push(snap(p, extra)); }, true));
   D.querySelectorAll("[data-player]").forEach(b => b.onclick = () => {

@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=11";
+import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=16";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -36,6 +36,18 @@ async function watchDoc(id, mockKey, cb){
 export function watchBoard(cb){ return watchDoc("scoreboard", "eagles-mock-scoreboard", cb); }
 /* Every finished match of a season in full detail (lineups, stats), updated the moment a match goes final. */
 export function watchSeason(season, cb){ return watchDoc("season-" + season, "eagles-mock-season-" + season, cb); }
+/* LevelUP: which match each streaming station shows, and one match in full detail (match documents are public to read). */
+export function watchBroadcast(cb){ return watchDoc("broadcast", "eagles-mock-broadcast", cb); }
+export async function watchMatch(id, cb){
+  if (!id){ cb(null); return () => {}; }
+  if (isMock()){
+    const read = () => { try { const all = JSON.parse(localStorage.getItem("eagles-mock-matches")) || {}; return all[id] ? {id, ...all[id]} : null; } catch(e){ return null; } };
+    cb(read()); const h = e => { if (e.key === "eagles-mock-matches") cb(read()); }; window.addEventListener("storage", h); const t = setInterval(() => cb(read()), 1500);
+    return () => { window.removeEventListener("storage", h); clearInterval(t); };
+  }
+  const {fb, db:d} = await db();
+  return fb.onSnapshot(fb.doc(d, "matches", id), s => cb(s.exists() ? {id:s.id, ...s.data()} : null), () => {});
+}
 /* Stream ticker announcements, written from the scorekeeper. */
 export function watchTicker(cb){ return watchDoc("ticker", "eagles-mock-ticker", cb); }
 /* Past players and the list of seasons that have results. */
@@ -331,7 +343,7 @@ function drawPlayer(site, host, all, dir){
 
 /* ---------- every FINAL match, all seasons. The record book, rivalry pages and player pages are built from this and
    nothing else: a match that is still live or upcoming never counts toward permanent history. ---------- */
-function watchFinals(site, cb){
+export function watchFinals(site, cb){
   const NOW = seasonOf(), full = {}, watching = new Set();
   let arch = [], dir = {alumni:[], seasons:[]}, ready = false;
   learnPeople(site, null);

@@ -163,7 +163,7 @@ function honorsHTML(site){
   return Object.entries(groups).map(([t, l]) => `<p class="sub">${esc(t)}</p><div class="tbl-wrap" style="margin-bottom:26px"><table class="tbl"><tbody>${l.sort((a, b) => recSeason(b).localeCompare(recSeason(a))).map(r => `<tr>${l.some(x => x.year) ? `<td style="white-space:nowrap">${esc(r.year || "")}</td>` : ""}<td>${esc(r.detail || "")}</td><td class="muted">${esc(recGame(site, r)?.name || "")}</td></tr>`).join("")}</tbody></table></div>`).join("");
 }
 function recordBookHTML(site){
-  const left = timelineHTML(site), right = (recordTableHTML(site) ? `<p class="sub">Records</p>${recordTableHTML(site)}<div style="height:26px"></div>` : "") + honorsHTML(site);
+  const left = timelineHTML(site), right = (recordTableHTML(site) ? `<p class="sub">Notable marks</p>${recordTableHTML(site)}<div style="height:26px"></div>` : "") + honorsHTML(site);
   return `${bannersHTML(site) ? `<p class="sub" style="margin-top:38px">Banners</p>${bannersHTML(site)}` : ""}
     ${left || right ? `<div class="grid g2 rb-cols">${left ? `<div><p class="sub">Program timeline</p>${left}</div>` : ""}${right ? `<div>${right}</div>` : ""}</div>` : ""}`;
 }
@@ -311,6 +311,8 @@ function legacy(site){
   return pageH("Record book · Rivalries · Alumni", "Legacy", "Every final result since the program began, the schools we measure ourselves against, and where Eagles go after graduation.")
   + `<section class="section" id="recordBook"><div class="wrap">${secH("Record book")}
       <div id="allTime"><div class="loading">Adding up every final…</div></div>
+      <p class="sub" style="margin-top:38px">Records</p>
+      <div id="leaders"><div class="loading">Sorting the leaderboards…</div></div>
       ${recordBookHTML(site)}
     </div></section>`
   + (rv.length ? `<section class="section alt" id="rivalries"><div class="wrap">${secH("Rivalries")}
@@ -402,7 +404,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "legacy", "rival"].includes(PAGE)) import(BASE + "assets/live.js?v=24").then(L => {
+  if (["home", "schedule", "results", "player", "legacy", "rival"].includes(PAGE)) import(BASE + "assets/live.js?v=25").then(L => {
     if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);

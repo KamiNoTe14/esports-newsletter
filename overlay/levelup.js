@@ -2,7 +2,7 @@
    ?station=1 (default). The scorekeeper decides which match is on each station; every overlay updates itself live.
    Layers: scorebug, vs, lineups, team-compare, player-compare. Add ?bg=1 to see an overlay on a grey test background. */
 import {gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=16";
-import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=24";
+import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=25";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=3";
 
 const q = new URLSearchParams(location.search);
@@ -357,8 +357,27 @@ function replay(){ clearTimeout(held); held = null; enterUntil = 0; lastHTML = "
 window.addEventListener("obsSourceActiveChanged", e => { if (e.detail?.active) replay(); });
 window.addEventListener("obsSourceVisibleChanged", e => { if (e.detail?.visible) replay(); });
 if (q.get("bg")) document.addEventListener("keydown", e => { if (e.key === "r") replay(); });   // preview: press R to replay
+/* ---------- record broken: big splash on the stream where it happened ----------
+   The scorekeeper's "Fire it" puts {id, holder, title, game, display, prev, at} on this station. Only the score bug
+   shows it (so a scene with several overlays doesn't show it twice), only once, and only if it's fresh. */
+const seenSplash = new Set();
+function splash(sp){
+  if (!sp?.id || seenSplash.has(sp.id)) return; seenSplash.add(sp.id);
+  if ((LAYER || "scorebug") !== "scorebug" || Date.now() - new Date(sp.at).getTime() > 90000) return;
+  const el = document.createElement("div"); el.className = "splash";
+  el.innerHTML = `${claw("sp-claw")}<div class="sp-band"><div class="sp-in">
+      <p class="sp-kicker">New Hartland record</p>
+      <b class="sp-name grunge">${esc(sp.holder)}</b>
+      <p class="sp-what"><span>${esc(sp.game ? sp.game + " · " : "")}${esc(sp.title)}</span><em>${esc(sp.display)}</em></p>
+      ${sp.prev?.name ? `<p class="sp-prev">Previous: ${esc(sp.prev.name)}, ${esc(sp.prev.display)}</p>` : ""}
+    </div></div><i class="sp-script">Record broken!</i><div class="flash"></div>`;
+  document.body.appendChild(el);
+  setTimeout(() => el.classList.add("out"), 9000);
+  setTimeout(() => el.remove(), 10200);
+}
 watchBroadcast(b => {
   const next = (b.stations || {})[STATION] || {};
+  if (next.splash) splash(next.splash);
   if (next.matchId !== station.matchId){ lastScores = null; lastHTML = ""; rlStatic = ""; match = null; if (stopMatch) Promise.resolve(stopMatch).then(f => f && f()); stopMatch = watchMatch(next.matchId, mm => { match = mm; draw(); }); }
   station = next; draw();
 });

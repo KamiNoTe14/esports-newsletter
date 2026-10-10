@@ -8,7 +8,9 @@
      transparent except for the bar. One score at a time flips into view, and the label on the left changes with each section
      (Eagles Esports, Hartland Athletics, NFL, ...). Live scores update the moment the scorekeeper changes them.
      Options: ?hold=6 (seconds per score), ?height=72, ?top=1 (bar at the top), ?bg=1 (grey page background, for testing),
-     ?sections=esports,athletics,pro,college,news (leave any out to hide it; ?sections=esports shows only our matches). -->
+     ?sections=esports,athletics,pro,college,news (leave any out to hide it; ?sections=esports shows only our matches),
+     ?station=2 (which LevelUP streaming station this ticker is on: a "record broken" alert skips the station where it
+     happened, because that stream already shows the big splash). -->
 <style>
 :root{--navy:#00274C;--gold:#FFBC05;--white:#fff;--live:#E8202A;--steel:#7F9BB8;--h:72px;--f:"Oswald","Arial Narrow",Arial,sans-serif;--d:"Anton",Impact,"Arial Narrow",sans-serif;--script:"Kaushan Script","Brush Script MT",cursive}
 /* Same fonts as the other LevelUP overlays, stored on the site (see assets/fonts). */
@@ -76,7 +78,7 @@ body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:3px solid var(--gold)
   <div class="clock" id="clock"></div>
 </div>
 <script type="module">
-import {watchBoard, watchTicker} from "../assets/live.js?v=24";
+import {watchBoard, watchTicker} from "../assets/live.js?v=25";
 import {gameFor, oppShort, postseason, rivalFor, fmtTime, roundLabel} from "../assets/matches.js?v=16";
 const q = new URLSearchParams(location.search);
 const HOLD = (+q.get("hold") || 6) * 1000;
@@ -124,7 +126,8 @@ async function loadESPN(){
     } catch(e){}
   }
 }
-const active = () => (ticker.messages || []).filter(x => x.text && (!x.until || new Date(x.until) > new Date()));
+const STATION = q.get("station") || "";
+const active = () => (ticker.messages || []).filter(x => x.text && (!x.until || new Date(x.until) > new Date()) && !(STATION && x.skipStation && String(x.skipStation) === STATION));
 
 /* ---------- cards: one score (or headline) each ---------- */
 const st = (kind, text) => `<span class="st ${kind}">${esc(text)}</span>`;

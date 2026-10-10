@@ -182,6 +182,11 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .newp{margin-top:12px;border:1px dashed var(--line-2);border-radius:12px;padding:12px}
 .newp>summary{cursor:pointer;font:700 16px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold);list-style:none}
 .newp>summary::-webkit-details-marker{display:none}
+.recbrk{margin-top:12px;display:grid;grid-template-columns:1fr auto;gap:10px 14px;align-items:center;padding:14px 16px;border-radius:14px;background:linear-gradient(180deg,rgba(255,188,5,.22),rgba(255,188,5,.1));border:2px solid var(--gold)}
+.recbrk b{display:block;font:800 19px/1.1 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.recbrk span{display:block;margin-top:4px;font-size:16px}.recbrk small{display:block;margin-top:4px;color:var(--muted);font-size:13px}
+.recbtns{display:flex;flex-direction:column;gap:6px}.recbtns .btn{min-height:44px;padding:0 16px;font-size:16px}
+@media (max-width:440px){.recbrk{grid-template-columns:1fr}.recbtns{flex-direction:row}}
 .strow{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .strow:first-of-type{border-top:0}.strow select{min-height:46px;min-width:0;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);padding:0 10px}.strow .olk{grid-column:1/-1}
 .stpick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stpick .btn{min-height:52px;padding:0 6px;font-size:16px;display:grid;place-items:center;line-height:1.1}.stpick small{font-size:11px;opacity:.75;font-weight:600}
@@ -222,6 +227,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=16";
+import {watchFinals} from "../../assets/live.js?v=25";
+import {recordBreaks} from "../../assets/records.js?v=1";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -235,6 +242,7 @@ let site = {teams:[], games:[]}, be = null, user = null, season = NOW, matches =
 let dir = {alumni:[], seasons:[], rosters:{}}, lastEntry = null;
 let tick = {messages:[]};
 let bc = {stations:{}};   // LevelUP: which match is on each streaming station
+let allFinals = null, recDismissed = new Set();   // every final match (for record checks)
 let view = "list", openId = null, cur = null, draft = null, undo = {}, saveTimer = null, saving = false, dirtyIds = new Set();
 const pendingSaves = new Map(); // match id -> latest local copy not yet written
 
@@ -248,6 +256,7 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
     user = u; renderWho();
     if (unwatch){ unwatch(); unwatch = null; }
     if (u && EDITORS.includes(u.email)){ unwatch = be.watchSeason(season, onMatches, onState);
+      startFinals();
       be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}};
         if (view === "list" && !document.activeElement?.closest?.("#stBox")) renderList();
         else if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
@@ -507,6 +516,46 @@ function bindAlumni(){
   box.querySelectorAll(".adel").forEach(b => b.onclick = () => { const row = b.closest(".arow"); if (!confirm("Remove this person from the past players list? Their old match results keep their name.")) return; row.remove(); save(read()); });
 }
 
+/* ---------- record-breaking announcements ----------
+   Every entry is checked against the record book worked out from all final matches. When an entry takes a record
+   from someone else, the match screen offers "Record broken: fire it?" (never automatic: plays get overturned and
+   stats get mis-typed). Firing shows a splash on the stream this match is on and a BREAKING line on every other
+   stream's ticker. Each record + holder is announced once per match, so corrections don't announce twice. The
+   record book itself only changes when the match is marked final. */
+function startFinals(){
+  if (allFinals !== null) return; allFinals = [];
+  watchFinals(site, f => { allFinals = f; if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
+}
+function recWho(){
+  const all = everyone(), seen = {}, cur = new Set((site.teams || []).flatMap(t => (t.roster || []).map(r => r.id)).filter(Boolean));
+  (allFinals || []).forEach(m => (m.players || []).forEach(p => { if (p.id && !seen[p.id]) seen[p.id] = p; }));
+  return {name:id => { const p = all.get(id) || seen[id] || {}; return p.private || !p.name ? (p.tag || "Player") : p.name; }, current:id => cur.has(id)};
+}
+function pendingRecords(m){
+  if (!allFinals || !allFinals.length) return [];
+  try { return recordBreaks(site, allFinals, m, recWho()).filter(r => (m.announced || {})[r.key] !== r.holder.id && !recDismissed.has(r.key + "|" + r.holder.id + "|" + r.value)); }
+  catch(e){ console.error(e); return []; }
+}
+function recordHTML(m){
+  const list = pendingRecords(m); if (!list.length) return "";
+  const g = gameFor(site, m.game), n = stationOf(m.id);
+  return list.map((r, i) => `<div class="recbrk" data-ri="${i}"><div><b>🏆 Record broken: fire it?</b>
+    <span>${esc(r.holder.name)}: ${esc(r.game ? (g.short || g.name) + " " : "")}${esc(r.title.toLowerCase())}, <strong>${esc(r.display)}</strong> (was ${esc(r.prev.name)}, ${esc(r.prev.display)})</span>
+    <small>${n ? `Splash on station ${n}, BREAKING on the other streams' tickers.` : "This match isn't on a stream station, so it goes on the tickers only."} It joins the record book when the match is final.</small></div>
+    <div class="recbtns"><button class="btn btn-gold" type="button" data-fire="${i}">Fire it</button><button class="btn btn-line" type="button" data-skip="${i}">Not now</button></div></div>`).join("");
+}
+async function fireRecord(r){
+  const g = gameFor(site, cur.game), n = stationOf(cur.id), gname = r.game ? (g.short || g.name) : "";
+  const text = `BREAKING: ${r.holder.name} breaks the Hartland ${gname ? gname + " " : ""}record for ${r.title.toLowerCase()} (${r.display})`;
+  change(m => { m.announced = {...(m.announced || {}), [r.key]:r.holder.id}; }, true);
+  try {
+    if (n) await setStation(n, {...freshStation(cur.id), ...bc.stations[n], splash:{id:Date.now().toString(36), holder:r.holder.name, title:r.title, game:gname, display:r.display, prev:r.prev, at:new Date().toISOString()}});
+    tick = {messages:[...activeMsgs(), {id:Date.now().toString(36), text, pinned:false, until:new Date(Date.now() + 10 * 6e4).toISOString(), at:new Date().toISOString(), by:user?.email || "", skipStation:n || "", kind:"record"}], updated:new Date().toISOString()};
+    await be.saveTicker(tick);
+    toast(n ? "Fired: splash on the stream, BREAKING on the other tickers." : "Fired: BREAKING on the stream tickers.");
+  } catch(e){ console.error(e); toast("Couldn't reach the stream overlays. Check the connection."); }
+}
+
 /* ---------- match (live scoring) ---------- */
 function renderMatch(fromSnapshot){
   if (!cur){ const m = matches.find(x => x.id === openId); if (!m){ $("#app").innerHTML = `<p class="empty">Loading match…</p>`; return; } cur = clone(m); }
@@ -546,7 +595,7 @@ function renderMatch(fromSnapshot){
   const clinch = status !== "final" && cur.clinched ? `<div class="clinch${cur.clinched === "them" ? " them" : ""}"><b>${cur.clinched === "us" ? "Hartland" : esc(them)} wins ${Math.max(cur.score.us, cur.score.them)}–${Math.min(cur.score.us, cur.score.them)}</b><button class="btn" type="button" data-status="final">Mark final</button></div>` : "";
   const tools = `<div class="tools"><button class="btn btn-line" type="button" id="undo"${(undo[cur.id] || []).length ? "" : " disabled style=\"opacity:.4\""}>↶ Undo</button>
       ${cur.stream?.live ? `<a class="btn btn-line" style="flex:1;text-decoration:none" href="${esc(cur.stream.live)}" target="_blank" rel="noopener">▶ Stream</a>` : ""}</div>`;
-  const top = head + seg + board + clinch + panel + tools;
+  const top = head + seg + board + recordHTML(cur) + clinch + panel + tools;
   if (typing && $("#scoreTop")){ $("#scoreTop").innerHTML = top; bindTop(); return; }
   const wasOpen = [...document.querySelectorAll("#details details")].map(d => d.open);
   $("#app").innerHTML = `<div id="scoreTop">${top}</div><div id="details">${detailsHTML(g, them)}</div>`;
@@ -581,6 +630,9 @@ function bindTop(){
   }));
   $("#scoreTop").querySelectorAll("[data-goto]").forEach(b => b.onclick = () => change(m => { m.current = +b.dataset.goto; }, true));
   $("#scoreTop").querySelectorAll("[data-ff]").forEach(b => b.onclick = () => change(m => { m.forfeit = b.dataset.ff || null; if (m.forfeit) m.status = "final"; }));
+  const recs = pendingRecords(cur);
+  $("#scoreTop").querySelectorAll("[data-fire]").forEach(b => b.onclick = () => { const r = recs[+b.dataset.fire]; if (r) fireRecord(r); });
+  $("#scoreTop").querySelectorAll("[data-skip]").forEach(b => b.onclick = () => { const r = recs[+b.dataset.skip]; if (r){ recDismissed.add(r.key + "|" + r.holder.id + "|" + r.value); renderMatch(); } });
 }
 function gameRec(m, n){ m.games = m.games || []; let gm = m.games.find(x => x.n === n); if (!gm){ gm = {n, us:0, them:0, winner:null}; m.games.push(gm); m.games.sort((a, b) => a.n - b.n); } return gm; }
 function change(fn, quiet){

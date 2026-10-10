@@ -154,13 +154,16 @@ const TABS = [
   {id:"teams", label:"Teams & rosters", toggle:"rosters", toggleLabel:"Show rosters on the Teams page"},
   {id:"games", label:"Games"},
   {id:"profiles", label:"Player profiles"},
+  {id:"schools", label:"School library"},
   {id:"rivals", label:"Rivals"},
   {id:"standings", label:"Standings", toggle:"standings", toggleLabel:"Show league standings"},
   {id:"brackets", label:"Playoff brackets", toggle:"brackets", toggleLabel:"Show playoff brackets"},
   {id:"records", label:"Program records", toggle:"records", toggleLabel:"Show program records"},
+  {id:"legacyRecords", label:"Pre-tracking records"},
   {id:"news", label:"News articles", toggle:"news", toggleLabel:"Show news articles"},
   {id:"gallery", label:"Photo gallery", toggle:"gallery", toggleLabel:"Show the photo gallery"},
-  {id:"sponsors", label:"Sponsors", toggle:"sponsors", toggleLabel:"Show sponsors"}
+  {id:"sponsors", label:"Sponsors", toggle:"sponsors", toggleLabel:"Show sponsors"},
+  {id:"roadmap", label:"Future updates"}
 ];
 const LISTS = {
   teams:{title:"Team", add:"Add team", intro:"Each team card on the Teams and Home pages. Separate multiple leagues with commas.", name:i => `${i.game || "Game"} · ${i.name || "Team"}`,
@@ -183,6 +186,12 @@ const LISTS = {
     fields:[["image","Photo","image"],["caption","Caption"],["album","Album (optional)"]]},
   sponsors:{title:"Sponsor", add:"Add sponsor", intro:"Logos show on the Home and About pages. Transparent PNG logos look best.", name:i => i.name || "Sponsor",
     fields:[["name","Name"],["link","Website","url"],["logo","Logo","image"]]},
+  schools:{title:"School", add:"Add school", intro:"Colleges for player profiles: schools a player is interested in show with their logo, and a player who commits gets their profile re-skinned in that school's colors. Transparent PNG logos look best.", name:i => i.name || "School",
+    fields:[["name","School","text","Michigan State University"],["short","Short name (optional)","text","Michigan State"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["link","Esports program page (optional)","url"]]},
+  legacyRecords:{title:"Pre-tracking record", add:"Add a legend", intro:"Records from before the scorekeeper existed. They show in their own \"Before the scorekeeper\" section of the record book, clearly marked, and never mix with the leaderboards that are worked out from logged matches. Check \"At least\" when the number is a provable floor: the site shows it with a + (for example 6 stocks for every best-of-3 set won, because you can't win one with fewer).", name:i => [i.holder, i.title].filter(Boolean).join(" · ") || "Record",
+    fields:[["title","Record","text","Career stocks taken"],["holder","Who holds it","text","Griffin Appleby"],["game","Game","select",() => [["", "All games"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["value","Number","text","96"],["years","Years","text","2023–2025"],["note","How it was counted","textarea"],["floor","At least (show it with a +)","check"]]},
+  roadmap:{title:"Planned feature", add:"Add a planned feature", intro:"Features planned for LevelUP that aren't built yet, with a short description of each. This list is just for the coaches; it doesn't show on the website.", name:i => i.title || "Feature",
+    fields:[["title","Feature"],["status","Status","select",["Planned","Moved from a build (needs something we don't have yet)","In progress","Done"]],["text","What it is","textarea"]]},
   coaches:{title:"Coach", add:"Add coach", name:i => i.name || "Coach", fields:[["name","Name"],["role","Role"],["email","Email (optional)","email"]]},
   seasons:{title:"Season phase", add:"Add phase", name:i => i.name || "Phase", fields:[["name","Name"],["when","When"],["text","Description","textarea"]]}
 };
@@ -199,6 +208,7 @@ function renderSide(){
 function field(path, [key, label, type = "text", extra], val){
   const id = "f-" + path.replace(/\./g, "-");
   if (type === "check") return `<label class="toggle"><input id="${id}" type="checkbox" data-path="${path}"${val !== false && val !== undefined && val !== "" ? " checked" : ""}> ${esc(label)}</label>`;
+  if (type === "color"){ const v = /^#[0-9a-f]{6}$/i.test(val || "") ? val : "#00274C"; return `<label class="f"><span>${esc(label)}</span><span style="display:flex;gap:8px;align-items:center"><input id="${id}" type="color" data-path="${path}" value="${esc(v)}" style="width:52px;height:38px;padding:2px"><code class="muted">${esc(val || "not set")}</code></span></label>`; }
   if (type === "textarea") return `<label class="f"><span>${esc(label)}</span><textarea id="${id}" data-path="${path}" rows="3">${esc(val)}</textarea></label>`;
   if (type === "select"){ const opts = (typeof extra === "function" ? extra() : extra).map(o => Array.isArray(o) ? o : [o, o]); return `<label class="f"><span>${esc(label)}</span><select id="${id}" data-path="${path}">${opts.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(val ?? "") ? " selected" : ""}>${esc(l || "—")}</option>`).join("")}</select></label>`; }
   if (type === "image"){
@@ -269,10 +279,25 @@ function renderPanel(){
     const list = [...people.entries()].sort((a, b) => String(a[1].r.name || a[1].r.tag).localeCompare(String(b[1].r.name || b[1].r.tag)));
     P.innerHTML = `<div class="card"><div class="card-h"><h2>Player profiles</h2><span class="muted">${list.length} players</span></div>
       <p class="intro">Every rostered player has a public profile page with their stats from the scorekeeper. Anything you add here is optional and shows on their page, which is handy for recruiting. Players marked <b>Gamertag only</b> show just their gamertag and stats; nothing from this page is shown for them.</p>
-      ${list.map(([id, e]) => { const pr = site.profiles[id] = site.profiles[id] || {}; const filled = ["gradYear","bio","heroClipId","playlistUrl","chars","photo","mains"].filter(k => pr[k]).length;
+      ${list.map(([id, e]) => { const pr = site.profiles[id] = site.profiles[id] || {};
+        pr.ranks = pr.ranks && typeof pr.ranks === "object" ? pr.ranks : {}; pr.interest = pr.interest && typeof pr.interest === "object" ? pr.interest : {};
+        const filled = ["gradYear","bio","heroClipId","playlistUrl","chars","photo","mains","links","accolades","committed"].filter(k => pr[k]).length + Object.values(pr.ranks).filter(Boolean).length + Object.values(pr.interest).filter(Boolean).length;
+        const schools = site.schools || [], P = `profiles.${id}`;
         return `<details class="item" data-pid="${esc(id)}"${wasOpen.has(id) ? " open" : ""} style="padding:0"><summary style="padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:center;justify-content:space-between"><b>${esc(e.r.name || e.r.tag)}${e.r.name && e.r.tag ? ` <span class="muted" style="font-weight:400">· ${esc(e.r.tag)}</span>` : ""}</b><span class="muted" style="font-size:13.5px">${e.priv ? "Gamertag only · " : ""}${esc(e.teams.join(", "))}${filled ? ` · ${filled} filled in` : ""} · <a href="${SITE_BASE}player.html?id=${encodeURIComponent(id)}" target="_blank" rel="noopener">View page</a></span></summary>
-          <div style="padding:0 14px 14px">${objFields(`profiles.${id}`, [["gradYear","Graduation year","text","2028"],["mains","Mains / position","text","Main: Pikachu · Striker"],["heroClipId","Best highlight clip (YouTube link or video ID)","text","https://youtu.be/…"],["playlistUrl","Link to all their highlights (unlisted YouTube playlist)","url"],["chars","Top 3 characters, main first, separated by commas (leave blank to work it out from matches)","text","Luna Snow, Mantis, Loki"],["bio","Short bio","textarea"],["photo","Photo","image"]])}
-          ${field(`profiles.${id}.recruit`, ["recruit","Show a \"college coaches: contact us\" note","check"], !!pr.recruit)}</div></details>`; }).join("")}</div>`;
+          <div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:14px">${objFields(P, [["gradYear","Graduation year (seniors get the gold treatment)","text","2028"],["mains","Mains / position","text","Main: Pikachu · Striker"],["heroClipId","Featured highlight (YouTube link or video ID)","text","https://youtu.be/…"],["playlistUrl","All their highlights (unlisted YouTube playlist)","url"],["chars","Top 3 characters, main first, separated by commas (leave blank to work it out from matches)","text","Luna Snow, Mantis, Loki"],["photo","Photo","image"]])}
+          <div><p class="sub-h">Playbill bio</p>
+            <p class="muted" style="margin:2px 0 8px">A short career write-up, like a playbill. Leave it blank and the profile shows a draft written from their record. Once you write or edit it here, your version is what shows and is never replaced.</p><label class="f"><span>Bio</span><textarea id="bio-${esc(id)}" data-path="${P}.bio" rows="4" placeholder="Blank: the profile writes one from their record.">${esc(pr.bio || "")}</textarea></label>
+            <div style="display:flex;gap:8px;margin-top:6px"><button type="button" class="btn btn-line" data-biodraft="${esc(id)}">Write a draft from their record</button></div></div>
+          <div><p class="sub-h">Accolades and links</p><div class="grid g2">
+            ${field(`${P}.accolades`, ["accolades","Accolades, one per line. Shown as badges at the top of the profile.","textarea"], pr.accolades || "")}
+            ${field(`${P}.links`, ["links","Stat links, one per line: Name | link (RL Tracker, Ballchasing, start.gg…)","textarea"], pr.links || "")}</div></div>
+          <div><p class="sub-h">Rank by game</p><p class="muted" style="margin:2px 0 8px">Typed in by hand. Leave a game blank if they don't have a rank; the profile never shows "unranked".</p>
+            <div class="grid g3">${(site.games || []).map(g => field(`${P}.ranks.${g.key}`, ["", g.short || g.name, "text", g.key === "rocket-league" ? "Grand Champion II" : ""], pr.ranks[g.key] || "")).join("")}</div></div>
+          <div><p class="sub-h">Colleges</p>${schools.length ? `<p class="muted" style="margin:2px 0 8px">Schools of interest show with their logos. A commitment announces "Committed to …" and re-skins the profile in that school's colors.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px 16px">${schools.filter(sc => sc.id && sc.name).map(sc => field(`${P}.interest.${sc.id}`, ["", sc.short || sc.name, "check"], !!pr.interest[sc.id])).join("")}</div>
+            <div class="grid g2" style="margin-top:8px">${field(`${P}.committed`, ["committed","Committed to","select",[["", "Not committed"], ...schools.filter(sc => sc.id && sc.name).map(sc => [sc.id, sc.name])]], pr.committed || "")}</div>`
+            : `<p class="muted" style="margin:2px 0 0">Add colleges in the <b>School library</b> first, then pick them here.</p>`}</div>
+          ${field(`${P}.recruit`, ["recruit","Show a \"college coaches: contact us\" note","check"], !!pr.recruit)}</div></details>`; }).join("")}</div>`;
     return;
   }
   const spec = LISTS[tab];
@@ -285,6 +310,7 @@ function fillIds(){
   const byName = {};
   (site.teams || []).forEach(t => (t.roster || []).forEach(r => { const k = String(r.name || r.tag || "").trim().toLowerCase(); if (r.id && k) byName[k] = byName[k] || r.id; }));
   (site.teams || []).forEach(t => (t.roster || []).forEach(r => { const k = String(r.name || r.tag || "").trim().toLowerCase(); if (!r.id && k) r.id = byName[k] = byName[k] || "p-" + Math.random().toString(16).slice(2, 10); }));
+  (site.schools || []).forEach(sc => { if (!sc.id) sc.id = "s-" + Math.random().toString(16).slice(2, 10); });
   (site.games || []).forEach(g => { if (!g.key) g.key = String(g.name || "game").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); });
 }
 /* ---------- team → school list (fills in schools on every standings import) ---------- */
@@ -567,6 +593,25 @@ $("#standInput").addEventListener("change", async e => {
   toast(`Imported ${rows.length} teams${matches ? " and worked out W-L and ratings from the match results" : ""}${us ? `, ${us} Hartland row${us > 1 ? "s" : ""} highlighted` : ""}.${missing.length ? ` No ${missing.join("/")} column found, so check those.` : ""}${schoolNote}${schoolMiss} It goes live when you publish.`);
 });
 
+/* ---------- bio drafts: read every final match (same data as the website) and write a playbill-style summary ---------- */
+let finalsP = null;
+function loadFinals(){
+  return finalsP = finalsP || (async () => {
+    const live = await import(SITE_BASE + "assets/live.js?v=25");
+    return new Promise(res => { let latest = null, t = null;
+      live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
+      setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });
+  })();
+}
+async function draftBio(id){
+  const [{fin, dir}, R] = await Promise.all([loadFinals(), import(SITE_BASE + "assets/records.js?v=1")]);
+  const names = {}, cur = new Set();
+  fin.forEach(m => (m.players || []).forEach(p => { if (p.id) names[p.id] = p.private ? p.tag : (p.name || p.tag); }));
+  (dir?.alumni || []).forEach(p => names[p.id] = p.private ? p.tag : (p.name || p.tag));
+  (site.teams || []).forEach(t => (t.roster || []).forEach(p => { if (!p.id) return; cur.add(p.id); names[p.id] = p.private ? p.tag : (p.name || p.tag); }));
+  return R.bioDraft(site, fin, id, {name:x => names[x] || "Player", current:x => cur.has(x)}, site.profiles?.[id] || {});
+}
+
 /* ---------- events ---------- */
 $("#side").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; tab = b.dataset.tab; renderSide(); renderPanel(); $("#panel").scrollIntoView({block:"start"}); });
 $("#panel").addEventListener("input", e => {
@@ -592,7 +637,7 @@ $("#panel").addEventListener("click", async e => {
   if (b.id === "ghForget"){ const c = ghCfg() || {}; delete c.token; ghSave(c); connected = false; setStatus(); renderSide(); renderPanel(); toast("Key removed from this computer."); return; }
   if (b.dataset.add){
     const arr = getP(b.dataset.add); const key = b.dataset.add.split(".").pop();
-    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", gameKey:"", level:"Varsity", leagues:"MHSEL", note:"", roster:[]}, rivals:{school:"", title:"", note:""}, games:{key:"", name:"", short:"", abbr:"", unit:"Game", points:"", bestOf:"3", teamSize:"", stats:"", roles:"", charLabel:"", chars:"", icon:"", art:""}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{id:"", name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}}[key] || {};
+    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", gameKey:"", level:"Varsity", leagues:"MHSEL", note:"", roster:[]}, rivals:{school:"", title:"", note:""}, games:{key:"", name:"", short:"", abbr:"", unit:"Game", points:"", bestOf:"3", teamSize:"", stats:"", roles:"", charLabel:"", chars:"", icon:"", art:""}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{id:"", name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}, schools:{id:"s-" + Date.now().toString(36), name:"", short:"", primary:"", secondary:"", logo:"", link:""}, legacyRecords:{title:"", holder:"", game:"", value:"", years:"", note:"", floor:false}, roadmap:{title:"", status:"Planned", text:""}}[key] || {};
     arr.push(blank); setDirty(true); setStatus(); renderPanel(); return;
   }
   if (b.dataset.del){
@@ -602,6 +647,15 @@ $("#panel").addEventListener("click", async e => {
   if (b.dataset.move){
     const arr = getP(b.dataset.move), i = +b.dataset.i, j = i + (+b.dataset.d);
     if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; setDirty(true); setStatus(); renderPanel(); return;
+  }
+  if (b.dataset.biodraft){
+    const id = b.dataset.biodraft, area = document.getElementById("bio-" + id), pr = site.profiles[id] || {};
+    if (area.value.trim() && !confirm("Replace the bio that's there with a fresh draft from their record?")) return;
+    b.disabled = true; b.textContent = "Reading their matches…";
+    try { const text = await draftBio(id); area.value = text; setP(`profiles.${id}.bio`, text); setDirty(true); setStatus(); toast("Draft written. Edit it however you like; your version is what goes live."); }
+    catch(err){ console.error(err); toast("Couldn't read the match results right now. Try again in a minute."); }
+    finally { b.disabled = false; b.textContent = "Write a draft from their record"; }
+    return;
   }
   if (b.dataset.import){ importPath = b.dataset.import; $("#standInput").click(); return; }
   if (b.dataset.upload){ uploadPath = b.dataset.upload; $("#imgInput").click(); return; }

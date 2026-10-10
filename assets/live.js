@@ -3,6 +3,7 @@
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
 import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=16";
+import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=1";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -303,37 +304,57 @@ function drawPlayer(site, host, all, dir){
   const playing = host.querySelector(".clip.on");
   const mainRoles = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(x => x[0]);
   const W = played.filter(m => m.result === "W").length, L = played.filter(m => m.result === "L").length;
-  host.innerHTML = `<section class="page-h player-h"><div class="wrap player-top">
+  /* Recruiting: commitment re-skins the page in that school's colors; otherwise seniors (still on a roster) get gold. */
+  const schools = site.schools || [], schoolOf = sid => schools.find(x => x.id === sid);
+  const sch = !priv && prof.committed ? schoolOf(prof.committed) : null;
+  const senior = !priv && !sch && entries.length && isSenior(prof.gradYear);
+  const skin = sch ? ` style="--c1:${esc(sch.primary || "#FFBC05")};--c2:${esc(sch.secondary || "#FFFFFF")}"` : "";
+  const logo = x => x?.logo ? `<img src="${esc(src(x.logo))}" alt="" loading="lazy">` : "";
+  const nameKey = String(me.name || "").toLowerCase();
+  const honors = priv || !nameKey ? [] : (site.records || []).filter(r => r.type === "honor" && String(r.detail || "").toLowerCase().includes(nameKey)).filter(r => !/signing/i.test(r.title)).map(r => `${r.title}${r.year ? ` ${r.year}` : ""}`);
+  const accolades = [...new Set([...(entries.some(e => e.captain) ? ["Team captain"] : []), ...honors, ...String(prof.accolades || "").split(/\r?\n/).map(x => x.trim()).filter(Boolean)])];
+  const ranks = Object.entries(prof.ranks || {}).filter(([, v]) => String(v || "").trim()).map(([k, v]) => ({g:gameFor(site, k), v:String(v).trim()}));
+  const links = String(prof.links || "").split(/\r?\n/).map(line => { const i = line.lastIndexOf("|"), u = safe((i < 0 ? line : line.slice(i + 1)).trim()); if (!u) return null; const label = (i < 0 ? "" : line.slice(0, i).trim()) || new URL(u).hostname.replace(/^www\./, ""); return {label, u}; }).filter(Boolean);
+  const interest = Object.entries(prof.interest || {}).filter(([k, v]) => v && k !== prof.committed).map(([k]) => schoolOf(k)).filter(Boolean);
+  const bio = priv ? "" : (String(prof.bio || "").trim() || bioDraft(site, all, id, {name:x => x === id ? display : (PEOPLE.get(x)?.name || "Player"), current:x => (site.teams || []).some(t => (t.roster || []).some(r => r.id === x))}, prof));
+  host.innerHTML = `<section class="page-h player-h${sch ? " committed" : senior ? " senior" : ""}"${skin}><div class="wrap player-top">
       ${prof.photo ? `<img class="player-photo" src="${esc(/^https?:/.test(prof.photo) ? prof.photo : BASE + prof.photo)}" alt="">` : `<div class="player-photo ph">${esc((display || "?")[0])}</div>`}
       <div><p class="eyebrow">${teams.map(t => esc(teamName(site, t))).join(" · ") || [...new Set(played.map(m => m.teamName).filter(Boolean))].slice(0, 3).map(esc).join(" · ") || "Hartland Esports"}</p>
         <h1 style="font-size:clamp(40px,7vw,76px)">${esc(display)}</h1>
         ${!priv && me.name && me.tag ? `<p class="player-tag">${esc(me.tag)}</p>` : ""}
         ${alum?.now ? `<p class="player-now"><span>Now playing</span> ${esc(alum.now)}</p>` : ""}
-        <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>` : ""}${prof.gradYear ? `<span class="chip gold">Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
+        ${sch ? `<p class="player-commit">${logo(sch)}<span><small>Committed to</small><b>${esc(sch.name)}</b></span></p>` : ""}
+        <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>` : ""}${prof.gradYear ? `<span class="chip gold">${senior ? "Senior · " : ""}Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
       </div>
       <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${played.length} match${played.length === 1 ? "" : "es"}</span></div>
     </div></section>
-    ${prof.bio || clip || playlist ? `<section class="section"><div class="wrap grid g2" style="align-items:start">
-      ${prof.bio ? `<div><h2 class="res-h">About</h2><p class="lead" style="margin:0">${esc(prof.bio)}</p></div>` : ""}
+    ${accolades.length ? `<section class="acc-bar"><div class="wrap"><ul class="acc">${accolades.map(a => `<li><span aria-hidden="true">★</span>${esc(a)}</li>`).join("")}</ul></div></section>` : ""}
+    ${ranks.length || links.length || interest.length ? `<section class="section recruit-s"><div class="wrap"><div class="recruit">
+      ${ranks.length ? `<div><h2 class="res-h">Rank</h2><ul class="ranks">${ranks.map(r => `<li>${r.g.icon ? `<img src="${esc(src(r.g.icon))}" alt="${esc(r.g.name)}">` : `<small>${esc(r.g.short || r.g.name)}</small>`}<b>${esc(r.v)}</b></li>`).join("")}</ul></div>` : ""}
+      ${links.length ? `<div><h2 class="res-h">Verify the stats</h2><p class="muted" style="margin:0 0 10px;font-size:15px">Outside trackers, for checking our numbers independently.</p><div class="vlinks">${links.map(l => `<a class="btn btn-line" href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")}</div></div>` : ""}
+      ${interest.length ? `<div><h2 class="res-h">Schools of interest</h2><ul class="schools">${interest.map(x => `<li>${safe(x.link) ? `<a href="${esc(safe(x.link))}" target="_blank" rel="noopener">` : ""}${logo(x) || `<span class="ph">${esc((x.short || x.name)[0])}</span>`}<span>${esc(x.short || x.name)}</span>${safe(x.link) ? "</a>" : ""}</li>`).join("")}</ul></div>` : ""}
+    </div></div></section>` : ""}
+    ${bio || clip || playlist ? `<section class="section"><div class="wrap grid g2" style="align-items:start">
+      ${bio ? `<div><h2 class="res-h">Career</h2><p class="lead playbill" style="margin:0">${esc(bio)}</p></div>` : ""}
       ${clip || playlist ? `<div><h2 class="res-h">Highlights</h2>
         ${clip ? `<button class="clip" type="button" data-yt="${esc(clip)}" aria-label="Play ${esc(display)}'s highlight"><img src="https://i.ytimg.com/vi/${esc(clip)}/hqdefault.jpg" alt="" loading="lazy"><span aria-hidden="true">▶</span></button>` : ""}
         ${playlist ? `<p style="margin:14px 0 0"><a ${clip ? "" : 'class="btn btn-gold" '}href="${esc(playlist)}" target="_blank" rel="noopener">${clip ? "See all highlights →" : "▶ Watch highlights"}</a></p>` : ""}
         ${prof.recruit ? `<p class="muted" style="margin:14px 0 0">College coaches: detailed stats and full match film are available on request. Reach out to ${(site.coaches || []).filter(c => c.email).map(c => `<a href="mailto:${esc(c.email)}">Coach ${esc(c.name.split(" ").pop())}</a>`).join(" or ") || `<a href="${BASE}about.html#join">our coaches</a>`}.</p>` : ""}</div>` : ""}
     </div></section>` : ""}
-    ${charGames.length ? `<section class="section ${prof.bio || clip || playlist ? "alt" : ""}"><div class="wrap"><h2 class="res-h">Characters</h2><div class="grid g2">${charGames.map(c => `<div class="card mains2">
+    ${charGames.length ? `<section class="section ${bio || clip || playlist ? "alt" : ""}"><div class="wrap"><h2 class="res-h">Characters</h2><div class="grid g2">${charGames.map(c => `<div class="card mains2">
       <div class="main">${c.dir ? `<img class="main-art" src="${esc(src(c.dir + "/" + slug(c.list[0])))}-art.webp" alt="" loading="lazy" onerror="this.remove()">` : ""}<div class="main-cap">${c.g.charArt ? `<img class="main-sig" src="${esc(src(c.dir + "/" + slug(c.list[0])))}-sig.webp" alt="" onerror="this.remove()">` : ""}<small>Main</small><b>${esc(c.list[0])}</b></div></div>
       <div class="alts">${c.g.icon ? `<img class="game-logo" src="${esc(src(c.g.icon))}" alt="${esc(c.g.name)}">` : `<p class="eyebrow">${esc(c.g.name)}</p>`}
         ${c.list.length > 1 ? `<p class="mains-h">Also plays</p>${c.list.slice(1).map(n => `<span class="alt">${c.dir ? `<img src="${esc(src(c.dir + "/" + slug(n)))}-logo.webp" alt="" onerror="this.remove()">` : ""}${esc(n)}</span>`).join("")}` : ""}</div>
     </div>`).join("")}</div></div></section>` : ""}
-    <section class="section ${!!(prof.bio || clip || playlist) !== !!charGames.length ? "alt" : ""}"><div class="wrap">
+    <section class="section ${!!(bio || clip || playlist) !== !!charGames.length ? "alt" : ""}"><div class="wrap">
       <h2 class="res-h">Stats</h2>
       ${Object.keys(byGame).length ? `<div class="grid g2">${Object.values(byGame).map(s => `<div class="card stat-card">${s.game.statArt || s.game.art ? `<img class="team-art" src="${esc(BASE + (s.game.statArt || s.game.art))}" alt="">` : ""}${s.game.icon ? `<img class="game-logo" src="${esc(/^https?:/.test(s.game.icon) ? s.game.icon : BASE + s.game.icon)}" alt="${esc(s.game.name)}">` : `<p class="eyebrow">${esc(s.game.name)}</p>`}
         <div class="stat-row"><div><b>${s.n}</b><small>Matches</small></div><div><b>${s.w}–${s.l}</b><small>Record</small></div>${(s.game.statList || []).filter(x => x.avg ? (s.avg[x.key] || []).length : x.key in s.tot).map(x => x.avg ? `<div><b>${(s.avg[x.key].reduce((a, b) => a + b, 0) / s.avg[x.key].length).toFixed(1)}%</b><small>${esc(x.label.replace(/\s*%\s*$/, ""))}<br>average</small></div>` : `<div><b>${s.tot[x.key].toLocaleString("en-US")}</b><small>${esc(x.label)}<br>${(s.tot[x.key] / (s.cnt[x.key] || s.n)).toLocaleString("en-US", {maximumFractionDigits:1})}/match</small></div>`).join("")}</div>
         ${mainRoles(s.roles).length ? `<div class="stat-tags"><p><span>Role</span>${roleTags(s.game, mainRoles(s.roles))}</p></div>` : ""}</div>`).join("")}</div>`
         : `<div class="empty">Stats show up here after ${esc(display)} plays a match.</div>`}
-      ${played.length ? `<h2 class="res-h" style="margin-top:34px">Match log</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Team</th><th>Opponent</th><th class="n">Result</th><th>Stats</th></tr></thead><tbody>${played.map(m => { const st = (m.players.find(p => p.id === id) || {}).stats || {}, g = gameFor(site, m.game);
+      ${played.length ? `<h2 class="res-h" style="margin-top:34px">Games played</h2>${played.some(m => watchLink(m)) ? `<p class="muted" style="margin:-6px 0 12px;font-size:15px">Matches with a ▶ were streamed; click through to watch on YouTube.</p>` : ""}<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Team</th><th>Opponent</th><th class="n">Result</th><th>Stats</th><th>Stream</th></tr></thead><tbody>${played.map(m => { const st = (m.players.find(p => p.id === id) || {}).stats || {}, g = gameFor(site, m.game);
         const yr = new Date(m.startsAt).getFullYear();
-        return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => x.avg ? `${fmtStat(x, st[x.key])} ${esc(x.label.replace(/\s*%\s*$/, ""))}` : `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
+        return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => x.avg ? `${fmtStat(x, st[x.key])} ${esc(x.label.replace(/\s*%\s*$/, ""))}` : `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td><td>${watchLink(m) ? `<a href="${esc(watchLink(m))}" target="_blank" rel="noopener" aria-label="Watch the stream of this match">▶ Watch</a>` : ""}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
     </div></section>`;
   const btn = host.querySelector(".clip");
   if (btn && playing && playing.dataset.yt === btn.dataset.yt) btn.replaceWith(playing);
@@ -358,10 +379,37 @@ const wl = list => { const w = list.filter(m => m.result === "W").length, l = li
 const rivalKey = n => String(n || "").toLowerCase().replace(/\s+(high\s+school|hs|school)\s*$/i, "").replace(/[^a-z0-9]+/g, " ").trim();
 const byNewest = (a, b) => a.startsAt > b.startsAt ? -1 : 1;
 
+/* who: names and current/alum status for the record book (gamertag only for private players) */
+function whoFrom(site, fin){
+  const seen = {}; fin.forEach(m => (m.players || []).forEach(p => { if (p.id && !seen[p.id]) seen[p.id] = p; }));
+  const cur = new Set((site.teams || []).flatMap(t => (t.roster || []).map(r => r.id)).filter(Boolean));
+  return {name:id => playerName(seen[id] || {id}), current:id => cur.has(id)};
+}
+/* ---------- auto-computed leaderboards, program honors, and pre-tracking legends ---------- */
+function drawBoards(site, host, fin){
+  const who = whoFrom(site, fin), R = buildRecords(site, fin, who), prog = programRecords(site, fin), leg = legacyRecords(site);
+  const flag = w => w.kind === "player" ? (w.current ? `<span class="rflag cur">Current</span>` : `<span class="rflag alum">Alum</span>`) : "";
+  const nm = w => w.kind === "player" ? `<a href="${BASE}player.html?id=${encodeURIComponent(w.id)}">${esc(w.name)}</a>` : esc(w.name);
+  const card = r => { const [a, ...rest] = r.rows; return `<div class="rcard"><p class="rt">${esc(r.title)}${r.since ? `<span class="since">since ${esc(r.since)}</span>` : ""}</p>
+      ${a ? `<div class="rlead"><b class="rv">${esc(a.display || a.value)}</b><span class="rwho">${nm(a.who)} ${flag(a.who)}${a.detail ? `<small>${esc(a.detail)}</small>` : ""}</span></div>
+      ${rest.length ? `<ol class="rnext" start="2">${rest.slice(0, 2).map(x => `<li>${nm(x.who)} <b>${esc(x.display || x.value)}</b></li>`).join("")}</ol>` : ""}` : `<p class="muted" style="margin:0;font-size:14px">Open. The first entry sets it.</p>`}</div>`; };
+  const groups = R.groups.filter(g => g.records.some(r => r.rows.length));
+  host.innerHTML = `${groups.map(g => `<div class="rgroup"><h3 class="rgh">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : BASE + g.icon)}" alt="${esc(g.title)}">` : esc(g.title)}</h3><div class="rgrid">${g.records.map(card).join("")}</div></div>`).join("")}
+    <div class="rgroup"><h3 class="rgh">Program</h3><div class="rgrid">
+      <div class="rcard"><p class="rt">State titles</p><div class="rlead"><b class="rv">${prog.titles.length}</b><span class="rwho">${prog.titles.map(r => esc([r.year, r.game ? gameFor(site, r.game).short : ""].filter(Boolean).join(" "))).join("<br>") || "Still chasing the first"}</span></div></div>
+      <div class="rcard"><p class="rt">Tournament titles and top finishes</p><ul class="rlist">${[...prog.other, ...prog.places].map(r => `<li><b>${esc(r.title)}</b> ${esc(r.year || "")}</li>`).join("") || "<li>None yet</li>"}</ul></div>
+      <div class="rcard"><p class="rt">Rivalries, head to head</p><ul class="rlist">${prog.rivals.filter(x => x.n).map(x => `<li><a href="${BASE}rival.html?school=${encodeURIComponent(x.school)}">${esc(x.school)}</a> <b>${x.w}–${x.l}</b></li>`).join("") || "<li>No meetings yet</li>"}</ul></div>
+    </div></div>
+    <p class="muted" style="margin:6px 0 0;font-size:14px">Worked out from every match marked final, re-sorted every time this page loads. Exhibitions and scrimmages don't count. "Current" means the record holder is still on a roster, so the record is still live. Stats show the season we started logging them.</p>
+    ${leg.length ? `<div class="rgroup legacy-era"><h3 class="rgh">Before the scorekeeper</h3><p class="muted" style="margin:-6px 0 12px;font-size:15px">Pre-tracking era, entered by hand and kept out of the leaderboards above. A + means "at least": the lowest number the results can prove.</p>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Record</th><th>Holder</th><th class="n">Mark</th><th>Notes</th></tr></thead><tbody>${leg.map(r => `<tr><td>${esc(r.title)}${r.game ? `<small>${esc(gameFor(site, r.game).short || gameFor(site, r.game).name)}</small>` : ""}</td><td>${esc(r.holder)}${r.years ? `<small>${esc(r.years)}</small>` : ""}</td><td class="n"><b>${esc(r.shown)}</b></td><td class="muted">${esc(r.note || "")}</td></tr>`).join("")}</tbody></table></div></div>` : ""}`;
+}
+
 export function startLegacy(site){
   startNextLevel(site);
-  const host = $("#allTime");
+  const host = $("#allTime"), boards = $("#leaders");
   watchFinals(site, fin => {
+    if (boards) drawBoards(site, boards, fin);
     document.querySelectorAll("[data-rival]").forEach(c => { const r = {school:c.dataset.rival}; const vs = fin.filter(m => rivalFor({rivals:[r]}, m)); c.querySelector("[data-rec]").textContent = vs.length ? wl(vs).text : "0–0"; });
     document.querySelectorAll("[data-season-rec]").forEach(el => { const l = fin.filter(m => (m.season || seasonOf(m.startsAt)) === el.dataset.seasonRec); el.textContent = l.length ? wl(l).text : ""; });
     if (!host) return;

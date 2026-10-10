@@ -3086,7 +3086,7 @@
       "points": "Games",
       "bestOf": "5",
       "teamSize": "3",
-      "stats": "Stocks taken",
+      "stats": "Stocks taken, Stocks lost, Damage",
       "roles": "",
       "charLabel": "Character",
       "chars": "Banjo & Kazooie, Bayonetta, Bowser, Bowser Jr., Byleth, Captain Falcon, Charizard, Chrom, Cloud, Corrin, Daisy, Dark Pit, Dark Samus, Diddy Kong, Donkey Kong, Dr. Mario, Duck Hunt, Falco, Fox, Ganondorf, Greninja, Hero, Ice Climbers, Ike, Incineroar, Inkling, Isabelle, Ivysaur, Jigglypuff, Joker, Kazuya, Ken, King Dedede, King K. Rool, Kirby, Link, Little Mac, Lucario, Lucas, Lucina, Luigi, Mario, Marth, Mega Man, Meta Knight, Mewtwo, Mii Brawler, Mii Gunner, Mii Swordfighter, Min Min, Mr. Game & Watch, Mythra, Ness, Olimar, Pac-Man, Palutena, Peach, Pichu, Pikachu, Piranha Plant, Pit, Pokémon Trainer, Pyra, R.O.B., Richter, Ridley, Robin, Rosalina & Luma, Roy, Ryu, Samus, Sephiroth, Sheik, Shulk, Simon, Snake, Sonic, Sora, Squirtle, Steve, Terry, Toon Link, Villager, Wario, Wii Fit Trainer, Wolf, Yoshi, Young Link, Zelda, Zero Suit Samus",
@@ -3104,7 +3104,7 @@
       "points": "Goals",
       "bestOf": "5",
       "teamSize": "3",
-      "stats": "Goals, Assists, Saves, Shots",
+      "stats": "Goals, Assists, Saves, Shots, MVPs",
       "roles": "",
       "charLabel": "",
       "chars": "",
@@ -3202,5 +3202,44 @@
     "p-75b76f7a": {},
     "p-0b11aaef": {},
     "p-57ba7f60": {}
-  }
+  },
+  "schools": [],
+  "legacyRecords": [],
+  "roadmap": [
+    {
+      "title": "Approval queue and student submission inbox",
+      "status": "Planned",
+      "text": "Students submit clips and bio drafts; everything lands in one queue for the coach to approve, and students never edit live pages. Build a single reusable queue, shared with the social graphics approval."
+    },
+    {
+      "title": "Milestone announcements",
+      "status": "Planned",
+      "text": "100th career goal, the program's 50th win and similar milestones, announced with the same splash and ticker system as broken records."
+    },
+    {
+      "title": "Replayable announcement feed",
+      "status": "Planned",
+      "text": "A log of every announcement event so mid-match corrections can be reconciled without announcing twice."
+    },
+    {
+      "title": "Auto social graphic for broken records",
+      "status": "Planned",
+      "text": "A ready-to-post graphic when a record falls. Ties into the Canva Autofill + Buffer feature."
+    },
+    {
+      "title": "Rank by API",
+      "status": "Planned",
+      "text": "Pull ranks automatically if a free Rocket League rank API ever exists. Until then ranks are typed in by hand on each profile."
+    },
+    {
+      "title": "Rocket League stats straight from the game",
+      "status": "Moved from a build (needs something we don't have yet)",
+      "text": "Moved from \"record-breaking announcements\". The Rocket League game feed (Stats API) only reaches the stream overlay on the game PC; it has no signed-in path to save goals, saves and shots into the scorekeeper, so Rocket League records are still checked when those stats are typed in. Needs a small signed-in helper on the game PC (or a scorekeeper screen that listens to the game) to log stats on its own."
+    },
+    {
+      "title": "Per-game Rocket League leaders",
+      "status": "Moved from a build (needs something we don't have yet)",
+      "text": "Moved from \"launch records\". Most Rocket League history was logged as match totals, not game by game, so single-game leaders can't be worked out fairly yet. The record book has single-match leaders now; per-game boards can be added once a season of game-by-game stats is logged."
+    }
+  ]
 }

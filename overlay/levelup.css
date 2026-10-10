@@ -329,3 +329,21 @@ img{display:block}
 /* Rocket League keeps the in-game team colors on its stripes */
 .bug.rl .wing.blue{border-bottom-color:var(--rl-blue)}
 .bug.rl .wing.orange{border-bottom-color:var(--rl-orange)}
+
+/* =============== record broken splash =============== */
+@keyframes spBand{from{clip-path:polygon(0 0,0 0,0 100%,0 100%)}to{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}}
+@keyframes spOut{to{opacity:0;transform:translateY(40px)}}
+@keyframes clawBig{from{clip-path:polygon(100% 0,100% 0,100% 0)}to{clip-path:polygon(-120% 0,100% 0,100% 220%)}}
+.splash{position:absolute;inset:0;pointer-events:none;z-index:50}
+.splash.out{animation:spOut .9s var(--ease) both}
+.splash .flash{position:absolute;inset:0;background:#fff;opacity:0;animation:flash .7s .25s ease-out both}
+.splash .sp-claw{position:absolute;left:50%;top:360px;width:900px;height:600px;margin-left:-450px;filter:drop-shadow(-10px 12px 0 rgba(0,10,25,.7));animation:clawBig .45s cubic-bezier(.7,0,.3,1) both}
+.sp-band{position:absolute;left:0;right:0;top:640px;height:300px;background:linear-gradient(180deg,rgba(0,39,76,.96),rgba(0,20,42,.97));border-top:8px solid var(--gold);border-bottom:8px solid var(--gold);
+  box-shadow:0 20px 60px rgba(0,0,0,.6);animation:spBand .55s .35s var(--ease) both;display:grid;place-items:center;overflow:visible}
+.sp-in{text-align:center;display:grid;justify-items:center;gap:4px}
+.sp-kicker{margin:0;font:700 30px/1 var(--t);letter-spacing:.28em;text-transform:uppercase;color:var(--gold);animation:rise .4s .8s var(--ease) both}
+.sp-name{display:block;font:400 132px/1 var(--d);text-transform:uppercase;letter-spacing:.01em;animation:slam .55s .9s var(--snap) both;filter:drop-shadow(0 8px 0 rgba(0,10,25,.7))}
+.sp-what{margin:6px 0 0;display:flex;align-items:baseline;gap:22px;font:600 34px/1 var(--t);text-transform:uppercase;letter-spacing:.06em;color:var(--ice);animation:rise .45s 1.25s var(--ease) both}
+.sp-what em{font:400 72px/1 var(--d);font-style:normal;color:var(--gold)}
+.sp-prev{margin:2px 0 0;font:400 26px/1 var(--hand);color:var(--steel);animation:rise .45s 1.45s var(--ease) both}
+.sp-script{position:absolute;right:170px;top:572px;z-index:2;font:400 92px/1 var(--script);font-style:normal;color:var(--gold);transform:rotate(-8deg);text-shadow:0 6px 0 var(--mid),0 0 30px rgba(0,0,0,.5);animation:scribble .6s 1.1s var(--snap) both}

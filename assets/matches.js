@@ -38,6 +38,12 @@ export const seasonLabel = s => String(s || "").replace("-", "/");
 export function termOf(d){ const m = new Date(d || Date.now()).getMonth(); return m >= 6 ? "fall" : "spring"; }
 export function slug(s){ return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
 /* "Novi High School" -> "Novi", "Detroit Catholic Central" stays. Used wherever space is tight (scores strip, scorekeeper). */
+/* An opponent's entry in the School library (site.highSchools), matched loosely: "Novi" finds "Novi High School". */
+export function schoolInfo(site, name){
+  const key = n => shortSchool(n).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(), k = key(name);
+  if (!k) return null;
+  return (site?.highSchools || []).find(x => [x.name, x.short].some(n => n && key(n) === k)) || null;
+}
 export function shortSchool(name){
   const s = String(name || "").trim();
   const cut = s.replace(/\s+(jr\.?\s*\/\s*sr\.?\s+|junior\s+|senior\s+|community\s+)?(high\s+sc?h?c?ool|high|hs|h\.s\.|school)\s*$/i, "").replace(/\s+senior$/i, "").trim();

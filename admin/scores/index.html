@@ -226,7 +226,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock} from "../../assets/matches.js?v=16";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo} from "../../assets/matches.js?v=17";
 import {watchFinals} from "../../assets/live.js?v=25";
 import {recordBreaks} from "../../assets/records.js?v=1";
 
@@ -918,7 +918,7 @@ function renderForm(){
   if (!draft){ location.hash = ""; return; }
   const teams = site.teams || [];
   const known = site.teamSchools || {};
-  const schools = [...new Set([...Object.values(known), ...matches.map(m => m.opponent?.school).filter(Boolean)])].sort();
+  const schools = [...new Set([...(site.highSchools || []).map(x => x.name), ...Object.values(known), ...matches.map(m => m.opponent?.school).filter(Boolean)].filter(Boolean))].sort();
   const oppTeams = [...new Set([...Object.keys(known), ...matches.map(m => m.opponent?.team).filter(Boolean)])].sort();
   const past = !!draft._past || (!!openId && !draft.teamId) || (!teams.some(t => t.id === draft.teamId) && !!draft.teamName && !!openId);
   const team = past ? {} : (teams.find(t => t.id === draft.teamId) || {});
@@ -935,6 +935,7 @@ function renderForm(){
       ${team.id && !team.gameKey ? `<p class="hint" style="color:var(--gold)">This team has no game type yet. Set it on the Teams tab in the Site Manager so scoring works right.</p>` : ""}
       <label class="f"><span>Opponent team name</span><input name="oppTeam" list="oppTeams" value="${esc(draft.opponent?.team || "")}" placeholder="Denby Tars"></label>
       <label class="f"><span>Opponent school</span><input name="oppSchool" list="schools" value="${esc(draft.opponent?.school || "")}" placeholder="Denby High School"></label>
+      <p class="hint" id="libHint"${schoolInfo(site, draft.opponent?.school) ? "" : " hidden"}>✓ In the School library: logo and short name fill in on the overlays.</p>
       <div class="two">
         <label class="f"><span>Short name (optional)</span><input name="abbr" maxlength="24" value="${esc(draft.opponent?.short || "")}" placeholder="${esc(shortSchool(draft.opponent?.school || "") || "Novi")}"></label>
         <label class="f"><span>Best of</span><select name="bestOf">${[1, 3, 5, 7].map(n => `<option${n === +draft.bestOf ? " selected" : ""}>${n}</option>`).join("")}</select></label>
@@ -972,7 +973,7 @@ function renderForm(){
     if (isPast){ draft.teamId = ""; draft.teamName = ""; draft.game = (site.games || [])[0]?.key || ""; } renderForm(); };
   if (F.pastGame) F.pastGame.onchange = () => { const g = gameFor(site, F.pastGame.value); if (g.bestOf) F.bestOf.value = String(g.bestOf); };
   F.oppTeam.onchange = () => { const k = Object.keys(known).find(n => n.toLowerCase() === F.oppTeam.value.trim().toLowerCase()); if (k && !F.oppSchool.value){ F.oppSchool.value = known[k]; F.abbr.placeholder = shortSchool(known[k]); } };
-  F.oppSchool.oninput = () => F.abbr.placeholder = shortSchool(F.oppSchool.value) || "Novi";
+  F.oppSchool.oninput = () => { const lib = schoolInfo(site, F.oppSchool.value); F.abbr.placeholder = lib?.short || shortSchool(F.oppSchool.value) || "Novi"; $("#libHint").hidden = !lib; };
   if (!isNew) $("#del").onclick = async () => {
     if (!confirm("Delete this match for good?")) return;
     try { await be.remove(openId, sb(matches.filter(m => m.id !== openId)), seasonSum(matches.filter(m => m.id !== openId), openId, false)); toast("Match deleted."); cur = null; location.hash = ""; }
@@ -999,7 +1000,7 @@ function renderForm(){
     cur = clone(m); openId = m.id; location.hash = "m/" + m.id;
   };
 }
-function readOpp(F){ const school = F.oppSchool.value.trim(), team = F.oppTeam.value.trim(); return {school, team, short:F.abbr.value.trim(), abbr:abbrFor(school || team), logo:draft?.opponent?.logo || ""}; }
+function readOpp(F){ const school = F.oppSchool.value.trim(), team = F.oppTeam.value.trim(), lib = schoolInfo(site, school); return {school, team, short:F.abbr.value.trim(), abbr:abbrFor(school || team), logo:draft?.opponent?.logo || lib?.logo || ""}; }
 function readWhen(F){ const v = F.when.value; if (!v) return ""; const d = new Date(v); return isNaN(d) ? "" : d.toISOString(); }
 
 /* ---------- backup finished matches to the GitHub repo ---------- */

@@ -1,7 +1,7 @@
 /* LevelUP overlays. Each overlay page is an OBS Browser Source (1920 x 1080) that follows one streaming station:
    ?station=1 (default). The scorekeeper decides which match is on each station; every overlay updates itself live.
    Layers: scorebug, vs, lineups, team-compare, player-compare. Add ?bg=1 to see an overlay on a grey test background. */
-import {gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=16";
+import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=17";
 import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=25";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=3";
 
@@ -65,7 +65,8 @@ function sides(m){
   const charOf = id => cur.p?.[id]?.hero;
   const us = {name:US.short, team:m.teamName, logo:US.logo, score:m.score?.us ?? 0, won:(m.games || []).filter(x => x.winner === "us").length,
     now:ourPlayer ? {name:tagOf(ourPlayer) || nameOf(ourPlayer), char:charOf(ourPlayer.id)} : null, us:true};
-  const them = {name:oppShort(m), team:m.opponent?.team || "", school:m.opponent?.school || "", logo:station.oppLogo || m.opponent?.logo || "", score:m.score?.them ?? 0,
+  const lib = schoolInfo(site, m.opponent?.school);
+  const them = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), team:m.opponent?.team || "", school:m.opponent?.school || "", logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", score:m.score?.them ?? 0,
     won:(m.games || []).filter(x => x.winner === "them").length, now:station.oppNow ? {name:station.oppNow, char:station.oppChar} : null};
   return station.swap ? [them, us] : [us, them];
 }
@@ -189,7 +190,8 @@ let rlStatic = "", rlLive = null;
 function rlbug(m){
   const g = gameFor(site, m.game), need = Math.floor((+m.bestOf || 1) / 2) + 1, us = ourTeamNum(m);
   const usSide = {name:US.short, logo:US.logo, won:(m.games || []).filter(x => x.winner === "us").length};
-  const themSide = {name:oppShort(m), logo:station.oppLogo || m.opponent?.logo || "", won:(m.games || []).filter(x => x.winner === "them").length};
+  const lib = schoolInfo(site, m.opponent?.school);
+  const themSide = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", won:(m.games || []).filter(x => x.winner === "them").length};
   const sides = us === 0 ? [usSide, themSide] : [themSide, usSide];   // [blue, orange]
   const decided = (m.games || []).filter(x => x.winner).length;
   const gameNo = m.status === "final" ? decided : Math.min(+m.bestOf || 1, rl.ended ? Math.max(1, decided) : decided + 1);

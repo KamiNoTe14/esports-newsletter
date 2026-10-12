@@ -514,3 +514,5 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .rlist b{color:var(--gold)}
 .legacy-era{margin-top:34px;padding:18px;border:1px dashed var(--line-2);border-radius:var(--r);background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.015) 14px 28px)}
 .legacy-era td small{display:block;color:var(--muted);font-size:13px}
+.commit-links{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
+.commit-links a{font:600 13px var(--body);color:#fff;opacity:.9;text-decoration:underline}

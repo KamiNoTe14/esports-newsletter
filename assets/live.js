@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=16";
+import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=17";
 import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=1";
 
 const BASE = new URL("../", import.meta.url).href;
@@ -305,7 +305,8 @@ function drawPlayer(site, host, all, dir){
   const mainRoles = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(x => x[0]);
   const W = played.filter(m => m.result === "W").length, L = played.filter(m => m.result === "L").length;
   /* Recruiting: commitment re-skins the page in that school's colors; otherwise seniors (still on a roster) get gold. */
-  const schools = site.schools || [], schoolOf = sid => schools.find(x => x.id === sid);
+  const schools = site.colleges || site.schools || [], schoolOf = sid => schools.find(x => x.id === sid);
+  const socials = x => [["link","Esports"],["website","Website"],["youtube","YouTube"],["twitch","Twitch"],["x","X"],["instagram","Instagram"],["tiktok","TikTok"]].filter(([k]) => safe(x?.[k])).map(([k, l]) => `<a href="${esc(safe(x[k]))}" target="_blank" rel="noopener">${l}</a>`).join("");
   const sch = !priv && prof.committed ? schoolOf(prof.committed) : null;
   const senior = !priv && !sch && entries.length && isSenior(prof.gradYear);
   const skin = sch ? ` style="--c1:${esc(sch.primary || "#FFBC05")};--c2:${esc(sch.secondary || "#FFFFFF")}"` : "";
@@ -323,7 +324,7 @@ function drawPlayer(site, host, all, dir){
         <h1 style="font-size:clamp(40px,7vw,76px)">${esc(display)}</h1>
         ${!priv && me.name && me.tag ? `<p class="player-tag">${esc(me.tag)}</p>` : ""}
         ${alum?.now ? `<p class="player-now"><span>Now playing</span> ${esc(alum.now)}</p>` : ""}
-        ${sch ? `<p class="player-commit">${logo(sch)}<span><small>Committed to</small><b>${esc(sch.name)}</b></span></p>` : ""}
+        ${sch ? `<p class="player-commit">${logo(sch)}<span><small>Committed to</small><b>${esc(sch.name)}</b>${socials(sch) ? `<span class="commit-links">${socials(sch)}</span>` : ""}</span></p>` : ""}
         <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>` : ""}${prof.gradYear ? `<span class="chip gold">${senior ? "Senior · " : ""}Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
       </div>
       <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${played.length} match${played.length === 1 ? "" : "es"}</span></div>
@@ -332,7 +333,7 @@ function drawPlayer(site, host, all, dir){
     ${ranks.length || links.length || interest.length ? `<section class="section recruit-s"><div class="wrap"><div class="recruit">
       ${ranks.length ? `<div><h2 class="res-h">Rank</h2><ul class="ranks">${ranks.map(r => `<li>${r.g.icon ? `<img src="${esc(src(r.g.icon))}" alt="${esc(r.g.name)}">` : `<small>${esc(r.g.short || r.g.name)}</small>`}<b>${esc(r.v)}</b></li>`).join("")}</ul></div>` : ""}
       ${links.length ? `<div><h2 class="res-h">Verify the stats</h2><p class="muted" style="margin:0 0 10px;font-size:15px">Outside trackers, for checking our numbers independently.</p><div class="vlinks">${links.map(l => `<a class="btn btn-line" href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")}</div></div>` : ""}
-      ${interest.length ? `<div><h2 class="res-h">Schools of interest</h2><ul class="schools">${interest.map(x => `<li>${safe(x.link) ? `<a href="${esc(safe(x.link))}" target="_blank" rel="noopener">` : ""}${logo(x) || `<span class="ph">${esc((x.short || x.name)[0])}</span>`}<span>${esc(x.short || x.name)}</span>${safe(x.link) ? "</a>" : ""}</li>`).join("")}</ul></div>` : ""}
+      ${interest.length ? `<div><h2 class="res-h">Schools of interest</h2><ul class="schools">${interest.map(x => `<li>${safe(x.link || x.website) ? `<a href="${esc(safe(x.link || x.website))}" target="_blank" rel="noopener">` : ""}${logo(x) || `<span class="ph">${esc((x.short || x.name)[0])}</span>`}<span>${esc(x.short || x.name)}</span>${safe(x.link || x.website) ? "</a>" : ""}</li>`).join("")}</ul></div>` : ""}
     </div></div></section>` : ""}
     ${bio || clip || playlist ? `<section class="section"><div class="wrap grid g2" style="align-items:start">
       ${bio ? `<div><h2 class="res-h">Career</h2><p class="lead playbill" style="margin:0">${esc(bio)}</p></div>` : ""}

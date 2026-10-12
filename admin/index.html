@@ -110,6 +110,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 </div>
 <input type="file" id="imgInput" accept="image/*" hidden>
 <input type="file" id="standInput" accept=".csv,.json,text/csv,application/json" hidden>
+<input type="file" id="schoolCsv" accept=".csv,.txt,text/csv" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
@@ -154,7 +155,8 @@ const TABS = [
   {id:"teams", label:"Teams & rosters", toggle:"rosters", toggleLabel:"Show rosters on the Teams page"},
   {id:"games", label:"Games"},
   {id:"profiles", label:"Player profiles"},
-  {id:"schools", label:"School library"},
+  {id:"colleges", label:"Colleges/Universities"},
+  {id:"highSchools", label:"School library"},
   {id:"rivals", label:"Rivals"},
   {id:"standings", label:"Standings", toggle:"standings", toggleLabel:"Show league standings"},
   {id:"brackets", label:"Playoff brackets", toggle:"brackets", toggleLabel:"Show playoff brackets"},
@@ -186,8 +188,10 @@ const LISTS = {
     fields:[["image","Photo","image"],["caption","Caption"],["album","Album (optional)"]]},
   sponsors:{title:"Sponsor", add:"Add sponsor", intro:"Logos show on the Home and About pages. Transparent PNG logos look best.", name:i => i.name || "Sponsor",
     fields:[["name","Name"],["link","Website","url"],["logo","Logo","image"]]},
-  schools:{title:"School", add:"Add school", intro:"Colleges for player profiles: schools a player is interested in show with their logo, and a player who commits gets their profile re-skinned in that school's colors. Transparent PNG logos look best.", name:i => i.name || "School",
-    fields:[["name","School","text","Michigan State University"],["short","Short name (optional)","text","Michigan State"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["link","Esports program page (optional)","url"]]},
+  colleges:{title:"College", add:"Add college or university", csv:true, intro:"Colleges for player profiles: schools a player is interested in show with their logo, and a player who commits gets their profile re-skinned in that school's colors. Transparent PNG logos look best.", name:i => i.name || "College",
+    fields:[["name","College or university","text","Michigan State University"],["short","Short name (optional)","text","Michigan State"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["link","Esports program page (optional)","url"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"]]},
+  highSchools:{title:"School", add:"Add school", csv:true, seed:true, intro:"High schools we compete against. Their logos and details are filled in automatically wherever a match is against them: the stream overlays, and the opponent on new matches in the scorekeeper. Type the school the way it appears in matches; \"Novi\" also matches \"Novi High School\".", name:i => [i.name, i.mascot].filter(Boolean).join(" · ") || "School",
+    fields:[["name","School","text","Novi High School"],["short","Short name for overlays (optional)","text","Novi"],["mascot","Mascot / team name","text","Wildcats"],["city","City","text","Novi, MI"],["league","League or conference","text","MHSEL · KLAA"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"],["notes","Notes (scouting, contacts…)","textarea"]]},
   legacyRecords:{title:"Pre-tracking record", add:"Add a legend", intro:"Records from before the scorekeeper existed. They show in their own \"Before the scorekeeper\" section of the record book, clearly marked, and never mix with the leaderboards that are worked out from logged matches. Check \"At least\" when the number is a provable floor: the site shows it with a + (for example 6 stocks for every best-of-3 set won, because you can't win one with fewer).", name:i => [i.holder, i.title].filter(Boolean).join(" · ") || "Record",
     fields:[["title","Record","text","Career stocks taken"],["holder","Who holds it","text","Griffin Appleby"],["game","Game","select",() => [["", "All games"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["value","Number","text","96"],["years","Years","text","2023–2025"],["note","How it was counted","textarea"],["floor","At least (show it with a +)","check"]]},
   roadmap:{title:"Planned feature", add:"Add a planned feature", intro:"Features planned for LevelUP that aren't built yet, with a short description of each. This list is just for the coaches; it doesn't show on the website.", name:i => i.title || "Feature",
@@ -217,12 +221,30 @@ function field(path, [key, label, type = "text", extra], val){
   }
   return `<label class="f"><span>${esc(label)}</span><input id="${id}" type="${type === "date" ? "date" : type === "url" ? "url" : type === "email" ? "email" : "text"}" data-path="${path}" value="${esc(val)}"${extra ? ` placeholder="${esc(extra)}"` : ""}></label>`;
 }
+const listFilter = {};
 function listEditor(key, spec){
   const arr = site[key] = site[key] || [];
   const isCheck = f => f[2] === "check";
-  return `<div class="grid" style="gap:10px">${arr.map((it, i) => {
+  /* Long lists (the school libraries) fold each entry up to one line, with a search box above */
+  const fold = !!spec.csv, wasOpen = fold ? new Set([...document.querySelectorAll("#panel details[data-oid][open]")].map(d => d.dataset.oid)) : null;
+  const q = fold ? String(listFilter[key] || "").trim().toLowerCase() : "";
+  return `<div class="grid" style="gap:10px">${fold && arr.length > 6 ? `<input type="search" class="list-filter" data-filter="${key}" value="${esc(listFilter[key] || "")}" placeholder="Search ${arr.length} schools…" style="padding:10px 12px;border:1px solid var(--line,#cfd6e0);border-radius:10px;font:inherit">` : ""}${arr.map((it, i) => {
     const base = `${key}.${i}`;
     const main = spec.fields.filter(f => !isCheck(f)), checks = spec.fields.filter(isCheck);
+    if (fold){
+      const hide = q && !String([it.name, it.short, it.mascot, it.city].join(" ")).toLowerCase().includes(q);
+      const sw = c => c ? `<i style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${esc(c)};border:1px solid rgba(0,0,0,.2)"></i>` : "";
+      const logo = it.logo ? `<img src="${esc(/^(https?:|data:)/.test(it.logo) ? it.logo : SITE_BASE + it.logo)}" alt="" style="width:28px;height:28px;object-fit:contain">` : `<span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:#e8edf3"></span>`;
+      const open = wasOpen.has(String(it.id)) || !it.name;
+      return `<details class="item" data-oid="${esc(it.id || "")}" data-fname="${esc(String([it.name, it.short, it.mascot, it.city].join(" ")).toLowerCase())}"${open ? " open" : ""}${hide ? " hidden" : ""}>
+      <summary class="item-h" style="cursor:pointer;list-style:none"><span style="display:flex;gap:10px;align-items:center">${logo}<b>${esc(spec.name(it))}</b>${sw(it.primary)}${sw(it.secondary)}</span><div class="tools">
+        <button type="button" data-move="${key}" data-i="${i}" data-d="-1" aria-label="Move up"${i === 0 ? " disabled" : ""}>▲</button>
+        <button type="button" data-move="${key}" data-i="${i}" data-d="1" aria-label="Move down"${i === arr.length - 1 ? " disabled" : ""}>▼</button>
+        <button type="button" class="x" data-del="${key}" data-i="${i}" aria-label="Remove ${esc(spec.title)}">×</button>
+      </div></summary>
+      <div class="grid g2" style="margin-top:12px">${main.map(f => `<div style="${f[2] === "textarea" || f[2] === "image" ? "grid-column:1/-1" : ""}">${field(`${base}.${f[0]}`, f, it[f[0]] ?? "")}</div>`).join("")}</div>
+    </details>`;
+    }
     return `<div class="item">
       <div class="item-h"><b>${esc(spec.name(it))}</b><div class="tools">
         <button type="button" data-move="${key}" data-i="${i}" data-d="-1" aria-label="Move up"${i === 0 ? " disabled" : ""}>▲</button>
@@ -282,7 +304,7 @@ function renderPanel(){
       ${list.map(([id, e]) => { const pr = site.profiles[id] = site.profiles[id] || {};
         pr.ranks = pr.ranks && typeof pr.ranks === "object" ? pr.ranks : {}; pr.interest = pr.interest && typeof pr.interest === "object" ? pr.interest : {};
         const filled = ["gradYear","bio","heroClipId","playlistUrl","chars","photo","mains","links","accolades","committed"].filter(k => pr[k]).length + Object.values(pr.ranks).filter(Boolean).length + Object.values(pr.interest).filter(Boolean).length;
-        const schools = site.schools || [], P = `profiles.${id}`;
+        const schools = site.colleges || [], P = `profiles.${id}`;
         return `<details class="item" data-pid="${esc(id)}"${wasOpen.has(id) ? " open" : ""} style="padding:0"><summary style="padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:center;justify-content:space-between"><b>${esc(e.r.name || e.r.tag)}${e.r.name && e.r.tag ? ` <span class="muted" style="font-weight:400">· ${esc(e.r.tag)}</span>` : ""}</b><span class="muted" style="font-size:13.5px">${e.priv ? "Gamertag only · " : ""}${esc(e.teams.join(", "))}${filled ? ` · ${filled} filled in` : ""} · <a href="${SITE_BASE}player.html?id=${encodeURIComponent(id)}" target="_blank" rel="noopener">View page</a></span></summary>
           <div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:14px">${objFields(P, [["gradYear","Graduation year (seniors get the gold treatment)","text","2028"],["mains","Mains / position","text","Main: Pikachu · Striker"],["heroClipId","Featured highlight (YouTube link or video ID)","text","https://youtu.be/…"],["playlistUrl","All their highlights (unlisted YouTube playlist)","url"],["chars","Top 3 characters, main first, separated by commas (leave blank to work it out from matches)","text","Luna Snow, Mantis, Loki"],["photo","Photo","image"]])}
           <div><p class="sub-h">Playbill bio</p>
@@ -296,21 +318,74 @@ function renderPanel(){
           <div><p class="sub-h">Colleges</p>${schools.length ? `<p class="muted" style="margin:2px 0 8px">Schools of interest show with their logos. A commitment announces "Committed to …" and re-skins the profile in that school's colors.</p>
             <div style="display:flex;flex-wrap:wrap;gap:6px 16px">${schools.filter(sc => sc.id && sc.name).map(sc => field(`${P}.interest.${sc.id}`, ["", sc.short || sc.name, "check"], !!pr.interest[sc.id])).join("")}</div>
             <div class="grid g2" style="margin-top:8px">${field(`${P}.committed`, ["committed","Committed to","select",[["", "Not committed"], ...schools.filter(sc => sc.id && sc.name).map(sc => [sc.id, sc.name])]], pr.committed || "")}</div>`
-            : `<p class="muted" style="margin:2px 0 0">Add colleges in the <b>School library</b> first, then pick them here.</p>`}</div>
+            : `<p class="muted" style="margin:2px 0 0">Add colleges on the <b>Colleges/Universities</b> tab first, then pick them here.</p>`}</div>
           ${field(`${P}.recruit`, ["recruit","Show a \"college coaches: contact us\" note","check"], !!pr.recruit)}</div></details>`; }).join("")}</div>`;
     return;
   }
   const spec = LISTS[tab];
   P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
     ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
+    ${spec.csv ? csvBar(tab, spec) : ""}
     ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}`;
+}
+/* ---------- CSV import for the college and high school lists ---------- */
+const CSV_COLS = {name:["name","school","college","university","high school"], short:["short","short name","nickname","abbreviated name"], mascot:["mascot","team name","nickname mascot"],
+  city:["city","location","town"], league:["league","conference","leagues"], primary:["primary","primary color","color 1","color1","main color"], secondary:["secondary","secondary color","color 2","color2"],
+  logo:["logo","logo url","image","logo link"], link:["esports","esports page","esports program","program page"], website:["website","site","url","web"], youtube:["youtube","yt"], twitch:["twitch"],
+  x:["x","twitter","x / twitter"], instagram:["instagram","ig"], tiktok:["tiktok","tik tok"], notes:["notes","note"]};
+function csvBar(key, spec){
+  const cols = spec.fields.map(f => f[0]);
+  const tpl = "data:text/csv;charset=utf-8," + encodeURIComponent(cols.join(",") + "\n");
+  return `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-line" type="button" data-csv="${key}">⇪ Import CSV</button>
+    <a class="btn btn-line" href="${tpl}" download="${key === "colleges" ? "colleges" : "high-schools"}-template.csv">Download a blank template</a>
+    ${spec.seed ? `<button class="btn btn-line" type="button" data-seed="${key}">+ Add every school we've played</button>` : ""}
+    <span class="muted">Columns: ${esc(cols.join(", "))}. Colors as hex codes (#18453B); logo as an image link. Rows that match a school already here update it instead of adding a copy.</span></div>`;
+}
+function csvRows(text){
+  const rows = [], row = [""]; let q = false;
+  for (let i = 0; i < text.length; i++){ const c = text[i];
+    if (q){ if (c === '"' && text[i + 1] === '"'){ row[row.length - 1] += '"'; i++; } else if (c === '"') q = false; else row[row.length - 1] += c; }
+    else if (c === '"') q = true; else if (c === "," || c === "\t") row.push(""); else if (c === "\n" || c === "\r"){ if (c === "\r" && text[i + 1] === "\n") i++; rows.push(row.splice(0)); row.push(""); } else row[row.length - 1] += c; }
+  if (row.length > 1 || row[0] !== "") rows.push(row);
+  return rows.filter(r => r.some(x => String(x).trim()));
+}
+const hexOf = v => { const t = String(v || "").trim(); return /^#?[0-9a-f]{6}$/i.test(t) ? ("#" + t.replace(/^#/, "")).toUpperCase() : /^#?[0-9a-f]{3}$/i.test(t) ? "#" + t.replace(/^#/, "").split("").map(c => c + c).join("").toUpperCase() : ""; };
+/* Same school, different spelling: "Fenton Senior High School" = "Fenton High School", "Cass City Jr/Sr High" = "Cass City Jr/Sr High School" (matches shortSchool in matches.js) */
+const nameKey = n => { const t = String(n || "").trim(), cut = t.replace(/\s+(jr\.?\s*\/\s*sr\.?\s+|junior\s+|senior\s+|community\s+)?(high\s+sc?h?c?ool|high|hs|h\.s\.|school)\s*$/i, "").replace(/\s+senior$/i, "").trim() || t;
+  return cut.toLowerCase().replace(/\b(university|college|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim(); };
+function importSchools(key, text){
+  const rows = csvRows(text); if (rows.length < 2) return {added:0, updated:0, error:"The file needs a header row and at least one school."};
+  const head = rows[0].map(h => String(h).trim().toLowerCase()), spec = LISTS[key], keys = new Set(spec.fields.map(f => f[0]));
+  const col = {}; Object.entries(CSV_COLS).forEach(([k, names]) => { if (!keys.has(k)) return; const i = head.findIndex(h => h === k.toLowerCase() || names.includes(h)); if (i >= 0) col[k] = i; });
+  if (!("name" in col)) return {added:0, updated:0, error:"No name column found. The first column header should be \"name\"."};
+  const list = site[key] = site[key] || []; let added = 0, updated = 0;
+  rows.slice(1).forEach(r => {
+    const rec = {}; Object.entries(col).forEach(([k, i]) => { let v = String(r[i] ?? "").trim(); if (!v) return; if (k === "primary" || k === "secondary") v = hexOf(v); if (v) rec[k] = v; });
+    if (!rec.name) return;
+    const have = list.find(x => nameKey(x.name) === nameKey(rec.name) || (rec.short && x.short && nameKey(x.short) === nameKey(rec.short)));
+    if (have){ Object.assign(have, rec); updated++; } else { list.push({id:(key === "colleges" ? "s-" : "h-") + Math.random().toString(16).slice(2, 10), ...rec}); added++; }
+  });
+  return {added, updated};
+}
+/* Every opponent school in the match history (and the team -> school list) that isn't in the library yet */
+async function seedSchools(){
+  const names = new Map(), add = (n, logo) => { n = String(n || "").trim(); if (!n || /hartland/i.test(n)) return; const k = nameKey(n); if (!k) return; const e = names.get(k) || {name:n, logo:"", n:0}; e.n++; if (logo && !e.logo) e.logo = logo; if (n.length > e.name.length) e.name = n; names.set(k, e); };
+  Object.values(site.teamSchools || {}).forEach(n => add(n));
+  try { const idx = await (await fetch(SITE_BASE + "data/matches/index.json?v=" + Date.now(), {cache:"no-store"})).json();
+    for (const se of idx.seasons || []){ try { const d = await (await fetch(SITE_BASE + `data/matches/${se}.json?v=` + Date.now(), {cache:"no-store"})).json(); (d.matches || []).forEach(m => add(m.opponent?.school, m.opponent?.logo)); } catch(e){} } } catch(e){}
+  const list = site.highSchools = site.highSchools || []; let added = 0;
+  names.forEach((e, k) => { if (list.some(x => nameKey(x.name) === k)) return; list.push({id:"h-" + Math.random().toString(16).slice(2, 10), name:e.name, short:"", mascot:"", primary:"", secondary:"", logo:e.logo || ""}); added++; });
+  list.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  return added;
 }
 /* Stable IDs: each player keeps one ID across teams and years (the same name = the same player), so stats follow them. */
 function fillIds(){
   const byName = {};
   (site.teams || []).forEach(t => (t.roster || []).forEach(r => { const k = String(r.name || r.tag || "").trim().toLowerCase(); if (r.id && k) byName[k] = byName[k] || r.id; }));
   (site.teams || []).forEach(t => (t.roster || []).forEach(r => { const k = String(r.name || r.tag || "").trim().toLowerCase(); if (!r.id && k) r.id = byName[k] = byName[k] || "p-" + Math.random().toString(16).slice(2, 10); }));
-  (site.schools || []).forEach(sc => { if (!sc.id) sc.id = "s-" + Math.random().toString(16).slice(2, 10); });
+  (site.colleges || []).forEach(sc => { if (!sc.id) sc.id = "s-" + Math.random().toString(16).slice(2, 10); });
+  (site.highSchools || []).forEach(sc => { if (!sc.id) sc.id = "h-" + Math.random().toString(16).slice(2, 10); });
   (site.games || []).forEach(g => { if (!g.key) g.key = String(g.name || "game").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); });
 }
 /* ---------- team → school list (fills in schools on every standings import) ---------- */
@@ -362,12 +437,14 @@ async function loadSite(){
     try {
       const c = ghCfg();
       const f = await gh(`/contents/data/site.json?ref=${encodeURIComponent(c.branch || "main")}`);
-      site = JSON.parse(b64dec(f.content)); siteSha = f.sha; return;
+      site = JSON.parse(b64dec(f.content)); siteSha = f.sha; migrate(); return;
     } catch(e){ toast("Couldn't load the latest content from GitHub. Showing the live site's copy."); }
   }
   const r = await fetch(SITE_BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"});
-  site = await r.json(); siteSha = null;
+  site = await r.json(); siteSha = null; migrate();
 }
+/* The first college list was saved as "schools"; it's "colleges" now, and "highSchools" is the opponent library. */
+function migrate(){ if (Array.isArray(site.schools)){ if (!(site.colleges || []).length) site.colleges = site.schools; delete site.schools; } }
 async function connect(cfg){
   ghSave(cfg);
   try {
@@ -645,7 +722,7 @@ $("#panel").addEventListener("click", async e => {
   if (b.id === "ghForget"){ const c = ghCfg() || {}; delete c.token; ghSave(c); connected = false; setStatus(); renderSide(); renderPanel(); toast("Key removed from this computer."); return; }
   if (b.dataset.add){
     const arr = getP(b.dataset.add); const key = b.dataset.add.split(".").pop();
-    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", gameKey:"", level:"Varsity", leagues:"MHSEL", note:"", roster:[]}, rivals:{school:"", title:"", note:""}, games:{key:"", name:"", short:"", abbr:"", unit:"Game", points:"", bestOf:"3", teamSize:"", stats:"", roles:"", charLabel:"", chars:"", icon:"", art:""}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{id:"", name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}, schools:{id:"s-" + Date.now().toString(36), name:"", short:"", primary:"", secondary:"", logo:"", link:""}, legacyRecords:{title:"", holder:"", game:"", value:"", years:"", note:"", floor:false}, roadmap:{title:"", status:"Planned", text:""}}[key] || {};
+    const blank = {teams:{id:"t" + Date.now().toString(36), game:"", name:"", gameKey:"", level:"Varsity", leagues:"MHSEL", note:"", roster:[]}, rivals:{school:"", title:"", note:""}, games:{key:"", name:"", short:"", abbr:"", unit:"Game", points:"", bestOf:"3", teamSize:"", stats:"", roles:"", charLabel:"", chars:"", icon:"", art:""}, standings:{title:"", updated:new Date().toISOString().slice(0, 10), link:"", on:true, rows:[]}, brackets:{title:"", league:"MHSEL", status:"Upcoming", link:"", image:"", text:"", on:true}, roster:{id:"", name:"", tag:"", role:"", captain:false, private:false}, rows:{rank:"", team:"", school:"", w:"", l:"", rating:"", us:false}, colleges:{id:"s-" + Date.now().toString(36), name:"", short:"", primary:"", secondary:"", logo:"", link:""}, highSchools:{id:"h-" + Date.now().toString(36), name:"", short:"", mascot:"", primary:"", secondary:"", logo:""}, legacyRecords:{title:"", holder:"", game:"", value:"", years:"", note:"", floor:false}, roadmap:{title:"", status:"Planned", text:""}}[key] || {};
     arr.push(blank); setDirty(true); setStatus(); renderPanel(); return;
   }
   if (b.dataset.del){
@@ -666,10 +743,23 @@ $("#panel").addEventListener("click", async e => {
     return;
   }
   if (b.dataset.import){ importPath = b.dataset.import; $("#standInput").click(); return; }
+  if (b.dataset.csv){ csvKey = b.dataset.csv; $("#schoolCsv").value = ""; $("#schoolCsv").click(); return; }
+  if (b.dataset.seed){ b.disabled = true; b.textContent = "Reading every match…"; const n = await seedSchools(); setDirty(true); setStatus(); renderPanel(); toast(n ? `Added ${n} school${n === 1 ? "" : "s"} from our match history. Add logos and colors, then publish.` : "Every school we've played is already in the library."); return; }
   if (b.dataset.upload){ uploadPath = b.dataset.upload; $("#imgInput").click(); return; }
   if (b.dataset.clearimg){ setP(b.dataset.clearimg, ""); setDirty(true); setStatus(); renderPanel(); return; }
 });
 $("#publish").addEventListener("click", publish);
+let csvKey = null;
+$("#panel").addEventListener("input", e => { const el = e.target.closest("[data-filter]"); if (!el) return;
+  const q = (listFilter[el.dataset.filter] = el.value).trim().toLowerCase();
+  el.parentElement.querySelectorAll("details[data-fname]").forEach(d => { d.hidden = !!q && !d.dataset.fname.includes(q); }); });
+$("#schoolCsv").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f || !csvKey) return;
+  const r = importSchools(csvKey, await f.text());
+  if (r.error){ toast(r.error); return; }
+  setDirty(true); setStatus(); renderPanel();
+  toast(`Imported: ${r.added} added, ${r.updated} updated. It goes live when you publish.`);
+});
 
 (async function init(){
   const cfg = ghCfg();

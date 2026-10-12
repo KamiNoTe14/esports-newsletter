@@ -208,7 +208,7 @@ function renderSide(){
 function field(path, [key, label, type = "text", extra], val){
   const id = "f-" + path.replace(/\./g, "-");
   if (type === "check") return `<label class="toggle"><input id="${id}" type="checkbox" data-path="${path}"${val !== false && val !== undefined && val !== "" ? " checked" : ""}> ${esc(label)}</label>`;
-  if (type === "color"){ const v = /^#[0-9a-f]{6}$/i.test(val || "") ? val : "#00274C"; return `<label class="f"><span>${esc(label)}</span><span style="display:flex;gap:8px;align-items:center"><input id="${id}" type="color" data-path="${path}" value="${esc(v)}" style="width:52px;height:38px;padding:2px"><code class="muted">${esc(val || "not set")}</code></span></label>`; }
+  if (type === "color"){ const v = /^#[0-9a-f]{6}$/i.test(val || "") ? val : "#00274C"; return `<label class="f"><span>${esc(label)}</span><span style="display:flex;gap:8px;align-items:center"><input id="${id}" type="color" data-path="${path}" data-hexpair="${id}-hex" value="${esc(v)}" style="width:52px;height:38px;padding:2px;flex:none" aria-label="${esc(label)} picker"><input id="${id}-hex" type="text" data-hexfor="${id}" value="${esc(val || "")}" placeholder="#18453B" maxlength="7" spellcheck="false" autocomplete="off" style="font-family:ui-monospace,Consolas,Menlo,monospace;max-width:120px" aria-label="${esc(label)} hex code"></span></label>`; }
   if (type === "textarea") return `<label class="f"><span>${esc(label)}</span><textarea id="${id}" data-path="${path}" rows="3">${esc(val)}</textarea></label>`;
   if (type === "select"){ const opts = (typeof extra === "function" ? extra() : extra).map(o => Array.isArray(o) ? o : [o, o]); return `<label class="f"><span>${esc(label)}</span><select id="${id}" data-path="${path}">${opts.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(val ?? "") ? " selected" : ""}>${esc(l || "—")}</option>`).join("")}</select></label>`; }
   if (type === "image"){
@@ -619,6 +619,14 @@ $("#panel").addEventListener("input", e => {
     const m = {}; e.target.value.split(/\r?\n/).forEach(line => { const i = line.lastIndexOf("|"); if (i < 0) return; const n = line.slice(0, i).trim(), sc = line.slice(i + 1).trim(); if (n && sc) m[n] = sc; });
     site.teamSchools = m; setDirty(true); setStatus(); return;
   }
+  /* color boxes: the swatch and the hex code box stay in step; a hex code is saved once it's a full #RRGGBB */
+  if (e.target.dataset.hexfor){
+    const raw = e.target.value.trim(), hex = /^#?[0-9a-f]{6}$/i.test(raw) ? ("#" + raw.replace(/^#/, "")).toUpperCase() : /^#?[0-9a-f]{3}$/i.test(raw) ? "#" + raw.replace(/^#/, "").split("").map(c => c + c).join("").toUpperCase() : "";
+    e.target.style.borderColor = raw && !hex ? "var(--danger)" : "";
+    if (!hex) return;
+    const sw = document.getElementById(e.target.dataset.hexfor); sw.value = hex; setP(sw.dataset.path, hex); setDirty(true); setStatus(); return;
+  }
+  if (e.target.dataset.hexpair){ const box = document.getElementById(e.target.dataset.hexpair); if (box){ box.value = e.target.value.toUpperCase(); box.style.borderColor = ""; } }
   const el = e.target, path = el.dataset.path; if (!path) return;
   setP(path, el.type === "checkbox" ? el.checked : el.value);
   setDirty(true); setStatus();

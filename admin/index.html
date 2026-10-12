@@ -155,6 +155,7 @@ const TABS = [
   {id:"teams", label:"Teams & rosters", toggle:"rosters", toggleLabel:"Show rosters on the Teams page"},
   {id:"games", label:"Games"},
   {id:"profiles", label:"Player profiles"},
+  {id:"alumni", label:"Alumni"},
   {id:"colleges", label:"Colleges/Universities"},
   {id:"highSchools", label:"School library"},
   {id:"rivals", label:"Rivals"},
@@ -170,7 +171,7 @@ const TABS = [
 const LISTS = {
   teams:{title:"Team", add:"Add team", intro:"Each team card on the Teams and Home pages. Separate multiple leagues with commas.", name:i => `${i.game || "Game"} · ${i.name || "Team"}`,
     fields:[["game","Game (as shown on the site)"],["name","Team name"],["gameKey","Game type (for scores)","select",() => [["", "—"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["level","Level","select",["Varsity","JV"]],["leagues","Leagues"],["note","Note (optional)"],["art","Card artwork for this team (optional; overrides the game's)","image"]],
-    sub:{key:"roster", title:"Roster", add:"Add player", fields:[["name","Name"],["tag","Gamertag"],["role","Role (optional)"],["captain","Captain","check"],["private","Gamertag only","check"]]}},
+    sub:{key:"roster", title:"Roster", add:"Add player", fields:[["name","Name"],["tag","Gamertag"],["role","Role (optional)"],["captain","Captain","check"],["private","Gamertag only","check"],["graduated","Graduated","check"]]}},
   standings:{title:"Standings table", add:"Add standings table", intro:"Paste in league standings from RallyCry. Download the standings from RallyCry as CSV or JSON and click \"Import RallyCry file\", or type the rows in by hand. Check \"Hartland\" on our row to highlight it.", name:i => i.title || "Standings",
     fields:[["title","Title","text","MHSEL Smash Varsity · Division 2"],["updated","Updated","date"],["link","Link to full standings","url"],["on","Show this table","check"]],
     sub:{key:"rows", title:"Rows", add:"Add row", importBtn:"Import RallyCry file (CSV or JSON)", fields:[["rank","#"],["team","Team"],["school","School"],["w","W"],["l","L"],["rating","Rating"],["us","Hartland","check"]]}},
@@ -205,6 +206,7 @@ function renderSide(){
   $("#side").innerHTML = TABS.map(t => {
     let badge = "";
     if (t.toggle && site) badge = site.sections?.[t.toggle] === false ? `<span class="dot off">Off</span>` : (LISTS[t.id] && (site[t.id] || []).length ? `<span class="dot">${site[t.id].length}</span>` : "");
+    if (t.id === "alumni" && site && (site.alumni || []).length) badge = `<span class="dot">${site.alumni.length}</span>`;
     if (t.id === "connect") badge = connected ? `<span class="dot">✓</span>` : `<span class="dot off">!</span>`;
     return `<button type="button" data-tab="${t.id}"${tab === t.id ? ' aria-current="true"' : ""}>${t.label}${badge}</button>`;
   }).join("");
@@ -300,28 +302,40 @@ function renderPanel(){
     const people = new Map();
     (site.teams || []).forEach(t => (t.roster || []).forEach(r => { if (!r.id) return; const e = people.get(r.id) || {r, teams:[], priv:false}; e.teams.push(`${t.game} ${t.name}`); e.priv = e.priv || !!r.private; people.set(r.id, e); }));
     const list = [...people.entries()].sort((a, b) => String(a[1].r.name || a[1].r.tag).localeCompare(String(b[1].r.name || b[1].r.tag)));
-    /* Alumni live in the scorekeeper's Past players list; they get the same profile, listed after the current roster */
-    /* Past players = the scorekeeper's Past players list plus anyone in the match history who isn't on a roster now
-       (one entry per person: same ID, or the same name) */
-    if (alumniList === null){ alumniList = false; loadFinals().then(r => {
-      const out = [], k = x => String(x || "").trim().toLowerCase(), find = p => out.find(a => a.id === p.id || (p.name && k(a.name) === k(p.name)) || (!p.name && !a.name && p.tag && k(a.tag) === k(p.tag)));
-      (r?.dir?.alumni || []).filter(a => a.id && (a.name || a.tag)).forEach(a => { if (!find(a)) out.push({...a}); });
-      (r?.fin || []).forEach(m => (m.players || []).forEach(p => { if (!p.id || !(p.name || p.tag)) return; const have = find(p);
-        if (have){ if (!have.histId && have.id !== p.id) have.histId = p.id; } else out.push({id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, gradYear:"", now:"", fromHistory:true}); }));
-      alumniList = out; if (tab === "profiles") renderPanel(); }); }
-    const alums = (alumniList || []).filter(a => !people.has(a.id)).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || String(a.name || a.tag).localeCompare(String(b.name || b.tag)))
-      .filter(a => !people.has(a.histId))
-      .map(a => [a.id, {r:a, teams:[`${a.fromHistory ? "Past player (not on the scorekeeper's Past players list)" : "Alumni"}${a.gradYear ? ` · Class of ${a.gradYear}` : ""}${a.now ? ` · ${a.now}` : ""}`], priv:!!a.private, alum:true, auto:a.private ? null : liveMod?.collegeFor?.(site, a.id, a.now)}]);
-    list.push(...alums);
-    P.innerHTML = `<div class="card"><div class="card-h"><h2>Player profiles</h2><span class="muted">${list.length - alums.length} players${alums.length ? ` · ${alums.length} alumni` : alumniList === false ? " · loading alumni…" : ""}</span></div>
-      <p class="intro">Every rostered player has a public profile page with their stats from the scorekeeper. Anything you add here is optional and shows on their page, which is handy for recruiting. Players marked <b>Gamertag only</b> show just their gamertag and stats; nothing from this page is shown for them.</p>
-      ${list.map(([id, e], li) => { const pr = site.profiles[id] = site.profiles[id] || {};
-        const head = e.alum && (li === 0 || !list[li - 1][1].alum) ? `<p class="sub-h" style="margin:18px 0 4px">Alumni</p><p class="muted" style="margin:0 0 8px">Past players from the scorekeeper. Pick the college they play for and their profile gets the same banner and school colors. If you leave it blank, the site matches their "Playing now at" line to a school on the Colleges/Universities tab.</p>` : "";
+    P.innerHTML = `<div class="card"><div class="card-h"><h2>Player profiles</h2><span class="muted">${list.length} players</span></div>
+      <p class="intro">Every rostered player has a public profile page with their stats from the scorekeeper. Anything you add here is optional and shows on their page, which is handy for recruiting. Players marked <b>Gamertag only</b> show just their gamertag and stats; nothing from this page is shown for them. When a player graduates, check <b>Graduated</b>: they come off every roster and move to the <b>Alumni</b> tab with their profile and stats.</p>
+      ${list.map(([id, e]) => profileCard(id, e, wasOpen.has(id))).join("")}</div>`;
+    return;
+  }
+  if (tab === "alumni"){
+    const wasOpen = new Set([...P.querySelectorAll("details[data-pid][open]")].map(d => d.dataset.pid));
+    fillIds(); site.profiles = site.profiles || {}; const A = site.alumni = Array.isArray(site.alumni) ? site.alumni : [];
+    if (alumniList === null){ alumniList = false; loadFinals().then(r => { alumniList = pastPlayers(r); if (tab === "alumni") renderPanel(); }); }
+    const waiting = (alumniList || []).filter(a => !onRoster(a.id) && !findAlum(a));
+    P.innerHTML = `<div class="card"><div class="card-h"><h2>Alumni</h2><span class="muted">${A.length} alumni</span></div>
+      <p class="intro">Eagles who have graduated. Their player page keeps their stats and profile, and anyone with a college gets the "Now playing at" banner in that school's colors and a card in "Where Eagles go next" on the Legacy page. Players land here when you check <b>Graduated</b> on a roster or on their profile.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">${alumniList === false ? `<span class="muted">Checking the scorekeeper and match history for past players…</span>`
+        : waiting.length ? `<button class="btn btn-line" type="button" id="alBring">+ Bring in ${waiting.length} past player${waiting.length === 1 ? "" : "s"}</button><span class="muted">From the scorekeeper's Past players list and the match history: ${esc(waiting.slice(0, 6).map(a => a.name || a.tag).join(", "))}${waiting.length > 6 ? "…" : ""}</span>`
+        : `<span class="muted">Every past player from the scorekeeper and match history is here.</span>`}</div>
+      ${A.length ? A.map((a, i) => profileCard(a.id, {r:a, i, alum:true, priv:!!a.private, teams:[`Class of ${a.gradYear || "?"}`]}, wasOpen.has(a.id))).join("") : `<p class="muted" style="margin:14px 0 0">No alumni yet.</p>`}</div>`;
+    return;
+  }
+  const spec = LISTS[tab];
+  P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
+    ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
+    ${spec.csv ? csvBar(tab, spec) : ""}
+    ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}`;
+}
+/* One player's profile editor: used for current players (Player profiles) and graduates (Alumni) */
+function profileCard(id, e, open){
+  const nowText = e.alum ? (e.r.now || (alumniList || []).find(a => a.id === id)?.now || "") : "";
+  const pr = site.profiles[id] = site.profiles[id] || {};
+  const auto = e.alum && !e.priv ? liveMod?.collegeFor?.(site, id, nowText) : null;
         pr.ranks = pr.ranks && typeof pr.ranks === "object" ? pr.ranks : {}; pr.interest = pr.interest && typeof pr.interest === "object" ? pr.interest : {};
         const filled = ["gradYear","bio","heroClipId","playlistUrl","chars","photo","mains","links","accolades","committed"].filter(k => pr[k]).length + Object.values(pr.ranks).filter(Boolean).length + Object.values(pr.interest).filter(Boolean).length;
         const schools = site.colleges || [], P = `profiles.${id}`;
-        return `${head}<details class="item" data-pid="${esc(id)}"${wasOpen.has(id) ? " open" : ""} style="padding:0"><summary style="padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:center;justify-content:space-between"><b>${esc(e.r.name || e.r.tag)}${e.r.name && e.r.tag ? ` <span class="muted" style="font-weight:400">· ${esc(e.r.tag)}</span>` : ""}</b><span class="muted" style="font-size:13.5px">${e.priv ? "Gamertag only · " : ""}${esc(e.teams.join(", "))}${filled ? ` · ${filled} filled in` : ""} · <a href="${SITE_BASE}player.html?id=${encodeURIComponent(e.r.histId || id)}" target="_blank" rel="noopener">View page</a></span></summary>
-          <div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:14px">${objFields(P, [["gradYear","Graduation year (seniors get the gold treatment)","text","2028"],["mains","Mains / position","text","Main: Pikachu · Striker"],["heroClipId","Featured highlight (YouTube link or video ID)","text","https://youtu.be/…"],["playlistUrl","All their highlights (unlisted YouTube playlist)","url"],["chars","Top 3 characters, main first, separated by commas (leave blank to work it out from matches)","text","Luna Snow, Mantis, Loki"],["photo","Photo","image"]])}
+        return `<details class="item" data-pid="${esc(id)}"${open ? " open" : ""} style="padding:0"><summary style="padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:center;justify-content:space-between"><b>${esc(e.r.name || e.r.tag)}${e.r.name && e.r.tag ? ` <span class="muted" style="font-weight:400">· ${esc(e.r.tag)}</span>` : ""}</b><span class="muted" style="font-size:13.5px">${e.priv ? "Gamertag only · " : ""}${esc(e.teams.join(", "))}${filled ? ` · ${filled} filled in` : ""} · <a href="${SITE_BASE}player.html?id=${encodeURIComponent(e.r.histId || id)}" target="_blank" rel="noopener">View page</a></span></summary>
+          <div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:14px">${e.alum ? alumHead(e) : `<label class="tog grad-tog"><input type="checkbox" data-graduate="${esc(id)}"> <b>Graduated</b>: take them off every roster and move them to the Alumni tab</label>`}${objFields(P, [...(e.alum ? [] : [["gradYear","Graduation year (seniors get the gold treatment)","text","2028"]]),["mains","Mains / position","text","Main: Pikachu · Striker"],["heroClipId","Featured highlight (YouTube link or video ID)","text","https://youtu.be/…"],["playlistUrl","All their highlights (unlisted YouTube playlist)","url"],["chars","Top 3 characters, main first, separated by commas (leave blank to work it out from matches)","text","Luna Snow, Mantis, Loki"],["photo","Photo","image"]])}
           <div><p class="sub-h">Playbill bio</p>
             <p class="muted" style="margin:2px 0 8px">A short career write-up, like a playbill. Leave it blank and the profile shows a draft written from their record. Once you write or edit it here, your version is what shows and is never replaced.</p><label class="f"><span>Bio</span><textarea id="bio-${esc(id)}" data-path="${P}.bio" rows="4" placeholder="Blank: the profile writes one from their record.">${esc(pr.bio || "")}</textarea></label>
             <div style="display:flex;gap:8px;margin-top:6px"><button type="button" class="btn btn-line" data-biodraft="${esc(id)}">Write a draft from their record</button></div></div>
@@ -331,18 +345,51 @@ function renderPanel(){
           <div><p class="sub-h">Rank by game</p><p class="muted" style="margin:2px 0 8px">Typed in by hand. Leave a game blank if they don't have a rank; the profile never shows "unranked".</p>
             <div class="grid g3">${(site.games || []).map(g => field(`${P}.ranks.${g.key}`, ["", g.short || g.name, "text", g.key === "rocket-league" ? "Grand Champion II" : ""], pr.ranks[g.key] || "")).join("")}</div></div>
           <div><p class="sub-h">Colleges</p>${schools.length ? `<p class="muted" style="margin:2px 0 8px">Schools of interest show with their logos. A commitment announces "Committed to …" and re-skins the profile in that school's colors.</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px 16px">${schools.filter(sc => sc.id && sc.name).map(sc => field(`${P}.interest.${sc.id}`, ["", sc.short || sc.name, "check"], !!pr.interest[sc.id])).join("")}</div>
-            <div class="grid g2" style="margin-top:8px">${field(`${P}.committed`, ["committed",e.alum ? "Plays for / attends" : "Committed to","select",[["", e.alum ? (e.auto ? `Matched from "Playing now at": ${e.auto.name}` : e.r.now ? `No match for "${e.r.now}"` : "None (add \"Playing now at\" in the scorekeeper)") : "Not committed"], ...schools.filter(sc => sc.id && sc.name).map(sc => [sc.id, sc.name])]], pr.committed || "")}
+            ${e.alum ? "" : `<div style="display:flex;flex-wrap:wrap;gap:6px 16px">${schools.filter(sc => sc.id && sc.name).map(sc => field(`${P}.interest.${sc.id}`, ["", sc.short || sc.name, "check"], !!pr.interest[sc.id])).join("")}</div>`}
+            <div class="grid g2" style="margin-top:8px">${field(`${P}.committed`, ["committed",e.alum ? "Plays for / attends" : "Committed to","select",[["", e.alum ? (auto ? `Matched from "Playing now at": ${auto.name}` : nowText ? `No match for "${nowText}"` : "None (add \"Playing now at\" in the scorekeeper)") : "Not committed"], ...schools.filter(sc => sc.id && sc.name).map(sc => [sc.id, sc.name])]], pr.committed || "")}
               ${field(`${P}.commitLabel`, ["commitLabel","Banner wording","select",[["", e.alum ? "Now playing at (default)" : "Committed to (default)"], ...["Committed to","Signed with","Now playing at","Attending"].map(x => [x, x])]], pr.commitLabel || "")}</div>`
             : `<p class="muted" style="margin:2px 0 0">Add colleges on the <b>Colleges/Universities</b> tab first, then pick them here.</p>`}</div>
-          ${field(`${P}.recruit`, ["recruit","Show a \"college coaches: contact us\" note","check"], !!pr.recruit)}</div></details>`; }).join("")}</div>`;
-    return;
-  }
-  const spec = LISTS[tab];
-  P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
-    ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
-    ${spec.csv ? csvBar(tab, spec) : ""}
-    ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}`;
+          ${e.alum ? "" : field(`${P}.recruit`, ["recruit","Show a \"college coaches: contact us\" note","check"], !!pr.recruit)}</div></details>`;
+}
+function alumHead(e){
+  const B = `alumni.${e.i}`, a = e.r;
+  return `<div class="grid g3">${field(`${B}.name`, ["name","Name"], a.name || "")}${field(`${B}.tag`, ["tag","Gamertag"], a.tag || "")}${field(`${B}.gradYear`, ["gradYear","Class of","text","2026"], a.gradYear || "")}</div>
+    <div class="grid g2">${field(`${B}.now`, ["now","Playing now at (picks their college automatically)","text","Rocket League at Michigan Tech"], a.now || "")}<div style="padding-top:22px">${field(`${B}.private`, ["private","Gamertag only","check"], !!a.private)}</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${(a.fromTeams || []).length ? `<button type="button" class="btn btn-line" data-ungrad="${e.i}">Undo: put back on ${esc(a.fromTeams.map(t => teamNameOf(t.teamId)).filter(Boolean).join(" and ") || "their roster")}</button>` : ""}<button type="button" class="btn btn-line" data-delalum="${e.i}">Remove from alumni</button></div>`;
+}
+/* ---------- graduation: roster -> Alumni ---------- */
+const nk = x => String(x || "").trim().toLowerCase();
+const samePerson = (a, p) => a.id === p.id || (p.name && nk(a.name) === nk(p.name)) || (!p.name && !a.name && p.tag && nk(a.tag) === nk(p.tag));
+const onRoster = id => (site.teams || []).some(t => (t.roster || []).some(r => r.id === id));
+const findAlum = p => (site.alumni || []).find(a => samePerson(a, p));
+const teamNameOf = tid => { const t = (site.teams || []).find(x => x.id === tid); return t ? `${t.game} ${t.name}` : ""; };
+/* Past players the site knows about outside this list: the scorekeeper's Past players and anyone in the match history
+   who isn't on a roster. One entry per person; when a Past players entry and the match history disagree on the ID,
+   the match history's ID is kept so their stats stay attached. */
+function pastPlayers(r){
+  const out = [], find = p => out.find(a => samePerson(a, p));
+  (r?.fin || []).forEach(m => (m.players || []).forEach(p => { if (p.id && (p.name || p.tag) && !find(p)) out.push({id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, gradYear:"", now:""}); }));
+  (r?.dir?.alumni || []).filter(a => a.id && (a.name || a.tag)).forEach(a => { const have = find(a);
+    if (have){ ["gradYear","now"].forEach(k => { if (!have[k] && a[k]) have[k] = a[k]; }); if (a.private) have.private = true; } else out.push({id:a.id, name:a.name || "", tag:a.tag || "", private:!!a.private, gradYear:a.gradYear || "", now:a.now || ""}); });
+  return out;
+}
+function sortAlumni(){ (site.alumni || []).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || String(a.name || a.tag).localeCompare(String(b.name || b.tag))); }
+function graduate(id){
+  const fromTeams = []; let who = null;
+  (site.teams || []).forEach(t => { t.roster = (t.roster || []).filter(r => { if (r.id !== id) return true; who = who || r; fromTeams.push({teamId:t.id, ...r}); return false; }); });
+  if (!who) return null;
+  site.alumni = Array.isArray(site.alumni) ? site.alumni : [];
+  const year = String(site.profiles?.[id]?.gradYear || "").trim() || String(new Date().getFullYear());
+  const known = (alumniList || []).find(a => a.id === id);
+  const have = site.alumni.find(a => a.id === id);
+  const rec = {id, name:who.name || "", tag:who.tag || "", private:!!who.private, gradYear:year, now:have?.now || known?.now || "", fromTeams};
+  if (have) Object.assign(have, rec); else site.alumni.push(rec);
+  sortAlumni(); return rec;
+}
+function ungraduate(i){
+  const a = site.alumni[i]; if (!a) return;
+  (a.fromTeams || []).forEach(({teamId, ...r}) => { const t = (site.teams || []).find(x => x.id === teamId); if (t && !(t.roster || []).some(x => x.id === a.id)) (t.roster = t.roster || []).push({...r, id:a.id, name:a.name, tag:a.tag, private:!!a.private}); });
+  site.alumni.splice(i, 1);
 }
 /* ---------- CSV import for the college and high school lists ---------- */
 const CSV_COLS = {name:["name","school","college","university","high school"], short:["short","short name","nickname","abbreviated name"], mascot:["mascot","team name","nickname mascot"],
@@ -460,7 +507,7 @@ async function loadSite(){
   site = await r.json(); siteSha = null; migrate();
 }
 /* The first college list was saved as "schools"; it's "colleges" now, and "highSchools" is the opponent library. */
-function migrate(){ if (Array.isArray(site.schools)){ if (!(site.colleges || []).length) site.colleges = site.schools; delete site.schools; } }
+function migrate(){ if (!Array.isArray(site.alumni)) site.alumni = []; if (Array.isArray(site.schools)){ if (!(site.colleges || []).length) site.colleges = site.schools; delete site.schools; } }
 async function connect(cfg){
   ghSave(cfg);
   try {
@@ -690,7 +737,7 @@ $("#standInput").addEventListener("change", async e => {
 let finalsP = null;
 function loadFinals(){
   return finalsP = finalsP || (async () => {
-    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=27");
+    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=28");
     return new Promise(res => { let latest = null, t = null;
       live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
       setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });
@@ -700,7 +747,7 @@ async function draftBio(id){
   const [{fin, dir}, R] = await Promise.all([loadFinals(), import(SITE_BASE + "assets/records.js?v=1")]);
   const names = {}, cur = new Set();
   fin.forEach(m => (m.players || []).forEach(p => { if (p.id) names[p.id] = p.private ? p.tag : (p.name || p.tag); }));
-  (dir?.alumni || []).forEach(p => names[p.id] = p.private ? p.tag : (p.name || p.tag));
+  [...(dir?.alumni || []), ...(site.alumni || [])].forEach(p => names[p.id] = p.private ? p.tag : (p.name || p.tag));
   (site.teams || []).forEach(t => (t.roster || []).forEach(p => { if (!p.id) return; cur.add(p.id); names[p.id] = p.private ? p.tag : (p.name || p.tag); }));
   return R.bioDraft(site, fin, id, {name:x => names[x] || "Player", current:x => cur.has(x)}, site.profiles?.[id] || {});
 }
@@ -720,8 +767,17 @@ $("#panel").addEventListener("input", e => {
     const sw = document.getElementById(e.target.dataset.hexfor); sw.value = hex; setP(sw.dataset.path, hex); setDirty(true); setStatus(); return;
   }
   if (e.target.dataset.hexpair){ const box = document.getElementById(e.target.dataset.hexpair); if (box){ box.value = e.target.value.toUpperCase(); box.style.borderColor = ""; } }
-  const el = e.target, path = el.dataset.path; if (!path) return;
+  const el = e.target, path = el.dataset.path;
+  const gradId = el.dataset.graduate || (path && /^teams\.\d+\.roster\.\d+\.graduated$/.test(path) && el.checked ? (fillIds(), getP(path.replace(/\.graduated$/, ""))?.id || "") : null);
+  if (gradId !== null && gradId !== undefined && el.type === "checkbox"){
+    if (!gradId){ el.checked = false; toast("Save a name for this player first."); return; }
+    const rec = graduate(gradId); if (!rec){ el.checked = false; return; }
+    setDirty(true); setStatus(); renderSide(); renderPanel();
+    toast(`${rec.private ? rec.tag : (rec.name || rec.tag)} moved to Alumni (Class of ${rec.gradYear}). Publish to make it live.`); return;
+  }
+  if (!path) return;
   setP(path, el.type === "checkbox" ? el.checked : el.value);
+  if (/^alumni\.\d+\.(name|tag|gradYear)$/.test(path)){ const a = getP(path.replace(/\.\w+$/, "")), sm = document.querySelector(`details[data-pid="${CSS.escape(a.id)}"] summary b`); if (sm) sm.textContent = a.private ? a.tag : (a.name || a.tag); }
   setDirty(true); setStatus();
   if (el.type === "checkbox" && path.startsWith("sections.")) renderPanel();
   if (el.type === "url" && /\.(image|logo)$/.test(path)) { clearTimeout(renderPanel.t); renderPanel.t = setTimeout(() => { const pos = el.id; renderPanel(); document.getElementById(pos)?.focus(); }, 900); }
@@ -748,6 +804,16 @@ $("#panel").addEventListener("click", async e => {
   if (b.dataset.move){
     const arr = getP(b.dataset.move), i = +b.dataset.i, j = i + (+b.dataset.d);
     if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; setDirty(true); setStatus(); renderPanel(); return;
+  }
+  if (b.id === "alBring"){
+    const add = (alumniList || []).filter(a => !onRoster(a.id) && !findAlum(a));
+    site.alumni = [...(site.alumni || []), ...add.map(a => ({id:a.id, name:a.name, tag:a.tag, private:!!a.private, gradYear:a.gradYear || "", now:a.now || ""}))]; sortAlumni();
+    setDirty(true); setStatus(); renderSide(); renderPanel(); toast(`Added ${add.length} past player${add.length === 1 ? "" : "s"}. Fill in class years, then publish.`); return;
+  }
+  if (b.dataset.ungrad !== undefined){ const a = site.alumni[+b.dataset.ungrad]; ungraduate(+b.dataset.ungrad); setDirty(true); setStatus(); renderSide(); renderPanel(); toast(`${a.name || a.tag} is back on the roster.`); return; }
+  if (b.dataset.delalum !== undefined){
+    if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Click again to remove"; setTimeout(() => { if (b.isConnected){ b.classList.remove("armed"); b.textContent = "Remove from alumni"; } }, 3000); return; }
+    site.alumni.splice(+b.dataset.delalum, 1); setDirty(true); setStatus(); renderSide(); renderPanel(); toast("Removed. Their match results keep their name."); return;
   }
   if (b.dataset.biodraft){
     const id = b.dataset.biodraft, area = document.getElementById("bio-" + id), pr = site.profiles[id] || {};

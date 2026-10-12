@@ -57,7 +57,15 @@ export function watchDirectory(cb){ return watchDoc("directory", "eagles-mock-di
 const PEOPLE = new Map();
 function learnPeople(site, dir){
   (site?.teams || []).forEach(t => (t.roster || []).forEach(p => { if (p.id) PEOPLE.set(p.id, {name:p.name || "", tag:p.tag || "", private:!!p.private}); }));
-  (dir?.alumni || []).forEach(p => { if (p.id && !PEOPLE.has(p.id)) PEOPLE.set(p.id, {name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
+  [...(site?.alumni || []), ...(dir?.alumni || [])].forEach(p => { if (p.id && !PEOPLE.has(p.id)) PEOPLE.set(p.id, {name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
+}
+/* Alumni: the Site Manager's Alumni list (graduates) first, then the scorekeeper's Past players; one entry per person */
+function alumniOf(site, dir){
+  const k = x => String(x || "").trim().toLowerCase(), same = (a, p) => a.id === p.id || (p.name && k(a.name) === k(p.name)) || (!p.name && !a.name && p.tag && k(a.tag) === k(p.tag));
+  const out = (site?.alumni || []).filter(a => a.id && (a.name || a.tag)).map(a => ({...a}));
+  (dir?.alumni || []).forEach(a => { if (!a.id || !(a.name || a.tag)) return; const have = out.find(x => same(x, a));
+    if (have){ if (!have.now && a.now) have.now = a.now; if (!have.gradYear && a.gradYear) have.gradYear = a.gradYear; } else out.push({...a}); });
+  return out;
 }
 function poll(id, cb){
   const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/public/${id}?key=${FIREBASE_CONFIG.apiKey}`;
@@ -266,7 +274,7 @@ const collegeKey = n => collegeStrip(collegeNorm(n)).trim();
 export function startNextLevel(site){
   const host = $("#nextLevel"); if (!host) return;
   watchDirectory(d => {
-    const list = (d.alumni || []).filter(p => (p.name || p.tag) && ((p.now || "").trim() || (!p.private && site.profiles?.[p.id]?.committed))).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
+    const list = alumniOf(site, d).filter(p => !(site.teams || []).some(t => (t.roster || []).some(r => r.id === p.id))).filter(p => (p.name || p.tag) && ((p.now || "").trim() || (!p.private && site.profiles?.[p.id]?.committed))).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
     host.hidden = !list.length; if (!list.length) return;
     host.innerHTML = `<div class="wrap"><div class="sec-h"><h2>${esc(host.dataset.title || "Eagles at the next level")}</h2></div>
       <p class="lead" style="margin:0 0 18px">${esc(host.dataset.lead || "Hartland Esports alumni who kept playing after graduation.")}</p>
@@ -296,7 +304,8 @@ function drawPlayer(site, host, all, dir){
   const id = new URLSearchParams(location.search).get("id") || "";
   const sameName = (a, b) => { const k = x => String(x || "").trim().toLowerCase(); return (a.name && k(a.name) === k(b.name)) || (!a.name && !b.name && a.tag && k(a.tag) === k(b.tag)); };
   const histMe = all.flatMap(m => m.players || []).find(p => p.id === id);
-  const alum = (dir?.alumni || []).find(p => p.id === id) || (histMe ? (dir?.alumni || []).find(p => sameName(p, histMe)) : null);
+  const alums = alumniOf(site, dir);
+  const alum = alums.find(p => p.id === id) || (histMe ? alums.find(p => sameName(p, histMe)) : null);
   const entries = (site.teams || []).flatMap(t => (t.roster || []).filter(p => p.id === id).map(p => ({...p, team:t})));
   const played = all.filter(m => m.status === "final" && (m.players || []).some(p => p.id === id)).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
   const me = entries[0] || (alum ? {...alum, team:null} : null) || (() => { const p = played[0]?.players.find(x => x.id === id); return p ? {...p, team:null} : null; })();

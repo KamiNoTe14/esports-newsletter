@@ -69,7 +69,7 @@ let exp = null, teamMap = {}, result = null, existing = [], picks = new Set(), o
 function people(){
   const map = new Map();
   (site.teams || []).forEach(t => (t.roster || []).forEach(p => { if (p.name || p.tag) map.set(p.id || p.name, {id:p.id || p.name, name:p.name || "", tag:p.tag || "", private:!!p.private}); }));
-  (dir.alumni || []).forEach(p => { if (!map.has(p.id)) map.set(p.id, {id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true}); });
+  [...(site.alumni || []), ...(dir.alumni || [])].forEach(p => { if (p.id && !map.has(p.id)) map.set(p.id, {id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true}); });
   return map;
 }
 

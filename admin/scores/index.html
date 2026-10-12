@@ -227,7 +227,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo} from "../../assets/matches.js?v=17";
-import {watchFinals} from "../../assets/live.js?v=27";
+import {watchFinals} from "../../assets/live.js?v=28";
 import {recordBreaks} from "../../assets/records.js?v=1";
 
 const $ = s => document.querySelector(s);
@@ -497,7 +497,7 @@ function bindRosters(){
 function alumniHTML(open){
   const list = (dir.alumni || []).slice().sort((a, b) => (a.name || a.tag || "").localeCompare(b.name || b.tag || ""));
   return `<details class="sec" id="alumniBox"${open ? " open" : ""}><summary>Past players<span>${list.length || "None yet"}</span></summary><div class="secb">
-    <p class="hint" style="margin:0 0 10px">Graduates and anyone no longer on a roster. Add them here or right from a match's Players section. If someone plays in college now, say where: it shows on their player page and in "Eagles at the next level" on the About page.</p>
+    <p class="hint" style="margin:0 0 10px">Graduates are managed in Site Manager → Alumni (check "Graduated" on their roster spot). This list is for anyone else no longer on a roster. Add them here or right from a match's Players section. If someone plays in college now, say where: it shows on their player page and in "Eagles at the next level" on the About page.</p>
     <div class="alist">${list.map(p => `<div class="arow" data-aid="${esc(p.id)}">
       <input data-a="name" value="${esc(p.name || "")}" placeholder="Name" aria-label="Name"><input data-a="tag" value="${esc(p.tag || "")}" placeholder="Gamertag" aria-label="Gamertag">
       <input data-a="gradYear" value="${esc(p.gradYear || "")}" placeholder="Class" inputmode="numeric" maxlength="4" aria-label="Graduation year">
@@ -655,7 +655,7 @@ function setStatus(s){
 function everyone(){ /* id -> person, for current rosters and past players */
   const map = new Map();
   (site.teams || []).forEach(t => (t.roster || []).forEach(p => { if (p.name || p.tag) map.set(p.id || p.name, {id:p.id || p.name, name:p.name || "", tag:p.tag || "", private:!!p.private}); }));
-  (dir.alumni || []).forEach(p => { if (!map.has(p.id)) map.set(p.id, {id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
+  [...(site.alumni || []), ...(dir.alumni || [])].forEach(p => { if (p.id && !map.has(p.id)) map.set(p.id, {id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
   return map;
 }
 function snap(p, extra){ return {id:p.id, name:p.private ? "" : (p.name || ""), tag:p.tag || "", private:!!p.private, ...(p.alum ? {alum:true} : {}), stats:{}, ...(extra || {})}; }

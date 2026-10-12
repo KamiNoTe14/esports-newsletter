@@ -240,17 +240,30 @@ function boxScore(g, m){
   return `<div class="tbl-wrap box${cols.length > 4 ? " wide" : ""}"><table class="tbl"><thead><tr><th>Player</th>${roles ? "<th>Role</th>" : ""}${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${roles ? `<td class="muted">${roleTags(g, p.roles || [])}</td>` : ""}${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(fmtStat(c, p.stats[c.key])) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
+/* ---------- the college an alum plays for: picked on their profile, or matched from "Playing now at…" ---------- */
+const collegeKey = n => String(n || "").toLowerCase().replace(/\b(the|university|college|of|at)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+export function collegeFor(site, id, now){
+  const list = (site.colleges || site.schools || []).filter(c => c && c.name), pick = site.profiles?.[id]?.committed;
+  if (pick) return list.find(c => c.id === pick) || null;
+  const t = " " + collegeKey(now) + " "; if (!t.trim()) return null;
+  let best = null, len = 0;
+  list.forEach(c => [c.name, c.short].forEach(n => { const k = collegeKey(n); if (k.length > 2 && t.includes(" " + k + " ") && k.length > len){ best = c; len = k.length; } }));
+  return best;
+}
 /* ---------- "Eagles at the next level" (About page): alumni who are playing somewhere now ---------- */
 export function startNextLevel(site){
   const host = $("#nextLevel"); if (!host) return;
   watchDirectory(d => {
-    const list = (d.alumni || []).filter(p => (p.now || "").trim() && (p.name || p.tag)).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
+    const list = (d.alumni || []).filter(p => (p.name || p.tag) && ((p.now || "").trim() || (!p.private && site.profiles?.[p.id]?.committed))).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
     host.hidden = !list.length; if (!list.length) return;
     host.innerHTML = `<div class="wrap"><div class="sec-h"><h2>${esc(host.dataset.title || "Eagles at the next level")}</h2></div>
       <p class="lead" style="margin:0 0 18px">${esc(host.dataset.lead || "Hartland Esports alumni who kept playing after graduation.")}</p>
-      <div class="grid g3">${list.map(p => { const nm = p.private || !p.name ? p.tag : p.name; return `<a class="card next-card" href="${BASE}player.html?id=${encodeURIComponent(p.id)}">
+      <div class="grid g3">${list.map(p => { const nm = p.private || !p.name ? p.tag : p.name, c = p.private ? null : collegeFor(site, p.id, p.now);
+        const src = x => /^(https?:|data:)/.test(x) ? x : BASE + x;
+        return `<a class="card next-card${c ? " has-college" : ""}" href="${BASE}player.html?id=${encodeURIComponent(p.id)}"${c ? ` style="--c1:${esc(c.primary || "#FFBC05")};--c2:${esc(c.secondary || "#FFFFFF")}"` : ""}>
+        ${c?.logo ? `<img class="next-logo" src="${esc(src(c.logo))}" alt="" loading="lazy">` : ""}
         <p class="eyebrow">${p.gradYear ? `Class of ${esc(p.gradYear)}` : "Alumni"}</p><h3>${esc(nm)}</h3>${!p.private && p.name && p.tag ? `<p class="tag">${esc(p.tag)}</p>` : ""}
-        <p class="now">${esc(p.now)}</p></a>`; }).join("")}</div></div>`;
+        ${c ? `<p class="next-school"><small>${esc(site.profiles?.[p.id]?.commitLabel || "Now playing at")}</small><b>${esc(c.name)}</b></p>` : ""}${p.now && (!c || collegeKey(p.now) !== collegeKey(c.name)) ? `<p class="now">${esc(p.now)}</p>` : ""}</a>`; }).join("")}</div></div>`;
   });
 }
 
@@ -307,7 +320,9 @@ function drawPlayer(site, host, all, dir){
   /* Recruiting: commitment re-skins the page in that school's colors; otherwise seniors (still on a roster) get gold. */
   const schools = site.colleges || site.schools || [], schoolOf = sid => schools.find(x => x.id === sid);
   const socials = x => [["link","Esports"],["website","Website"],["youtube","YouTube"],["twitch","Twitch"],["x","X"],["instagram","Instagram"],["tiktok","TikTok"]].filter(([k]) => safe(x?.[k])).map(([k, l]) => `<a href="${esc(safe(x[k]))}" target="_blank" rel="noopener">${l}</a>`).join("");
-  const sch = !priv && prof.committed ? schoolOf(prof.committed) : null;
+  const sch = priv ? null : prof.committed ? schoolOf(prof.committed) : (!entries.length && alum?.now ? collegeFor(site, id, alum.now) : null);
+  const commitLabel = prof.commitLabel || (entries.length ? "Committed to" : "Now playing at");
+  const nowExtra = alum?.now && (!sch || collegeKey(alum.now) !== collegeKey(sch.name)) ? alum.now : "";
   const senior = !priv && !sch && entries.length && isSenior(prof.gradYear);
   const skin = sch ? ` style="--c1:${esc(sch.primary || "#FFBC05")};--c2:${esc(sch.secondary || "#FFFFFF")}"` : "";
   const logo = x => x?.logo ? `<img src="${esc(src(x.logo))}" alt="" loading="lazy">` : "";
@@ -323,8 +338,8 @@ function drawPlayer(site, host, all, dir){
       <div><p class="eyebrow">${teams.map(t => esc(teamName(site, t))).join(" · ") || [...new Set(played.map(m => m.teamName).filter(Boolean))].slice(0, 3).map(esc).join(" · ") || "Hartland Esports"}</p>
         <h1 style="font-size:clamp(40px,7vw,76px)">${esc(display)}</h1>
         ${!priv && me.name && me.tag ? `<p class="player-tag">${esc(me.tag)}</p>` : ""}
-        ${alum?.now ? `<p class="player-now"><span>Now playing</span> ${esc(alum.now)}</p>` : ""}
-        ${sch ? `<p class="player-commit">${logo(sch)}<span><small>Committed to</small><b>${esc(sch.name)}</b>${socials(sch) ? `<span class="commit-links">${socials(sch)}</span>` : ""}</span></p>` : ""}
+        ${!sch && alum?.now ? `<p class="player-now"><span>Now playing</span> ${esc(alum.now)}</p>` : ""}
+        ${sch ? `<p class="player-commit">${logo(sch)}<span><small>${esc(commitLabel)}</small><b>${esc(sch.name)}</b>${nowExtra ? `<em class="commit-now">${esc(nowExtra)}</em>` : ""}${socials(sch) ? `<span class="commit-links">${socials(sch)}</span>` : ""}</span></p>` : ""}
         <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>` : ""}${prof.gradYear ? `<span class="chip gold">${senior ? "Senior · " : ""}Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
       </div>
       <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${played.length} match${played.length === 1 ? "" : "es"}</span></div>

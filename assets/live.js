@@ -240,16 +240,28 @@ function boxScore(g, m){
   return `<div class="tbl-wrap box${cols.length > 4 ? " wide" : ""}"><table class="tbl"><thead><tr><th>Player</th>${roles ? "<th>Role</th>" : ""}${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${roles ? `<td class="muted">${roleTags(g, p.roles || [])}</td>` : ""}${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(fmtStat(c, p.stats[c.key])) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
-/* ---------- the college an alum plays for: picked on their profile, or matched from "Playing now at…" ---------- */
-const collegeKey = n => String(n || "").toLowerCase().replace(/\b(the|university|college|of|at)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+/* ---------- the college an alum plays for: picked on their profile, or matched from "Playing now at…" ----------
+   Exact names win, then the longest name found in the text. A word that's in several college names ("Michigan",
+   "Ohio") only counts when it's the whole text, so "Michigan Tech" never turns into the University of Michigan. */
+const collegeNorm = n => " " + String(n || "").toLowerCase().replace(/&/g, " and ").replace(/\bst\./g, "st ").replace(/[^a-z0-9]+/g, " ")
+  .replace(/\b(technological|technology)\b/g, "tech").replace(/\bsaint\b/g, "st").replace(/\buniv\b/g, "university").replace(/\bcommunity college\b/g, "cc").replace(/\s+/g, " ").trim() + " ";
+const collegeStrip = k => k.replace(/ (the|university|college|of) /g, " ").replace(/ (the|university|college|of) /g, " ").replace(/\s+/g, " ");
 export function collegeFor(site, id, now){
   const list = (site.colleges || site.schools || []).filter(c => c && c.name), pick = site.profiles?.[id]?.committed;
   if (pick) return list.find(c => c.id === pick) || null;
-  const t = " " + collegeKey(now) + " "; if (!t.trim()) return null;
-  let best = null, len = 0;
-  list.forEach(c => [c.name, c.short].forEach(n => { const k = collegeKey(n); if (k.length > 2 && t.includes(" " + k + " ") && k.length > len){ best = c; len = k.length; } }));
+  const t = collegeNorm(now); if (!t.trim()) return null;
+  const freq = {}; list.forEach(c => new Set(collegeStrip(collegeNorm(c.name)).trim().split(" ")).forEach(w => freq[w] = (freq[w] || 0) + 1));
+  let best = null, score = 0;
+  list.forEach(c => { const full = collegeNorm(c.name);
+    [full, collegeNorm(c.name.replace(/^the\s+/i, "")), collegeStrip(full), collegeNorm(c.short)].forEach(k => { const core = k.trim(); if (!core) return;
+      const one = !core.includes(" "), shared = one && (freq[core] || 0) > 1;
+      let sc = 0;
+      if (t === k || collegeStrip(t) === k) sc = 1000 + core.length;
+      else if (!shared && core.length > 2 && (t.includes(k) || collegeStrip(t).includes(k))) sc = core.length;
+      if (sc > score){ score = sc; best = c; } }); });
   return best;
 }
+const collegeKey = n => collegeStrip(collegeNorm(n)).trim();
 /* ---------- "Eagles at the next level" (About page): alumni who are playing somewhere now ---------- */
 export function startNextLevel(site){
   const host = $("#nextLevel"); if (!host) return;
@@ -282,13 +294,15 @@ export async function startPlayer(site){
 }
 function drawPlayer(site, host, all, dir){
   const id = new URLSearchParams(location.search).get("id") || "";
-  const alum = (dir?.alumni || []).find(p => p.id === id);
+  const sameName = (a, b) => { const k = x => String(x || "").trim().toLowerCase(); return (a.name && k(a.name) === k(b.name)) || (!a.name && !b.name && a.tag && k(a.tag) === k(b.tag)); };
+  const histMe = all.flatMap(m => m.players || []).find(p => p.id === id);
+  const alum = (dir?.alumni || []).find(p => p.id === id) || (histMe ? (dir?.alumni || []).find(p => sameName(p, histMe)) : null);
   const entries = (site.teams || []).flatMap(t => (t.roster || []).filter(p => p.id === id).map(p => ({...p, team:t})));
   const played = all.filter(m => m.status === "final" && (m.players || []).some(p => p.id === id)).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
   const me = entries[0] || (alum ? {...alum, team:null} : null) || (() => { const p = played[0]?.players.find(x => x.id === id); return p ? {...p, team:null} : null; })();
   if (!me){ host.innerHTML = `<section class="section"><div class="wrap"><div class="empty">We couldn't find that player. <a href="${BASE}teams.html">See the rosters</a>.</div></div></section>`; return; }
   const priv = entries.some(e => e.private) || !!me.private;
-  const prof = (!priv && site.profiles?.[id]) || {};
+  const prof = (!priv && (site.profiles?.[id] || (alum && site.profiles?.[alum.id]))) || {};
   const display = priv || !me.name ? (me.tag || "Player") : me.name;
   document.title = `${display} · Hartland Esports`;
   const teams = entries.map(e => e.team);
@@ -320,7 +334,7 @@ function drawPlayer(site, host, all, dir){
   /* Recruiting: commitment re-skins the page in that school's colors; otherwise seniors (still on a roster) get gold. */
   const schools = site.colleges || site.schools || [], schoolOf = sid => schools.find(x => x.id === sid);
   const socials = x => [["link","Esports"],["website","Website"],["youtube","YouTube"],["twitch","Twitch"],["x","X"],["instagram","Instagram"],["tiktok","TikTok"]].filter(([k]) => safe(x?.[k])).map(([k, l]) => `<a href="${esc(safe(x[k]))}" target="_blank" rel="noopener">${l}</a>`).join("");
-  const sch = priv ? null : prof.committed ? schoolOf(prof.committed) : (!entries.length && alum?.now ? collegeFor(site, id, alum.now) : null);
+  const sch = priv ? null : prof.committed ? schoolOf(prof.committed) : (!entries.length && alum?.now ? collegeFor(site, alum.id, alum.now) : null);
   const commitLabel = prof.commitLabel || (entries.length ? "Committed to" : "Now playing at");
   const nowExtra = alum?.now && (!sch || collegeKey(alum.now) !== collegeKey(sch.name)) ? alum.now : "";
   const senior = !priv && !sch && entries.length && isSenior(prof.gradYear);

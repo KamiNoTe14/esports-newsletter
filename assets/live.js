@@ -62,8 +62,9 @@ function learnPeople(site, dir){
 /* Alumni: the Site Manager's Alumni list (graduates) first, then the scorekeeper's Past players; one entry per person */
 function alumniOf(site, dir){
   const k = x => String(x || "").trim().toLowerCase(), same = (a, p) => a.id === p.id || (p.name && k(a.name) === k(p.name)) || (!p.name && !a.name && p.tag && k(a.tag) === k(p.tag));
+  const gone = new Set(site?.removedPlayers || []);
   const out = (site?.alumni || []).filter(a => a.id && (a.name || a.tag)).map(a => ({...a}));
-  (dir?.alumni || []).forEach(a => { if (!a.id || !(a.name || a.tag)) return; const have = out.find(x => same(x, a));
+  (dir?.alumni || []).forEach(a => { if (!a.id || !(a.name || a.tag) || gone.has(a.id)) return; const have = out.find(x => same(x, a));
     if (have){ if (!have.now && a.now) have.now = a.now; if (!have.gradYear && a.gradYear) have.gradYear = a.gradYear; } else out.push({...a}); });
   return out;
 }
@@ -248,6 +249,16 @@ function boxScore(g, m){
   return `<div class="tbl-wrap box${cols.length > 4 ? " wide" : ""}"><table class="tbl"><thead><tr><th>Player</th>${roles ? "<th>Role</th>" : ""}${cols.map(c => `<th class="n">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${ps.map(p => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>${p.sub ? ` <span class="muted">(sub)</span>` : ""}</td>${roles ? `<td class="muted">${roleTags(g, p.roles || [])}</td>` : ""}${cols.map(c => `<td class="n">${p.stats && c.key in p.stats ? esc(fmtStat(c, p.stats[c.key])) : "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
+/* School colors as CSS variables, plus readable text colors: --c-on for text on the primary color, --c-hi for an
+   accent that shows up on the dark site (the lighter of the two school colors, or white if both are dark). */
+function hexLum(h){ const m = String(h || "").trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i); if (!m) return null; let x = m[1]; if (x.length === 3) x = x.split("").map(c => c + c).join("");
+  const ch = i => { const v = parseInt(x.slice(i, i + 2), 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  return 0.2126 * ch(0) + 0.7152 * ch(2) + 0.0722 * ch(4); }
+export function schoolSkin(c){
+  const c1 = c?.primary || "#FFBC05", c2 = c?.secondary || "#FFFFFF", l1 = hexLum(c1) ?? 0.5, l2 = hexLum(c2) ?? 0.5;
+  const on = l1 > 0.4 ? "#0B0F17" : "#FFFFFF", hi = Math.max(l1, l2) >= 0.2 ? (l1 >= l2 ? c1 : c2) : "#FFFFFF";
+  return `--c1:${esc(c1)};--c2:${esc(c2)};--c-on:${on};--c-hi:${esc(hi)}`;
+}
 /* ---------- the college an alum plays for: picked on their profile, or matched from "Playing now at…" ----------
    Exact names win, then the longest name found in the text. A word that's in several college names ("Michigan",
    "Ohio") only counts when it's the whole text, so "Michigan Tech" never turns into the University of Michigan. */
@@ -274,13 +285,13 @@ const collegeKey = n => collegeStrip(collegeNorm(n)).trim();
 export function startNextLevel(site){
   const host = $("#nextLevel"); if (!host) return;
   watchDirectory(d => {
-    const list = alumniOf(site, d).filter(p => !(site.teams || []).some(t => (t.roster || []).some(r => r.id === p.id))).filter(p => (p.name || p.tag) && ((p.now || "").trim() || (!p.private && site.profiles?.[p.id]?.committed))).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
+    const list = alumniOf(site, d).filter(p => p.status !== "inactive").filter(p => !(site.teams || []).some(t => (t.roster || []).some(r => r.id === p.id))).filter(p => (p.name || p.tag) && ((p.now || "").trim() || (!p.private && site.profiles?.[p.id]?.committed))).sort((a, b) => String(b.gradYear || "").localeCompare(String(a.gradYear || "")) || (a.name || a.tag).localeCompare(b.name || b.tag));
     host.hidden = !list.length; if (!list.length) return;
     host.innerHTML = `<div class="wrap"><div class="sec-h"><h2>${esc(host.dataset.title || "Eagles at the next level")}</h2></div>
       <p class="lead" style="margin:0 0 18px">${esc(host.dataset.lead || "Hartland Esports alumni who kept playing after graduation.")}</p>
       <div class="grid g3">${list.map(p => { const nm = p.private || !p.name ? p.tag : p.name, c = p.private ? null : collegeFor(site, p.id, p.now);
         const src = x => /^(https?:|data:)/.test(x) ? x : BASE + x;
-        return `<a class="card next-card${c ? " has-college" : ""}" href="${BASE}player.html?id=${encodeURIComponent(p.id)}"${c ? ` style="--c1:${esc(c.primary || "#FFBC05")};--c2:${esc(c.secondary || "#FFFFFF")}"` : ""}>
+        return `<a class="card next-card${c ? " has-college" : ""}" href="${BASE}player.html?id=${encodeURIComponent(p.id)}"${c ? ` style="${schoolSkin(c)}"` : ""}>
         ${c?.logo ? `<img class="next-logo" src="${esc(src(c.logo))}" alt="" loading="lazy">` : ""}
         <p class="eyebrow">${p.gradYear ? `Class of ${esc(p.gradYear)}` : "Alumni"}</p><h3>${esc(nm)}</h3>${!p.private && p.name && p.tag ? `<p class="tag">${esc(p.tag)}</p>` : ""}
         ${c ? `<p class="next-school"><small>${esc(site.profiles?.[p.id]?.commitLabel || "Now playing at")}</small><b>${esc(c.name)}</b></p>` : ""}${p.now && (!c || collegeKey(p.now) !== collegeKey(c.name)) ? `<p class="now">${esc(p.now)}</p>` : ""}</a>`; }).join("")}</div></div>`;
@@ -347,7 +358,7 @@ function drawPlayer(site, host, all, dir){
   const commitLabel = prof.commitLabel || (entries.length ? "Committed to" : "Now playing at");
   const nowExtra = alum?.now && (!sch || collegeKey(alum.now) !== collegeKey(sch.name)) ? alum.now : "";
   const senior = !priv && !sch && entries.length && isSenior(prof.gradYear);
-  const skin = sch ? ` style="--c1:${esc(sch.primary || "#FFBC05")};--c2:${esc(sch.secondary || "#FFFFFF")}"` : "";
+  const skin = sch ? ` style="${schoolSkin(sch)}"` : "";
   const logo = x => x?.logo ? `<img src="${esc(src(x.logo))}" alt="" loading="lazy">` : "";
   const nameKey = String(me.name || "").toLowerCase();
   const honors = priv || !nameKey ? [] : (site.records || []).filter(r => r.type === "honor" && String(r.detail || "").toLowerCase().includes(nameKey)).filter(r => !/signing/i.test(r.title)).map(r => `${r.title}${r.year ? ` ${r.year}` : ""}`);
@@ -363,7 +374,7 @@ function drawPlayer(site, host, all, dir){
         ${!priv && me.name && me.tag ? `<p class="player-tag">${esc(me.tag)}</p>` : ""}
         ${!sch && alum?.now ? `<p class="player-now"><span>Now playing</span> ${esc(alum.now)}</p>` : ""}
         ${sch ? `<p class="player-commit">${logo(sch)}<span><small>${esc(commitLabel)}</small><b>${esc(sch.name)}</b>${nowExtra ? `<em class="commit-now">${esc(nowExtra)}</em>` : ""}${socials(sch) ? `<span class="commit-links">${socials(sch)}</span>` : ""}</span></p>` : ""}
-        <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>` : ""}${prof.gradYear ? `<span class="chip gold">${senior ? "Senior · " : ""}Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
+        <div class="chips">${entries.some(e => e.captain) ? `<span class="chip gold">★ Captain</span>` : ""}${!entries.length ? (alum?.status === "inactive" ? `<span class="chip">Former player</span>` : `<span class="chip gold">Alumni${alum?.gradYear ? ` · Class of ${esc(alum.gradYear)}` : ""}</span>`) : ""}${prof.gradYear ? `<span class="chip gold">${senior ? "Senior · " : ""}Class of ${esc(prof.gradYear)}</span>` : ""}${entries.map(e => e.role).filter(Boolean).map(r => `<span class="chip">${esc(r)}</span>`).join("")}${prof.mains ? `<span class="chip">${esc(prof.mains)}</span>` : ""}</div>
       </div>
       <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${played.length} match${played.length === 1 ? "" : "es"}</span></div>
     </div></section>

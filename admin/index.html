@@ -91,6 +91,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .notice.warn{background:#FFF4D1;color:#4A3B00;border:1px solid #F0D98A}
 .notice.ok{background:#E3F4EA;color:#123F25;border:1px solid #B7DFC5}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;border-left:4px solid var(--gold);padding:10px 16px;border-radius:6px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);z-index:50}
+.al-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;border:1px dashed var(--line,#cfd6e0);border-radius:10px}
+.al-actions select{padding:8px 10px;border-radius:8px;border:1px solid var(--line,#cfd6e0);font:inherit;max-width:100%}
+.danger-line{color:#b42318;border-color:#f1b5ae}
+.grad-tog{display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:8px;background:#fff7e0;border:1px solid #f3d27a}
 </style>
 </head>
 <body>
@@ -311,13 +315,13 @@ function renderPanel(){
     const wasOpen = new Set([...P.querySelectorAll("details[data-pid][open]")].map(d => d.dataset.pid));
     fillIds(); site.profiles = site.profiles || {}; const A = site.alumni = Array.isArray(site.alumni) ? site.alumni : [];
     if (alumniList === null){ alumniList = false; loadFinals().then(r => { alumniList = pastPlayers(r); if (tab === "alumni") renderPanel(); }); }
-    const waiting = (alumniList || []).filter(a => !onRoster(a.id) && !findAlum(a));
+    const gone = new Set(site.removedPlayers || []), waiting = (alumniList || []).filter(a => !onRoster(a.id) && !findAlum(a) && !gone.has(a.id));
     P.innerHTML = `<div class="card"><div class="card-h"><h2>Alumni</h2><span class="muted">${A.length} alumni</span></div>
-      <p class="intro">Eagles who have graduated. Their player page keeps their stats and profile, and anyone with a college gets the "Now playing at" banner in that school's colors and a card in "Where Eagles go next" on the Legacy page. Players land here when you check <b>Graduated</b> on a roster or on their profile.</p>
+      <p class="intro">Eagles who have graduated. Their player page keeps their stats and profile, and anyone with a college gets the "Now playing at" banner in that school's colors and a card in "Where Eagles go next" on the Legacy page. Players land here when you check <b>Graduated</b> on a roster or on their profile. Someone who left a team but is still in high school can stay here too: set their status to <b>Still in high school</b>, and when they rejoin, <b>Move to roster</b> puts them back with everything you entered.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">${alumniList === false ? `<span class="muted">Checking the scorekeeper and match history for past players…</span>`
         : waiting.length ? `<button class="btn btn-line" type="button" id="alBring">+ Bring in ${waiting.length} past player${waiting.length === 1 ? "" : "s"}</button><span class="muted">From the scorekeeper's Past players list and the match history: ${esc(waiting.slice(0, 6).map(a => a.name || a.tag).join(", "))}${waiting.length > 6 ? "…" : ""}</span>`
         : `<span class="muted">Every past player from the scorekeeper and match history is here.</span>`}</div>
-      ${A.length ? A.map((a, i) => profileCard(a.id, {r:a, i, alum:true, priv:!!a.private, teams:[`Class of ${a.gradYear || "?"}`]}, wasOpen.has(a.id))).join("") : `<p class="muted" style="margin:14px 0 0">No alumni yet.</p>`}</div>`;
+      ${A.length ? A.map((a, i) => profileCard(a.id, {r:a, i, alum:true, priv:!!a.private, teams:[a.status === "inactive" ? "Not on a team (still in school)" : `Class of ${a.gradYear || "?"}`]}, wasOpen.has(a.id))).join("") : `<p class="muted" style="margin:14px 0 0">No alumni yet.</p>`}</div>`;
     return;
   }
   const spec = LISTS[tab];
@@ -352,10 +356,16 @@ function profileCard(id, e, open){
           ${e.alum ? "" : field(`${P}.recruit`, ["recruit","Show a \"college coaches: contact us\" note","check"], !!pr.recruit)}</div></details>`;
 }
 function alumHead(e){
-  const B = `alumni.${e.i}`, a = e.r;
+  const B = `alumni.${e.i}`, a = e.r, teams = (site.teams || []).filter(t => t.id);
+  const back = (a.fromTeams || []).map(t => teamNameOf(t.teamId)).filter(Boolean);
   return `<div class="grid g3">${field(`${B}.name`, ["name","Name"], a.name || "")}${field(`${B}.tag`, ["tag","Gamertag"], a.tag || "")}${field(`${B}.gradYear`, ["gradYear","Class of","text","2026"], a.gradYear || "")}</div>
-    <div class="grid g2">${field(`${B}.now`, ["now","Playing now at (picks their college automatically)","text","Rocket League at Michigan Tech"], a.now || "")}<div style="padding-top:22px">${field(`${B}.private`, ["private","Gamertag only","check"], !!a.private)}</div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">${(a.fromTeams || []).length ? `<button type="button" class="btn btn-line" data-ungrad="${e.i}">Undo: put back on ${esc(a.fromTeams.map(t => teamNameOf(t.teamId)).filter(Boolean).join(" and ") || "their roster")}</button>` : ""}<button type="button" class="btn btn-line" data-delalum="${e.i}">Remove from alumni</button></div>`;
+    <div class="grid g2">${field(`${B}.status`, ["status","Status","select",[["", "Graduated"], ["inactive", "Still in high school, not on a team right now"]]], a.status || "")}${field(`${B}.now`, ["now","Playing now at (picks their college automatically)","text","Rocket League at Michigan Tech"], a.now || "")}</div>
+    ${field(`${B}.private`, ["private","Gamertag only","check"], !!a.private)}
+    <div class="al-actions"><span class="sub-h" style="margin:0">Back on a team</span>
+      ${back.length ? `<button type="button" class="btn btn-line" data-ungrad="${e.i}">Put back on ${esc(back.join(" and "))}</button><span class="muted">or</span>` : ""}
+      <select data-toteam="${e.i}" aria-label="Team to add them to"><option value="">Pick a team…</option>${teams.map(t => `<option value="${esc(t.id)}">${esc(`${t.game} ${t.name}`)}</option>`).join("")}</select>
+      <button type="button" class="btn btn-line" data-toroster="${e.i}">Move to roster</button>
+      <span style="flex:1"></span><button type="button" class="btn btn-line danger-line" data-delalum="${e.i}">Delete player</button></div>`;
 }
 /* ---------- graduation: roster -> Alumni ---------- */
 const nk = x => String(x || "").trim().toLowerCase();
@@ -737,7 +747,7 @@ $("#standInput").addEventListener("change", async e => {
 let finalsP = null;
 function loadFinals(){
   return finalsP = finalsP || (async () => {
-    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=28");
+    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=29");
     return new Promise(res => { let latest = null, t = null;
       live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
       setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });
@@ -806,14 +816,25 @@ $("#panel").addEventListener("click", async e => {
     if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; setDirty(true); setStatus(); renderPanel(); return;
   }
   if (b.id === "alBring"){
-    const add = (alumniList || []).filter(a => !onRoster(a.id) && !findAlum(a));
+    const gone = new Set(site.removedPlayers || []), add = (alumniList || []).filter(a => !onRoster(a.id) && !findAlum(a) && !gone.has(a.id));
     site.alumni = [...(site.alumni || []), ...add.map(a => ({id:a.id, name:a.name, tag:a.tag, private:!!a.private, gradYear:a.gradYear || "", now:a.now || ""}))]; sortAlumni();
     setDirty(true); setStatus(); renderSide(); renderPanel(); toast(`Added ${add.length} past player${add.length === 1 ? "" : "s"}. Fill in class years, then publish.`); return;
   }
   if (b.dataset.ungrad !== undefined){ const a = site.alumni[+b.dataset.ungrad]; ungraduate(+b.dataset.ungrad); setDirty(true); setStatus(); renderSide(); renderPanel(); toast(`${a.name || a.tag} is back on the roster.`); return; }
+  if (b.dataset.toroster !== undefined){
+    const i = +b.dataset.toroster, a = site.alumni[i], tid = document.querySelector(`[data-toteam="${i}"]`)?.value, t = (site.teams || []).find(x => x.id === tid);
+    if (!t){ toast("Pick the team first."); return; }
+    const prev = (a.fromTeams || []).find(x => x.teamId === tid) || {};
+    if (!(t.roster || []).some(r => r.id === a.id)) (t.roster = t.roster || []).push({role:prev.role || "", captain:!!prev.captain, id:a.id, name:a.name || "", tag:a.tag || "", private:!!a.private});
+    site.alumni.splice(i, 1); setDirty(true); setStatus(); renderSide(); renderPanel();
+    toast(`${a.name || a.tag} is on ${t.game} ${t.name} again, with their profile and stats. Publish to make it live.`); return;
+  }
   if (b.dataset.delalum !== undefined){
-    if (!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent = "Click again to remove"; setTimeout(() => { if (b.isConnected){ b.classList.remove("armed"); b.textContent = "Remove from alumni"; } }, 3000); return; }
-    site.alumni.splice(+b.dataset.delalum, 1); setDirty(true); setStatus(); renderSide(); renderPanel(); toast("Removed. Their match results keep their name."); return;
+    const i = +b.dataset.delalum, a = site.alumni[i];
+    if (!confirm(`Delete ${a.name || a.tag}?\n\nThis removes them from Alumni and deletes their profile (photo, bio, college, links). They won't come back through "Bring in past players".\n\nMatch results they played in keep their name.`)) return;
+    site.alumni.splice(i, 1); delete site.profiles?.[a.id];
+    site.removedPlayers = [...new Set([...(site.removedPlayers || []), a.id])];
+    setDirty(true); setStatus(); renderSide(); renderPanel(); toast(`${a.name || a.tag} deleted. Publish to make it live.`); return;
   }
   if (b.dataset.biodraft){
     const id = b.dataset.biodraft, area = document.getElementById("bio-" + id), pr = site.profiles[id] || {};

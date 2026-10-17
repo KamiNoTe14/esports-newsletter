@@ -584,3 +584,5 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .page-h{background:linear-gradient(180deg,#001B36 0%,#0B2442 100%)}
 .page-h.has-art{background-color:#0B2442}
 .player-h.committed,.opp-h.skinned{box-shadow:none}
+/* tape labels always use dark ink, even on school-colored and committed headers */
+.page-h .eyebrow{color:#0B1420!important;text-shadow:none!important;letter-spacing:.14em;line-height:1.5;max-width:100%}

@@ -95,6 +95,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .al-actions select{padding:8px 10px;border-radius:8px;border:1px solid var(--line,#cfd6e0);font:inherit;max-width:100%}
 .danger-line{color:#b42318;border-color:#f1b5ae}
 .grad-tog{display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:8px;background:#fff7e0;border:1px solid #f3d27a}
+.needs{border:1px solid #f3c06b;background:#fff8ea;border-radius:12px;padding:12px 14px;display:grid;gap:10px}
+.needs-h{display:grid;gap:2px}.needs-h b{color:#8a4b00}
+.needs ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.needs li{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:10px;align-items:center;background:#fff;border:1px solid #f1e2c4;border-radius:10px;padding:8px 10px}
+.needs li small{display:block;color:#6b7684;font-size:12.5px}
+.needs .miss{display:flex;flex-wrap:wrap;gap:4px}.needs .miss i{font-style:normal;font-size:12px;padding:2px 7px;border-radius:999px;background:#fdecc8;color:#7a4a00}.needs .miss i.new{background:#fde2e1;color:#9b1c1c}
+@media (max-width:640px){.needs li{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -196,7 +203,7 @@ const LISTS = {
   colleges:{title:"College", add:"Add college or university", csv:true, intro:"Colleges for player profiles: schools a player is interested in show with their logo, and a player who commits gets their profile re-skinned in that school's colors. Transparent PNG logos look best.", name:i => i.name || "College",
     fields:[["name","College or university","text","Michigan State University"],["short","Short name (optional)","text","Michigan State"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["link","Esports program page (optional)","url"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"]]},
   highSchools:{title:"School", add:"Add school", csv:true, seed:true, intro:"High schools we compete against. Their logos and details are filled in automatically wherever a match is against them: the stream overlays, and the opponent on new matches in the scorekeeper. Type the school the way it appears in matches; \"Novi\" also matches \"Novi High School\".", name:i => [i.name, i.mascot].filter(Boolean).join(" · ") || "School",
-    fields:[["name","School","text","Novi High School"],["short","Short name for overlays (optional)","text","Novi"],["mascot","Mascot / team name","text","Wildcats"],["city","City","text","Novi, MI"],["league","League or conference","text","MHSEL · KLAA"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"],["notes","Notes (scouting, contacts…)","textarea"]]},
+    fields:[["name","School","text","Novi High School"],["short","Short name for overlays (optional)","text","Novi"],["mascot","Mascot / team name","text","Wildcats"],["city","City","text","Novi"],["state","State","text","MI"],["league","League or conference","text","MHSEL · KLAA"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"],["notes","Notes (scouting, contacts…)","textarea"],["noRemind","Don't flag this school for missing info","check"]]},
   legacyRecords:{title:"Pre-tracking record", add:"Add a legend", intro:"Records from before the scorekeeper existed. They show in their own \"Before the scorekeeper\" section of the record book, clearly marked, and never mix with the leaderboards that are worked out from logged matches. Check \"At least\" when the number is a provable floor: the site shows it with a + (for example 6 stocks for every best-of-3 set won, because you can't win one with fewer).", name:i => [i.holder, i.title].filter(Boolean).join(" · ") || "Record",
     fields:[["title","Record","text","Career stocks taken"],["holder","Who holds it","text","Griffin Appleby"],["game","Game","select",() => [["", "All games"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["value","Number","text","96"],["years","Years","text","2023–2025"],["note","How it was counted","textarea"],["floor","At least (show it with a +)","check"]]},
   roadmap:{title:"Planned feature", add:"Add a planned feature", intro:"Features planned for LevelUP that aren't built yet, with a short description of each. This list is just for the coaches; it doesn't show on the website.", name:i => i.title || "Feature",
@@ -210,6 +217,7 @@ function renderSide(){
   $("#side").innerHTML = TABS.map(t => {
     let badge = "";
     if (t.toggle && site) badge = site.sections?.[t.toggle] === false ? `<span class="dot off">Off</span>` : (LISTS[t.id] && (site[t.id] || []).length ? `<span class="dot">${site[t.id].length}</span>` : "");
+    if (t.id === "highSchools" && site){ const n = needsInfo().length; badge = n ? `<span class="dot off" title="${n} need info">${n}</span>` : ""; }
     if (t.id === "alumni" && site && (site.alumni || []).length) badge = `<span class="dot">${site.alumni.length}</span>`;
     if (t.id === "connect") badge = connected ? `<span class="dot">✓</span>` : `<span class="dot off">!</span>`;
     return `<button type="button" data-tab="${t.id}"${tab === t.id ? ' aria-current="true"' : ""}>${t.label}${badge}</button>`;
@@ -228,7 +236,7 @@ function field(path, [key, label, type = "text", extra], val){
   return `<label class="f"><span>${esc(label)}</span><input id="${id}" type="${type === "date" ? "date" : type === "url" ? "url" : type === "email" ? "email" : "text"}" data-path="${path}" value="${esc(val)}"${extra ? ` placeholder="${esc(extra)}"` : ""}></label>`;
 }
 const listFilter = {};
-let alumniList = null, liveMod = null;
+let alumniList = null, liveMod = null, openOid = "", oppSeen = null;
 function listEditor(key, spec){
   const arr = site[key] = site[key] || [];
   const isCheck = f => f[2] === "check";
@@ -242,7 +250,7 @@ function listEditor(key, spec){
       const hide = q && !String([it.name, it.short, it.mascot, it.city].join(" ")).toLowerCase().includes(q);
       const sw = c => c ? `<i style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${esc(c)};border:1px solid rgba(0,0,0,.2)"></i>` : "";
       const logo = it.logo ? `<img src="${esc(/^(https?:|data:)/.test(it.logo) ? it.logo : SITE_BASE + it.logo)}" alt="" style="width:28px;height:28px;object-fit:contain">` : `<span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:#e8edf3"></span>`;
-      const open = wasOpen.has(String(it.id)) || !it.name;
+      const open = wasOpen.has(String(it.id)) || !it.name || String(it.id) === openOid;
       return `<details class="item" data-oid="${esc(it.id || "")}" data-fname="${esc(String([it.name, it.short, it.mascot, it.city].join(" ")).toLowerCase())}"${open ? " open" : ""}${hide ? " hidden" : ""}>
       <summary class="item-h" style="cursor:pointer;list-style:none"><span style="display:flex;gap:10px;align-items:center">${logo}<b>${esc(spec.name(it))}</b>${sw(it.primary)}${sw(it.secondary)}</span><div class="tools">
         <button type="button" data-move="${key}" data-i="${i}" data-d="-1" aria-label="Move up"${i === 0 ? " disabled" : ""}>▲</button>
@@ -250,6 +258,7 @@ function listEditor(key, spec){
         <button type="button" class="x" data-del="${key}" data-i="${i}" aria-label="Remove ${esc(spec.title)}">×</button>
       </div></summary>
       <div class="grid g2" style="margin-top:12px">${main.map(f => `<div style="${f[2] === "textarea" || f[2] === "image" ? "grid-column:1/-1" : ""}">${field(`${base}.${f[0]}`, f, it[f[0]] ?? "")}</div>`).join("")}</div>
+      ${checks.length ? `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px">${checks.map(f => field(`${base}.${f[0]}`, f, !!it[f[0]])).join("")}</div>` : ""}
     </details>`;
     }
     return `<div class="item">
@@ -327,6 +336,7 @@ function renderPanel(){
   const spec = LISTS[tab];
   P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
     ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
+    ${tab === "highSchools" ? needsInfoCard() : ""}
     ${spec.csv ? csvBar(tab, spec) : ""}
     ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}`;
 }
@@ -401,9 +411,39 @@ function ungraduate(i){
   (a.fromTeams || []).forEach(({teamId, ...r}) => { const t = (site.teams || []).find(x => x.id === teamId); if (t && !(t.roster || []).some(x => x.id === a.id)) (t.roster = t.roster || []).push({...r, id:a.id, name:a.name, tag:a.tag, private:!!a.private}); });
   site.alumni.splice(i, 1);
 }
+/* ---------- School library: opponents we've played whose info is missing ---------- */
+const NEED = [["city","city"],["state","state"],["logo","logo"],["primary","primary color"],["secondary","secondary color"]];
+function loadOpponents(){
+  if (oppSeen !== null) return; oppSeen = false;
+  loadFinals().then(r => { const m = new Map();
+    (r?.fin || []).forEach(x => { const n = String(x.opponent?.school || "").trim(); if (!n || /hartland/i.test(n)) return; const k = nameKey(n); if (!k) return;
+      const e = m.get(k) || {name:n, n:0, last:""}; e.n++; if (String(x.startsAt) > e.last) e.last = String(x.startsAt); if (n.length > e.name.length) e.name = n; m.set(k, e); });
+    oppSeen = m; renderSide(); if (tab === "highSchools") renderPanel(); });
+}
+function needsInfo(){
+  if (!oppSeen) return [];
+  const lib = site.highSchools || [], out = [];
+  oppSeen.forEach((e, k) => { const s = lib.find(x => nameKey(x.name) === k || (x.short && nameKey(x.short) === k));
+    if (s?.noRemind) return;
+    const miss = s ? NEED.filter(([f]) => !String(s[f] || "").trim()).map(x => x[1]) : ["everything"];
+    if (miss.length) out.push({...e, s, miss}); });
+  return out.sort((a, b) => b.last.localeCompare(a.last));
+}
+function needsInfoCard(){
+  loadOpponents();
+  if (oppSeen === false) return `<p class="muted" style="margin:0">Checking the match history for schools that need info…</p>`;
+  const list = needsInfo(); if (!list.length) return `<div class="notice ok" style="margin:0">Every school we've played has a city, state, logo and colors.</div>`;
+  const shown = list.slice(0, needsAll ? list.length : 8);
+  return `<div class="needs"><div class="needs-h"><b>⚑ ${list.length} school${list.length === 1 ? "" : "s"} we've played ${list.length === 1 ? "needs" : "need"} info</b><span class="muted">Newest opponents first. Fill in what's missing so logos and colors show on results, overlays and head-to-head pages.</span></div>
+    <ul>${shown.map(x => `<li><span><b>${esc(x.name)}</b><small>${x.n} match${x.n === 1 ? "" : "es"}${x.last ? ` · last ${esc(new Date(x.last).toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"}))}` : ""}</small></span>
+      <span class="miss">${x.s ? x.miss.map(m => `<i>${esc(m)}</i>`).join("") : `<i class="new">Not in the library</i>`}</span>
+      <button type="button" class="btn btn-line" data-fillin="${esc(x.name)}">${x.s ? "Fill in" : "Add school"}</button></li>`).join("")}</ul>
+    ${list.length > shown.length ? `<button type="button" class="btn btn-line" data-needsall="1">Show all ${list.length}</button>` : ""}</div>`;
+}
+let needsAll = false;
 /* ---------- CSV import for the college and high school lists ---------- */
 const CSV_COLS = {name:["name","school","college","university","high school"], short:["short","short name","nickname","abbreviated name"], mascot:["mascot","team name","nickname mascot"],
-  city:["city","location","town"], league:["league","conference","leagues"], primary:["primary","primary color","color 1","color1","main color"], secondary:["secondary","secondary color","color 2","color2"],
+  city:["city","location","town"], state:["state","st"], league:["league","conference","leagues"], primary:["primary","primary color","color 1","color1","main color"], secondary:["secondary","secondary color","color 2","color2"],
   logo:["logo","logo url","image","logo link"], link:["esports","esports page","esports program","program page"], website:["website","site","url","web"], youtube:["youtube","yt"], twitch:["twitch"],
   x:["x","twitter","x / twitter"], instagram:["instagram","ig"], tiktok:["tiktok","tik tok"], notes:["notes","note"]};
 function csvBar(key, spec){
@@ -517,7 +557,8 @@ async function loadSite(){
   site = await r.json(); siteSha = null; migrate();
 }
 /* The first college list was saved as "schools"; it's "colleges" now, and "highSchools" is the opponent library. */
-function migrate(){ if (!Array.isArray(site.alumni)) site.alumni = []; if (Array.isArray(site.schools)){ if (!(site.colleges || []).length) site.colleges = site.schools; delete site.schools; } }
+function migrate(){ (site.highSchools || []).forEach(x => { const m = String(x.city || "").match(/^(.*?),\s*([A-Z]{2})$/); if (m && !x.state){ x.city = m[1].trim(); x.state = m[2]; } });
+  if (!Array.isArray(site.alumni)) site.alumni = []; if (Array.isArray(site.schools)){ if (!(site.colleges || []).length) site.colleges = site.schools; delete site.schools; } }
 async function connect(cfg){
   ghSave(cfg);
   try {
@@ -747,7 +788,7 @@ $("#standInput").addEventListener("change", async e => {
 let finalsP = null;
 function loadFinals(){
   return finalsP = finalsP || (async () => {
-    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=32");
+    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=33");
     return new Promise(res => { let latest = null, t = null;
       live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
       setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });
@@ -815,6 +856,15 @@ $("#panel").addEventListener("click", async e => {
     const arr = getP(b.dataset.move), i = +b.dataset.i, j = i + (+b.dataset.d);
     if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; setDirty(true); setStatus(); renderPanel(); return;
   }
+  if (b.dataset.needsall){ needsAll = true; renderPanel(); return; }
+  if (b.dataset.fillin){
+    const n = b.dataset.fillin, k = nameKey(n), lib = site.highSchools = site.highSchools || [];
+    let sc = lib.find(x => nameKey(x.name) === k || (x.short && nameKey(x.short) === k));
+    if (!sc){ sc = {id:"h-" + Math.random().toString(16).slice(2, 10), name:n, short:"", mascot:"", city:"", state:"MI", primary:"", secondary:"", logo:""}; lib.push(sc); lib.sort((a, c) => String(a.name).localeCompare(String(c.name))); setDirty(true); setStatus(); }
+    openOid = sc.id; listFilter.highSchools = sc.name; renderSide(); renderPanel();
+    const d = document.querySelector(`details[data-oid="${CSS.escape(sc.id)}"]`); d?.scrollIntoView({block:"start", behavior:"smooth"}); setTimeout(() => d?.querySelector("input")?.focus({preventScroll:true}), 400);
+    return;
+  }
   if (b.id === "alBring"){
     const gone = new Set(site.removedPlayers || []), add = (alumniList || []).filter(a => !onRoster(a.id) && !findAlum(a) && !gone.has(a.id));
     site.alumni = [...(site.alumni || []), ...add.map(a => ({id:a.id, name:a.name, tag:a.tag, private:!!a.private, gradYear:a.gradYear || "", now:a.now || ""}))]; sortAlumni();
@@ -870,6 +920,7 @@ $("#schoolCsv").addEventListener("change", async e => {
   try { await loadSite(); } catch(e){ $("#panel").innerHTML = `<div class="notice warn">Couldn't load the site's content. Reload the page.</div>`; return; }
   tab = connected ? "program" : "connect";
   setStatus(); renderSide(); renderPanel();
+  loadOpponents();
 })();
 })();
 </script>

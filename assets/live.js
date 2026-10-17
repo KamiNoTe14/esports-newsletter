@@ -224,10 +224,11 @@ function liveCard(site, m){
     ${w ? `<a class="btn btn-gold" href="${esc(w)}" target="_blank" rel="noopener">▶ Watch live</a>` : ""}</div>`;
 }
 let OPP_PAGE = false;
+const placeOf = x => { const c = String(x?.city || "").trim(), st = String(x?.state || "").trim(); return c && st && !new RegExp(`,\\s*${st}$`, "i").test(c) ? `${c}, ${st}` : c || st; };
 function oppCard(m){
   if (OPP_PAGE) return "";
   const lib = oppLib(m), logo = oppLogo(m, "opp-card-logo"), school = m.opponent?.school || lib?.name || ""; if (!school) return "";
-  const sub = [lib?.mascot, lib?.city].filter(Boolean).join(" · ");
+  const sub = [lib?.mascot, placeOf(lib)].filter(Boolean).join(" · ");
   return `<a class="opp-card" href="${BASE}opponent.html?school=${encodeURIComponent(school)}">${logo}<div><small>Opponent</small><b>${esc(school)}</b>${sub ? `<span>${esc(sub)}</span>` : ""}</div><span class="more">Head to head →</span></a>`;
 }
 function resultRow(site, m){
@@ -565,7 +566,7 @@ export function startOpponent(site){
     const res = m => `<span class="${m.result}">${esc(m.result || "–")} ${m.score?.us ?? 0}–${m.score?.them ?? 0}</span>`;
     host.innerHTML = `<section class="page-h opp-h${skin ? " skinned" : ""}"${skin}><div class="wrap opp-top">${logo}
         <div><p class="eyebrow">Head to head${lib?.league ? ` · ${esc(lib.league)}` : ""}</p><h1 style="font-size:clamp(36px,6vw,64px)">Hartland vs. ${esc(name)}</h1>
-        ${[lib?.mascot, lib?.city].filter(Boolean).length ? `<p class="lead" style="margin:4px 0 0">${esc([lib?.mascot, lib?.city].filter(Boolean).join(" · "))}</p>` : ""}
+        ${[lib?.mascot, placeOf(lib)].filter(Boolean).length ? `<p class="lead" style="margin:4px 0 0">${esc([lib?.mascot, placeOf(lib)].filter(Boolean).join(" · "))}</p>` : ""}
         <div class="opp-links">${rv ? `<a class="chip gold" href="${BASE}rival.html?school=${encodeURIComponent(rv.school)}">⚔ ${esc(rv.title || "Rivalry")}</a>` : ""}${links}</div></div></div></section>
       <section class="section"><div class="wrap">
         <div class="rb-top"><div class="rb-big"><small>All-time record</small><b>${loaded ? rec.text : "–"}</b><span>${all.length ? `${esc(lead)}${st ? ` ${st.r === "W" ? "Hartland has" : esc(short) + " has"} won the last ${st.n === 1 ? "meeting" : st.n + " meetings"}.` : ""}` : loaded ? "No final results against them yet." : ""}</span></div>

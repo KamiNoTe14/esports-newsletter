@@ -527,3 +527,12 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .legacy-era td small{display:block;color:var(--muted);font-size:13px}
 .commit-links{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
 .commit-links a{font:600 13px var(--body);color:var(--c-on,#fff);opacity:.9;text-decoration:underline}
+/* opponent logos on results: a small white tile so any logo reads on the dark rows */
+.opp-logo{display:inline-block;width:22px;height:22px;object-fit:contain;background:#fff;border-radius:5px;padding:2px;margin:0 6px 0 3px;vertical-align:-6px}
+.tbl .opp-logo{width:20px;height:20px;margin-left:0;vertical-align:-5px}
+.opp-card{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.opp-card-logo{flex:none;width:44px;height:44px;object-fit:contain;background:#fff;border-radius:8px;padding:4px}
+.opp-card small{display:block;font:700 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.opp-card b{display:block;font:700 18px/1.15 var(--display);letter-spacing:.02em}
+.opp-card span{display:block;font-size:14px;color:var(--muted)}
+.opp-card a{margin-left:auto;font-size:14px;white-space:nowrap}

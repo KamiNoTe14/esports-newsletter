@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG} from "./matches.js?v=17";
+import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo} from "./matches.js?v=17";
 import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=1";
 
 const BASE = new URL("../", import.meta.url).href;
@@ -89,6 +89,11 @@ export function merge(archived, board){
 /* ---------- shared bits ---------- */
 const opp = m => oppShort(m);
 const oppFull = m => m.opponent?.team || m.opponent?.school || "TBD";
+/* Opponent logo: the match's own, else the School library's. A logo that fails to load just disappears. */
+let SITE_REF = null;
+const oppLib = m => schoolInfo(SITE_REF, m.opponent?.school);
+const oppLogoSrc = m => { const u = String(m.opponent?.logo || oppLib(m)?.logo || "").trim(); return !u ? "" : /^(https?:|data:)/.test(u) ? u : BASE + u.replace(/^\//, ""); };
+const oppLogo = (m, cls) => { const u = oppLogoSrc(m); return u ? `<img class="${cls || "opp-logo"}" src="${esc(u)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : ""; };
 function badge(site, m, cls = "gbadge"){
   const g = gameFor(site, m.game);
   return `<span class="${cls}${g.icon ? " has-img" : ""}" title="${esc(g.name || m.gameName || "")}">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : BASE + g.icon)}" alt="${esc(g.short || g.name || "")}">` : esc(g.abbr || (g.short || "?").slice(0, 3))}</span>`;
@@ -211,13 +216,20 @@ export async function startResults(site){
 }
 function teamName(site, t){ const g = gameFor(site, t.gameKey); return `${g.short || t.game} ${t.name}`; }
 function liveCard(site, m){
+  SITE_REF = site;
   const g = gameFor(site, m.game), cg = m.current, w = watchLink(m);
   const rv = rivalFor(site, m);
-  return `<div class="card res-livecard">${badge(site, m)}<div>${rv ? `<span class="chip gold rv" style="margin:0 0 4px">⚔ ${esc(rv.title || "Rivalry")}</span>` : ""}<b>${esc(m.teamName)}</b><span class="muted">vs ${esc(oppFull(m))}</span></div>
+  return `<div class="card res-livecard">${badge(site, m)}<div>${rv ? `<span class="chip gold rv" style="margin:0 0 4px">⚔ ${esc(rv.title || "Rivalry")}</span>` : ""}<b>${esc(m.teamName)}</b><span class="muted res-vs">vs ${oppLogo(m)}${esc(oppFull(m))}</span></div>
     <div class="res-score">${m.score?.us ?? 0}<span>–</span>${m.score?.them ?? 0}${cg && g.points ? `<small>${esc(g.unit || "Game")} ${cg.n}: ${cg.us}–${cg.them}</small>` : ""}</div>
     ${w ? `<a class="btn btn-gold" href="${esc(w)}" target="_blank" rel="noopener">▶ Watch live</a>` : ""}</div>`;
 }
+function oppCard(m){
+  const lib = oppLib(m), logo = oppLogo(m, "opp-card-logo"); if (!lib && !logo) return "";
+  const name = m.opponent?.school || lib?.name || oppFull(m), sub = [lib?.mascot, lib?.city].filter(Boolean).join(" · "), site = safe(lib?.website);
+  return `<div class="opp-card">${logo}<div><small>Opponent</small><b>${esc(name)}</b>${sub ? `<span>${esc(sub)}</span>` : ""}</div>${site ? `<a href="${esc(site)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div>`;
+}
 function resultRow(site, m){
+  SITE_REF = site;
   const g = gameFor(site, m.game), games = m.seriesOnly ? [] : (m.games || []).filter(x => x.winner || x.us || x.them);
   const lineup = (m.players || []).map(p => `<a href="${BASE}player.html?id=${encodeURIComponent(p.id)}">${esc(playerName(p))}</a>`).join(", ");
   const w = watchLink(m), rv = rivalFor(site, m);
@@ -225,9 +237,10 @@ function resultRow(site, m){
   return `<details class="res${rv ? " rival" : ""}${ps ? " post" : ""}" id="m-${esc(m.id)}"><summary>
       <span class="res-date"><small>${esc(fmtDay(m.startsAt).split(",")[0])}</small><b>${esc(fmtDay(m.startsAt).split(", ")[1] || "")}</b></span>
       ${badge(site, m)}
-      <span class="res-who"><b>${esc(m.teamName)}${ps ? ` <span class="chip post${ps.finals ? " finals" : ""}">🏆 ${esc(ps.label)}</span>` : ""}${rv ? ` <span class="chip gold rv">⚔ ${esc(rv.title || "Rivalry")}</span>` : ""}</b><span>vs ${esc(oppFull(m))}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}</span></span>
+      <span class="res-who"><b>${esc(m.teamName)}${ps ? ` <span class="chip post${ps.finals ? " finals" : ""}">🏆 ${esc(ps.label)}</span>` : ""}${rv ? ` <span class="chip gold rv">⚔ ${esc(rv.title || "Rivalry")}</span>` : ""}</b><span class="res-vs">vs ${oppLogo(m)}${esc(oppFull(m))}${m.opponent?.school && m.opponent?.team ? ` · ${esc(m.opponent.school)}` : ""}</span></span>
       <span class="res-out ${m.result || ""}"><i>${esc(m.result || "–")}</i>${m.score?.us ?? 0}–${m.score?.them ?? 0}</span>
     </summary><div class="res-body">
+      ${oppCard(m)}
       <p class="muted" style="margin:0 0 10px">${esc(m.league || "")}${roundLabel(m) ? ` · ${esc(roundLabel(m))}` : ""}${m.event ? ` · ${esc(m.event)}` : ""} · Best of ${esc(m.bestOf)}${m.forfeit ? ` · ${m.forfeit === "them" ? "Won by forfeit" : "Forfeit"}` : ""}</p>
       ${games.length ? `<div class="res-games">${games.map(x => `<span class="${x.winner === "us" ? "W" : x.winner === "them" ? "L" : ""}"><small>${esc(g.unit || "Game")} ${x.n}</small>${g.points ? `${x.us}–${x.them}` : x.winner === "us" ? "Won" : x.winner === "them" ? "Lost" : "–"}</span>`).join("")}</div>` : ""}
       ${boxScore(g, m) || (lineup ? `<p style="margin:12px 0 0"><span class="muted">Lineup:</span> ${lineup}</p>` : "")}
@@ -312,6 +325,7 @@ export async function startPlayer(site){
   setTimeout(() => { ready = true; draw(); }, 5000);
 }
 function drawPlayer(site, host, all, dir){
+  SITE_REF = site;
   const id = new URLSearchParams(location.search).get("id") || "";
   const sameName = (a, b) => { const k = x => String(x || "").trim().toLowerCase(); return (a.name && k(a.name) === k(b.name)) || (!a.name && !b.name && a.tag && k(a.tag) === k(b.tag)); };
   const histMe = all.flatMap(m => m.players || []).find(p => p.id === id);
@@ -404,7 +418,7 @@ function drawPlayer(site, host, all, dir){
         : `<div class="empty">Stats show up here after ${esc(display)} plays a match.</div>`}
       ${played.length ? `<h2 class="res-h" style="margin-top:34px">Games played</h2>${played.some(m => watchLink(m)) ? `<p class="muted" style="margin:-6px 0 12px;font-size:15px">Matches with a ▶ were streamed; click through to watch on YouTube.</p>` : ""}<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Team</th><th>Opponent</th><th class="n">Result</th><th>Stats</th><th>Stream</th></tr></thead><tbody>${played.map(m => { const st = (m.players.find(p => p.id === id) || {}).stats || {}, g = gameFor(site, m.game);
         const yr = new Date(m.startsAt).getFullYear();
-        return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => x.avg ? `${fmtStat(x, st[x.key])} ${esc(x.label.replace(/\s*%\s*$/, ""))}` : `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td><td>${watchLink(m) ? `<a href="${esc(watchLink(m))}" target="_blank" rel="noopener" aria-label="Watch the stream of this match">▶ Watch</a>` : ""}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
+        return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td class="res-vs"><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${oppLogo(m)}${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => x.avg ? `${fmtStat(x, st[x.key])} ${esc(x.label.replace(/\s*%\s*$/, ""))}` : `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td><td>${watchLink(m) ? `<a href="${esc(watchLink(m))}" target="_blank" rel="noopener" aria-label="Watch the stream of this match">▶ Watch</a>` : ""}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
     </div></section>`;
   const btn = host.querySelector(".clip");
   if (btn && playing && playing.dataset.yt === btn.dataset.yt) btn.replaceWith(playing);

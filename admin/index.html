@@ -747,7 +747,7 @@ $("#standInput").addEventListener("change", async e => {
 let finalsP = null;
 function loadFinals(){
   return finalsP = finalsP || (async () => {
-    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=29");
+    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=30");
     return new Promise(res => { let latest = null, t = null;
       live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
       setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });

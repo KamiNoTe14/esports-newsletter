@@ -64,10 +64,10 @@ function sides(m){
   const ourPlayer = g.teamSize === 1 || /solo/i.test(m.teamName) || (ourNow.length === 1 && ((m.players || []).length > 1 || +g.teamSize > 1)) ? (m.players || []).find(p => p.id === ourNow[0]) : null;
   const charOf = id => cur.p?.[id]?.hero;
   const us = {name:US.short, team:m.teamName, logo:US.logo, score:m.score?.us ?? 0, won:(m.games || []).filter(x => x.winner === "us").length,
-    now:ourPlayer ? {name:tagOf(ourPlayer) || nameOf(ourPlayer), char:charOf(ourPlayer.id)} : null, us:true};
+    now:ourPlayer ? {name:tagOf(ourPlayer) || nameOf(ourPlayer), char:charOf(ourPlayer.id)} : null, us:true, ...OUR_COLORS};
   const lib = schoolInfo(site, m.opponent?.school);
   const them = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), team:m.opponent?.team || "", school:m.opponent?.school || "", logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", score:m.score?.them ?? 0,
-    won:(m.games || []).filter(x => x.winner === "them").length, now:station.oppNow ? {name:station.oppNow, char:station.oppChar} : null};
+    won:(m.games || []).filter(x => x.winner === "them").length, now:station.oppNow ? {name:station.oppNow, char:station.oppChar} : null, ...teamColors(lib)};
   return station.swap ? [them, us] : [us, them];
 }
 function charImg(g, name){
@@ -78,21 +78,34 @@ function charImg(g, name){
 const CLAW_D = ["M560,10 L538,21 L515,30 L491,39 L470,50 L455,70 L433,81 L412,92 L391,105 L372,120 L354,136 L334,149 L309,155 L291,172 L272,186 L262,213 L243,228 L229,248 L208,261 L192,280 L176,298 L159,315 L140,330 L140,330 L159,315 L180,303 L203,293 L223,281 L244,268 L264,254 L285,243 L306,231 L325,216 L344,202 L361,184 L382,173 L400,156 L418,141 L441,132 L457,112 L476,98 L495,83 L509,62 L528,47 L545,30 L560,10Z", "M600,60 L578,69 L560,81 L539,91 L523,107 L505,120 L482,127 L466,143 L446,154 L433,173 L411,181 L400,203 L384,218 L367,232 L348,245 L333,261 L317,277 L299,290 L284,306 L273,328 L261,348 L247,365 L230,380 L230,380 L247,365 L265,353 L285,342 L304,329 L324,319 L345,310 L358,291 L380,281 L398,268 L411,249 L432,239 L446,222 L469,214 L480,193 L501,183 L511,161 L527,146 L542,129 L559,115 L573,97 L589,81 L600,60Z", "M590,170 L575,177 L558,182 L546,192 L528,195 L513,202 L508,220 L493,227 L479,236 L470,248 L460,262 L444,267 L427,271 L419,286 L412,302 L402,314 L390,325 L378,336 L372,352 L360,363 L351,376 L342,390 L330,400 L330,400 L342,390 L356,381 L370,374 L382,364 L396,355 L412,350 L425,341 L434,327 L447,318 L462,311 L475,302 L483,287 L496,278 L507,266 L521,259 L527,242 L541,233 L550,220 L561,209 L572,197 L582,185 L590,170Z"];
 const claw = cls => `<svg class="claw ${cls || ""}" viewBox="0 0 640 430" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="sh" transform="translate(-10 12)">${CLAW_D.map(d => `<path d="${d}"/>`).join("")}</g><g>${CLAW_D.map(d => `<path d="${d}"/>`).join("")}</g></svg>`;
 /* Hand-brushed underline drawn under titles. */
-const BRUSH = `<svg viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M8 17 C 120 6, 260 4, 380 9 S 560 14, 592 8"/></svg>`;
+/* (kept for other layouts) */ const BRUSH = `<svg viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M8 17 C 120 6, 260 4, 380 9 S 560 14, 592 8"/></svg>`;
 /* Shrink long team names so "Byron Center" fits instead of being cut off (Anton is about half an em per letter). */
 const fitName = (name, max, room) => Math.max(24, Math.min(max, Math.floor(room / (String(name || "").length * .5 || 1))));
 const gameLogo = g => g.icon ? src(g.icon) : "";
+/* Team colors for paper panels: ours from site.json, theirs from the School library (steel blue when unknown).
+   --on is the readable text color on that paper; --hi is the lighter of the two school colors, for accents. */
+const lum = h => { const m = String(h || "").trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i); if (!m) return .3; let x = m[1]; if (x.length === 3) x = x.replace(/./g, c => c + c);
+  const c = i => { const v = parseInt(x.slice(i, i + 2), 16) / 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * c(0) + .7152 * c(2) + .0722 * c(4); };
+const hexOk = h => /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(h || "").trim()) ? (String(h).trim()[0] === "#" ? String(h).trim() : "#" + String(h).trim()) : "";
+const OUR_COLORS = {c1:hexOk(P.primary) || "#00274C", c2:hexOk(P.secondary) || "#FFBC05"};
+function teamColors(lib){ const c1 = hexOk(lib?.primary) || "#35557C", c2 = hexOk(lib?.secondary) || "#DCE8F5"; return {c1, c2}; }
+const skin = s => { const c1 = s.c1 || "#35557C", c2 = s.c2 || "#DCE8F5", l1 = lum(c1), l2 = lum(c2);
+  return `--c1:${esc(c1)};--c2:${esc(c2)};--on:${l1 > .42 ? "#0B1420" : "#FFFFFF"};--on2:${l2 > .42 ? "#0B1420" : "#FFFFFF"};--hi:${esc(Math.max(l1, l2) >= .2 ? (l1 >= l2 ? c1 : c2) : "#FFFFFF")}`; };
 /* Background artwork for full-screen graphics: this team's photo/art first, then the game's. */
 const artFor = (m, g) => src((site.teams || []).find(t => t.id === m.teamId)?.art || g.art || "");
 /* Full-screen frame: background art, hazard corners, claw slashes, game logo, then a title built like the program's
    graphics: big distressed block letters with a brush-script word slashed across the bottom corner, with a gold brush stroke underneath. */
-function frame(cls, m, g, {script = "", title = "", sub = "", body = "", foot = ""} = {}){
+/* The paper package: a wavy fabric backdrop (split into both schools' colors when the layer has two sides), the game
+   art faintly behind it, torn paper scraps in the corners, the claw as a die-cut sticker, the title on a torn,
+   crumpled paper banner with a script word stuck over it, and notes on strips of tape. */
+function frame(cls, m, g, {script = "", title = "", sub = "", body = "", foot = "", split = null} = {}){
   const art = artFor(m, g), gl = gameLogo(g);
-  return `<div class="full ${cls}">${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="streaks"></div><div class="vig"></div><div class="texture"></div>
-    <div class="haz tl"></div><div class="haz br"></div>${claw()}
+  const halves = split ? `<div class="half l" style="${skin(split[0])}"></div><div class="seam"><div class="half r" style="${skin(split[1])}"></div></div>` : `<div class="half solo" style="${skin(OUR_COLORS)}"></div>`;
+  return `<div class="full ${cls}">${halves}<div class="fab"></div>${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="vig"></div>
+    <div class="scrap tl"><i></i></div><div class="scrap br"><i></i></div>${claw("stk")}
     <header class="top">${gl ? `<img class="glogo" src="${esc(gl)}" alt="${esc(g.name)}">` : ""}
-      ${title ? `<div class="ttl${script ? " has-script" : ""}"><span class="bk"><b class="grunge">${esc(title)}</b></span>${script ? `<i>${esc(script)}</i>` : ""}${BRUSH}</div>` : ""}${sub ? `<small>${esc(sub)}</small>` : ""}</header>
-    ${body}${foot ? `<div class="foot">${foot}</div>` : ""}<div class="flash"></div></div>`;
+      ${title ? `<div class="ttl${script ? " has-script" : ""}"><div class="ban-w"><div class="ban"><b>${esc(title)}</b></div></div>${script ? `<i>${esc(script)}</i>` : ""}</div>` : ""}${sub ? `<div class="tape-w"><small class="tape">${esc(sub)}</small></div>` : ""}</header>
+    ${body}${foot ? `<div class="foot"><span class="tape">${foot}</span></div>` : ""}<div class="flash"></div></div>`;
 }
 const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; rlStatic = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
 
@@ -108,7 +121,7 @@ function scorebug(m){
   const pts = g.points && cur && (cur.us || cur.them) ? `${g.points} ${station.swap ? `${cur.them}–${cur.us}` : `${cur.us}–${cur.them}`}` : "";
   const state = fin ? `<b class="fin">Final</b>` : live ? `<small class="state">${esc(pts || "Live")}</small>` : `<small class="state up">${esc(m.status === "upcoming" ? fmtTime(m.startsAt) : m.status)}</small>`;
   const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b style="font-size:${fitName(s.name, 62, 300)}px">${esc(s.name)}</b></div>`, sc = `<div class="sc" data-side="${r ? "r" : "l"}"><span>${s.score}</span></div>`;
-    return `<div class="wing ${r ? "r" : "l"} ${s.us ? "us" : "them"}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };
+    return `<div class="wing ${r ? "r" : "l"} ${s.us ? "us" : "them"}" style="${skin(s)}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };
   const pips = (s, rev) => `<span class="pips">${Array.from({length:need}, (_, i) => { const k = rev ? need - 1 - i : i; return `<i class="${k < s.won ? "on" : ""}" data-k="${k}"></i>`; }).join("")}</span>`;
   /* a game just won: banner for 8 seconds */
   if (lastScores && !fin) [L, R].forEach((s, i) => { if (s.won > lastScores[i].won){
@@ -116,7 +129,7 @@ function scorebug(m){
     banner = {us:!!s.us, title:`${unit} ${decided}!`, name:s.name, note:lead}; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => { banner = null; draw(); }, 8000); } });
   if (fin) banner = null;
   const card = (s, r) => { if (!s.now || !live || q.get("card") === "0") return ""; const pic = charImg(g, s.now.char);
-    return `<div class="pcard char${r ? " r" : ""}${s.us ? " us" : " them"}"><div class="ring">${pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : `<b>${monogram(s.now.name)}</b>`}</div>
+    return `<div class="pcard char${r ? " r" : ""}${s.us ? " us" : " them"}" style="${skin(s)}"><div class="ring">${pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : `<b>${monogram(s.now.name)}</b>`}</div>
       <div class="pinfo"><b>${esc(s.now.name)}</b><div class="pst"><span><em>${esc(s.now.char || "—")}</em>${esc(g.charLabel || "Character")}</span><span><em>${s.won}</em>${esc(unit)}s won</span></div></div></div>`; };
   out.html = `<div class="bug gen">
       <div class="ev">${live ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
@@ -189,14 +202,14 @@ function ourTeamNum(m){
 let rlStatic = "", rlLive = null;
 function rlbug(m){
   const g = gameFor(site, m.game), need = Math.floor((+m.bestOf || 1) / 2) + 1, us = ourTeamNum(m);
-  const usSide = {name:US.short, logo:US.logo, won:(m.games || []).filter(x => x.winner === "us").length};
+  const usSide = {name:US.short, logo:US.logo, won:(m.games || []).filter(x => x.winner === "us").length, ...OUR_COLORS};
   const lib = schoolInfo(site, m.opponent?.school);
-  const themSide = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", won:(m.games || []).filter(x => x.winner === "them").length};
+  const themSide = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", won:(m.games || []).filter(x => x.winner === "them").length, ...teamColors(lib)};
   const sides = us === 0 ? [usSide, themSide] : [themSide, usSide];   // [blue, orange]
   const decided = (m.games || []).filter(x => x.winner).length;
   const gameNo = m.status === "final" ? decided : Math.min(+m.bestOf || 1, rl.ended ? Math.max(1, decided) : decided + 1);
   const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b style="font-size:${fitName(s.name, 62, 300)}px">${esc(s.name)}</b></div>`, sc = `<div class="sc" data-side="${r ? 1 : 0}"><span>0</span></div>`;
-    return `<div class="wing ${r ? "r orange" : "l blue"}${(r ? 1 : 0) === us ? " us" : " them"}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };
+    return `<div class="wing ${r ? "r orange" : "l blue"}${(r ? 1 : 0) === us ? " us" : " them"}" style="${skin(s)}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };
   const pips = (s, rev) => `<span class="pips">${Array.from({length:need}, (_, i) => { const k = rev ? need - 1 - i : i; return `<i class="${k < s.won ? "on" : ""}" data-k="${k}"></i>`; }).join("")}</span>`;
   const html = `<div class="bug rl">
       <div class="ev">${rl.on && rl.game && !rl.ended ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
@@ -260,14 +273,14 @@ function vs(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), mine = teamSeason(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), st = standingFor(m);
   const ourLine = mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l}, #${st.rank} in the league` : "";
   const lineup = s => s.us ? (m.players || []).map(p => tagOf(p) || nameOf(p)) : listOf(station.oppLineup);
-  const side = (s, c) => `<div class="side ${c}"><div class="crest"><div class="glow"></div><div class="halo"></div>${logoHTML(s.logo, s.name)}</div>
+  const side = (s, c) => `<div class="side ${c}" style="${skin(s)}"><div class="crest">${logoHTML(s.logo, s.name)}</div>
     <b>${esc(s.name)}</b><span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>
     ${(s.us ? ourLine : theirLine) ? `<span class="rec">${esc(s.us ? ourLine : theirLine)}</span>` : ""}
     ${lineup(s).length ? `<div class="names">${lineup(s).map((n, i) => `<span style="--i:${i}">${esc(n)}</span>`).join("")}</div>` : ""}</div>`;
   const hh = record(h2h);
   const foot = [`Best of <em>${esc(m.bestOf)}</em>`, m.status === "upcoming" ? esc(fmtTime(m.startsAt)) : "",
     h2h.length ? (hh.w === hh.l ? `All-time series tied ${hh.w}–${hh.l}` : `All-time: ${esc(hh.w > hh.l ? US.short : oppShort(m))} leads ${Math.max(hh.w, hh.l)}–${Math.min(hh.w, hh.l)}`) : "First meeting"].filter(Boolean).join(" &nbsp;/&nbsp; ");
-  out.html = frame("vs", m, g, {sub:eventLine(m), body:`${side(L, "l")}<div class="vsx"><span><b class="gold-text grunge">VS</b></span></div>${side(R, "r")}`, foot});
+  out.html = frame("vs", m, g, {sub:eventLine(m), split:[L, R], body:`${side(L, "l")}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${side(R, "r")}`, foot});
 }
 
 /* ---------- starting lineups ---------- */
@@ -285,9 +298,9 @@ function lineups(m){
     return `<div class="p" style="--i:${i}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="" onerror="this.remove()">` : `<span>${monogram(nameOf(p))}</span>`}</div>
       <div class="body"><div class="strip">${strip}</div><div class="main"><b>${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", yr ? `Class of ${yr}` : ""].filter(Boolean).join(", "))}</small></div></div></div>`; }).join("");
   const theirs = listOf(station.oppLineup).map((n, i) => `<div class="p" style="--i:${i}"><div class="body"><div class="strip"></div><div class="main"><b>${esc(n)}</b></div></div></div>`).join("");
-  const col = (s, html, c) => `<div class="col ${c}"><h2>${logoHTML(s.logo, s.name)}${esc(s.name)}</h2>${html || `<div class="empty-note">Lineup to come!</div>`}</div>`;
+  const col = (s, html, c) => `<div class="col ${c}" style="${skin(s)}"><h2>${logoHTML(s.logo, s.name)}${esc(s.name)}</h2>${html ? `<div class="plates">${html}</div>` : `<div class="empty-note">Lineup to come!</div>`}</div>`;
   const n = Math.max(1, (m.players || []).length, listOf(station.oppLineup).length), h = Math.min(100, Math.floor(620 / n) - 14);
-  out.html = frame("lu", m, g, {title:"Starting", script:"Lineups", sub:eventLine(m),
+  out.html = frame("lu", m, g, {title:"Starting", script:"Lineups", sub:eventLine(m), split:[L, R],
     body:`<div class="cols" style="--h:${h}px">${L.us ? col(L, ours, "l") + col(R, theirs, "r") : col(L, theirs, "l") + col(R, ours, "r")}</div>`});
 }
 
@@ -314,8 +327,8 @@ function teamCompare(m){
     ...(form ? [{k:"Last 5", a:mine.slice(-5).filter(x => x.result === "W").length, b:0, fa:form, fb:"–"}] : [])
   ];
   const ordered = L.us ? rows : rows.map(r => ({...r, a:r.b, b:r.a, fa:r.fb, fb:r.fa}));
-  const head = (s, c) => `<div class="h ${c}"><div class="pic crest">${logoHTML(s.logo, s.name)}</div><div><b>${esc(s.name)}</b><small>${esc(s.team || s.school)}</small></div></div>`;
-  out.html = frame("cmp", m, g, {title:"Tale of the", script:"Tape", sub:eventLine(m), foot:h2h.length ? "" : "First meeting!",
+  const head = (s, c) => `<div class="h ${c}" style="${skin(s)}"><div class="pic crest">${logoHTML(s.logo, s.name)}</div><div><b>${esc(s.name)}</b><small>${esc(s.team || s.school)}</small></div></div>`;
+  out.html = frame("cmp", m, g, {title:"Tale of the", script:"Tape", sub:eventLine(m), split:[L, R], foot:h2h.length ? "" : "First meeting!",
     body:`<div class="heads">${head(L, "l")}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${head(R, "r")}</div><div class="rows">${rowsHTML(ordered)}</div>`});
 }
 function playerStats(m, id){
@@ -367,12 +380,12 @@ function splash(sp){
   if (!sp?.id || seenSplash.has(sp.id)) return; seenSplash.add(sp.id);
   if ((LAYER || "scorebug") !== "scorebug" || Date.now() - new Date(sp.at).getTime() > 90000) return;
   const el = document.createElement("div"); el.className = "splash";
-  el.innerHTML = `${claw("sp-claw")}<div class="sp-band"><div class="sp-in">
+  el.innerHTML = `${claw("sp-claw")}<div class="sp-wrap"><div class="sp-band"><div class="sp-in">
       <p class="sp-kicker">New Hartland record</p>
       <b class="sp-name grunge">${esc(sp.holder)}</b>
       <p class="sp-what"><span>${esc(sp.game ? sp.game + " · " : "")}${esc(sp.title)}</span><em>${esc(sp.display)}</em></p>
       ${sp.prev?.name ? `<p class="sp-prev">Previous: ${esc(sp.prev.name)}, ${esc(sp.prev.display)}</p>` : ""}
-    </div></div><i class="sp-script">Record broken!</i><div class="flash"></div>`;
+    </div></div></div><i class="sp-script">Record broken!</i><div class="flash"></div>`;
   document.body.appendChild(el);
   setTimeout(() => el.classList.add("out"), 9000);
   setTimeout(() => el.remove(), 10200);

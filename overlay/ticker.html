@@ -67,16 +67,28 @@ body.top .bar{top:0;bottom:auto;border-top:0;border-bottom:3px solid var(--gold)
 @keyframes up{from{transform:translateY(100%);opacity:0}to{transform:none;opacity:1}}
 @keyframes away{from{transform:none;opacity:1}to{transform:translateY(-100%);opacity:0}}
 @keyframes pulse{50%{opacity:.6}}
+/* Paper package (matches the other LevelUP overlays): crumpled navy paper with a torn top edge, a gold paper brand tab */
+.bar{border-top:0;background:url(../assets/tex/crumple-strip.jpg) center/cover,linear-gradient(180deg,#0B3A6B 0%,var(--navy) 48%,#001A33 100%);background-blend-mode:overlay;
+  -webkit-mask:url(../assets/tex/tear-t.svg) top left/300px 14px repeat-x,linear-gradient(#000,#000) bottom/100% calc(100% - 13px) no-repeat;padding-top:8px;box-shadow:none}
+body.top .bar{-webkit-mask:url(../assets/tex/tear-b.svg) bottom left/300px 14px repeat-x,linear-gradient(#000,#000) top/100% calc(100% - 13px) no-repeat;padding:0 0 8px;border-bottom:0}
+.wrap{position:fixed;left:0;right:0;bottom:0;filter:drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 -6px 14px rgba(0,0,0,.35))}
+body.top .wrap{top:0;bottom:auto;filter:drop-shadow(0 2.5px 0 #fff) drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+.wrap .bar{position:relative}
+.brand{background:url(../assets/tex/crumple-strip.jpg) center/cover,linear-gradient(var(--gold),var(--gold));background-blend-mode:overlay;color:var(--navy);border-right:0}
+.brand small{color:var(--navy)}
+.lab div{color:#fff;text-shadow:2px 2px 0 #001A33,-2px 2px 0 #001A33,2px -2px 0 #001A33,-2px -2px 0 #001A33}
+.card.ann,.alert{background:url(../assets/tex/crumple-strip.jpg) center/cover,linear-gradient(var(--gold),var(--gold));background-blend-mode:overlay}
+.clock{background:url(../assets/tex/crumple-strip.jpg) center/cover,linear-gradient(#141518,#141518);background-blend-mode:overlay}
 </style>
 </head>
 <body>
-<div class="bar">
+<div class="wrap"><div class="bar">
   <div class="brand"><img src="../assets/eagle.png" alt=""><div><b>Eagles</b><small>Esports</small></div></div>
   <div class="lab" id="lab"></div>
   <div class="main" id="main"></div>
   <div class="next" id="next" hidden></div>
   <div class="clock" id="clock"></div>
-</div>
+</div></div>
 <script type="module">
 import {watchBoard, watchTicker} from "../assets/live.js?v=33";
 import {gameFor, oppShort, postseason, rivalFor, fmtTime, roundLabel} from "../assets/matches.js?v=17";

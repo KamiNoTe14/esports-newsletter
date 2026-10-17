@@ -555,3 +555,32 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .opp-tbl .L{color:var(--muted);font-weight:700}
 .opp-grid>div{min-width:0}
 @media (max-width:640px){.opp-tbl .sm-hide{display:none}.opp-game img{display:none}.opp-tbl td,.opp-tbl th{white-space:nowrap}.opp-tbl td:first-child{white-space:normal}}
+
+/* ---------- paper accents (shared with the LevelUP broadcast package): crumpled paper, torn edges, tape, stickers ---------- */
+:root{--tex:url(tex/crumple.jpg);--tex-s:url(tex/crumple-strip.jpg);--tear-t:url(tex/tear-t.svg);--tear-l:url(tex/tear-l.svg);--tear-r:url(tex/tear-r.svg)}
+/* page headers: a crumpled-paper sheen and a torn bottom edge */
+.page-h{position:relative;isolation:isolate;border-bottom:0;padding-bottom:48px}
+.page-h::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--tex) center/cover;mix-blend-mode:overlay;opacity:.45;pointer-events:none}
+.page-h::after{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:-1px;height:18px;background:var(--bg);-webkit-mask:var(--tear-t) top left/300px 18px repeat-x;mask:var(--tear-t) top left/300px 18px repeat-x;pointer-events:none}
+.hero{border-bottom:0}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:20px;z-index:4;background:var(--bg);-webkit-mask:var(--tear-t) top left/300px 20px repeat-x;mask:var(--tear-t) top left/300px 20px repeat-x;pointer-events:none}
+.hero.has-video{border-bottom:0}
+/* the eyebrow over each page title becomes a strip of masking tape */
+.page-h .eyebrow{display:inline-block;padding:6px 18px 7px;color:#0B1420;letter-spacing:.18em;transform:rotate(-1.5deg);
+  background:var(--tex-s) center/cover,linear-gradient(rgba(237,227,198,.96),rgba(237,227,198,.96));background-blend-mode:overlay;
+  -webkit-mask:var(--tear-l) left top/10px 300px repeat-y,var(--tear-r) right top/10px 300px repeat-y,linear-gradient(#000,#000) center/calc(100% - 18px) 100% no-repeat;
+  mask:var(--tear-l) left top/10px 300px repeat-y,var(--tear-r) right top/10px 300px repeat-y,linear-gradient(#000,#000) center/calc(100% - 18px) 100% no-repeat}
+/* section heading marks and gold buttons get a little paper grain */
+.sec-h h2::before{width:9px;background:var(--tex-s) center/cover,linear-gradient(var(--gold),var(--gold));background-blend-mode:overlay;transform:rotate(-6deg);border-radius:1px}
+.btn-gold{background:var(--tex-s) center/cover,linear-gradient(var(--gold),var(--gold));background-blend-mode:overlay}
+.btn-gold:hover{background:var(--tex-s) center/cover,linear-gradient(var(--gold-2),var(--gold-2));background-blend-mode:overlay}
+/* wins are a little gold sticker */
+.res-out.W i{background:var(--tex-s) center/cover,linear-gradient(var(--gold),var(--gold));background-blend-mode:overlay;color:var(--navy);transform:rotate(-5deg);
+  box-shadow:0 0 0 2px #fff,0 4px 8px rgba(0,0,0,.35)}
+/* school logos read as vinyl stickers */
+.opp-hero-logo,.opp-card-logo,.player-commit img,.next-logo{box-shadow:0 0 0 3px #fff,0 8px 18px rgba(0,0,0,.4);transform:rotate(-3deg)}
+.opp-hero-logo{transform:rotate(-4deg)}
+/* headers end on a solid sheet so the torn edge reads; colored headers drop their bottom stripe for the tear */
+.page-h{background:linear-gradient(180deg,#001B36 0%,#0B2442 100%)}
+.page-h.has-art{background-color:#0B2442}
+.player-h.committed,.opp-h.skinned{box-shadow:none}

@@ -552,7 +552,7 @@ export function startOpponent(site){
     const post = all.filter(m => postseason(m)), postRec = wl(post);
     const next = (board?.matches || []).filter(m => (m.status === "upcoming" || m.status === "live") && mine(m)).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1)[0];
     const byGame = [...new Set(all.map(m => m.game))].map(k => { const list = all.filter(m => m.game === k), r = wl(list), g2 = gamesWL(list), s2 = streakOf(list);
-      return {k, g:gameFor(site, k), list, r, g2, s2, last:list[0]}; }).sort((a, b) => b.list.length - a.list.length);
+      return {k, g:gameFor(site, k), list, r, g2, s2, last:list[0]}; }).sort((a, b) => a.last.startsAt < b.last.startsAt ? 1 : -1);
     const bySeason = [...new Set(all.map(m => m.season || seasonOf(m.startsAt)))].sort().reverse().map(se => ({se, r:wl(all.filter(m => (m.season || seasonOf(m.startsAt)) === se))}));
     /* Eagles with the most wins against them */
     const tally = {}; all.forEach(m => (m.players || []).forEach(p => { if (!p.id) return; const t = tally[p.id] = tally[p.id] || {p, w:0, n:0}; t.n++; if (m.result === "W") t.w++; }));

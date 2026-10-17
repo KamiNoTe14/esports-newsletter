@@ -53,7 +53,7 @@ function footer(site){
       <div><h4>Support the team</h4><ul>${support.map(([k, t]) => `<li><a href="${esc(safe(L[k]))}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("") || "<li class='muted'>Coming soon</li>"}</ul></div>
       <div><h4>More</h4><ul>${more.map(([k, t]) => `<li><a href="${esc(safe(L[k]))}" target="_blank" rel="noopener">${esc(t)}</a></li>`).join("")}<li><a href="${BASE}legacy.html">Record book, rivalries & alumni</a></li><li><a href="${BASE}future.html">Future Eagles (grades 6–8)</a></li><li><a href="${BASE}newsletters.html">Newsletter archive</a></li><li><a href="${BASE}feed.xml">RSS feed</a></li><li><a href="${BASE}schedule.html#subscribe">Add our calendar</a></li></ul></div>
     </div>
-    <div class="f-base"><span>© ${new Date().getFullYear()} ${esc(P.name || "Hartland Esports")} · Go Eagles!</span><span><a href="${BASE}portal/">Coach portal</a> · <a href="${BASE}admin/">Site manager</a></span></div>
+    <div class="f-base"><span>© ${new Date().getFullYear()} ${esc(P.name || "Hartland Esports")} · Go Eagles!</span><span><a href="${BASE}portal/">Coach portal</a> · <a href="${BASE}admin/">Site manager</a> · <a href="${BASE}scout/">Team scouting</a></span></div>
   </div></footer>`;
 }
 function secH(title, more){ return `<div class="sec-h"><h2>${title}</h2>${more || ""}</div>`; }

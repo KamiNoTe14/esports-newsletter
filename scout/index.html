@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Scouting · Hartland Esports</title>
+<link rel="icon" href="../assets/eagle.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#EDF1F6;--panel:#fff;--field:#F5F8FB;--ink:#0B1F33;--muted:#5A6B7F;--line:#D6DFE8;--navy:#00274C;--gold:#FFBC05;--chip:#E4EAF1;--danger:#B3261E;--ok:#1E7A45;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--body:"Barlow",Arial,Helvetica,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer}
+a{color:var(--navy)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.topbar{background:var(--navy);color:#fff;border-bottom:4px solid var(--gold);padding:12px 20px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.brand small{display:block;font-weight:600;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.brand h1{margin:0;font-family:var(--display);font-weight:700;font-size:26px;line-height:1;letter-spacing:.02em;text-transform:uppercase}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.who{font-size:13px;color:#C9D6E3;text-align:right;line-height:1.25}.who b{display:block;color:#fff}
+.btn{border:0;border-radius:6px;padding:9px 15px;font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:.06em;text-transform:uppercase;line-height:1;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:disabled{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.45)}
+.btn-line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-line:hover{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.btn-sm{padding:6px 10px;font-size:14px}
+.danger{color:var(--danger)}
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;max-width:1240px;margin:0 auto;padding:20px}
+@media (max-width:860px){.layout{grid-template-columns:1fr;padding:14px}}
+.side{position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 100px);overflow:auto}
+@media (max-width:860px){.side{position:static;max-height:none}}
+.side h3{margin:4px 2px 2px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.side .list{display:flex;flex-direction:column;gap:2px}
+.side .list button{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:8px;display:flex;gap:10px;align-items:center;color:var(--ink)}
+.side .list button:hover{background:var(--chip)}
+.side .list button[aria-current="true"]{background:var(--navy);color:#fff}
+.side .list button[aria-current="true"] small{color:#C9D6E3}
+.side .list img,.side .list .ph{flex:none;width:30px;height:30px;object-fit:contain;background:#fff;border-radius:6px;border:1px solid var(--line)}
+.side .list span{min-width:0}.side .list b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side .list small{display:block;color:var(--muted);font-size:12.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;font-size:13px;font-weight:600;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;padding:2px 7px;background:var(--chip);color:var(--muted)}
+.tag.gold{background:var(--gold);color:var(--navy)}
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h2{margin:0;font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.03em;text-transform:uppercase}
+h4{margin:0;font:700 12px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.intro{margin:0;color:var(--muted);max-width:70ch}
+.muted{color:var(--muted);font-size:13.5px}
+.grid{display:grid;gap:10px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:640px){.g2,.g3{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+label.f>span{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:80px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:0;border-color:transparent}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--navy)}
+.notice{border-radius:8px;padding:10px 14px;font-size:14px}
+.notice.warn{background:#FFF4D1;color:#4A3B00;border:1px solid #F0D98A}
+.notice.ok{background:#E3F4EA;color:#123F25;border:1px solid #B7DFC5}
+.gate{max-width:560px;margin:60px auto;text-align:center}
+.gate .card{align-items:center;padding:32px}
+.gate img{width:84px}
+.hero{display:flex;gap:16px;align-items:center}
+.hero .logo{flex:none;width:76px;height:76px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:12px;padding:5px}
+.hero h2{font-size:30px}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.stat{flex:1 1 150px;background:var(--field);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:10px 12px}
+.stat small{display:block;font:700 11px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat b{font:700 28px/1.1 var(--display)}
+.stat span{display:block;font-size:13px;color:var(--muted)}
+.sec{display:flex;flex-direction:column;gap:8px}
+.sec-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.text{white-space:pre-wrap;margin:0}
+.empty{color:var(--muted);font-style:italic;margin:0}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,2fr) auto;gap:6px;align-items:start}
+@media (max-width:640px){.prow{grid-template-columns:1fr}}
+.plist{display:grid;gap:8px}
+.pcard{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--field)}
+.pcard b{font-family:ui-monospace,Consolas,Menlo,monospace}
+.pcard .r{color:var(--muted);font-size:13px;margin-left:6px}
+.pcard p{margin:4px 0 0;white-space:pre-wrap}
+.vods{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.note{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
+.note-h{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.note-h b{color:var(--ink)}
+.note p{margin:6px 0 0;white-space:pre-wrap}
+.note .tools{display:flex;gap:6px}
+.note .tools button{border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;padding:0}
+.hist{width:100%;border-collapse:collapse;font-size:14px}
+.hist td{padding:6px 8px;border-top:1px solid var(--line)}
+.hist .W{color:var(--ok);font-weight:700}.hist .L{color:var(--danger);font-weight:700}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 8px}
+.tbl td{border-top:1px solid var(--line);padding:8px;vertical-align:top}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;border-left:4px solid var(--gold);padding:10px 16px;border-radius:6px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);z-index:50}
+.private{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#7A4A00;background:#FFF4D1;border:1px solid #F0D98A;border-radius:999px;padding:3px 10px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><small>Hartland Eagles Esports</small><h1>Scouting</h1></div>
+  <div class="actions" id="acts"></div>
+</header>
+<div id="app"><div class="gate"><div class="card"><p class="muted">Loading…</p></div></div></div>
+<div class="toast" id="toast" hidden></div>
+<script type="module">
+/* Team scouting. Private: every scouting record lives in Firestore behind security rules (firestore.rules), so only
+   coaches and people a coach has added to a team can read it. Nothing here is ever written to the public site files.
+   Coaches (EDITORS) manage members and edit everything. Captains edit reports for their games.
+   Everyone on a team can read their games' reports and add notes. */
+import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=17";
+const BASE = new URL("../", import.meta.url).href;
+const DOMAIN = "hartlandschools.us";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safe = u => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "";
+const key = n => shortSchool(n).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const toast = m => { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3600); };
+const when = iso => { if (!iso) return ""; const d = new Date(iso); return d.toLocaleDateString(undefined, {month:"short", day:"numeric"}) + " " + d.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"}); };
+
+/* ---------- data: Firebase, or a pretend database in this browser for ?mock=1 ---------- */
+async function firebaseDB(){
+  const fb = await import(BASE + "assets/vendor/firebase-full.js");
+  const app = fb.initializeApp(FIREBASE_CONFIG), db = fb.getFirestore(app), auth = fb.getAuth(app);
+  const clean = o => JSON.parse(JSON.stringify(o, (k, v) => v === undefined ? null : v));
+  const live = (q, cb) => fb.onSnapshot(q, s => cb(s.docs.map(d => ({id:d.id, ...d.data()}))), e => { console.warn(e); cb([], e); });
+  return {
+    onUser(cb){ fb.getRedirectResult(auth).catch(() => {}); return fb.onAuthStateChanged(auth, u => cb(u ? {email:(u.email || "").toLowerCase(), name:u.displayName || u.email, verified:!!u.emailVerified} : null)); },
+    async signIn(){ const p = new fb.GoogleAuthProvider(); p.setCustomParameters({prompt:"select_account", hd:DOMAIN});
+      try { await fb.signInWithPopup(auth, p); } catch(e){ if (/popup-blocked|operation-not-supported/.test(e.code || "")) await fb.signInWithRedirect(auth, p); else throw e; } },
+    signOut(){ return fb.signOut(auth); },
+    watchMe(email, cb){ return fb.onSnapshot(fb.doc(db, "scoutMembers", email), s => cb(s.exists() ? s.data() : null), () => cb(null)); },
+    watchMembers(cb){ return live(fb.collection(db, "scoutMembers"), cb); },
+    saveMember(m){ return fb.setDoc(fb.doc(db, "scoutMembers", m.email), clean(m)); },
+    removeMember(email){ return fb.deleteDoc(fb.doc(db, "scoutMembers", email)); },
+    watchReports(games, cb){ const c = fb.collection(db, "scoutReports"); return live(games === "all" ? c : fb.query(c, fb.where("game", "in", games.slice(0, 30))), cb); },
+    newReportId(){ return fb.doc(fb.collection(db, "scoutReports")).id; },
+    saveReport(id, r){ return fb.setDoc(fb.doc(db, "scoutReports", id), clean(r)); },
+    removeReport(id){ return fb.deleteDoc(fb.doc(db, "scoutReports", id)); },
+    watchNotes(rid, game, cb){ return live(fb.query(fb.collection(db, "scoutReports", rid, "notes"), fb.where("game", "==", game)), cb); },
+    addNote(rid, n){ return fb.setDoc(fb.doc(fb.collection(db, "scoutReports", rid, "notes")), clean(n)); },
+    saveNote(rid, nid, n){ return fb.setDoc(fb.doc(db, "scoutReports", rid, "notes", nid), clean(n)); },
+    removeNote(rid, nid){ return fb.deleteDoc(fb.doc(db, "scoutReports", rid, "notes", nid)); }
+  };
+}
+function mockDB(){
+  const K = "eagles-mock-scout", read = () => { try { return JSON.parse(localStorage.getItem(K)) || {members:{}, reports:{}, notes:{}}; } catch(e){ return {members:{}, reports:{}, notes:{}}; } };
+  const subs = new Set(), emit = () => subs.forEach(f => f()), write = d => { localStorage.setItem(K, JSON.stringify(d)); emit(); };
+  const sub = f => { subs.add(f); setTimeout(f, 0); return () => subs.delete(f); };
+  window.addEventListener("storage", e => { if (e.key === K) emit(); });
+  let user = null; try { user = JSON.parse(sessionStorage.getItem("eagles-mock-scout-user")); } catch(e){}
+  const userSubs = new Set();
+  const id = () => "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  return {
+    onUser(cb){ userSubs.add(cb); setTimeout(() => cb(user), 0); },
+    async signIn(){ const e = prompt("Test mode: sign in as which email?", EDITORS[0]); if (!e) return; user = {email:e.trim().toLowerCase(), name:e.split("@")[0], verified:true}; sessionStorage.setItem("eagles-mock-scout-user", JSON.stringify(user)); userSubs.forEach(f => f(user)); },
+    async signOut(){ user = null; sessionStorage.removeItem("eagles-mock-scout-user"); userSubs.forEach(f => f(null)); },
+    watchMe(email, cb){ return sub(() => cb(read().members[email] || null)); },
+    watchMembers(cb){ return sub(() => cb(Object.entries(read().members).map(([id, m]) => ({id, ...m})))); },
+    async saveMember(m){ const d = read(); d.members[m.email] = m; write(d); },
+    async removeMember(e){ const d = read(); delete d.members[e]; write(d); },
+    watchReports(games, cb){ return sub(() => cb(Object.entries(read().reports).map(([id, r]) => ({id, ...r})).filter(r => games === "all" || games.includes(r.game)))); },
+    newReportId: id,
+    async saveReport(rid, r){ const d = read(); d.reports[rid] = r; write(d); },
+    async removeReport(rid){ const d = read(); delete d.reports[rid]; delete d.notes[rid]; write(d); },
+    watchNotes(rid, game, cb){ return sub(() => cb(Object.entries(read().notes[rid] || {}).map(([id, n]) => ({id, ...n})).filter(n => n.game === game))); },
+    async addNote(rid, n){ const d = read(); (d.notes[rid] = d.notes[rid] || {})[id()] = n; write(d); },
+    async saveNote(rid, nid, n){ const d = read(); (d.notes[rid] = d.notes[rid] || {})[nid] = n; write(d); },
+    async removeNote(rid, nid){ const d = read(); delete (d.notes[rid] || {})[nid]; write(d); }
+  };
+}
+
+/* ---------- state ---------- */
+let db, site = {teams:[], games:[]}, user = null, me = null, meReady = false, members = [], reports = [], finals = [], board = null;
+let view = {kind:"home"}, gameF = "", editing = null, notes = [], unNotes = null, unReports = null, unMembers = null, unMe = null;
+const isCoach = () => !!user && EDITORS.includes(user.email);
+const inDomain = () => !!user && user.verified && user.email.endsWith("@" + DOMAIN);
+const myGames = () => isCoach() ? [...new Set([...(site.games || []).map(g => g.key), ...reports.map(r => r.game)])] : (me?.games || []);
+const canSee = g => isCoach() || (me?.games || []).includes(g);
+const canEdit = g => isCoach() || (!!me?.captain && (me?.games || []).includes(g));
+const gName = k => { const g = gameFor(site, k); return (g.name && g.name !== k ? g.name : "") || k; };
+const gShort = k => { const g = gameFor(site, k); return (g.short && g.short !== k ? g.short : "") || gName(k); };
+const logoOf = school => { const l = schoolInfo(site, school)?.logo; return l ? (/^(https?:|data:)/.test(l) ? l : BASE + l) : ""; };
+const imgTag = (school, cls) => { const u = logoOf(school); return u ? `<img class="${cls || ""}" src="${esc(u)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph ${cls || ""}'}))">` : `<span class="ph ${cls || ""}"></span>`; };
+const reportFor = (school, game) => reports.find(r => r.schoolKey === key(school) && r.game === game);
+
+/* ---------- top bar ---------- */
+function drawActs(){
+  $("#acts").innerHTML = user ? `<span class="who"><b>${esc(user.name)}</b>${esc(user.email)}${isCoach() ? " · Coach" : me?.captain ? " · Captain" : ""}</span>${isCoach() ? `<a class="btn btn-ghost" href="../admin/">Site Manager</a>` : ""}<button class="btn btn-ghost" id="out">Sign out</button>`
+    : `<a class="btn btn-ghost" href="../">Website</a>`;
+  $("#out") && ($("#out").onclick = () => db.signOut());
+}
+
+/* ---------- gates ---------- */
+function gate(html){ $("#app").innerHTML = `<div class="gate"><div class="card"><img src="../assets/eagle.png" alt="">${html}</div></div>`; }
+function render(){
+  drawActs();
+  if (!user) return gate(`<h2>Team scouting</h2><p class="intro">For Hartland esports players and coaches. Sign in with your <b>@${DOMAIN}</b> Google account.</p><button class="btn btn-gold" id="in">Sign in with Google</button>${isMock() ? `<p class="muted">Test mode: you'll be asked which email to pretend to be.</p>` : ""}`), ($("#in").onclick = () => db.signIn().catch(e => toast(e.code === "auth/popup-closed-by-user" ? "Sign-in was closed." : "Couldn't sign in. Try again.")));
+  if (!isCoach() && !inDomain()) return gate(`<h2>School account needed</h2><p class="intro">Scouting is only for <b>@${DOMAIN}</b> accounts. You're signed in as ${esc(user.email)}.</p><button class="btn btn-gold" id="sw">Use a different account</button>`), ($("#sw").onclick = async () => { await db.signOut(); db.signIn(); });
+  if (!isCoach() && !meReady) return gate(`<p class="muted">Checking your team…</p>`);
+  if (!isCoach() && !(me?.games || []).length) return gate(`<h2>Almost there</h2><p class="intro">You're signed in as <b>${esc(user.email)}</b>, but a coach hasn't added you to a team yet. Ask Coach Montney or Coach Watkins to add you, then refresh this page.</p>`);
+  layout();
+}
+
+/* ---------- main layout ---------- */
+function upcoming(){
+  const now = Date.now() - 3 * 3600e3;
+  return (board?.matches || []).filter(m => (m.status === "upcoming" || m.status === "live") && m.opponent?.school && canSee(m.game) && new Date(m.startsAt).getTime() > now)
+    .sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
+}
+function layout(){
+  const games = myGames().filter(g => reports.some(r => r.game === g) || upcoming().some(m => m.game === g) || isCoach());
+  const up = upcoming().filter(m => !gameF || m.game === gameF);
+  const reps = reports.filter(r => canSee(r.game) && (!gameF || r.game === gameF)).sort((a, b) => String(a.school).localeCompare(String(b.school)));
+  const cur = x => view.kind === x.kind && view.school === x.school && view.game === x.game;
+  const btn = (x, sub) => `<button type="button" data-view='${esc(JSON.stringify(x))}'${cur(x) ? ' aria-current="true"' : ""}>${imgTag(x.school)}<span><b>${esc(shortSchool(x.school))}</b><small>${sub}</small></span></button>`;
+  $("#app").innerHTML = `<div class="layout"><aside class="side">
+      <span class="private">🔒 Private to Hartland esports</span>
+      ${games.length > 1 ? `<div class="chips"><button class="chip" data-gf="" aria-pressed="${!gameF}">All</button>${games.map(g => `<button class="chip" data-gf="${esc(g)}" aria-pressed="${gameF === g}">${esc(gShort(g))}</button>`).join("")}</div>` : ""}
+      <div><h3>Up next</h3><div class="list">${up.length ? up.slice(0, 12).map(m => btn({kind:"report", school:m.opponent.school, game:m.game}, `${esc(gShort(m.game))} · ${esc(fmtDay(m.startsAt))}${reportFor(m.opponent.school, m.game) ? "" : " · no report yet"}`)).join("") : `<p class="muted" style="margin:4px 10px">Nothing on the schedule.</p>`}</div></div>
+      <div><h3>Scouting reports</h3><div class="list">${reps.length ? reps.map(r => btn({kind:"report", school:r.school, game:r.game}, esc(gShort(r.game)))).join("") : `<p class="muted" style="margin:4px 10px">No reports yet.</p>`}</div></div>
+      ${games.some(canEdit) ? `<button class="btn btn-line" data-new="1">+ New report</button>` : ""}
+      ${isCoach() ? `<div><h3>Coach</h3><div class="list"><button type="button" data-view='{"kind":"members"}'${view.kind === "members" ? ' aria-current="true"' : ""}><span class="ph">👥</span><span><b>Members</b><small>${members.length} people</small></span></button></div></div>` : ""}
+    </aside><main class="panel" id="main"></main></div>`;
+  $("#app").querySelectorAll("[data-view]").forEach(b => b.onclick = () => go(JSON.parse(b.dataset.view)));
+  $("#app").querySelectorAll("[data-gf]").forEach(b => b.onclick = () => { gameF = b.dataset.gf; layout(); });
+  $("[data-new]") && ($("[data-new]").onclick = () => go({kind:"new"}));
+  drawMain();
+}
+function go(v){
+  view = v; editing = null;
+  if (unNotes){ unNotes(); unNotes = null; } notes = [];
+  if (v.kind === "report"){ const r = reportFor(v.school, v.game); if (r) unNotes = db.watchNotes(r.id, r.game, n => { notes = n; if (view.kind === "report" && !editing) drawMain(); }); }
+  layout(); window.scrollTo({top:0});
+}
+function drawMain(){
+  const M = $("#main"); if (!M) return;
+  const typed = $("#noteText")?.value || "";
+  drawMainInner(M);
+  if (typed && $("#noteText")) $("#noteText").value = typed;
+}
+function drawMainInner(M){
+  if (view.kind === "members") return drawMembers(M);
+  if (view.kind === "new") return drawNew(M);
+  if (view.kind === "report") return drawReport(M);
+  const up = upcoming();
+  M.innerHTML = `<div class="card"><h2>Scouting</h2><p class="intro">Pick an opponent on the left. Reports cover how a team plays, who to watch and what's beaten them, plus notes from everyone on the team. ${canEditAny() ? "As a " + (isCoach() ? "coach" : "captain") + " you can start and edit reports." : "Anyone on the team can add notes."}</p>
+    ${up[0] ? `<div class="notice ok">Next up: <b>${esc(shortSchool(up[0].opponent.school))}</b> in ${esc(gName(up[0].game))}, ${esc(fmtDay(up[0].startsAt))} at ${esc(fmtTime(up[0].startsAt))}. <a href="#" data-goup="1">Open the scouting report →</a></div>` : ""}</div>`;
+  M.querySelector("[data-goup]") && (M.querySelector("[data-goup]").onclick = e => { e.preventDefault(); go({kind:"report", school:up[0].opponent.school, game:up[0].game}); });
+}
+const canEditAny = () => myGames().some(canEdit);
+
+/* ---------- new report ---------- */
+function drawNew(M){
+  const games = myGames().filter(canEdit);
+  const schools = [...new Set([...(site.highSchools || []).map(s => s.name), ...finals.map(m => m.opponent?.school).filter(Boolean), ...upcoming().map(m => m.opponent.school)])].sort();
+  M.innerHTML = `<div class="card"><h2>New scouting report</h2><p class="intro">One report per opponent per game. If one already exists you'll be taken to it.</p>
+    <div class="grid g2"><label class="f"><span>Opponent school</span><input id="nSchool" list="nSchools" placeholder="Novi High School"><datalist id="nSchools">${schools.map(s => `<option value="${esc(s)}">`).join("")}</datalist></label>
+    <label class="f"><span>Game</span><select id="nGame">${games.map(g => `<option value="${esc(g)}"${g === gameF ? " selected" : ""}>${esc(gName(g))}</option>`).join("")}</select></label></div>
+    <div><button class="btn btn-gold" id="nGo">Start report</button></div></div>`;
+  $("#nGo").onclick = async () => {
+    const school = $("#nSchool").value.trim(), game = $("#nGame").value; if (!school){ toast("Type the opponent school."); return; }
+    const lib = schoolInfo(site, school), name = lib?.name || school;
+    if (reportFor(name, game)) return go({kind:"report", school:name, game});
+    await startReport(name, game); go({kind:"report", school:name, game}); };
+}
+async function startReport(school, game){
+  const id = db.newReportId();
+  const r = {school, schoolKey:key(school), game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:new Date().toISOString(), createdBy:user.email, updatedAt:new Date().toISOString(), updatedBy:user.email};
+  reports = [...reports, {id, ...r}];
+  try { await db.saveReport(id, r); toast("Report started."); } catch(e){ console.error(e); toast("Couldn't start the report. You may not have permission."); }
+}
+
+/* ---------- one report ---------- */
+function history(school, game){
+  return finals.filter(m => key(m.opponent?.school) === key(school) && m.game === game).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
+}
+function drawReport(M){
+  const {school, game} = view, r = reportFor(school, game), lib = schoolInfo(site, school), edit = canEdit(game), hist = history(school, game);
+  const w = hist.filter(m => m.result === "W").length, l = hist.filter(m => m.result === "L").length;
+  const gw = hist.reduce((a, m) => { (m.games || []).forEach(x => { if (x.winner === "us") a[0]++; else if (x.winner === "them") a[1]++; }); return a; }, [0, 0]);
+  const next = upcoming().find(m => key(m.opponent.school) === key(school) && m.game === game);
+  const head = `<div class="card"><div class="hero">${imgTag(school, "logo")}<div><h4>${esc(gName(game))} scouting</h4><h2>${esc(lib?.name || school)}</h2>
+      <div class="muted">${esc([lib?.mascot, [lib?.city, lib?.state].filter(Boolean).join(", ")].filter(Boolean).join(" · "))}${lib ? ` · <a href="${BASE}opponent.html?school=${encodeURIComponent(lib.name)}" target="_blank" rel="noopener">Public head to head ↗</a>` : ""}</div></div></div>
+    <div class="stats"><div class="stat"><small>Our record in ${esc(gShort(game))}</small><b>${w}–${l}</b><span>${hist.length ? `${hist.length} meeting${hist.length === 1 ? "" : "s"}` : "Never played them"}</span></div>
+      <div class="stat"><small>Games / sets</small><b>${gw[0]}–${gw[1]}</b><span>${gw[0] + gw[1] ? Math.round(100 * gw[0] / (gw[0] + gw[1])) + "% won" : ""}</span></div>
+      <div class="stat"><small>${next ? "Next meeting" : "Last meeting"}</small><b>${next ? esc(fmtDay(next.startsAt)) : hist[0] ? esc(fmtDay(hist[0].startsAt)) : "–"}</b><span>${next ? esc(`${next.teamName} · ${fmtTime(next.startsAt)}`) : hist[0] ? esc(`${hist[0].teamName} · ${hist[0].result === "W" ? "Won" : "Lost"} ${hist[0].score?.us}–${hist[0].score?.them}`) : ""}</span></div></div>
+    ${hist.length ? `<details><summary class="muted" style="cursor:pointer">Every meeting in ${esc(gShort(game))}</summary><table class="hist">${hist.map(m => `<tr><td>${esc(fmtDay(m.startsAt))}, ${new Date(m.startsAt).getFullYear()}</td><td>${esc(m.teamName)}</td><td class="${m.result}">${esc(m.result || "")} ${m.score?.us}–${m.score?.them}</td><td class="muted">${esc((m.games || []).map(x => `${x.us}-${x.them}`).join(", "))}</td></tr>`).join("")}</table></details>` : ""}</div>`;
+  if (!r){
+    M.innerHTML = head + `<div class="card"><h3 style="margin:0">No scouting report yet</h3><p class="intro">${edit ? "Start one to add a game plan, players to watch and VODs. The whole team can then add notes." : "A captain or coach needs to start the report. Once they do, you can add notes here."}</p>${edit ? `<div><button class="btn btn-gold" id="start">Start the report</button></div>` : ""}</div>`;
+    $("#start") && ($("#start").onclick = async () => { await startReport(lib?.name || school, game); go(view); });
+    return;
+  }
+  const ed = editing === r.id, d = ed ? editDraft : r;
+  const txt = (k, label, hint) => `<div class="sec"><div class="sec-h"><h4>${label}</h4></div>${ed ? `<textarea data-k="${k}" rows="4" placeholder="${esc(hint)}">${esc(d[k] || "")}</textarea>` : d[k] ? `<p class="text">${esc(d[k])}</p>` : `<p class="empty">Nothing yet.</p>`}</div>`;
+  const players = d.players || [], vods = d.vods || [];
+  M.innerHTML = head + `<div class="card"><div class="card-h"><h2 style="font-size:22px">Scouting report</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="muted">Updated ${esc(when(r.updatedAt))}${r.updatedBy ? ` by ${esc(nameOf(r.updatedBy))}` : ""}</span>
+      ${edit ? (ed ? `<button class="btn btn-gold btn-sm" id="save">Save</button><button class="btn btn-line btn-sm" id="cancel">Cancel</button>` : `<button class="btn btn-line btn-sm" id="edit">Edit report</button>`) : ""}</div></div>
+    ${txt("plan", "Game plan", "How we beat them: draft, roles, what to focus on.")}
+    ${txt("tendencies", "How they play", "Their habits, strengths, what they fall back on under pressure.")}
+    ${txt("picks", "Picks, maps, stages and bans", "What they pick and ban, favorite maps or stages, counters that worked.")}
+    <div class="sec"><div class="sec-h"><h4>Players to watch</h4>${ed ? `<button class="btn btn-line btn-sm" id="addP">+ Player</button>` : ""}</div>
+      ${ed ? `<div class="plist">${players.map((p, i) => `<div class="prow"><input data-p="${i}" data-pk="tag" value="${esc(p.tag || "")}" placeholder="Gamertag"><input data-p="${i}" data-pk="role" value="${esc(p.role || "")}" placeholder="Main / role"><textarea data-p="${i}" data-pk="notes" rows="2" placeholder="What to expect">${esc(p.notes || "")}</textarea><button class="btn btn-line btn-sm danger" data-delp="${i}">Remove</button></div>`).join("")}</div><p class="muted" style="margin:0">Gamertags only, no real names. Opponent info stays in scouting and never appears on the public site.</p>`
+        : players.length ? `<div class="plist">${players.map(p => `<div class="pcard"><b>${esc(p.tag)}</b>${p.role ? `<span class="r">${esc(p.role)}</span>` : ""}${p.notes ? `<p>${esc(p.notes)}</p>` : ""}</div>`).join("")}</div>` : `<p class="empty">Nothing yet.</p>`}</div>
+    <div class="sec"><div class="sec-h"><h4>VODs and replays</h4>${ed ? `<button class="btn btn-line btn-sm" id="addV">+ Link</button>` : ""}</div>
+      ${ed ? `<div class="plist">${vods.map((v, i) => `<div class="prow" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto"><input data-v="${i}" data-vk="label" value="${esc(v.label || "")}" placeholder="What it shows (Game 2, 4:10)"><input data-v="${i}" data-vk="url" value="${esc(v.url || "")}" placeholder="https://youtu.be/…"><button class="btn btn-line btn-sm danger" data-delv="${i}">Remove</button></div>`).join("")}</div>`
+        : vods.filter(v => safe(v.url)).length ? `<ul class="vods">${vods.filter(v => safe(v.url)).map(v => `<li>▶ <a href="${esc(safe(v.url))}" target="_blank" rel="noopener">${esc(v.label || v.url)}</a></li>`).join("")}</ul>` : `<p class="empty">Nothing yet.</p>`}</div>
+    ${ed && isCoach() ? `<div><button class="btn btn-line btn-sm danger" id="delR">Delete this report</button></div>` : ""}</div>
+    <div class="card"><div class="card-h"><h2 style="font-size:22px">Team notes</h2><span class="muted">${notes.length} note${notes.length === 1 ? "" : "s"}</span></div>
+      <p class="intro" style="font-size:14px">Anything you noticed: a habit, a counter that worked, a VOD timestamp. Everyone on the team can read these.</p>
+      <div class="grid"><textarea id="noteText" rows="3" placeholder="Add a note…"></textarea><div><button class="btn btn-gold btn-sm" id="noteAdd">Post note</button></div></div>
+      ${notes.slice().sort((a, b) => a.at > b.at ? -1 : 1).map(n => { const mine = n.author === user.email, mod = mine || edit;
+        return `<div class="note" data-nid="${esc(n.id)}"><div class="note-h"><span><b>${esc(n.authorName || n.author)}</b> · ${esc(when(n.at))}${n.editedAt ? " · edited" : ""}</span>${mod ? `<span class="tools">${mine ? `<button data-ned="${esc(n.id)}">Edit</button>` : ""}<button data-ndel="${esc(n.id)}">Delete</button></span>` : ""}</div><p>${esc(n.text)}</p></div>`; }).join("") || `<p class="empty">No notes yet. Be the first.</p>`}
+    </div>`;
+  bindReport(r);
+}
+let editDraft = null;
+const nameOf = email => { const m = members.find(x => x.email === email); return m?.name || (email === user?.email ? user.name : email.split("@")[0]); };
+function bindReport(r){
+  const M = $("#main"), q = s => M.querySelector(s);
+  q("#edit") && (q("#edit").onclick = () => { editing = r.id; editDraft = JSON.parse(JSON.stringify({plan:r.plan, tendencies:r.tendencies, picks:r.picks, players:r.players || [], vods:r.vods || []})); drawMain(); });
+  q("#cancel") && (q("#cancel").onclick = () => { editing = null; drawMain(); });
+  const pull = () => { M.querySelectorAll("[data-k]").forEach(t => editDraft[t.dataset.k] = t.value);
+    M.querySelectorAll("[data-p]").forEach(t => editDraft.players[+t.dataset.p][t.dataset.pk] = t.value);
+    M.querySelectorAll("[data-v]").forEach(t => editDraft.vods[+t.dataset.v][t.dataset.vk] = t.value); };
+  q("#addP") && (q("#addP").onclick = () => { pull(); editDraft.players.push({tag:"", role:"", notes:""}); drawMain(); });
+  q("#addV") && (q("#addV").onclick = () => { pull(); editDraft.vods.push({label:"", url:""}); drawMain(); });
+  M.querySelectorAll("[data-delp]").forEach(b => b.onclick = () => { pull(); editDraft.players.splice(+b.dataset.delp, 1); drawMain(); });
+  M.querySelectorAll("[data-delv]").forEach(b => b.onclick = () => { pull(); editDraft.vods.splice(+b.dataset.delv, 1); drawMain(); });
+  q("#save") && (q("#save").onclick = async () => { pull();
+    const data = {school:r.school, schoolKey:r.schoolKey, game:r.game, createdAt:r.createdAt || "", createdBy:r.createdBy || "",
+      plan:editDraft.plan.trim(), tendencies:editDraft.tendencies.trim(), picks:editDraft.picks.trim(),
+      players:editDraft.players.map(p => ({tag:String(p.tag || "").trim(), role:String(p.role || "").trim(), notes:String(p.notes || "").trim()})).filter(p => p.tag || p.notes).slice(0, 40),
+      vods:editDraft.vods.map(v => ({label:String(v.label || "").trim(), url:String(v.url || "").trim()})).filter(v => v.url).slice(0, 40),
+      updatedAt:new Date().toISOString(), updatedBy:user.email};
+    try { await db.saveReport(r.id, data); editing = null; layout(); toast("Report saved."); } catch(e){ console.error(e); toast("Couldn't save. You may not have permission to edit this report."); } });
+  q("#delR") && (q("#delR").onclick = async () => { if (!confirm(`Delete the ${gName(r.game)} report on ${r.school} and all its notes?`)) return; try { await db.removeReport(r.id); toast("Report deleted."); go({kind:"home"}); } catch(e){ toast("Couldn't delete it."); } });
+  q("#noteAdd").onclick = async () => { const t = q("#noteText").value.trim(); if (!t) return; if (t.length > 4000){ toast("Keep notes under 4,000 characters."); return; }
+    try { await db.addNote(r.id, {text:t, game:r.game, author:user.email, authorName:me?.name || user.name, at:new Date().toISOString()}); q("#noteText").value = ""; } catch(e){ console.error(e); toast("Couldn't post the note."); } };
+  M.querySelectorAll("[data-ndel]").forEach(b => b.onclick = async () => { if (!confirm("Delete this note?")) return; try { await db.removeNote(r.id, b.dataset.ndel); } catch(e){ toast("Couldn't delete it."); } });
+  M.querySelectorAll("[data-ned]").forEach(b => b.onclick = () => { const n = notes.find(x => x.id === b.dataset.ned), box = b.closest(".note");
+    box.querySelector("p").outerHTML = `<div class="grid" style="margin-top:6px"><textarea rows="3">${esc(n.text)}</textarea><div style="display:flex;gap:6px"><button class="btn btn-gold btn-sm" data-nsave>Save</button><button class="btn btn-line btn-sm" data-ncancel>Cancel</button></div></div>`;
+    box.querySelector("[data-ncancel]").onclick = () => drawMain();
+    box.querySelector("[data-nsave]").onclick = async () => { const t = box.querySelector("textarea").value.trim(); if (!t) return;
+      try { await db.saveNote(r.id, n.id, {text:t, game:n.game, author:n.author, authorName:n.authorName, at:n.at, editedAt:new Date().toISOString()}); } catch(e){ toast("Couldn't save the note."); } }; });
+}
+
+/* ---------- members (coaches only) ---------- */
+function rosterPeople(){
+  const map = new Map();
+  (site.teams || []).forEach(t => (t.roster || []).forEach(r => { if (!r.id) return; const e = map.get(r.id) || {id:r.id, name:r.name || r.tag, tag:r.tag || "", captain:false, teams:[]}; e.teams.push(t); e.captain = e.captain || !!r.captain; map.set(r.id, e); }));
+  return [...map.values()].sort((a, b) => String(a.name).localeCompare(String(b.name)));
+}
+const teamLabel = t => `${gShort(t.gameKey || t.game)} ${t.name}`;
+function drawMembers(M){
+  const people = rosterPeople(), teams = (site.teams || []).filter(t => t.id);
+  const list = members.slice().sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
+  M.innerHTML = `<div class="card"><h2>Members</h2><p class="intro">Who can see scouting. Add a player's <b>@${DOMAIN}</b> email and the teams they're on. They only see reports for those teams' games. Captains can start and edit reports; everyone else can read them and add notes. Coaches always see everything.</p>
+    <div class="grid g3"><label class="f"><span>School email</span><input id="mEmail" type="email" placeholder="first.last@${DOMAIN}"></label>
+      <label class="f"><span>Player on our rosters</span><select id="mPlayer"><option value="">Pick a player (fills in teams)…</option>${people.map(p => `<option value="${esc(p.id)}">${esc(p.name)}${p.tag && p.tag !== p.name ? ` · ${esc(p.tag)}` : ""}</option>`).join("")}</select></label>
+      <label class="f"><span>Name to show</span><input id="mName" placeholder="Their name"></label></div>
+    <div><h4 style="margin-bottom:6px">Teams</h4><div class="chips" id="mTeams">${teams.map(t => `<label class="toggle" style="margin-right:12px"><input type="checkbox" value="${esc(t.id)}"> ${esc(teamLabel(t))}</label>`).join("")}</div></div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><label class="toggle"><input type="checkbox" id="mCap"> Captain: can start and edit reports</label><button class="btn btn-gold" id="mAdd">Add member</button></div></div>
+    <div class="card"><div class="card-h"><h2 style="font-size:22px">${list.length} member${list.length === 1 ? "" : "s"}</h2></div>
+    ${list.length ? `<table class="tbl"><thead><tr><th>Member</th><th>Teams</th><th>Captain</th><th></th></tr></thead><tbody>${list.map(m => `<tr><td><b>${esc(m.name || m.email)}</b><div class="muted">${esc(m.email)}</div></td>
+      <td>${(m.teams || []).map(id => teams.find(t => t.id === id)).filter(Boolean).map(t => `<span class="tag" style="margin:0 4px 4px 0">${esc(teamLabel(t))}</span>`).join("") || `<span class="muted">No team: sees nothing</span>`}</td>
+      <td><label class="toggle"><input type="checkbox" data-cap="${esc(m.email)}"${m.captain ? " checked" : ""}></label></td>
+      <td style="text-align:right;white-space:nowrap"><button class="btn btn-line btn-sm" data-medit="${esc(m.email)}">Edit</button> <button class="btn btn-line btn-sm danger" data-mdel="${esc(m.email)}">Remove</button></td></tr>`).join("")}</tbody></table>` : `<p class="empty">No members yet. Add your players above.</p>`}</div>`;
+  const setTeams = ids => $("#mTeams").querySelectorAll("input").forEach(i => i.checked = ids.includes(i.value));
+  $("#mPlayer").onchange = () => { const p = people.find(x => x.id === $("#mPlayer").value); if (!p) return; $("#mName").value = p.name; setTeams(p.teams.map(t => t.id)); $("#mCap").checked = p.captain; };
+  $("#mAdd").onclick = async () => {
+    const email = $("#mEmail").value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+$/.test(email)){ toast("Type their school email."); return; }
+    if (!email.endsWith("@" + DOMAIN) && !confirm(`${email} isn't a @${DOMAIN} account, so they won't be able to sign in. Add anyway?`)) return;
+    const ids = [...$("#mTeams").querySelectorAll("input:checked")].map(i => i.value);
+    const games = [...new Set(ids.map(id => teams.find(t => t.id === id)).filter(Boolean).map(t => gameFor(site, t.gameKey || t.game).key))];
+    const m = {email, name:$("#mName").value.trim() || email.split("@")[0], playerId:$("#mPlayer").value || "", teams:ids, games, captain:$("#mCap").checked, addedBy:user.email, updatedAt:new Date().toISOString()};
+    try { await db.saveMember(m); toast(`${m.name} added${ids.length ? "" : ". Pick a team so they can see something"}.`); } catch(e){ console.error(e); toast("Couldn't save. Check the Firestore rules are published."); } };
+  M.querySelectorAll("[data-cap]").forEach(c => c.onchange = async () => { const m = members.find(x => x.email === c.dataset.cap); try { await db.saveMember({...strip(m), captain:c.checked, updatedAt:new Date().toISOString()}); } catch(e){ toast("Couldn't save."); } });
+  M.querySelectorAll("[data-mdel]").forEach(b => b.onclick = async () => { if (!confirm(`Remove ${b.dataset.mdel}? They'll lose access to scouting right away. Their notes stay.`)) return; try { await db.removeMember(b.dataset.mdel); } catch(e){ toast("Couldn't remove."); } });
+  M.querySelectorAll("[data-medit]").forEach(b => b.onclick = () => { const m = members.find(x => x.email === b.dataset.medit); $("#mEmail").value = m.email; $("#mName").value = m.name || ""; $("#mPlayer").value = m.playerId || ""; setTeams(m.teams || []); $("#mCap").checked = !!m.captain; $("#mEmail").focus(); window.scrollTo({top:0, behavior:"smooth"}); });
+}
+const strip = ({id, ...m}) => m;
+
+/* ---------- start ---------- */
+(async function init(){
+  try { site = await (await fetch(BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
+  db = isMock() ? mockDB() : await firebaseDB();
+  const live = await import(BASE + "assets/live.js?v=33");
+  live.watchFinals(site, f => { finals = f; if (user && view.kind === "report" && !editing) drawMain(); });
+  live.watchBoard(b => { board = b; if (user && (isCoach() || me) && !editing) layout(); });
+  db.onUser(u => {
+    user = u; me = null; meReady = false; [unMe, unReports, unMembers].forEach(f => f && f()); unMe = unReports = unMembers = null; reports = []; members = [];
+    if (!u){ render(); return; }
+    if (isCoach()){
+      unReports = db.watchReports("all", r => { reports = r; if (user && !editing) layout(); });
+      unMembers = db.watchMembers(m => { members = m; if (user && view.kind !== "report" && !editing) layout(); });
+      render(); return;
+    }
+    if (!inDomain()){ render(); return; }
+    unMe = db.watchMe(u.email, m => { me = m; meReady = true;
+      if (unReports){ unReports(); unReports = null; }
+      if ((m?.games || []).length) unReports = db.watchReports(m.games, r => { reports = r; if (user && !editing) layout(); });
+      render(); });
+    render();
+  });
+})();
+</script>
+</body>
+</html>

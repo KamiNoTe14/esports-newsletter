@@ -37,6 +37,54 @@ service cloud.firestore {
       allow write: if isCoach();
     }
 
+    // ---------- Team scouting (scout/) ----------
+    // PRIVATE. Coaches see and edit everything. A player sees nothing until a coach adds their
+    // @hartlandschools.us email to scoutMembers with at least one team; then they can read reports for
+    // those teams' games and post notes. Members marked captain can also create and edit those reports.
+    function myEmail() { return request.auth.token.email.lower(); }
+    function inDistrict() {
+      return request.auth != null && request.auth.token.email_verified == true
+        && myEmail().matches('.*@hartlandschools[.]us$');
+    }
+    function memberDoc() { return /databases/$(database)/documents/scoutMembers/$(myEmail()); }
+    function isMember() { return inDistrict() && exists(memberDoc()); }
+    function canSee(game) { return isCoach() || (isMember() && game in get(memberDoc()).data.games); }
+    function canEdit(game) { return isCoach() || (isMember() && get(memberDoc()).data.captain == true && game in get(memberDoc()).data.games); }
+    function validReport() {
+      let d = request.resource.data;
+      return d.game is string && d.school is string && d.school.size() <= 120
+        && d.plan is string && d.plan.size() <= 20000
+        && d.tendencies is string && d.tendencies.size() <= 20000
+        && d.picks is string && d.picks.size() <= 20000
+        && d.players is list && d.players.size() <= 40
+        && d.vods is list && d.vods.size() <= 40;
+    }
+
+    match /scoutMembers/{email} {
+      allow read: if isCoach() || (inDistrict() && email == myEmail());
+      allow write: if isCoach();
+    }
+    match /scoutReports/{reportId} {
+      allow read: if canSee(resource.data.game);
+      allow create: if canEdit(request.resource.data.game) && validReport();
+      allow update: if canEdit(resource.data.game) && request.resource.data.game == resource.data.game && validReport();
+      allow delete: if isCoach();
+
+      match /notes/{noteId} {
+        function reportGame() { return get(/databases/$(database)/documents/scoutReports/$(reportId)).data.game; }
+        allow read: if canSee(resource.data.game);
+        allow create: if canSee(reportGame())
+          && request.resource.data.game == reportGame()
+          && request.resource.data.author == myEmail()
+          && request.resource.data.text is string && request.resource.data.text.size() <= 4000;
+        allow update: if canSee(resource.data.game) && resource.data.author == myEmail()
+          && request.resource.data.author == resource.data.author
+          && request.resource.data.game == resource.data.game
+          && request.resource.data.text is string && request.resource.data.text.size() <= 4000;
+        allow delete: if (canSee(resource.data.game) && resource.data.author == myEmail()) || canEdit(resource.data.game);
+      }
+    }
+
     // Everything else is closed.
     match /{document=**} {
       allow read, write: if false;

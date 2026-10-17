@@ -323,6 +323,7 @@ function legacy(site){
     </div></section>` : "")
   + `<section class="section" id="nextLevel" data-title="Where Eagles go next" data-lead="The road doesn't end at graduation. These Eagles took it to the college level, and it's the same road today's roster is on." hidden></section>`;
 }
+function opponent(){ return `<div id="opponent"><div class="loading" style="padding:80px 0">Loading the head to head…</div></div>`; }
 function rival(){ return `<div id="rival"><div class="loading" style="padding:80px 0">Loading the rivalry…</div></div>`; }
 
 /* ---------- Future Eagles (grades 6-8). Wording lives in site.json under "future"; these are the defaults. ---------- */
@@ -402,13 +403,13 @@ async function boot(){
   try { site = await getJSON("data/site.json"); } catch(e){ app.innerHTML = `<div class="loading">Couldn't load the site. Please refresh.</div>`; return; }
   try { issues = (await getJSON("data/issues.json")).issues || []; } catch(e){}
   document.body.insertAdjacentHTML("afterbegin", header(site));
-  const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, future}[PAGE] || home;
+  const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "legacy", "rival"].includes(PAGE)) import(BASE + "assets/live.js?v=30").then(L => {
-    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site);
+  if (["home", "schedule", "results", "player", "legacy", "rival", "opponent"].includes(PAGE)) import(BASE + "assets/live.js?v=31").then(L => {
+    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
-  }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#rival") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
+  }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#rival") || $("#opponent") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));
   heroSetup();
   const stories = $("#stories") ? JSON.parse($("#stories").textContent) : [];

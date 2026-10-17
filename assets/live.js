@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo} from "./matches.js?v=17";
+import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo, shortSchool} from "./matches.js?v=17";
 import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=1";
 
 const BASE = new URL("../", import.meta.url).href;
@@ -223,10 +223,12 @@ function liveCard(site, m){
     <div class="res-score">${m.score?.us ?? 0}<span>–</span>${m.score?.them ?? 0}${cg && g.points ? `<small>${esc(g.unit || "Game")} ${cg.n}: ${cg.us}–${cg.them}</small>` : ""}</div>
     ${w ? `<a class="btn btn-gold" href="${esc(w)}" target="_blank" rel="noopener">▶ Watch live</a>` : ""}</div>`;
 }
+let OPP_PAGE = false;
 function oppCard(m){
-  const lib = oppLib(m), logo = oppLogo(m, "opp-card-logo"); if (!lib && !logo) return "";
-  const name = m.opponent?.school || lib?.name || oppFull(m), sub = [lib?.mascot, lib?.city].filter(Boolean).join(" · "), site = safe(lib?.website);
-  return `<div class="opp-card">${logo}<div><small>Opponent</small><b>${esc(name)}</b>${sub ? `<span>${esc(sub)}</span>` : ""}</div>${site ? `<a href="${esc(site)}" target="_blank" rel="noopener">Website ↗</a>` : ""}</div>`;
+  if (OPP_PAGE) return "";
+  const lib = oppLib(m), logo = oppLogo(m, "opp-card-logo"), school = m.opponent?.school || lib?.name || ""; if (!school) return "";
+  const sub = [lib?.mascot, lib?.city].filter(Boolean).join(" · ");
+  return `<a class="opp-card" href="${BASE}opponent.html?school=${encodeURIComponent(school)}">${logo}<div><small>Opponent</small><b>${esc(school)}</b>${sub ? `<span>${esc(sub)}</span>` : ""}</div><span class="more">Head to head →</span></a>`;
 }
 function resultRow(site, m){
   SITE_REF = site;
@@ -523,6 +525,67 @@ export function startRival(site){
       <section class="section alt"><div class="wrap"><a class="btn btn-line" href="${BASE}legacy.html#rivalries">← All rivalries</a></div></section>`;
     host.querySelectorAll("details").forEach(d => { if (open.has(d.id)) d.open = true; });
     host.querySelectorAll("[data-open]").forEach(a => a.onclick = e => { e.preventDefault(); const d = document.getElementById(a.dataset.open); if (d){ d.open = true; d.scrollIntoView({block:"center", behavior:"smooth"}); } });
+  };
+  draw();
+  watchFinals(site, f => { fin = f; loaded = true; draw(); });
+  watchBoard(b => { board = b; draw(); });
+}
+
+/* ---------- any opponent: our record against them, overall and by game ---------- */
+const oppKey = n => shortSchool(n).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+export function startOpponent(site){
+  const host = $("#opponent"); if (!host) return;
+  SITE_REF = site; OPP_PAGE = true;
+  const asked = new URLSearchParams(location.search).get("school") || "", want = oppKey(asked);
+  if (!want){ host.innerHTML = `<section class="section"><div class="wrap"><div class="empty">Pick an opponent from a result. <a href="${BASE}results.html">See results</a>.</div></div></section>`; return; }
+  const lib = schoolInfo(site, asked), rv = (site.rivals || []).find(r => oppKey(r.school) === want);
+  let fin = [], board = null, loaded = false, gameF = "";
+  const mine = m => oppKey(m.opponent?.school) === want;
+  const pct = (w, l) => w + l ? Math.round(100 * w / (w + l)) + "%" : "–";
+  const gamesWL = list => list.reduce((a, m) => { (m.games || []).forEach(x => { if (x.winner === "us") a.w++; else if (x.winner === "them") a.l++; }); return a; }, {w:0, l:0});
+  const streakOf = list => { if (!list.length) return null; const r = list[0].result; let n = 0; for (const m of list){ if (m.result === r) n++; else break; } return r === "W" || r === "L" ? {r, n} : null; };
+  const draw = () => {
+    const all = fin.filter(mine).sort(byNewest), vs = gameF ? all.filter(m => m.game === gameF) : all;
+    const name = lib?.name || all[0]?.opponent?.school || asked, short = lib?.short || shortSchool(name);
+    document.title = `Hartland vs. ${name} · Hartland Esports`;
+    const rec = wl(all), gw = gamesWL(all), st = streakOf(all), last = all[0];
+    const post = all.filter(m => postseason(m)), postRec = wl(post);
+    const next = (board?.matches || []).filter(m => (m.status === "upcoming" || m.status === "live") && mine(m)).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1)[0];
+    const byGame = [...new Set(all.map(m => m.game))].map(k => { const list = all.filter(m => m.game === k), r = wl(list), g2 = gamesWL(list), s2 = streakOf(list);
+      return {k, g:gameFor(site, k), list, r, g2, s2, last:list[0]}; }).sort((a, b) => b.list.length - a.list.length);
+    const bySeason = [...new Set(all.map(m => m.season || seasonOf(m.startsAt)))].sort().reverse().map(se => ({se, r:wl(all.filter(m => (m.season || seasonOf(m.startsAt)) === se))}));
+    /* Eagles with the most wins against them */
+    const tally = {}; all.forEach(m => (m.players || []).forEach(p => { if (!p.id) return; const t = tally[p.id] = tally[p.id] || {p, w:0, n:0}; t.n++; if (m.result === "W") t.w++; }));
+    const top = Object.values(tally).filter(t => t.w).sort((a, b) => b.w - a.w || a.n - b.n).slice(0, 5);
+    const lead = !all.length ? "" : rec.w > rec.l ? `Hartland leads the series ${rec.text}.` : rec.w < rec.l ? `${short} leads the series ${rec.l}–${rec.w}.` : `The series is tied ${rec.text}.`;
+    const logo = lib?.logo ? `<img class="opp-hero-logo" src="${esc(/^(https?:|data:)/.test(lib.logo) ? lib.logo : BASE + lib.logo)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : (last ? oppLogo(last, "opp-hero-logo") : "");
+    const links = [["website","Website"],["youtube","YouTube"],["twitch","Twitch"],["x","X"],["instagram","Instagram"],["tiktok","TikTok"]].filter(([k]) => safe(lib?.[k])).map(([k, l]) => `<a href="${esc(safe(lib[k]))}" target="_blank" rel="noopener">${l} ↗</a>`).join("");
+    const skin = lib?.primary ? ` style="${schoolSkin(lib)}"` : "";
+    const open = new Set([...host.querySelectorAll("details[open]")].map(d => d.id));
+    const res = m => `<span class="${m.result}">${esc(m.result || "–")} ${m.score?.us ?? 0}–${m.score?.them ?? 0}</span>`;
+    host.innerHTML = `<section class="page-h opp-h${skin ? " skinned" : ""}"${skin}><div class="wrap opp-top">${logo}
+        <div><p class="eyebrow">Head to head${lib?.league ? ` · ${esc(lib.league)}` : ""}</p><h1 style="font-size:clamp(36px,6vw,64px)">Hartland vs. ${esc(name)}</h1>
+        ${[lib?.mascot, lib?.city].filter(Boolean).length ? `<p class="lead" style="margin:4px 0 0">${esc([lib?.mascot, lib?.city].filter(Boolean).join(" · "))}</p>` : ""}
+        <div class="opp-links">${rv ? `<a class="chip gold" href="${BASE}rival.html?school=${encodeURIComponent(rv.school)}">⚔ ${esc(rv.title || "Rivalry")}</a>` : ""}${links}</div></div></div></section>
+      <section class="section"><div class="wrap">
+        <div class="rb-top"><div class="rb-big"><small>All-time record</small><b>${loaded ? rec.text : "–"}</b><span>${all.length ? `${esc(lead)}${st ? ` ${st.r === "W" ? "Hartland has" : esc(short) + " has"} won the last ${st.n === 1 ? "meeting" : st.n + " meetings"}.` : ""}` : loaded ? "No final results against them yet." : ""}</span></div>
+          <div class="rb-big"><small>Games &amp; sets won</small><b>${loaded ? `${gw.w}–${gw.l}` : "–"}</b><span>${gw.w + gw.l ? `${pct(gw.w, gw.l)} of individual games and sets.` : ""}</span></div>
+          <div class="rb-big next"><small>${next ? "Next meeting" : "Last meeting"}</small>${next ? `<b>${esc(fmtDay(next.startsAt))}</b><span>${next.status === "live" ? `<span class="pill-live">Live</span> ` : ""}${esc(next.teamName)} · ${esc(fmtTime(next.startsAt))}</span>`
+            : last ? `<b>${esc(fmtDay(last.startsAt))}</b><span>${esc(last.teamName)} · ${last.result === "W" ? "Won" : last.result === "L" ? "Lost" : "Played"} ${last.score?.us ?? 0}–${last.score?.them ?? 0}, ${new Date(last.startsAt).getFullYear()}</span>` : `<b class="tbd">TBD</b><span></span>`}</div></div>
+        ${all.length ? `<h2 class="res-h" style="margin-top:30px">By game</h2><div class="tbl-wrap"><table class="tbl opp-tbl"><thead><tr><th>Game</th><th class="n">Record</th><th class="n sm-hide">Win %</th><th class="n">Games</th><th class="sm-hide">Streak</th><th class="sm-hide">Last meeting</th></tr></thead><tbody>
+          ${byGame.map(x => `<tr><td><span class="opp-game">${x.g.icon ? `<img src="${esc(/^https?:/.test(x.g.icon) ? x.g.icon : BASE + x.g.icon)}" alt="">` : ""}${esc((x.g.name && x.g.name !== x.k ? x.g.name : "") || x.list[0].gameName || x.k.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()) || "Other")}</span></td><td class="n"><b>${x.r.text}</b></td><td class="n sm-hide">${pct(x.r.w, x.r.l)}</td><td class="n">${x.g2.w + x.g2.l ? `${x.g2.w}–${x.g2.l}` : "–"}</td><td class="sm-hide">${x.s2 ? `${x.s2.r}${x.s2.n}` : "–"}</td><td class="sm-hide">${esc(fmtDay(x.last.startsAt))}, ${new Date(x.last.startsAt).getFullYear()} · ${res(x.last)}</td></tr>`).join("")}
+          </tbody></table></div>` : ""}
+        ${all.length ? `<div class="grid g2 opp-grid" style="margin-top:22px">
+          <div><h2 class="res-h">By season</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Season</th><th class="n">W</th><th class="n">L</th></tr></thead><tbody>${bySeason.map(x => `<tr><td>${esc(seasonLabel(x.se))}</td><td class="n">${x.r.w}</td><td class="n">${x.r.l}</td></tr>`).join("")}${post.length ? `<tr><td>🏆 Playoffs (all seasons)</td><td class="n">${postRec.w}</td><td class="n">${postRec.l}</td></tr>` : ""}</tbody></table></div></div>
+          ${top.length ? `<div><h2 class="res-h">Most wins against ${esc(short)}</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Eagle</th><th class="n">Wins</th><th class="n">Played</th></tr></thead><tbody>${top.map(t => `<tr><td><a href="${BASE}player.html?id=${encodeURIComponent(t.p.id)}">${esc(playerName(t.p))}</a></td><td class="n">${t.w}</td><td class="n">${t.n}</td></tr>`).join("")}</tbody></table></div></div>` : ""}
+        </div>` : ""}
+      </div></section>
+      ${all.length ? `<section class="section alt"><div class="wrap"><h2 class="res-h">Every meeting</h2>
+        ${byGame.length > 1 ? `<div class="res-teams" role="group" aria-label="Filter by game" style="margin-bottom:12px"><button type="button" class="chip${gameF ? "" : " gold"}" data-g="">All games <span class="rec-mini">${rec.text}</span></button>${byGame.map(x => `<button type="button" class="chip${gameF === x.k ? " gold" : ""}" data-g="${esc(x.k)}">${esc(x.g.short || x.g.name)} <span class="rec-mini">${x.r.text}</span></button>`).join("")}</div>` : ""}
+        <div class="res-list">${vs.map(m => resultRow(site, m)).join("")}</div></div></section>` : ""}
+      <section class="section"><div class="wrap"><a class="btn btn-line" href="${BASE}results.html">← All results</a></div></section>`;
+    host.querySelectorAll("details").forEach(d => { if (open.has(d.id)) d.open = true; });
+    host.querySelectorAll("[data-g]").forEach(b => b.onclick = () => { gameF = b.dataset.g; draw(); });
   };
   draw();
   watchFinals(site, f => { fin = f; loaded = true; draw(); });

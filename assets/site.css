@@ -536,3 +536,22 @@ details.res>summary{grid-template-columns:54px auto 1fr auto}
 .opp-card b{display:block;font:700 18px/1.15 var(--display);letter-spacing:.02em}
 .opp-card span{display:block;font-size:14px;color:var(--muted)}
 .opp-card a{margin-left:auto;font-size:14px;white-space:nowrap}
+/* opponent card on a result links to the head-to-head page */
+a.opp-card{color:inherit;text-decoration:none;transition:border-color .15s,background .15s}
+a.opp-card:hover{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 7%,var(--surface-2))}
+a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+/* head-to-head page */
+.opp-top{display:flex;align-items:center;gap:26px}
+.opp-top>div{flex:1 1 auto;min-width:0}
+@media (max-width:640px){.opp-top{flex-direction:column;align-items:flex-start;gap:16px}}
+.opp-hero-logo{width:clamp(88px,14vw,132px);height:clamp(88px,14vw,132px);object-fit:contain;background:#fff;border-radius:18px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.opp-h.skinned{background:linear-gradient(120deg,color-mix(in srgb,var(--c1) 40%,#000) 0%,color-mix(in srgb,var(--c1) 18%,var(--bg)) 55%,var(--bg) 100%);box-shadow:inset 0 -4px 0 var(--c-hi,var(--c2))}
+.opp-h.skinned .eyebrow{color:var(--c-hi,var(--gold))}
+.opp-links{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:14px}
+.opp-links a:not(.chip){font-weight:600;font-size:15px}
+.opp-game{display:inline-flex;align-items:center;gap:8px}
+.opp-game img{height:18px;width:auto;max-width:64px;object-fit:contain}
+.opp-tbl .W{color:var(--gold);font-weight:700}
+.opp-tbl .L{color:var(--muted);font-weight:700}
+.opp-grid>div{min-width:0}
+@media (max-width:640px){.opp-tbl .sm-hide{display:none}.opp-game img{display:none}.opp-tbl td,.opp-tbl th{white-space:nowrap}.opp-tbl td:first-child{white-space:normal}}

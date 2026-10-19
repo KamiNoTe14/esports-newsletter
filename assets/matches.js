@@ -117,7 +117,9 @@ export function settle(m){
   const need = Math.floor((+m.bestOf || 1) / 2) + 1;
   m.clinched = us >= need ? "us" : them >= need ? "them" : null;
   if (m.forfeit){ m.score = m.forfeit === "them" ? {us:need, them:0} : {us:0, them:need}; m.clinched = m.forfeit === "them" ? "us" : "them"; }
-  m.result = m.status === "final" ? (m.score.us > m.score.them ? "W" : m.score.us < m.score.them ? "L" : "T") : null;
+  /* Bye week (odd number of teams in the queue, so no opponent): an automatic win with no games played. */
+  if (m.bye){ m.games = []; m.score = {us:0, them:0}; m.clinched = "us"; m.forfeit = null; }
+  m.result = m.status === "final" ? (m.bye ? "W" : m.score.us > m.score.them ? "W" : m.score.us < m.score.them ? "L" : "T") : null;
   return m;
 }
 
@@ -148,7 +150,7 @@ export function localInput(iso){ /* "YYYY-MM-DDTHH:MM" in the browser's zone, fo
 export function scoreboardFrom(matches, site){
   const pick = m => ({id:m.id, game:m.game, gameName:m.gameName, teamName:m.teamName, level:m.level, league:m.league,
     opponent:{school:m.opponent?.school || "", team:m.opponent?.team || "", short:m.opponent?.short || "", abbr:m.opponent?.abbr || abbrFor(m.opponent?.school)},
-    startsAt:m.startsAt, status:m.status, bestOf:m.bestOf, score:m.score, result:m.result, forfeit:m.forfeit || null,
+    startsAt:m.startsAt, status:m.status, bestOf:m.bestOf, score:m.score, result:m.result, forfeit:m.forfeit || null, bye:!!m.bye,
     current:(m.games || []).find(g => g.n === m.current && !g.winner) || null, games:(m.games || []).filter(g => g.winner || g.us || g.them).map(({p, ...g}) => g), stream:m.stream || {}, teamId:m.teamId || "", season:m.season, week:m.week || "", event:m.event || "", stage:m.stage || "regular"});
   const live = matches.filter(m => m.status === "live");
   const up = matches.filter(m => m.status === "upcoming" || m.status === "postponed").sort((a, b) => a.startsAt < b.startsAt ? -1 : 1).slice(0, 10);

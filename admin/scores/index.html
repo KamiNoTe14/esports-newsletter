@@ -211,6 +211,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 .stotals .none{font:500 14px var(--body);color:var(--muted)} .stotals .in{color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;background:var(--white);color:var(--navy);padding:12px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 28px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
 @media (min-width:700px){ .board .num{font-size:110px} }
+.po{list-style:none;margin:0;padding:0;display:grid;gap:6px}.po li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:8px}.po li span{grid-column:1;font-size:13px;opacity:.75}.po li em{grid-row:1/3;grid-column:2;align-self:center;font-style:normal;font-weight:700;font-size:13px;color:#FFBC05}.po li em.ok{color:#5BD68A}
 </style>
 </head>
 <body>
@@ -226,8 +227,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo} from "../../assets/matches.js?v=17";
-import {watchFinals} from "../../assets/live.js?v=33";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo} from "../../assets/matches.js?v=18";
+import {watchFinals} from "../../assets/live.js?v=34";
 import {recordBreaks} from "../../assets/records.js?v=1";
 
 const $ = s => document.querySelector(s);
@@ -350,7 +351,7 @@ function oppName(m){ return oppShort(m); }
 function rowHTML(m){
   const live = m.status === "live", fin = m.status === "final";
   const st = live ? `${m.score.us}–${m.score.them}<small><span class="pill-live">LIVE</span></small>`
-    : fin ? `<span class="${m.result}">${m.result}</span> ${m.score.us}–${m.score.them}<small>Final${m.forfeit ? " · FF" : ""}</small>`
+    : fin ? (m.bye ? `<span class="W">W</span> Bye<small>Auto win</small>` : `<span class="${m.result}">${m.result}</span> ${m.score.us}–${m.score.them}<small>Final${m.forfeit ? " · FF" : ""}</small>`)
     : m.status === "postponed" ? `<small>Postponed</small>` : m.status === "canceled" ? `<small>Canceled</small>`
     : `${esc(fmtTime(m.startsAt))}<small>${esc(fmtDay(m.startsAt))}</small>`;
   return `<button class="mrow${live ? " live" : ""}" type="button" data-open="${esc(m.id)}">${gameBadge(m)}
@@ -364,13 +365,14 @@ function renderList(){
   const gh = ghCfg();
   const rec = `${done.filter(m => m.result === "W").length}–${done.filter(m => m.result === "L").length}`;
   const openAl = $("#alumniBox")?.open;
-  const openRo = $("#rosterBox")?.open;
+  const openRo = $("#rosterBox")?.open, openPo = $("#poBox")?.open;
   $("#app").innerHTML = `<label class="seasonbar"><span>Season</span><select id="seasonSel">${seasonList(dir.seasons).map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}${se === NOW ? " (current)" : dir.seasons.includes(se) ? " ✓" : ""}</option>`).join("")}</select><b>${done.length ? rec : ""}</b></label>`
     + tickerHTML()
     + stationsHTML()
     + (live.length ? sec("Live now", live, "") : "")
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
+    + playoffHTML(openPo)
     + rostersHTML(openRo)
     + alumniHTML(openAl)
     + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div><div class="foot"><span>Old results on PlayVS?</span><a class="linkbtn" href="../import/${location.search}">Import history from PlayVS →</a></div>
@@ -493,6 +495,21 @@ function bindRosters(){
   });
 }
 
+/* Playoff eligibility (league rules: 8-week regular season with one mandatory rest week, so 7 matches at most;
+   5 played to make playoffs, so a team can forfeit twice). A bye week counts as a played match (it's an automatic win);
+   a match Hartland forfeited does not. Numbers can be changed in site.json under leagueRules. */
+function playoffHTML(open){
+  if (season !== NOW) return "";
+  const R = {league:"MHSEL", minPlayed:5, maxPlayed:7, ...(site.leagueRules || {})}, term = termOf(new Date().toISOString());
+  const reg = matches.filter(m => m.status === "final" && (m.stage || "regular") === "regular" && (m.term || termOf(m.startsAt)) === term && String(m.league || "").toLowerCase().includes(String(R.league).toLowerCase()));
+  const teams = [...new Set(reg.map(m => m.teamName))].sort();
+  if (!teams.length) return "";
+  const rows = teams.map(t => { const l = reg.filter(m => m.teamName === t), ff = l.filter(m => m.forfeit === "us").length, played = l.length - ff, need = Math.max(0, R.minPlayed - played);
+    return `<li><b>${esc(t)}</b><span>${played} played${ff ? ` · ${ff} forfeit${ff === 1 ? "" : "s"}` : ""}</span><em class="${need ? "" : "ok"}">${need ? `${need} more to qualify` : "✓ Playoff eligible"}</em></li>`; }).join("");
+  return `<details class="sec" id="poBox"${open ? " open" : ""}><summary>Playoff eligibility<span>${esc(term === "fall" ? "Fall" : "Spring")} season</span></summary><div class="secb">
+    <p class="hint" style="margin:0 0 8px">${esc(R.league)} teams need ${R.minPlayed} played matches (of ${R.maxPlayed}) to make playoffs. Bye weeks count as played wins; rest weeks aren't entered; matches we forfeit don't count.</p>
+    <ul class="po">${rows}</ul></div></details>`;
+}
 /* Past players (alumni). Kept in the score database so both coaches see the same list. */
 function alumniHTML(open){
   const list = (dir.alumni || []).slice().sort((a, b) => (a.name || a.tag || "").localeCompare(b.name || b.tag || ""));
@@ -775,6 +792,7 @@ function detailsHTML(g, them){
     <details class="sec"><summary>Forfeit or fix</summary><div class="secb" style="display:grid;gap:10px">
       <button class="btn btn-line" type="button" data-ff="them">${esc(them)} forfeited</button>
       <button class="btn btn-line" type="button" data-ff="us">Hartland forfeited</button>
+      <button class="btn btn-line" type="button" id="byeBtn">${cur.bye ? "Undo bye week" : "Bye week: no opponent (automatic win)"}</button>
       <button class="btn btn-line" type="button" id="resetg">Clear all ${esc((g.unit || "game").toLowerCase())} scores</button></div></details>`;
 }
 /* "On stream" panel for the open match: which station shows it and what the overlays need that isn't in the score. */
@@ -886,6 +904,9 @@ function bindDetails(g){
   });
   D.querySelectorAll("[data-link]").forEach(inp => inp.oninput = () => { cur.stream = cur.stream || {}; cur.stream[inp.dataset.link] = inp.value.trim(); queueSave(); });
   D.querySelectorAll("[data-ff]").forEach(b => b.onclick = () => { if (confirm(b.textContent.trim() + "? This marks the match final.")){ change(m => { m.forfeit = b.dataset.ff; m.status = "final"; }); queueArchive(); } });
+  $("#byeBtn").onclick = () => { const on = !cur.bye;
+    if (on && !confirm("Mark this as a bye week? There was no opponent, so it counts as an automatic win with no games.")) return;
+    change(m => { m.bye = on; if (on){ m.status = "final"; m.opponent = {school:"", team:"Bye", short:"Bye", abbr:"BYE", logo:""}; } else { m.status = "upcoming"; } }); if (on) queueArchive(); };
   $("#resetg").onclick = () => { if (confirm("Clear every game score for this match? (Undo can bring it back.)")) change(m => { m.games = []; m.current = 1; }); };
 }
 
@@ -933,6 +954,7 @@ function renderForm(){
       <p class="hint">For a game we no longer play, add it on the Games tab in the Site Manager first so it scores correctly.</p>
       <datalist id="pastTeams">${[...new Set(matches.filter(m => !m.teamId).map(m => m.teamName).filter(Boolean))].map(n => `<option value="${esc(n)}">`).join("")}</datalist>` : ""}
       ${team.id && !team.gameKey ? `<p class="hint" style="color:var(--gold)">This team has no game type yet. Set it on the Teams tab in the Site Manager so scoring works right.</p>` : ""}
+      <label class="tog" style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" name="bye"${draft.bye ? " checked" : ""}> Bye week: no opponent was available (counts as an automatic win)</label>
       <label class="f"><span>Opponent team name</span><input name="oppTeam" list="oppTeams" value="${esc(draft.opponent?.team || "")}" placeholder="Denby Tars"></label>
       <label class="f"><span>Opponent school</span><input name="oppSchool" list="schools" value="${esc(draft.opponent?.school || "")}" placeholder="Denby High School"></label>
       <p class="hint" id="libHint"${schoolInfo(site, draft.opponent?.school) ? "" : " hidden"}>✓ In the School library: logo and short name fill in on the overlays.</p>
@@ -989,6 +1011,8 @@ function renderForm(){
       opponent:readOpp(F), startsAt:when, season:seasonOf(when), term:termOf(when), bestOf:+F.bestOf.value, league:F.league.value, stage:F.stage.value,
       week:F.week.value.trim(), event:F.event.value.trim(), stream:{...(draft.stream || {}), live:F.live.value.trim()}, notes:F.notes.value.trim()};
     if (!isNew) m.status = F.status.value;
+    m.bye = F.bye.checked;
+    if (m.bye){ m.status = "final"; m.opponent = {school:"", team:"Bye", short:"Bye", abbr:"BYE", logo:""}; m.players = []; }
     delete m._past;
     m.id = openId || be.newId();
     settle(m);

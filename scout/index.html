@@ -120,7 +120,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
    coaches and people a coach has added to a team can read it. Nothing here is ever written to the public site files.
    Coaches (EDITORS) manage members and edit everything. Captains edit reports for their games.
    Everyone on a team can read their games' reports and add notes. */
-import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=17";
+import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=18";
 const BASE = new URL("../", import.meta.url).href;
 const DOMAIN = "hartlandschools.us";
 const $ = s => document.querySelector(s);
@@ -399,7 +399,7 @@ const strip = ({id, ...m}) => m;
 (async function init(){
   try { site = await (await fetch(BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
   db = isMock() ? mockDB() : await firebaseDB();
-  const live = await import(BASE + "assets/live.js?v=33");
+  const live = await import(BASE + "assets/live.js?v=34");
   live.watchFinals(site, f => { finals = f; if (user && view.kind === "report" && !editing) drawMain(); });
   live.watchBoard(b => { board = b; if (user && (isCoach() || me) && !editing) layout(); });
   db.onUser(u => {

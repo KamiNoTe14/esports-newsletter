@@ -269,12 +269,22 @@ function standingFor(m){
 }
 
 /* ---------- VS screen ---------- */
+/* Team name on the VS screen: one line when it fits at a good size; otherwise split into two balanced lines
+   ("Walled Lake / Western"), sized so the longer line fits the 660px column. */
+function vsName(name){
+  const n = String(name || "").trim(), one = Math.min(120, Math.floor(660 / ((n.length || 1) * .5)));
+  if (one >= 88 || !n.includes(" ")) return `<b style="font-size:${Math.max(56, one)}px">${esc(n)}</b>`;
+  const w = n.split(/\s+/); let best = null;
+  for (let i = 1; i < w.length; i++){ const a = w.slice(0, i).join(" "), b = w.slice(i).join(" "), m = Math.max(a.length, b.length); if (!best || m < best.m) best = {a, b, m}; }
+  const size = Math.max(56, Math.min(104, Math.floor(660 / (best.m * .5))));
+  return `<b class="two" style="font-size:${size}px">${esc(best.a)}<br>${esc(best.b)}</b>`;
+}
 function vs(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), mine = teamSeason(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), st = standingFor(m);
   const ourLine = mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l}, #${st.rank} in the league` : "";
   const lineup = s => s.us ? (m.players || []).map(p => tagOf(p) || nameOf(p)) : listOf(station.oppLineup);
   const side = (s, c) => `<div class="side ${c}" style="${skin(s)}"><div class="crest">${logoHTML(s.logo, s.name)}</div>
-    <b>${esc(s.name)}</b><span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>
+    ${vsName(s.name)}<span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>
     ${(s.us ? ourLine : theirLine) ? `<span class="rec">${esc(s.us ? ourLine : theirLine)}</span>` : ""}
     ${lineup(s).length ? `<div class="names">${lineup(s).map((n, i) => `<span style="--i:${i}">${esc(n)}</span>`).join("")}</div>` : ""}</div>`;
   const hh = record(h2h);
@@ -298,7 +308,7 @@ function lineups(m){
     return `<div class="p" style="--i:${i}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="" onerror="this.remove()">` : `<span>${monogram(nameOf(p))}</span>`}</div>
       <div class="body"><div class="strip">${strip}</div><div class="main"><b>${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", yr ? `Class of ${yr}` : ""].filter(Boolean).join(", "))}</small></div></div></div>`; }).join("");
   const theirs = listOf(station.oppLineup).map((n, i) => `<div class="p" style="--i:${i}"><div class="body"><div class="strip"></div><div class="main"><b>${esc(n)}</b></div></div></div>`).join("");
-  const col = (s, html, c) => `<div class="col ${c}" style="${skin(s)}"><h2>${logoHTML(s.logo, s.name)}${esc(s.name)}</h2>${html ? `<div class="plates">${html}</div>` : `<div class="empty-note">Lineup to come!</div>`}</div>`;
+  const col = (s, html, c) => `<div class="col ${c}" style="${skin(s)}"><h2 style="font-size:${fitName(s.name, 66, 640)}px">${logoHTML(s.logo, s.name)}<span>${esc(s.name)}</span></h2>${html ? `<div class="plates">${html}</div>` : `<div class="empty-note">Lineup to come!</div>`}</div>`;
   const n = Math.max(1, (m.players || []).length, listOf(station.oppLineup).length), h = Math.min(100, Math.floor(620 / n) - 14);
   out.html = frame("lu", m, g, {title:"Starting", script:"Lineups", sub:eventLine(m), split:[L, R],
     body:`<div class="cols" style="--h:${h}px">${L.us ? col(L, ours, "l") + col(R, theirs, "r") : col(L, theirs, "l") + col(R, ours, "r")}</div>`});
@@ -327,7 +337,7 @@ function teamCompare(m){
     ...(form ? [{k:"Last 5", a:mine.slice(-5).filter(x => x.result === "W").length, b:0, fa:form, fb:"–"}] : [])
   ];
   const ordered = L.us ? rows : rows.map(r => ({...r, a:r.b, b:r.a, fa:r.fb, fb:r.fa}));
-  const head = (s, c) => `<div class="h ${c}" style="${skin(s)}"><div class="pic crest">${logoHTML(s.logo, s.name)}</div><div><b>${esc(s.name)}</b><small>${esc(s.team || s.school)}</small></div></div>`;
+  const head = (s, c) => `<div class="h ${c}" style="${skin(s)}"><div class="pic crest">${logoHTML(s.logo, s.name)}</div><div><b style="font-size:${fitName(s.name, 76, 470)}px">${esc(s.name)}</b><small>${esc(s.team || s.school)}</small></div></div>`;
   out.html = frame("cmp", m, g, {title:"Tale of the", script:"Tape", sub:eventLine(m), split:[L, R], foot:h2h.length ? "" : "First meeting!",
     body:`<div class="heads">${head(L, "l")}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${head(R, "r")}</div><div class="rows">${rowsHTML(ordered)}</div>`});
 }
@@ -343,13 +353,15 @@ function playerStats(m, id){
 }
 function playerCompare(m){
   const g = gameFor(site, m.game), ids = [station.compare?.a, station.compare?.b].filter(Boolean);
-  const list = (m.players || []); const a = list.find(p => p.id === ids[0]) || list[0], b = list.find(p => p.id === ids[1]) || list.find(p => p !== a);
-  if (!a || !b){ empty("Pick two players to compare in the scorekeeper"); return; }
+  const roster = ((site.teams || []).find(t => t.id === m.teamId)?.roster || []).filter(p => p.id);
+  const list = [...(m.players || []), ...roster.filter(r => !(m.players || []).some(p => p.id === r.id))];
+  const a = list.find(p => p.id === ids[0]) || list[0], b = list.find(p => p.id === ids[1]) || list.find(p => p !== a);
+  if (!a || !b){ empty("This team needs two players on its roster to compare"); return; }
   const A = playerStats(m, a.id), B = playerStats(m, b.id);
   const fmt = (d, v) => v === null || v === undefined ? "–" : d.avg ? `${Math.round(v)}%` : (Math.round(v * 10) / 10).toLocaleString("en-US");
   const rows = [{k:"Matches", a:A.n, b:B.n}, {k:"Record", a:A.rec.w, b:B.rec.w, fa:A.rec.text, fb:B.rec.text},
     ...(g.statList || []).filter(d => A.per[d.key] !== null || B.per[d.key] !== null).map(d => ({k:d.label.replace(/\s*%\s*$/, ""), a:A.per[d.key] || 0, b:B.per[d.key] || 0, fa:fmt(d, A.per[d.key]), fb:fmt(d, B.per[d.key]), lower:/death/i.test(d.label)}))].slice(0, 6);
-  const head = (p, r) => { const ch = mainChar(m, p.id); return `<div class="h ${r ? "r" : "l"}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="">` : `<div class="mono">${monogram(nameOf(p))}</div>`}</div><div><b>${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", ch].filter(Boolean).join(", "))}</small></div></div>`; };
+  const head = (p, r) => { const ch = mainChar(m, p.id); return `<div class="h ${r ? "r" : "l"}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="">` : `<div class="mono">${monogram(nameOf(p))}</div>`}</div><div><b style="font-size:${fitName(tagOf(p) || nameOf(p), 76, 470)}px">${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", ch].filter(Boolean).join(", "))}</small></div></div>`; };
   out.html = frame("cmp", m, g, {title:"Player", script:"Matchup", sub:`${m.teamName}, this season`, foot:"Averages per match",
     body:`<div class="heads">${head(a)}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${head(b, true)}</div><div class="rows">${rowsHTML(rows)}</div>`});
 }

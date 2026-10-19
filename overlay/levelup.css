@@ -541,3 +541,20 @@ img{display:block}
 .splash .sp-claw{filter:var(--stk)}
 .splash .sp-claw .sh{display:none}
 .sp-script{color:#fff;text-shadow:3px 3px 0 var(--navy),-3px 3px 0 var(--navy),3px -3px 0 var(--navy),-3px -3px 0 var(--navy),0 6px 0 var(--navy),0 10px 0 var(--navy);filter:var(--stk)}
+
+/* VS names: never wider than their half; two-line names get a tighter line and a smaller crest */
+.vs .side b{white-space:nowrap;max-width:700px;line-height:.95}
+.vs .side:has(b.two) .crest{width:340px;height:340px}
+.vs .side:has(b.two) .crest .logo{width:280px;height:280px}
+
+/* long names: comparison heads and lineup headers shrink to fit (sizes set per name) and never run into the middle */
+.cmp .h > div:last-child{min-width:0}
+.cmp .heads{grid-template-columns:minmax(0,1fr) 220px minmax(0,1fr)}
+.lu .col{min-width:0}
+.lu .col h2 span{min-width:0;white-space:nowrap}
+.lu .col.r .empty-note{text-align:right}
+/* leave room for the footer note under the stat rows */
+.cmp .rows{top:530px;gap:10px}
+.cmp .row{height:60px}
+.cmp .row .v{font-size:46px}
+.full .foot{bottom:28px}

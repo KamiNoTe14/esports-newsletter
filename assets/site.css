@@ -586,3 +586,13 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .player-h.committed,.opp-h.skinned{box-shadow:none}
 /* tape labels always use dark ink, even on school-colored and committed headers */
 .page-h .eyebrow{color:#0B1420!important;text-shadow:none!important;letter-spacing:.14em;line-height:1.5;max-width:100%}
+/* seniors: a Hartland Gold paper sheet with navy ink */
+.player-h.senior{background:linear-gradient(180deg,#FFC21F 0%,var(--gold) 60%,#F0AE00 100%);box-shadow:none;color:var(--navy)}
+.player-h.senior::before{opacity:.55}
+.player-h.senior h1{color:var(--navy);text-shadow:none}
+.player-h.senior .player-tag{color:#3D3000}
+.player-h.senior .player-now,.player-h.senior .lead{color:var(--navy)}
+.player-h.senior .chip{background:rgba(0,39,76,.08);border-color:rgba(0,39,76,.35);color:var(--navy)}
+.player-h.senior .chip.gold{background:var(--navy);border-color:var(--navy);color:var(--gold)}
+.player-h.senior .player-photo{border-color:var(--navy);box-shadow:0 0 0 4px var(--gold),0 0 0 7px var(--navy),0 10px 24px rgba(0,0,0,.25)}
+.player-h.senior .player-rec{border-color:var(--navy);box-shadow:0 10px 24px rgba(0,0,0,.2)}

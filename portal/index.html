@@ -282,9 +282,10 @@ body.lib-open{overflow:hidden}
         <option value="E">Headline: record and a headline</option>
         <option value="J">Achievement: record and an unlocked badge</option>
         <option value="L">Headline + stats: headline with a stat row</option>
+        <option value="H">Headline only: no record</option>
         <option value="O">All-in-one: record, win rate bar and badge</option>
       </select></label>
-      <div class="grid g3">
+      <div class="grid g3" data-styles="A E J L O">
         <label class="f"><span>Wins</span><input id="f-barWins" data-k="barWins" type="text" placeholder=""></label>
         <label class="f"><span>Losses</span><input id="f-barLosses" data-k="barLosses" type="text" placeholder=""></label>
         <label class="f"><span>Record label</span><input id="f-barLabel" data-k="barLabel" type="text" placeholder="This Week"></label>
@@ -292,7 +293,7 @@ body.lib-open{overflow:hidden}
       <div class="grid g2" data-styles="O">
         <label class="f"><span>Win rate</span><input id="f-barPct" data-k="barPct" type="text" placeholder=""></label>
       </div>
-      <div class="grid" data-styles="E L">
+      <div class="grid" data-styles="E L H">
         <label class="f"><span>Headline label</span><input id="f-barHlLabel" data-k="barHlLabel" type="text" placeholder=""></label>
         <label class="f"><span>Headline</span><textarea id="f-barHeadline" data-k="barHeadline" rows="2"></textarea></label>
       </div>
@@ -748,6 +749,14 @@ function barHTML(){
         ${cap(b.hlLabel, {c:"#FFBC05", m:"0"})}
         <p style="margin:4px 0 0 0;font-family:${FB};font-size:19px;line-height:24px;font-weight:900;color:#FFFFFF;">${esc(b.headline)}</p>
         ${st === "L" && [1,2,3].some(n => state["barS" + n + "on"] !== false) ? `<p style="margin:10px 0 0 0;font-size:12px;line-height:18px;color:#8FA3B8;">${b.stats.filter((x, i) => state["barS" + (i + 1) + "on"] !== false).map((x, i) => `<span style="white-space:nowrap;"><b style="color:${i ? "#FFFFFF" : "#FFBC05"};">${esc(x[0])}</b> ${esc(x[1])}</span>`).join(" &nbsp;·&nbsp; ")}</p>` : ""}
+      </td>
+    </tr></table>`);
+  if (st === "H") return wrap(`
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td width="8" bgcolor="#FFBC05" style="background:#FFBC05;font-size:0;line-height:0;">&nbsp;</td>
+      <td valign="middle" style="padding:18px 24px;font-family:${F};">
+        ${cap(b.hlLabel, {c:"#FFBC05", m:"0"})}
+        <p style="margin:4px 0 0 0;font-family:${FB};font-size:22px;line-height:28px;font-weight:900;color:#FFFFFF;">${esc(b.headline)}</p>
       </td>
     </tr></table>`);
   if (st === "J") return wrap(`

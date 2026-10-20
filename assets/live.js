@@ -56,6 +56,7 @@ export function watchDirectory(cb){ return watchDoc("directory", "eagles-mock-di
 /* Everyone we know by id (current rosters, then past players), so names stay right even if a match stored an old spelling. */
 const PEOPLE = new Map();
 function learnPeople(site, dir){
+  learnSchools(site);
   (site?.teams || []).forEach(t => (t.roster || []).forEach(p => { if (p.id) PEOPLE.set(p.id, {name:p.name || "", tag:p.tag || "", private:!!p.private}); }));
   [...(site?.alumni || []), ...(dir?.alumni || [])].forEach(p => { if (p.id && !PEOPLE.has(p.id)) PEOPLE.set(p.id, {name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
 }
@@ -83,7 +84,33 @@ function fromRest(fields){ /* Firestore REST value format -> plain JSON */
 export function merge(archived, board){
   const by = new Map(archived.map(m => [m.id, m]));
   (board?.matches || []).forEach(b => { const a = by.get(b.id); by.set(b.id, a ? {...a, ...b, games:(b.games || []).length ? b.games : a.games, players:a.players, stream:{...(a.stream || {}), ...(b.stream || {})}} : b); });
-  return [...by.values()];
+  const list = [...by.values()];
+  list.forEach(m => knowSchool(m.opponent?.school, m.opponent?.team));
+  return list.map(fillSchool);
+}
+/* Older matches (from before the school field, or imported) often have only a team name like "Niles Vikings Varsity".
+   Work out the school from: the Team → school list, a team name seen with a school on another match, or a known
+   school whose name the team name starts with ("Niles" → Niles High School). Every school seen anywhere is remembered,
+   so the more seasons load, the more of these match up. */
+const KNOWN = new Map(), TEAM_SCHOOL = new Map();
+const sKey = n => shortSchool(n).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+function knowSchool(school, team){
+  const n = String(school || "").trim(); if (!n || /hartland/i.test(n)) return;
+  const k = sKey(n); if (k.length >= 3 && (!KNOWN.has(k) || n.length > KNOWN.get(k).length)) KNOWN.set(k, n);
+  if (team) TEAM_SCHOOL.set(String(team).trim().toLowerCase(), n);
+}
+function learnSchools(site){
+  (site?.highSchools || []).forEach(x => { knowSchool(x.name); if (x.short && sKey(x.short).length >= 4) KNOWN.set(sKey(x.short), x.name); });
+  Object.entries(site?.teamSchools || {}).forEach(([t, sc]) => knowSchool(sc, t));
+}
+function fillSchool(m){
+  const o = m.opponent; if (!o || m.bye || String(o.school || "").trim() || !String(o.team || "").trim()) return m;
+  const team = String(o.team).trim(), exact = TEAM_SCHOOL.get(team.toLowerCase());
+  let school = exact;
+  if (!school){ const t = " " + team.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " "; let best = "";
+    KNOWN.forEach((n, k) => { if (k.length >= 4 && t.startsWith(" " + k + " ") && k.length > best.length) best = k; });
+    school = best ? KNOWN.get(best) : ""; }
+  return school ? {...m, opponent:{...o, school, schoolGuessed:true}} : m;
 }
 
 /* ---------- shared bits ---------- */

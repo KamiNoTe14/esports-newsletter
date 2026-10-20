@@ -399,7 +399,7 @@ const strip = ({id, ...m}) => m;
 (async function init(){
   try { site = await (await fetch(BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
   db = isMock() ? mockDB() : await firebaseDB();
-  const live = await import(BASE + "assets/live.js?v=34");
+  const live = await import(BASE + "assets/live.js?v=35");
   live.watchFinals(site, f => { finals = f; if (user && view.kind === "report" && !editing) drawMain(); });
   live.watchBoard(b => { board = b; if (user && (isCoach() || me) && !editing) layout(); });
   db.onUser(u => {

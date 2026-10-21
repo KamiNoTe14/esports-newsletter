@@ -84,6 +84,12 @@ body.top .wrap{top:0;bottom:auto;filter:drop-shadow(0 2.5px 0 #fff) drop-shadow(
 .card.ann,.alert{background:var(--gold)}
 .card.ann .head{color:var(--navy);text-shadow:none;letter-spacing:.01em}
 .card.ann .l2{color:#0B1420;font-weight:700}
+/* announcement icon and scrolling long headlines */
+.head .mega{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.22em;margin-right:.35em;color:var(--navy)}
+.card:not(.ann) .head .mega{color:var(--gold)}
+.head.marq{text-overflow:clip}
+.head .mq{display:inline-block;animation:mq var(--t) linear 1.6s both}
+@keyframes mq{to{transform:translateX(var(--d))}}
 </style>
 </head>
 <body>
@@ -177,7 +183,8 @@ function athCard(a){
     l1:`${one(t[0])}<span class="sep"></span>${one(t[1])}${fin ? st("fin", "Final") : st("", when(a.at))}`,
     l2:`<b>${esc(a.sport)}</b> · ${esc(new Date(a.at).toLocaleDateString("en-US", {weekday:"short", month:"short", day:"numeric"}))}`};
 }
-function annCard(x){ return {sec:"Update", ann:true, key:"n" + x.id, l1:`<span class="head">📣 ${esc(x.text)}</span>`, l2:"Hartland Eagles Esports"}; }
+const MEGA = `<svg class="mega" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1zm12.5 2a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM13 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z" fill="currentColor"/></svg>`;
+function annCard(x){ return {sec:"Update", ann:true, key:"n" + x.id, l1:`<span class="head">${MEGA}<span class="tx">${esc(x.text)}</span></span>`, l2:"Hartland Eagles Esports"}; }
 
 function pickOurs(){
   const all = board.matches || [], now = Date.now(), today = day(now);
@@ -237,8 +244,20 @@ function step(){
   let at = -1;
   if (shown) p.cards.forEach((c, k) => { if (c.key === shown.key && (at < 0 || Math.abs(k - i) < Math.abs(at - i))) at = k; });   // the same card may appear more than once
   list = p.cards; i = (at >= 0 ? at : i) + 1; if (i >= list.length) i = 0;
-  if (!(shown && list.length === 1 && list[0].key === shown.key)) render(list[i]); else refreshShown();
-  timer = setTimeout(step, HOLD * (list[i].hold || 1));
+  let extra = 0;
+  if (!(shown && list.length === 1 && list[0].key === shown.key)){ render(list[i]); extra = fitCard(main.lastElementChild); } else refreshShown();
+  timer = setTimeout(step, HOLD * (list[i].hold || 1) + extra * 1000);
+}
+/* Long headlines: shrink the type a little; if it still doesn't fit, scroll it across once (and hold the card
+   long enough to read it all) instead of cutting it off with "…". Returns the extra seconds needed. */
+function fitCard(card){
+  const el = card?.querySelector(".head"); if (!el) return 0;
+  const base = parseFloat(getComputedStyle(el).fontSize); let size = base;
+  while (el.scrollWidth > el.clientWidth + 1 && size > base * .74){ size -= 1; el.style.fontSize = size + "px"; }
+  if (el.scrollWidth <= el.clientWidth + 1) return 0;
+  const dist = el.scrollWidth - el.clientWidth + 24, dur = Math.max(3, dist / 110);
+  el.classList.add("marq"); el.innerHTML = `<span class="mq" style="--d:-${dist}px;--t:${dur.toFixed(1)}s">${el.innerHTML}</span>`;
+  return dur + 2.5;
 }
 /* A live score that changes while it's on screen updates in place instead of waiting for the next flip. */
 function refreshShown(){

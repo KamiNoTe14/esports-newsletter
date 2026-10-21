@@ -79,6 +79,11 @@ body.top .wrap{top:0;bottom:auto;filter:drop-shadow(0 2.5px 0 #fff) drop-shadow(
 .lab div{color:#fff;text-shadow:2px 2px 0 #001A33,-2px 2px 0 #001A33,2px -2px 0 #001A33,-2px -2px 0 #001A33}
 .card.ann,.alert{background:url(../assets/tex/crumple-strip.jpg) center/cover,linear-gradient(var(--gold),var(--gold));background-blend-mode:overlay}
 .clock{background:url(../assets/tex/crumple-strip.jpg) center/cover,linear-gradient(#141518,#141518);background-blend-mode:overlay}
+/* announcements: plain gold so the navy text stays crisp; the label is solid navy ink, no outline */
+.lab div.ann{text-shadow:none;color:var(--navy);background:var(--gold);font-family:var(--f);font-weight:700;font-size:calc(var(--h) * .3);letter-spacing:.14em;text-transform:uppercase;transform:none}
+.card.ann,.alert{background:var(--gold)}
+.card.ann .head{color:var(--navy);text-shadow:none;letter-spacing:.01em}
+.card.ann .l2{color:#0B1420;font-weight:700}
 </style>
 </head>
 <body>

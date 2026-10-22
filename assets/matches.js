@@ -198,6 +198,8 @@ async function firebaseBackend(){
       }, err => onState && onState({error:err}));
     },
     newId(){ return fb.doc(fb.collection(db, "matches")).id; },
+    /* every match of one season, once (not live) */
+    async getSeason(season){ const s = await fb.getDocs(fb.query(fb.collection(db, "matches"), fb.where("season", "==", season))); return s.docs.map(d => ({id:d.id, ...d.data()})); },
     async save(m, scoreboard, by, seasonDoc){
       const b = fb.writeBatch(db), {id, ...data} = m;
       b.set(fb.doc(db, "matches", id), strip({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""}));
@@ -268,6 +270,7 @@ function mockBackend(){
       subs.add(f); setTimeout(f, 0); return () => subs.delete(f);
     },
     newId(){ return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+    async getSeason(season){ return Object.entries(read()).map(([id, m]) => ({id, ...m})).filter(m => m.season === season); },
     async save(m, scoreboard, by, seasonDoc){ const all = read(), {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
     async remove(id, scoreboard, seasonDoc){ const all = read(); delete all[id]; localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
     async saveMany(list, by){ const all = read(); list.forEach(m => { const {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); }); localStorage.setItem(K, JSON.stringify(all)); emit(); },

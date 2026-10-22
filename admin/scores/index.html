@@ -236,8 +236,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=19";
-import {watchFinals} from "../../assets/live.js?v=36";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=20";
+import {watchFinals} from "../../assets/live.js?v=37";
 import {recordBreaks} from "../../assets/records.js?v=1";
 
 const $ = s => document.querySelector(s);
@@ -376,6 +376,7 @@ function renderList(){
   const openAl = $("#alumniBox")?.open;
   const openRo = $("#rosterBox")?.open, openPo = $("#poBox")?.open;
   $("#app").innerHTML = `<label class="seasonbar"><span>Season</span><select id="seasonSel">${seasonList(dir.seasons).map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}${se === NOW ? " (current)" : dir.seasons.includes(se) ? " ✓" : ""}</option>`).join("")}</select><b>${done.length ? rec : ""}</b></label>`
+    + pendingMergeHTML()
     + tickerHTML()
     + stationsHTML()
     + (live.length ? sec("Live now", live, "") : "")
@@ -384,11 +385,12 @@ function renderList(){
     + playoffHTML(openPo)
     + rostersHTML(openRo)
     + alumniHTML(openAl)
+    + mergeHTML()
     + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div><div class="foot"><span>Old results on PlayVS?</span><a class="linkbtn" href="../import/${location.search}">Import history from PlayVS →</a></div>
     <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
   $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };
-  bindAlumni(); bindRosters(); bindTicker(); bindStations();
+  bindAlumni(); bindRosters(); bindTicker(); bindStations(); bindMerge();
   $("#app").querySelectorAll("[data-open]").forEach(b => b.onclick = () => location.hash = "m/" + b.dataset.open);
   $("#backup") && ($("#backup").onclick = () => archive(true));
 }
@@ -522,6 +524,75 @@ function playoffHTML(open){
     <ul class="po">${rows}</ul></div></details>`;
 }
 /* Past players (alumni). Kept in the score database so both coaches see the same list. */
+/* ---------- merge duplicate players ----------
+   The same student entered twice (a new gamertag, a nickname). Merging moves every match, game stat, season roster
+   and past-player entry from the duplicate onto the one you keep, in every season, then backs up the changed seasons. */
+function mergeHTML(){
+  const ppl = [...everyone().values()].sort((a, b) => (a.name || a.tag).localeCompare(b.name || b.tag));
+  const opt = p => `<option value="${esc(p.id)}">${esc(p.name || p.tag)}${p.name && p.tag ? ` (${esc(p.tag)})` : ""}${p.alum ? " · past" : ""}</option>`;
+  return `<details class="sec" id="mergeBox"><summary>Merge duplicate players<span>Same person entered twice</span></summary><div class="secb form">
+    <label class="f"><span>Keep this one</span><select id="mgKeep"><option value="">Choose…</option>${ppl.map(opt).join("")}</select></label>
+    <label class="f"><span>Merge this duplicate into it</span><select id="mgDrop"><option value="">Choose…</option>${ppl.map(opt).join("")}</select></label>
+    <button class="btn btn-gold btn-block" type="button" id="mgGo">Merge</button>
+    <p class="hint" style="margin:0">Every match and stat from every season moves to the one you keep. Afterwards, delete the duplicate from the team roster in the Site Manager if it's still listed.</p></div></details>`;
+}
+/* Merges already decided in site.json (mergedPlayers: {duplicateId: {into, name, tag}}) that still need the score
+   database updated. Shown at the top of the list until done. */
+function pendingMerges(){ const done = new Set(dir.merged || []); return Object.entries(site.mergedPlayers || {}).filter(([id, v]) => v?.into && !done.has(id)); }
+function pendingMergeHTML(){
+  const list = pendingMerges(); if (!list.length) return "";
+  const all = everyone();
+  return list.map(([id, v]) => { const k = all.get(v.into); return `<div class="card" style="margin-bottom:12px"><b>Finish merging a duplicate player</b><p class="hint" style="margin:6px 0 10px">${esc(v.name || v.tag || id)}${v.tag ? ` (${esc(v.tag)})` : ""} is the same person as ${esc(k?.name || k?.tag || v.into)}. One tap moves their old matches and stats over in the score database.</p><button class="btn btn-gold btn-block" type="button" data-pmerge="${esc(id)}">Finish merge</button></div>`; }).join("");
+}
+function bindMerge(){
+  const go = $("#mgGo");
+  document.querySelectorAll("[data-pmerge]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.pmerge, v = site.mergedPlayers[id]; b.disabled = true; b.textContent = "Merging…";
+    const ok = await mergePlayers(id, v.into, {id, name:v.name || "", tag:v.tag || ""});
+    if (ok){ dir = {...dir, merged:[...new Set([...(dir.merged || []), id])]}; try { await be.saveDirectory(dir); } catch(e){} renderList(); } else { b.disabled = false; b.textContent = "Finish merge"; }
+  });
+  if (!go) return;
+  go.onclick = async () => {
+    const keep = $("#mgKeep").value, drop = $("#mgDrop").value, all = everyone();
+    if (!keep || !drop || keep === drop){ toast("Pick two different players."); return; }
+    const K = all.get(keep), D = all.get(drop);
+    if (!confirm(`Merge ${D.name || D.tag}${D.tag ? ` (${D.tag})` : ""} into ${K.name || K.tag}${K.tag ? ` (${K.tag})` : ""}? Every match in every season moves over. This can't be undone with Undo.`)) return;
+    go.disabled = true; go.textContent = "Merging…";
+    await mergePlayers(drop, keep, D);
+    go.disabled = false; go.textContent = "Merge";
+  };
+}
+async function mergePlayers(drop, keep, D){
+    const K = everyone().get(keep) || {id:keep};
+    try {
+      const seasons = [...new Set([...seasonList(dir.seasons), season])];
+      let moved = 0; const touched = [];
+      for (const se of seasons){
+        const list = await be.getSeason(se), changed = [];
+        list.forEach(m0 => {
+          if (!JSON.stringify(m0).includes(drop)) return;
+          const m = clone(m0), g = gameFor(site, m.game);
+          const pk = (m.players || []).find(p => p.id === keep), pd = (m.players || []).find(p => p.id === drop);
+          if (pd){ m.players = m.players.filter(p => p.id !== drop);
+            if (!pk) m.players.push({...pd, ...snap(K, pd.sub ? {sub:true} : null), stats:pd.stats || {}, ...(pd.games ? {games:pd.games} : {})}); }
+          (m.games || []).forEach(x => { if (x.p && x.p[drop]){ if (!x.p[keep]) x.p[keep] = x.p[drop]; delete x.p[drop]; } });
+          rollup(m, g); settle(m); changed.push(m);
+        });
+        if (changed.length){
+          await be.saveMany(changed, user?.email); moved += changed.length;
+          const merged = list.map(m => changed.find(c => c.id === m.id) || m);
+          await be.syncSummaries(se === season ? sb(matches.map(m => changed.find(c => c.id === m.id) || m)) : null, seasonDocFrom(merged, se));
+          touched.push([se, merged]);
+        }
+      }
+      /* season rosters and the past-players list */
+      const ro = {}; Object.entries(dir.rosters || {}).forEach(([k, ids]) => { ro[k] = [...new Set((ids || []).map(id => id === drop ? keep : id))]; });
+      dir = {...dir, rosters:ro, alumni:(dir.alumni || []).filter(a => a.id !== drop)};
+      await be.saveDirectory(dir);
+      await remapArchives(drop, keep, K);
+      toast(`Merged. ${moved} match${moved === 1 ? "" : "es"} updated.`); renderList(); return true;
+    } catch(e){ console.error(e); toast("Couldn't finish the merge. Check the connection and try again (it's safe to repeat)."); return false; }
+}
 function alumniHTML(open){
   const list = (dir.alumni || []).slice().sort((a, b) => (a.name || a.tag || "").localeCompare(b.name || b.tag || ""));
   return `<details class="sec" id="alumniBox"${open ? " open" : ""}><summary>Past players<span>${list.length || "None yet"}</span></summary><div class="secb">
@@ -1164,7 +1235,30 @@ function ghCfg(){ try { return JSON.parse(localStorage.getItem("eagles-gh")); } 
    site update instead of one per match. The hourly backup catches anything this misses. */
 let archiveTimer = 0;
 function queueArchive(){ clearTimeout(archiveTimer); archiveTimer = setTimeout(() => archive(false), 120000); }
-async function archive(loud){
+async function archive(loud){ return archiveSeason(season, matches, loud); }
+/* Merge in the backed-up season files too (older seasons may only live there). Edits each file in place. */
+async function remapArchives(drop, keep, K){
+  const c = ghCfg(); if (!c?.token || isMock()) return;
+  const H = {"Accept":"application/vnd.github+json", "Authorization":`Bearer ${c.token}`, "X-GitHub-Api-Version":"2022-11-28"};
+  const base = `https://api.github.com/repos/${c.owner}/${c.repo}/contents/data/matches/`, ref = "?ref=" + encodeURIComponent(c.branch || "main");
+  let files = []; try { const r = await fetch(base + ref, {headers:H, cache:"no-store"}); files = (await r.json()).filter(f => /^\d{4}-\d{2}\.json$/.test(f.name)).map(f => f.name); } catch(e){ return; }
+  for (const name of files){
+    try {
+      const r = await fetch(base + name + ref, {headers:H, cache:"no-store"}); if (!r.ok) continue;
+      const f = await r.json(), text = new TextDecoder().decode(Uint8Array.from(atob(f.content.replace(/\s/g, "")), ch => ch.charCodeAt(0)));
+      if (!text.includes(drop)) continue;
+      const doc = JSON.parse(text);
+      (doc.matches || []).forEach(m => {
+        const pk = (m.players || []).find(p => p.id === keep), pd = (m.players || []).find(p => p.id === drop);
+        if (pd){ m.players = m.players.filter(p => p.id !== drop); if (!pk) m.players.push({...pd, id:keep, name:K.private ? "" : (K.name || ""), tag:K.tag || "", private:!!K.private}); }
+        (m.games || []).forEach(x => { if (x.p && x.p[drop]){ if (!x.p[keep]) x.p[keep] = x.p[drop]; delete x.p[drop]; } });
+      });
+      const body = JSON.stringify(doc, null, 2) + "\n";
+      await fetch(base + name, {method:"PUT", headers:{...H, "Content-Type":"application/json"}, body:JSON.stringify({message:`Scorekeeper: merge duplicate player in ${name}`, content:b64(body), sha:f.sha, branch:c.branch || "main"})});
+    } catch(e){ console.error(e); }
+  }
+}
+async function archiveSeason(season, matches, loud){
   const c = ghCfg(); if (!c?.token || isMock()){ if (loud) toast(isMock() ? "Backups are off in test mode." : "Connect this device in the Site Manager first."); return; }
   const finals = matches.filter(m => m.status === "final").map(m => { const {updatedBy, ...rest} = m; return rest; }).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1);
   const path = `data/matches/${season}.json`, api = `https://api.github.com/repos/${c.owner}/${c.repo}/contents/${path}`;

@@ -443,7 +443,7 @@ function stationsHTML(){
   </div></details>`;
 }
 function bindCopy(root){ root.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast("Link copied."); } catch(e){ prompt("Copy this link:", b.dataset.copy); } }); }
-function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppLogo:"", compare:{a:"", b:""}}; }
+function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}}; }
 function bindStations(){
   const box = $("#stBox"); if (!box) return;
   box.querySelectorAll("[data-st]").forEach(sel => sel.onchange = async () => {
@@ -901,6 +901,27 @@ function bindInbox(){
   });
 }
 
+/* Rocket League player matchup picker: one Hartland player and one opponent, by their in-game names. Blank = that
+   side's top scorer. Changes show on the stream right away. Name suggestions: our roster's gamertags, and the
+   opponent's from their lineup, stats waiting here and their scouting report. */
+let rlOppNames = {};
+function rlPickHTML(st, them){
+  const team = (site.teams || []).find(t => t.id === cur.teamId);
+  const ours = [...new Set([...(cur.players || []), ...(team?.roster || [])].map(p => p.tag).filter(Boolean))];
+  const theirs = [...new Set([...listOf(st.oppLineup), ...inbox.flatMap(b => (b.players || []).filter(p => p.team !== b.us).map(p => p.name)), ...(rlOppNames[cur.id] || [])].filter(Boolean))];
+  const pk = st.rlCompare || {};
+  return `<div class="two"><label class="f"><span>Player matchup: Hartland</span><input data-rlc="us" list="rlUs" value="${esc(pk.us || "")}" placeholder="Top scorer" autocomplete="off"></label>
+      <label class="f"><span>vs ${esc(them)}</span><input data-rlc="them" list="rlThem" value="${esc(pk.them || "")}" placeholder="Top scorer" autocomplete="off"></label></div>
+    <datalist id="rlUs">${ours.map(n => `<option value="${esc(n)}">`).join("")}</datalist><datalist id="rlThem">${theirs.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
+    <p class="hint" style="margin:0">Type or pick each player's in-game name; the Player matchup graphic switches right away. Leave a box blank for that team's top scorer. <button type="button" class="linkbtn" id="rlcReset">Back to top scorers</button></p>`;
+}
+async function loadOppNames(){
+  if (!cur || rlOppNames[cur.id] || !be.scoutFor) return;
+  const id = cur.id; rlOppNames[id] = [];
+  try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || ""); rlOppNames[id] = (r?.players || []).map(p => p.tag).filter(Boolean);
+    const dl = $("#rlThem"); if (dl && cur?.id === id) rlOppNames[id].forEach(n => { if (![...dl.options].some(o => o.value === n)){ const o = document.createElement("option"); o.value = n; dl.appendChild(o); } }); } catch(e){}
+}
+
 /* "On stream" panel for the open match: which station shows it and what the overlays need that isn't in the score. */
 function streamHTML(g, them){
   const n = stationOf(cur.id), st = n ? bc.stations[n] : null, ppl = cur.players || [];
@@ -910,14 +931,14 @@ function streamHTML(g, them){
     <div class="stpick" role="group" aria-label="Put this match on a station">${STATIONS.map(k => { const other = bc.stations[k]?.matchId && bc.stations[k].matchId !== cur.id;
       return `<button type="button" class="btn ${k === n ? "btn-gold" : "btn-line"}" data-station="${k}" aria-pressed="${k === n}">${k === n ? "✓ " : ""}Station ${k}${other ? "<small>in use</small>" : ""}</button>`; }).join("")}</div>
     ${n ? `${g.liveFeed === "sos" ? `<label class="f"><span>Hartland's color in the Rocket League lobby</span><select data-bc="rlSide"><option value="">Work it out from player names</option><option value="blue"${st.rlSide === "blue" ? " selected" : ""}>Blue (left side of the score bug)</option><option value="orange"${st.rlSide === "orange" ? " selected" : ""}>Orange (right side)</option></select></label>
-      <p class="hint" style="margin:0">The score bug reads the clock and goals straight from Rocket League's Stats API on the PC running the game (turn it on once in TAStatsAPI.ini). Mark each game's winner here as usual for the series.</p>`
+      <p class="hint" style="margin:0">The score bug reads the clock and goals straight from Rocket League on the PC running the game (through the LevelUP Relay). When a game ends, its stats and winner show up under Stats from the stream to save.</p>`
       : `<label class="tog"><input type="checkbox" data-bc="swap"${st.swap ? " checked" : ""}> Hartland on the right side (we're the away team)</label>`}
       <label class="f"><span>${esc(them)} lineup (gamertags, commas between)</span><input data-bc="oppLineup" value="${esc(st.oppLineup || "")}" placeholder="Shown on the VS screen and starting lineups" autocomplete="off"></label>
       ${oneVone ? `<div class="two"><label class="f"><span>${esc(them)} player on now</span><input data-bc="oppNow" value="${esc(st.oppNow || "")}" autocomplete="off"></label>
         <label class="f"><span>Their ${esc(g.charLabel.toLowerCase())}</span><input data-bc="oppChar" list="charList" value="${esc(st.oppChar || "")}" autocomplete="off"></label></div>
         <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
       <label class="f"><span>${esc(them)} logo link (optional)</span><input type="url" inputmode="url" data-bc="oppLogo" value="${esc(st.oppLogo || "")}" placeholder="https://… .png" autocomplete="off"></label>
-      ${ppl.length > 1 ? `<div class="two"><label class="f"><span>Compare player</span><select data-cmp="a"><option value="">—</option>${ppl.map(p => `<option value="${esc(p.id)}"${st.compare?.a === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label>
+      ${g.liveFeed === "sos" ? rlPickHTML(st, them) : ppl.length > 1 ? `<div class="two"><label class="f"><span>Compare player</span><select data-cmp="a"><option value="">—</option>${ppl.map(p => `<option value="${esc(p.id)}"${st.compare?.a === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label>
         <label class="f"><span>with</span><select data-cmp="b"><option value="">—</option>${ppl.map(p => `<option value="${esc(p.id)}"${st.compare?.b === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label></div>` : ""}
       <details class="olk"><summary>OBS links for station ${n}</summary>${linksHTML(n)}</details>`
     : `<p class="hint" style="margin:0">Pick the streaming PC this match is on. The score bug, VS screen, lineups and comparisons on that PC switch to it.</p>`}
@@ -938,8 +959,12 @@ function bindStream(){
   const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};
     box.querySelectorAll("[data-bc]").forEach(i => st[i.dataset.bc] = i.type === "checkbox" ? i.checked : i.value.trim());
     st.compare = {a:box.querySelector("[data-cmp=a]")?.value || "", b:box.querySelector("[data-cmp=b]")?.value || ""};
+    if (box.querySelector("[data-rlc]")) st.rlCompare = {us:box.querySelector("[data-rlc=us]").value.trim(), them:box.querySelector("[data-rlc=them]").value.trim()};
     setStation(n, st); };
   box.querySelectorAll("[data-bc],[data-cmp]").forEach(i => i.onchange = save);
+  let rlcT = null; box.querySelectorAll("[data-rlc]").forEach(i => i.oninput = () => { clearTimeout(rlcT); rlcT = setTimeout(save, 700); });   // live as you type or pick
+  const rs = $("#rlcReset"); if (rs) rs.onclick = () => { box.querySelectorAll("[data-rlc]").forEach(i => i.value = ""); save(); renderMatch(); };
+  if (box.querySelector("[data-rlc]")) loadOppNames();
   bindCopy(box);
 }
 function bindDetails(g){

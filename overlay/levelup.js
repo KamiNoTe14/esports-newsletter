@@ -442,9 +442,14 @@ function rlTeam(m){
 function rlPlayers(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), d = rlData(m); if (!d){ rlWait(); return; }
   const {players} = rlAgg(d.boxes), top = side => players.filter(p => p.side === side).sort((a, b) => b.score - a.score)[0];
-  const find = n => n && players.find(p => p.name.toLowerCase() === String(n).toLowerCase());
+  /* the scorekeeper's live picker (On stream > Player matchup) names one player per side; a blank or a name that isn't
+     in the lobby falls back to that side's top scorer. Names match loosely (case, spaces and symbols ignored). */
+  const k = n => String(n || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const find = (n, side) => { const t = k(n); if (!t) return null; const pool = players.filter(p => p.side === side);
+    return pool.find(p => k(p.name) === t) || pool.find(p => k(p.name).startsWith(t) || t.startsWith(k(p.name))) || null; };
   const pick = station.rlCompare || {};
-  let a = find(q.get("a") || pick.a) || top(L.us ? "us" : "them"), b = find(q.get("b") || pick.b) || top(L.us ? "them" : "us");
+  const ours = find(q.get("a") || pick.us, "us") || top("us"), theirs = find(q.get("b") || pick.them, "them") || top("them");
+  let a = L.us ? ours : theirs, b = L.us ? theirs : ours;
   if (!a || !b){ rlWait(); return; }
   const sideOf = p => p.side === "us" ? sides(m).find(s => s.us) : sides(m).find(s => !s.us);
   const per = SCOPE === "series";

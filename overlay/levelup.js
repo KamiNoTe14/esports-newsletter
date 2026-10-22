@@ -105,7 +105,7 @@ function frame(cls, m, g, {script = "", title = "", sub = "", body = "", foot = 
   return `<div class="full ${cls}">${halves}<div class="fab"></div>${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="vig"></div>
     <div class="scrap tl"><i></i></div><div class="scrap br"><i></i></div>${claw("stk")}
     <header class="top">${gl ? `<img class="glogo" src="${esc(gl)}" alt="${esc(g.name)}">` : ""}
-      ${title ? `<div class="ttl${script ? " has-script" : ""}"><div class="ban-w"><div class="ban"><b>${esc(title)}</b></div></div>${script ? `<i>${esc(script)}</i>` : ""}</div>` : ""}${sub ? `<div class="tape-w"><small class="tape">${esc(sub)}</small></div>` : ""}</header>
+      ${title ? `<div class="ttl${script ? " has-script" : ""}"><div class="ban-w"><div class="ban"><b>${esc(title)}</b></div></div>${script ? `<i${script.length > 6 ? ' class="long"' : ""}>${esc(script)}</i>` : ""}</div>` : ""}${sub ? `<div class="tape-w"><small class="tape">${esc(sub)}</small></div>` : ""}</header>
     ${body}${foot ? `<div class="foot"><span class="tape">${foot}</span></div>` : ""}<div class="flash"></div></div>`;
 }
 const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; rlStatic = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
@@ -423,8 +423,9 @@ function rlAgg(boxes){
 const pct = (g, s) => s ? Math.round(g / s * 100) : 0;
 function rlTitle(d){ return SCOPE === "series" ? {title:"Series", script:"Stats"} : {title:`Game ${d.n}`, script:"Stats"}; }
 function rlFoot(m, d){
-  if (d.live) return SCOPE === "series" ? `Through ${d.count - 1} game${d.count === 2 ? "" : "s"} plus <em>live</em>` : `<em>Live</em>, updating as they play`;
-  if (SCOPE === "series") return `${d.count} game${d.count === 1 ? "" : "s"} added up`;
+  const fin = d.count - (d.live ? 1 : 0);
+  if (SCOPE === "series") return d.live ? (fin ? `${fin} game${fin === 1 ? "" : "s"} done, game <em>${fin + 1}</em> live` : `Game <em>1</em>, live`) : `All <em>${fin}</em> game${fin === 1 ? "" : "s"} added up`;
+  if (d.live) return `<em>Live</em> stats, game in progress`;
   const b = d.box, us = b.goals[b.us], them = b.goals[1 - b.us];
   return `Final: ${esc(us > them ? US.short : oppShort(m))} wins <em>${Math.max(us, them)}–${Math.min(us, them)}</em>`;
 }

@@ -69,8 +69,10 @@ function sides(m){
   const lib = schoolInfo(site, m.opponent?.school);
   const them = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), team:m.opponent?.team || "", school:m.opponent?.school || "", logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", score:m.score?.them ?? 0,
     won:(m.games || []).filter(x => x.winner === "them").length, now:station.oppNow ? {name:station.oppNow, char:station.oppChar} : null, ...teamColors(lib)};
+  if (m.show){ Object.assign(us, {name:m.showSides[0], team:"", logo:US.logo, now:null}); Object.assign(them, {name:m.showSides[1], team:"", school:"", logo:US.logo, now:null, ...OUR_COLORS}); }
   return station.swap ? [them, us] : [us, them];
 }
+const oppList = m => m.show ? [m.showSides[1]] : listOf(station.oppLineup);
 function charImg(g, name){
   const dir = String(g.charArt || g.charIcons || "").replace(/\/$/, ""); if (!dir || !name) return "";
   return BASE + dir + "/" + slug(name) + (g.key === "marvel-rivals" ? "-face.webp" : "-logo.webp");
@@ -194,6 +196,12 @@ function diag(){
 }
 /* Hartland's color in the lobby: 0 = blue, 1 = orange. */
 function ourTeamNum(m){
+  if (m.show){   // showmatch: whichever team the left player is on (or the right player isn't)
+    const k = x => String(x || "").toLowerCase().replace(/[^a-z0-9]/g, ""), find = p => [p?.tag, p?.name, m.showSides?.[p === m.showR ? 1 : 0]].map(k).filter(Boolean);
+    const L = find(m.players?.[0]), R = find(m.showR);
+    for (const p of Object.values(rl.players)){ const n = k(p.name); if (L.includes(n)) return p.team === 1 ? 1 : 0; if (R.includes(n)) return p.team === 1 ? 0 : 1; }
+    return 0;
+  }
   if (station.rlSide === "blue") return 0;
   if (station.rlSide === "orange") return 1;
   const ours = new Set((m.players || []).flatMap(p => [tagOf(p), nameOf(p), p.tag, p.name]).filter(Boolean).map(x => String(x).toLowerCase()));
@@ -221,7 +229,7 @@ function noteGame(m, winTeam){
   list.push(box);
   try { localStorage.setItem(seenKey(m), JSON.stringify(list)); } catch {}
   /* hand the box score to the scorekeeper: Hartland's stats go on the match, the opponent's into scouting */
-  if (m.id && box.players.length) sendRLBox(`${m.id}_${guid || t}`, {matchId:m.id, at:new Date(t).toISOString(), guid, us, winner:winTeam, goals:box.goals, players:box.players}).catch(() => {});
+  if (m.id && !m.show && box.players.length) sendRLBox(`${m.id}_${guid || t}`, {matchId:m.id, at:new Date(t).toISOString(), guid, us, winner:winTeam, goals:box.goals, players:box.players}).catch(() => {});
 }
 function seriesGames(m){
   const entered = (m.games || []).filter(x => x.winner), seen = seenGames(m);
@@ -234,6 +242,7 @@ function rlbug(m){
   const usSide = {name:US.short, logo:US.logo, won:played.filter(x => x.winner === "us").length, ...OUR_COLORS};
   const lib = schoolInfo(site, m.opponent?.school);
   const themSide = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", won:played.filter(x => x.winner === "them").length, ...teamColors(lib)};
+  if (m.show){ usSide.name = m.showSides[0]; Object.assign(themSide, {name:m.showSides[1], logo:US.logo, ...OUR_COLORS}); }
   const sides = us === 0 ? [usSide, themSide] : [themSide, usSide];   // [blue, orange]
   const decided = played.length;
   const gameNo = m.status === "final" ? decided : Math.min(+m.bestOf || 1, rl.ended ? Math.max(1, decided) : decided + 1);
@@ -311,14 +320,14 @@ function vsName(name){
 function vs(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), mine = teamSeason(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), st = standingFor(m);
   const ourLine = mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l}, #${st.rank} in the league` : "";
-  const lineup = s => s.us ? (m.players || []).map(p => tagOf(p) || nameOf(p)) : listOf(station.oppLineup);
+  const lineup = s => m.show ? [] : s.us ? (m.players || []).map(p => tagOf(p) || nameOf(p)) : oppList(m);
   const side = (s, c) => `<div class="side ${c}" style="${skin(s)}"><div class="crest">${logoHTML(s.logo, s.name)}</div>
-    ${vsName(s.name)}<span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>
+    ${vsName(s.name)}${(s.team || s.school) ? `<span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>` : ""}
     ${(s.us ? ourLine : theirLine) ? `<span class="rec">${esc(s.us ? ourLine : theirLine)}</span>` : ""}
     ${lineup(s).length ? `<div class="names">${lineup(s).map((n, i) => `<span style="--i:${i}">${esc(n)}</span>`).join("")}</div>` : ""}</div>`;
   const hh = record(h2h);
   const foot = [`Best of <em>${esc(m.bestOf)}</em>`, m.status === "upcoming" ? esc(fmtTime(m.startsAt)) : "",
-    h2h.length ? (hh.w === hh.l ? `All-time series tied ${hh.w}–${hh.l}` : `All-time: ${esc(hh.w > hh.l ? US.short : oppShort(m))} leads ${Math.max(hh.w, hh.l)}–${Math.min(hh.w, hh.l)}`) : "First meeting"].filter(Boolean).join(" &nbsp;/&nbsp; ");
+    m.show ? "" : h2h.length ? (hh.w === hh.l ? `All-time series tied ${hh.w}–${hh.l}` : `All-time: ${esc(hh.w > hh.l ? US.short : oppShort(m))} leads ${Math.max(hh.w, hh.l)}–${Math.min(hh.w, hh.l)}`) : "First meeting"].filter(Boolean).join(" &nbsp;/&nbsp; ");
   out.html = frame("vs", m, g, {sub:eventLine(m), split:[L, R], body:`${side(L, "l")}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${side(R, "r")}`, foot});
 }
 
@@ -336,9 +345,9 @@ function lineups(m){
     const strip = [role && g.roleIcons?.[role] ? `<img src="${esc(src(g.roleIcons[role]))}" alt="">` : "", esc([role, ch].filter(Boolean).join(" · ") || g.short || g.name)].join("");
     return `<div class="p" style="--i:${i}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="" onerror="this.remove()">` : `<span>${monogram(nameOf(p))}</span>`}</div>
       <div class="body"><div class="strip">${strip}</div><div class="main"><b>${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", yr ? `Class of ${yr}` : ""].filter(Boolean).join(", "))}</small></div></div></div>`; }).join("");
-  const theirs = listOf(station.oppLineup).map((n, i) => `<div class="p" style="--i:${i}"><div class="body"><div class="strip"></div><div class="main"><b>${esc(n)}</b></div></div></div>`).join("");
+  const theirs = oppList(m).map((n, i) => `<div class="p" style="--i:${i}"><div class="body"><div class="strip"></div><div class="main"><b>${esc(n)}</b></div></div></div>`).join("");
   const col = (s, html, c) => `<div class="col ${c}" style="${skin(s)}"><h2 style="font-size:${fitName(s.name, 66, 640)}px">${logoHTML(s.logo, s.name)}<span>${esc(s.name)}</span></h2>${html ? `<div class="plates">${html}</div>` : `<div class="empty-note">Lineup to come!</div>`}</div>`;
-  const n = Math.max(1, (m.players || []).length, listOf(station.oppLineup).length), h = Math.min(100, Math.floor(620 / n) - 14);
+  const n = Math.max(1, (m.players || []).length, oppList(m).length), h = Math.min(100, Math.floor(620 / n) - 14);
   out.html = frame("lu", m, g, {title:"Starting", script:"Lineups", sub:eventLine(m), split:[L, R],
     body:`<div class="cols" style="--h:${h}px">${L.us ? col(L, ours, "l") + col(R, theirs, "r") : col(L, theirs, "l") + col(R, ours, "r")}</div>`});
 }
@@ -483,7 +492,7 @@ let finalsReady = LAYER === "scorebug";
 setTimeout(() => { if (!finalsReady){ finalsReady = true; draw(); } }, 2500);
 function draw(){
   if (!finalsReady || offAir) return;
-  if (!station.matchId){ empty(`Station ${STATION} has no match on it. Pick one in the scorekeeper.`); return; }
+  if (!station.matchId && !station.show?.on){ empty(`Station ${STATION} has no match on it. Pick one in the scorekeeper.`); return; }
   if (!match){ empty("Loading the match…"); return; }
   const g = gameFor(site, match.game);
   if ((LAYER || "scorebug") === "scorebug" && g.liveFeed === "sos"){ startSOS(); rlbug(match); return; }
@@ -530,9 +539,35 @@ function splash(sp){
   setTimeout(() => el.classList.add("out"), 9000);
   setTimeout(() => el.remove(), 10200);
 }
+/* ---------- showmatch: a 1v1 or scrim between our own players, run from the scorekeeper's Stream overlays panel ----------
+   station.show = {on, game, bestOf, title, nameStyle:"tag"|"first"|"both", left:{id,name,tag}, right:{...}, won:[l, r]}.
+   It replaces the station's match: both sides get the Hartland logo and colors, named after the players. Nothing is
+   stored anywhere but the station (no match, no stats, never on the website). In Rocket League the left player is
+   found in the lobby to work out who's blue; finished games count themselves as usual. */
+function showLabel(p, style){
+  const first = String(p?.name || "").trim().split(/\s+/)[0] || "", tag = String(p?.tag || "").trim();
+  if (style === "first") return first || tag || "Player";
+  if (style === "both") return first && tag ? `${first} "${tag}"` : first || tag || "Player";
+  return tag || first || "Player";
+}
+function showMatch(st){
+  const sh = st.show || {}, won = [+(sh.won?.[0]) || 0, +(sh.won?.[1]) || 0], g = gameFor(site, sh.game || "rocket-league");
+  const games = [...Array(won[0]).fill("us"), ...Array(won[1]).fill("them")].map((w, i) => ({n:i + 1, winner:w, us:0, them:0}));
+  const L = {id:sh.left?.id || "show-l", name:sh.left?.name || "", tag:sh.left?.tag || ""}, R = {id:sh.right?.id || "show-r", name:sh.right?.name || "", tag:sh.right?.tag || ""};
+  return {id:`show-${STATION}-${sh.started || 0}`, show:true, game:g.key, gameName:g.name, status:"live", bestOf:+sh.bestOf || 5, score:{us:won[0], them:won[1]}, games, current:games.length + 1,
+    teamName:sh.title || "Showmatch", event:sh.title || "Showmatch", league:"", stage:"regular",
+    opponent:{school:"", team:showLabel(R, sh.nameStyle), short:showLabel(R, sh.nameStyle)}, players:[L], showSides:[showLabel(L, sh.nameStyle), showLabel(R, sh.nameStyle)], showR:R};
+}
 watchBroadcast(b => {
   const next = (b.stations || {})[STATION] || {};
   if (next.splash) splash(next.splash);
+  if (next.show?.on){
+    if (stopMatch){ Promise.resolve(stopMatch).then(f => f && f()); stopMatch = null; }
+    const was = station.show?.on; station = next; match = showMatch(next);
+    if (!was){ lastScores = null; lastHTML = ""; rlStatic = ""; }
+    draw(); return;
+  }
+  if (station.show?.on){ station = {}; match = null; lastHTML = ""; rlStatic = ""; }
   if (next.matchId !== station.matchId){ lastScores = null; lastHTML = ""; rlStatic = ""; match = null; if (stopMatch) Promise.resolve(stopMatch).then(f => f && f()); stopMatch = watchMatch(next.matchId, mm => { match = mm; draw(); }); }
   station = next; draw();
 });

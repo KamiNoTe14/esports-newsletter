@@ -482,7 +482,7 @@ let rlDrawAt = 0, rlDrawTimer = null;
 let finalsReady = LAYER === "scorebug";
 setTimeout(() => { if (!finalsReady){ finalsReady = true; draw(); } }, 2500);
 function draw(){
-  if (!finalsReady) return;
+  if (!finalsReady || offAir) return;
   if (!station.matchId){ empty(`Station ${STATION} has no match on it. Pick one in the scorekeeper.`); return; }
   if (!match){ empty("Loading the match…"); return; }
   const g = gameFor(site, match.game);
@@ -499,8 +499,18 @@ function draw(){
 }
 /* Replay the entrance: OBS tells a Browser Source when its scene goes live, so every cut to this graphic animates in. */
 function replay(){ clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; lastScores = null; rlStatic = ""; draw(); }
-window.addEventListener("obsSourceActiveChanged", e => { if (e.detail?.active) replay(); });
-window.addEventListener("obsSourceVisibleChanged", e => { if (e.detail?.visible) replay(); });
+/* OBS keeps showing a Browser Source's last frame for a moment when it comes back on screen. So the moment a graphic is
+   hidden (eye icon off, or its scene switched away) it clears itself and stops drawing; nothing old can flash when it
+   returns, and it starts straight into its entrance. */
+let obsVisible = true, obsActive = true, offAir = false;
+function obsState(){
+  const off = !obsVisible || !obsActive;
+  if (off === offAir) return; offAir = off;
+  if (off){ clearTimeout(held); held = null; clearTimeout(rlDrawTimer); rlDrawTimer = null; enterUntil = 0; lastHTML = ""; lastScores = null; rlStatic = ""; app.innerHTML = ""; document.querySelectorAll(".splash").forEach(el => el.remove()); }
+  else replay();
+}
+window.addEventListener("obsSourceActiveChanged", e => { obsActive = !!e.detail?.active; obsState(); });
+window.addEventListener("obsSourceVisibleChanged", e => { obsVisible = !!e.detail?.visible; obsState(); });
 if (q.get("bg")) document.addEventListener("keydown", e => { if (e.key === "r") replay(); });   // preview: press R to replay
 /* ---------- record broken: big splash on the stream where it happened ----------
    The scorekeeper's "Fire it" puts {id, holder, title, game, display, prev, at} on this station. Only the score bug

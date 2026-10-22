@@ -176,7 +176,7 @@ function startSOS(){
         rl.goal = {name:d?.scorer?.name || "", team:+(d?.scorer?.teamnum ?? -1), assist:d?.assister?.name || "", speed:kph(d?.goalspeed)};
         clearTimeout(goalTimer); goalTimer = setTimeout(() => { rl.goal = null; draw(); }, 9000);
       } else if (ev === "game:replay_end"){ rl.goal = null; rl.replay = false; }
-      else if (ev === "game:match_ended"){ rl.ended = true; }
+      else if (ev === "game:match_ended"){ if (!rl.ended && match) noteGame(match, +(d?.winner_team_num ?? -1)); rl.ended = true; }
       else if (ev === "game:match_destroyed" || ev === "game:initialized"){ rl.ended = false; rl.goal = null; }
       draw();
     }
@@ -199,14 +199,30 @@ function ourTeamNum(m){
   const hits = [0, 0]; Object.values(rl.players).forEach(p => { if (ours.has(String(p.name || "").toLowerCase())) hits[p.team === 1 ? 1 : 0]++; });
   return hits[1] > hits[0] ? 1 : 0;
 }
+/* Games the overlay saw end, so the series moves on even when nobody has entered the result in the scorekeeper yet.
+   Kept in this browser source's storage per match. The scorekeeper always wins once it has as many results. */
+const seenKey = m => `levelup-rl-games-${m.id || m.matchId || station.matchId || ""}`;
+function seenGames(m){ try { return JSON.parse(localStorage.getItem(seenKey(m)) || "[]"); } catch { return []; } }
+function noteGame(m, winTeam){
+  if (winTeam !== 0 && winTeam !== 1) return;
+  const list = seenGames(m), last = list[list.length - 1];
+  if (last && Date.now() - last.t < 90000) return;            // the same match end reported twice
+  list.push({t:Date.now(), winner:winTeam === ourTeamNum(m) ? "us" : "them"});
+  try { localStorage.setItem(seenKey(m), JSON.stringify(list)); } catch {}
+}
+function seriesGames(m){
+  const entered = (m.games || []).filter(x => x.winner), seen = seenGames(m);
+  return seen.length > entered.length ? [...entered, ...seen.slice(entered.length)] : entered;
+}
 let rlStatic = "", rlLive = null;
 function rlbug(m){
   const g = gameFor(site, m.game), need = Math.floor((+m.bestOf || 1) / 2) + 1, us = ourTeamNum(m);
-  const usSide = {name:US.short, logo:US.logo, won:(m.games || []).filter(x => x.winner === "us").length, ...OUR_COLORS};
+  const played = m.status === "final" ? (m.games || []).filter(x => x.winner) : seriesGames(m);
+  const usSide = {name:US.short, logo:US.logo, won:played.filter(x => x.winner === "us").length, ...OUR_COLORS};
   const lib = schoolInfo(site, m.opponent?.school);
-  const themSide = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", won:(m.games || []).filter(x => x.winner === "them").length, ...teamColors(lib)};
+  const themSide = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", won:played.filter(x => x.winner === "them").length, ...teamColors(lib)};
   const sides = us === 0 ? [usSide, themSide] : [themSide, usSide];   // [blue, orange]
-  const decided = (m.games || []).filter(x => x.winner).length;
+  const decided = played.length;
   const gameNo = m.status === "final" ? decided : Math.min(+m.bestOf || 1, rl.ended ? Math.max(1, decided) : decided + 1);
   const wing = (s, r) => { const lg = `<div class="lg">${logoHTML(s.logo, s.name)}</div>`, nm = `<div class="nm"><b style="font-size:${fitName(s.name, 62, 300)}px">${esc(s.name)}</b></div>`, sc = `<div class="sc" data-side="${r ? 1 : 0}"><span>0</span></div>`;
     return `<div class="wing ${r ? "r orange" : "l blue"}${(r ? 1 : 0) === us ? " us" : " them"}" style="${skin(s)}">${r ? sc + nm + lg : lg + nm + sc}${claw()}</div>`; };

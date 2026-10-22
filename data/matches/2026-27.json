@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "updated": "2026-10-22T19:50:57.291Z",
+  "updated": "2026-10-22T20:33:22.988Z",
   "matches": [
     {
       "id": "SsNb26EizYEmqDhXLTUd",
@@ -2634,6 +2634,123 @@
       "startsAt": "2026-10-21T19:00:00.000Z"
     },
     {
+      "id": "7mU3Kd3rDpH52IILQWM7",
+      "season": "2026-27",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "league": "MHSEL",
+      "games": [
+        {
+          "n": 1,
+          "winner": "them",
+          "them": 2,
+          "p": {
+            "p-989757e2": {
+              "hero": "Dark Samus",
+              "stocks_taken": 5,
+              "stocks_lost": 6
+            }
+          },
+          "us": 1
+        },
+        {
+          "them": 0,
+          "winner": "us",
+          "n": 2,
+          "us": 2,
+          "p": {
+            "p-b1bbb78f": {
+              "hero": "Yoshi",
+              "stocks_taken": 6,
+              "stocks_lost": 2
+            }
+          }
+        },
+        {
+          "winner": "us",
+          "them": 1,
+          "n": 3,
+          "us": 2
+        },
+        {
+          "them": 1,
+          "us": 2,
+          "n": 4,
+          "winner": "us"
+        }
+      ],
+      "term": "fall",
+      "clinched": "us",
+      "bestOf": 5,
+      "bye": false,
+      "forfeit": null,
+      "stage": "regular",
+      "week": "5",
+      "result": "W",
+      "game": "smash",
+      "level": "JV",
+      "notes": "",
+      "startsAt": "2026-10-21T19:30:00.000Z",
+      "updatedAt": "2026-10-22T20:33:11.140Z",
+      "current": 4,
+      "gameName": "Super Smash Bros. Ultimate",
+      "source": {},
+      "players": [
+        {
+          "private": false,
+          "tag": "SKELE",
+          "stats": {
+            "stocks_taken": 5,
+            "stocks_lost": 6
+          },
+          "games": [
+            1
+          ],
+          "id": "p-989757e2",
+          "name": "Nicholas Govier"
+        },
+        {
+          "stats": {},
+          "tag": "Buptub",
+          "games": [],
+          "id": "p-f1134599",
+          "private": false,
+          "name": "Evan Hudgins"
+        },
+        {
+          "tag": "",
+          "id": "p-b1bbb78f",
+          "private": false,
+          "stats": {
+            "stocks_lost": 2,
+            "stocks_taken": 6
+          },
+          "games": [
+            2
+          ],
+          "name": "Liam Aeh"
+        }
+      ],
+      "teamName": "Smash JV",
+      "opponent": {
+        "abbr": "FRU",
+        "school": "Fruitport High School",
+        "short": "",
+        "logo": "",
+        "team": "Fruitport SSBU JV 1"
+      },
+      "score": {
+        "us": 3,
+        "them": 1
+      },
+      "status": "final",
+      "perGame": true,
+      "teamId": "t4",
+      "event": "MHSEL Fall 2026"
+    },
+    {
       "id": "RJQJJmOpbrmzuYCz3fZm",
       "status": "final",
       "bye": false,
@@ -2773,6 +2890,68 @@
       "perGame": true,
       "forfeit": null,
       "event": "MHSEL Fall 2026"
+    },
+    {
+      "id": "nYCahwxfVUwTEoEQ0Ebt",
+      "bestOf": 5,
+      "term": "fall",
+      "level": "Varsity",
+      "startsAt": "2026-10-22T19:30:00.000Z",
+      "event": "MHSEL Fall 2026",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "league": "MHSEL",
+      "clinched": "them",
+      "perGame": false,
+      "season": "2026-27",
+      "teamId": "t6",
+      "gameName": "Marvel Rivals",
+      "notes": "",
+      "status": "final",
+      "updatedAt": "2026-10-22T20:26:44.632Z",
+      "forfeit": null,
+      "source": {},
+      "opponent": {
+        "logo": "https://static.eventlink.com/public/1a6e823f-de68-4884-b4a5-542533d2cf97/b85ecbf9-c767-46a0-b697-22c00bc33b20/Primary%20Logo.png",
+        "short": "",
+        "team": "Yale Bulldogs: Marvel Rivals",
+        "school": "Yale Senior High School",
+        "abbr": "YAL"
+      },
+      "games": [
+        {
+          "winner": "them",
+          "us": 0,
+          "them": 0,
+          "n": 1
+        },
+        {
+          "n": 2,
+          "us": 0,
+          "winner": "them",
+          "them": 0
+        },
+        {
+          "winner": "them",
+          "us": 0,
+          "n": 3,
+          "them": 0
+        }
+      ],
+      "current": 3,
+      "players": [],
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "teamName": "Marvel Rivals Varsity",
+      "game": "marvel-rivals",
+      "stage": "regular",
+      "result": "L",
+      "week": "5",
+      "bye": false
     },
     {
       "id": "utRDyyr4nbmQJ6NFFKAY",

@@ -262,8 +262,14 @@ img{display:block}
 .bug.rl .mid .clock.fin{font:400 52px/1.2 var(--script);color:var(--gold)}
 .bug.rl .mid .state{font:600 17px/1 var(--t);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);min-height:17px}
 .bug.rl.ot .mid .clock{color:var(--gold)}
-.bug.rl.replay .mid .clock{opacity:.35}
-.bug.rl.replay .mid .state{color:#fff;background:var(--live);padding:3px 10px 4px;border-radius:3px}
+/* the status line sits in the clock box's bottom edge so it never pushes the box taller than the bar */
+.bug.rl .mid{align-content:start;padding:8px 10px 0;overflow:hidden}
+.bug.rl .mid .clock{font-size:64px;line-height:.95}
+.bug.rl .mid .state{position:absolute;left:0;right:0;bottom:7px;text-align:center;min-height:0}
+/* goal replay: the clock steps aside for a big REPLAY tag rather than a dimmed clock */
+.bug.rl.replay .mid .clock{visibility:hidden}
+.bug.rl.replay .mid .state{top:50%;bottom:auto;left:50%;right:auto;transform:translate(-50%,-50%) rotate(-3deg);color:#fff;background:var(--live);
+  font:400 38px/1 var(--d);letter-spacing:.06em;padding:6px 16px 5px;border-radius:3px;box-shadow:0 3px 0 rgba(0,0,0,.35)}
 .bug.rl.idle .mid .clock{opacity:.4}
 .bug.rl.idle .mid .state{color:var(--steel);font-size:14px}
 /* goal banner under the bug */
@@ -523,6 +529,8 @@ img{display:block}
 .pcard{clip-path:none;border:0;filter:var(--rim);background:var(--tex-s) center/cover,linear-gradient(180deg,color-mix(in srgb,var(--c1,var(--navy)) 85%,#fff),var(--c1,var(--navy)));background-blend-mode:overlay;color:var(--on,#fff);
   -webkit-mask:var(--tear-r) right top/16px 300px repeat-y,linear-gradient(#000,#000) left/calc(100% - 15px) 100% no-repeat}
 .pcard.r{-webkit-mask:var(--tear-l) left top/16px 300px repeat-y,linear-gradient(#000,#000) right/calc(100% - 15px) 100% no-repeat;clip-path:none;border:0}
+.pcard.blue{box-shadow:inset 10px 0 0 var(--rl-blue)}
+.pcard.orange{box-shadow:inset 10px 0 0 var(--rl-orange)}
 .pcard .pinfo b,.pcard.us .pinfo b{color:var(--on,#fff)}
 .pcard .pst span{color:color-mix(in srgb,var(--on,#fff) 75%,transparent)}
 .pcard .pst em{color:var(--on,#fff)}

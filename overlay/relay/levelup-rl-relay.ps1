@@ -9,11 +9,22 @@
   Leave the window open while streaming. Nothing leaves this PC: it only listens on localhost.
 
   It also checks the Stats API setting file and offers to create it if it's missing.
+
+  Highlight clips (optional): with OBS's Replay Buffer on and OBS's WebSocket server turned on, every goal and epic
+  save is saved as a clip a few seconds after it happens, into "LevelUP Highlights" on the desktop, named after the
+  play ("7-14 PM Goal - TRE4TY.mkv"). The OBS password is asked once and kept encrypted for this Windows user in
+  levelup-obs.dat next to this script. "Set up highlight clips.bat" asks again.
 #>
 param(
   [int]$GamePort = 49123,      # Port= in TAStatsAPI.ini
   [int]$WebPort  = 49124,      # what the score bug connects to (?feed=localhost:49124)
-  [int]$SendRate = 30          # PacketSendRate written to the ini if we create it
+  [int]$SendRate = 30,         # PacketSendRate written to the ini if we create it
+  [int]$ObsPort  = 4455,       # OBS: Tools > WebSocket Server Settings
+  [string]$ObsPassword = "",   # normally asked once and saved (encrypted) in levelup-obs.dat
+  [double]$ClipDelay = 4,      # seconds after the play before the clip is saved (keeps the celebration in)
+  [string]$ClipEvents = "Goal,EpicSave",   # also possible: Save, Demolish, Assist, AerialGoal, BicycleGoal, LongGoal ...
+  [string]$ClipFolder = "",    # default: Desktop\LevelUP Highlights
+  [switch]$SetupClips          # ask for the OBS password again
 )
 $ErrorActionPreference = "Stop"
 $Host.UI.RawUI.WindowTitle = "LevelUP Rocket League relay"
@@ -102,6 +113,127 @@ function Broadcast([string]$text){
   }
 }
 
+# ---------- 2b. highlight clips through OBS ----------
+$clipsOn = $false
+$obsFile = Join-Path $PSScriptRoot "levelup-obs.dat"
+try {
+  if ($SetupClips -and (Test-Path $obsFile)){ Remove-Item $obsFile -Force }
+  if (-not $ObsPassword -and (Test-Path $obsFile)){
+    $raw = (Get-Content $obsFile -Raw).Trim()
+    if ($raw -eq "off"){ $ObsPassword = "" } elseif ($raw -eq "nopassword"){ $ObsPassword = ""; $clipsOn = $true }
+    else { $ObsPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR((ConvertTo-SecureString $raw))); $clipsOn = $true }
+  } elseif ($ObsPassword){ $clipsOn = $true }
+  elseif (-not (Test-Path $obsFile)){
+    Write-Host ""
+    Say "Highlight clips: this can save every goal and epic save as a video clip on your desktop." "Cyan"
+    Say "  In OBS: Tools > WebSocket Server Settings > Show Connect Info, and copy the Server Password." "Cyan"
+    $sec = Read-Host "Paste the OBS WebSocket password here (or type N to skip clips)" -AsSecureString
+    $plain = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
+    if ($plain -match "^\s*[Nn]\s*$"){ Set-Content $obsFile "off"; Say "Clips skipped. Double-click 'Set up highlight clips.bat' any time to turn them on." "Gray" }
+    elseif (-not $plain){ Set-Content $obsFile "nopassword"; $clipsOn = $true }
+    else { Set-Content $obsFile (ConvertFrom-SecureString $sec); $ObsPassword = $plain; $clipsOn = $true; Say "Saved. You won't be asked again on this PC." "Green" }
+  }
+} catch { Say "Couldn't set up highlight clips: $($_.Exception.Message)" "Yellow"; $clipsOn = $false }
+if (-not $ClipFolder){ $desk = [Environment]::GetFolderPath("Desktop"); if (-not $desk){ $desk = Join-Path ([string]$env:USERPROFILE + [string]$env:HOME) "Desktop" }; $ClipFolder = Join-Path $desk "LevelUP Highlights" }
+$clipKinds = @($ClipEvents -split "," | ForEach-Object { $_.Trim().ToLower() } | Where-Object { $_ })
+$obs = $null; $obsReady = $false; $obsNext = [datetime]::MinValue; $obsRecv = $null; $obsBuf = New-Object byte[] 65536; $obsMsg = New-Object System.Text.StringBuilder
+$obsReq = 0; $pendingClip = $null; $clipNames = New-Object System.Collections.Queue; $obsSaid = $false; $rbWarned = $false
+function ObsSend($obj){
+  $b = [System.Text.Encoding]::UTF8.GetBytes(($obj | ConvertTo-Json -Compress -Depth 6))
+  $obs.SendAsync((New-Object System.ArraySegment[byte] -ArgumentList (,$b)), [System.Net.WebSockets.WebSocketMessageType]::Text, $true, [System.Threading.CancellationToken]::None).Wait(3000) | Out-Null
+}
+function ObsRequest($type, $data){ $script:obsReq++; $m = @{op = 6; d = @{requestType = $type; requestId = "lu$($script:obsReq)"}}; if ($data){ $m.d.requestData = $data }; ObsSend $m }
+# one whole message, or $null if none has arrived yet (never waits unless $wait is set)
+function ObsPoll([int]$wait = 0){
+  $until = (Get-Date).AddMilliseconds($wait)
+  while ($true){
+    if (-not $script:obsRecv){ $script:obsRecv = $obs.ReceiveAsync((New-Object System.ArraySegment[byte] -ArgumentList (,$obsBuf)), [System.Threading.CancellationToken]::None) }
+    if (-not $script:obsRecv.IsCompleted){ if ((Get-Date) -ge $until){ return $null }; Start-Sleep -Milliseconds 10; continue }
+    $r = $script:obsRecv.Result; $script:obsRecv = $null
+    if ($r.MessageType -eq [System.Net.WebSockets.WebSocketMessageType]::Close){ throw "OBS closed the connection" }
+    [void]$obsMsg.Append([System.Text.Encoding]::UTF8.GetString($obsBuf, 0, $r.Count))
+    if ($r.EndOfMessage){ $t = $obsMsg.ToString(); [void]$obsMsg.Clear(); return ($t | ConvertFrom-Json) }
+  }
+}
+function ObsConnect {
+  $script:obsReady = $false; $script:obsRecv = $null; [void]$obsMsg.Clear()
+  try {
+    $script:obs = New-Object System.Net.WebSockets.ClientWebSocket
+    if (-not $obs.ConnectAsync([Uri]"ws://127.0.0.1:$ObsPort", [System.Threading.CancellationToken]::None).Wait(3000)){ throw "no answer" }
+    $hello = ObsPoll 3000; if (-not $hello -or $hello.op -ne 0){ throw "no hello" }
+    $ident = @{op = 1; d = @{rpcVersion = 1; eventSubscriptions = 64}}   # 64 = output events (ReplayBufferSaved)
+    if ($hello.d.authentication){
+      if (-not $ObsPassword){ throw "OBS wants a password. Double-click 'Set up highlight clips.bat' and paste it." }
+      $sha = [System.Security.Cryptography.SHA256]::Create()
+      $secret = [Convert]::ToBase64String($sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($ObsPassword + $hello.d.authentication.salt)))
+      $ident.d.authentication = [Convert]::ToBase64String($sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($secret + $hello.d.authentication.challenge)))
+    }
+    ObsSend $ident
+    $ok = $null; try { $ok = ObsPoll 3000 } catch {}
+    if (-not $ok -or $ok.op -ne 2){ throw "OBS didn't accept the password. Double-click 'Set up highlight clips.bat' and paste it again." }
+    $script:obsReady = $true; $script:obsSaid = $false
+    Say "Connected to OBS. Highlight clips go to $ClipFolder" "Green"
+    ObsRequest "StartReplayBuffer" $null    # already running is fine
+  } catch {
+    $script:obsReady = $false; try { $obs.Dispose() } catch {}
+    if (-not $script:obsSaid){
+      if ("$($_.Exception.Message)" -match "password"){ Say "Highlight clips: $($_.Exception.Message)" "Yellow" }
+      else { Say "Highlight clips: waiting for OBS (open OBS, and turn on Tools > WebSocket Server Settings > Enable WebSocket server)..." "DarkGray" }
+      $script:obsSaid = $true }
+    $script:obsNext = (Get-Date).AddSeconds(10)
+  }
+}
+function ObsTick {
+  if (-not $clipsOn){ return }
+  if (-not $obsReady){ if ((Get-Date) -ge $obsNext){ ObsConnect }; return }
+  try {
+    while ($m = ObsPoll 0){
+      if ($m.op -eq 7 -and $m.d.requestType -eq "StartReplayBuffer" -and -not $m.d.requestStatus.result -and $m.d.requestStatus.code -ne 500 -and -not $rbWarned){
+        Say "OBS's Replay Buffer is off, so no clips can be saved. In OBS: Settings > Output > Replay Buffer > tick 'Enable Replay Buffer', then restart this window." "Yellow"; $script:rbWarned = $true }
+      if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }
+      if ($m.op -eq 5 -and $m.d.eventType -eq "ReplayBufferSaved"){
+        $src = $m.d.eventData.savedReplayPath; $label = if ($clipNames.Count){ $clipNames.Dequeue() } else { "Clip" }
+        try {
+          $day = Join-Path $ClipFolder (Get-Date).ToString("yyyy-MM-dd"); New-Item -ItemType Directory -Force -Path $day | Out-Null
+          $name = ((Get-Date).ToString("h-mm-ss tt") + " " + $label) -replace '[\\/:*?"<>|]', "_"
+          $dest = Join-Path $day ($name + [IO.Path]::GetExtension($src))
+          Start-Sleep -Milliseconds 300; Move-Item -LiteralPath $src -Destination $dest -Force
+          Say "Saved clip: $label" "Green"
+        } catch { Say "Clip saved by OBS at $src (couldn't move it: $($_.Exception.Message))" "Yellow" }
+      }
+    }
+    if ($pendingClip -and (Get-Date) -ge $pendingClip.due){
+      $clipNames.Enqueue(($pendingClip.labels -join ", ")); $script:pendingClip = $null
+      ObsRequest "SaveReplayBuffer" $null
+    }
+  } catch { Say "Lost the connection to OBS. Retrying..." "Yellow"; $script:obsReady = $false; $script:obsSaid = $false; $script:obsNext = (Get-Date).AddSeconds(5) }
+}
+# A play worth clipping. Plays within a few seconds of each other share one clip ("Goal - TRE4TY, Epic Save - Nova").
+function QueueClip([string]$label){
+  if (-not $clipsOn){ return }
+  if ($pendingClip){ if ($pendingClip.labels -notcontains $label){ $pendingClip.labels += $label }; $pendingClip.due = (Get-Date).AddSeconds($ClipDelay); return }
+  $script:pendingClip = @{labels = @($label); due = (Get-Date).AddSeconds($ClipDelay)}
+}
+# Pull goals and stat-feed plays out of the game's data stream. Each message starts with {"Event"; the last piece may
+# still be arriving, so it's kept for next time.
+$scan = ""
+function ScanPlays([string]$text){
+  $script:scan += $text
+  $last = $scan.LastIndexOf('{"Event"'); if ($last -le 0){ if ($scan.Length -gt 2000000){ $script:scan = "" }; return }
+  $done = $scan.Substring(0, $last); $script:scan = $scan.Substring($last)
+  if ($done.IndexOf("GoalScored") -lt 0 -and $done.IndexOf("StatfeedEvent") -lt 0){ return }
+  foreach ($seg in ($done -split '(?=\{"Event")')){
+    if ($seg -match '^\{"Event"\s*:\s*"GoalScored"'){
+      $who = if ($seg -match 'Scorer\\?"\s*:\s*\{\\?"Name\\?"\s*:\s*\\?"((?:[^"\\]|\\[^"])*)\\?"'){ $Matches[1] } else { "" }
+      if ($clipKinds -contains "goal"){ QueueClip ("Goal" + $(if ($who){ " - $who" } else { "" })) }
+    } elseif ($seg -match '^\{"Event"\s*:\s*"StatfeedEvent"'){
+      $kind = if ($seg -match 'EventName\\?"\s*:\s*\\?"([A-Za-z]+)'){ $Matches[1] } else { "" }
+      $who = if ($seg -match 'MainTarget\\?"\s*:\s*\{\\?"Name\\?"\s*:\s*\\?"((?:[^"\\]|\\[^"])*)\\?"'){ $Matches[1] } else { "" }
+      if ($kind -and $kind -ne "Goal" -and $clipKinds -contains $kind.ToLower()){ QueueClip (($kind -creplace '([a-z])([A-Z])', '$1 $2') + $(if ($who){ " - $who" } else { "" })) }
+    }
+  }
+}
+
 # ---------- 3. the game side ----------
 $tcp = $null; $stream = $null; $nextTry = [datetime]::MinValue; $waitingSaid = $false
 $buf = New-Object byte[] 65536; $chars = New-Object char[] 131072
@@ -151,7 +283,7 @@ while ($true){
         if ($n -le 0){ $closed = $true }
         else {
           $c = $decoder.GetChars($buf, 0, $n, $chars, 0)
-          if ($c -gt 0){ Broadcast (New-Object string -ArgumentList $chars, 0, $c); $chunks++ }
+          if ($c -gt 0){ $txt = New-Object string -ArgumentList $chars, 0, $c; Broadcast $txt; $chunks++; if ($clipsOn){ ScanPlays $txt } }
         }
       } elseif ($tcp.Client.Poll(0, [System.Net.Sockets.SelectMode]::SelectRead) -and $tcp.Client.Available -eq 0){ $closed = $true }
       else { Start-Sleep -Milliseconds 4 }
@@ -159,6 +291,7 @@ while ($true){
     if ($closed){ try { $tcp.Close() } catch {}; $tcp = $null; Say "Rocket League closed the connection (match over or game closed). Waiting..." "Yellow"; $nextTry = (Get-Date).AddSeconds(2) }
   }
   if (-not $tcp){ Start-Sleep -Milliseconds 20 }
+  ObsTick
 
   # a short heartbeat line every 30 seconds so it's obvious it's alive
   if (((Get-Date) - $lastBeat).TotalSeconds -ge 30){

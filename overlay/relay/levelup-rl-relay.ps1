@@ -46,6 +46,40 @@ if (Test-Path $cfg){
 }
 } catch { Say "Couldn't check the Stats API setting file: $($_.Exception.Message)" "Yellow" }
 
+# ---------- 1b. the copy in Rocket League's install folder (Psyonix's instructions name this one) ----------
+try {
+  $roots = New-Object System.Collections.ArrayList
+  # the running game tells us exactly where it lives: <install>\Binaries\Win64\RocketLeague.exe
+  Get-Process -Name RocketLeague -ErrorAction SilentlyContinue | ForEach-Object { if ($_.Path){ [void]$roots.Add((Split-Path (Split-Path (Split-Path $_.Path)))) } }
+  # Epic Games launcher records each game's install folder in its manifests (Rocket League's Epic name is "Sugar")
+  $man = Join-Path $env:ProgramData "Epic\EpicGamesLauncher\Data\Manifests"
+  if ($env:ProgramData -and (Test-Path $man)){
+    Get-ChildItem $man -Filter *.item -ErrorAction SilentlyContinue | ForEach-Object {
+      try { $j = Get-Content $_.FullName -Raw | ConvertFrom-Json; if ($j.DisplayName -match "Rocket League" -or $j.AppName -eq "Sugar"){ [void]$roots.Add($j.InstallLocation) } } catch {} }
+  }
+  foreach ($p in @("C:\Program Files\Epic Games\rocketleague", "C:\Program Files (x86)\Steam\steamapps\common\rocketleague")){ if (Test-Path $p){ [void]$roots.Add($p) } }
+  $seen = @{}
+  foreach ($root in $roots){
+    if (-not $root -or $seen[$root]){ continue }; $seen[$root] = $true
+    $ini = Join-Path $root "TAGame\Config\DefaultStatsAPI.ini"
+    if (-not (Test-Path $ini)){ continue }
+    Say "Found Rocket League at $root" "Gray"
+    $text = Get-Content $ini -Raw
+    $rate = if ($text -match "(?im)^\s*PacketSendRate\s*=\s*([\d.]+)") { [double]$Matches[1] } else { 0 }
+    if ($text -match "(?im)^\s*Port\s*=\s*(\d+)"){ $GamePort = [int]$Matches[1] }
+    if ($rate -gt 0){ Say "DefaultStatsAPI.ini: Stats API is ON ($rate updates/sec, port $GamePort)." "Green"; continue }
+    Say "DefaultStatsAPI.ini: Stats API is OFF (PacketSendRate=0)." "Yellow"
+    $ans = Read-Host "Turn it on now (PacketSendRate=$SendRate)? (Y/N)"
+    if ($ans -notmatch "^[Yy]"){ continue }
+    if ($text -match "(?im)^\s*PacketSendRate\s*="){ $new = [regex]::Replace($text, "(?im)^(\s*PacketSendRate\s*=\s*)[\d.]+", "`${1}$SendRate") }
+    elseif ($text -match "(?im)^\[TAGame\.MatchStatsExporter_TA\]"){ $new = [regex]::Replace($text, "(?im)^(\[TAGame\.MatchStatsExporter_TA\]\s*)", "`${1}PacketSendRate=$SendRate`r`n") }
+    else { $new = $text.TrimEnd() + "`r`n`r`n[TAGame.MatchStatsExporter_TA]`r`nPort=$GamePort`r`nPacketSendRate=$SendRate`r`n" }
+    try { Copy-Item $ini "$ini.levelup-backup" -Force -ErrorAction SilentlyContinue; Set-Content -Path $ini -Value $new -NoNewline -Encoding ASCII; Say "Turned on. Now CLOSE Rocket League completely and open it again." "Green" }
+    catch { Say "Windows wouldn't let me change that file. Close this window, right-click 'Start LevelUP Relay.bat' and choose 'Run as administrator', then answer Y again." "Red" }
+  }
+  if (-not $seen.Count){ Say "Couldn't find Rocket League's install folder. Start Rocket League first, then reopen this window, and it will find it." "Yellow" }
+} catch { Say "Couldn't check the install folder: $($_.Exception.Message)" "Yellow" }
+
 # ---------- 2. the WebSocket side (what the score bug connects to) ----------
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$WebPort/")

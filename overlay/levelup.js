@@ -1,9 +1,10 @@
 /* LevelUP overlays. Each overlay page is an OBS Browser Source (1920 x 1080) that follows one streaming station:
    ?station=1 (default). The scorekeeper decides which match is on each station; every overlay updates itself live.
-   Layers: scorebug, vs, lineups, team-compare, player-compare. Add ?bg=1 to see an overlay on a grey test background. */
-import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=18";
-import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=35";
-import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=4";
+   Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
+   (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
+import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=19";
+import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=36";
+import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
 const STATION = q.get("station") || "1", LAYER = document.body.dataset.layer;
@@ -202,13 +203,25 @@ function ourTeamNum(m){
 /* Games the overlay saw end, so the series moves on even when nobody has entered the result in the scorekeeper yet.
    Kept in this browser source's storage per match. The scorekeeper always wins once it has as many results. */
 const seenKey = m => `levelup-rl-games-${m.id || m.matchId || station.matchId || ""}`;
-function seenGames(m){ try { return JSON.parse(localStorage.getItem(seenKey(m)) || "[]"); } catch { return []; } }
+/* Every graphic in OBS shares this storage, so whichever one sees the game end first records it; repeats of the same
+   game (same match GUID, or within 90 seconds) are dropped. Each entry keeps the final box score for both teams. */
+function seenGames(m){
+  let list = []; try { list = JSON.parse(localStorage.getItem(seenKey(m)) || "[]"); } catch {}
+  return list.filter((x, i) => !list.slice(0, i).some(y => sameGame(x, y)));
+}
+const sameGame = (x, y) => x.guid && y.guid ? x.guid === y.guid : Math.abs(x.t - y.t) < 90000;
+const snapshot = () => Object.values(rl.players).filter(p => p.name).map(p => ({name:String(p.name).slice(0, 40), team:p.team === 1 ? 1 : 0, score:+p.score || 0, goals:+p.goals || 0,
+  assists:+p.assists || 0, saves:+p.saves || 0, shots:+p.shots || 0, demos:+p.demos || 0, touches:+p.touches || 0})).slice(0, 10);
 function noteGame(m, winTeam){
   if (winTeam !== 0 && winTeam !== 1) return;
-  const list = seenGames(m), last = list[list.length - 1];
-  if (last && Date.now() - last.t < 90000) return;            // the same match end reported twice
-  list.push({t:Date.now(), winner:winTeam === ourTeamNum(m) ? "us" : "them"});
+  const list = seenGames(m), last = list[list.length - 1], guid = String(rl.game?.guid || "").replace(/[^A-Za-z0-9-]/g, "").slice(0, 60);
+  if (last && sameGame(last, {guid, t:Date.now()})) return;   // the same match end reported twice
+  const us = ourTeamNum(m), t = Date.now();
+  const box = {t, guid, winner:winTeam === us ? "us" : "them", us, goals:[+(rl.game?.teams?.[0]?.score ?? 0), +(rl.game?.teams?.[1]?.score ?? 0)], players:snapshot()};
+  list.push(box);
   try { localStorage.setItem(seenKey(m), JSON.stringify(list)); } catch {}
+  /* hand the box score to the scorekeeper: Hartland's stats go on the match, the opponent's into scouting */
+  if (m.id && box.players.length) sendRLBox(`${m.id}_${guid || t}`, {matchId:m.id, at:new Date(t).toISOString(), guid, us, winner:winTeam, goals:box.goals, players:box.players}).catch(() => {});
 }
 function seriesGames(m){
   const entered = (m.games || []).filter(x => x.winner), seen = seenGames(m);
@@ -382,8 +395,83 @@ function playerCompare(m){
     body:`<div class="heads">${head(a)}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${head(b, true)}</div><div class="rows">${rowsHTML(rows)}</div>`});
 }
 
+/* ---------- Rocket League stats graphics (live from the game) ----------
+   rl-team: team totals, rl-players: one player against another, rl-box: everyone's line. They show the game being
+   played (live) or, between games, the one that just ended. ?scope=series adds up every game of the match so far.
+   ?a=Name&b=Name picks the two players to compare; otherwise each side's top scorer. */
+const SCOPE = q.get("scope") === "series" ? "series" : "game";
+function rlData(m){
+  const done = seenGames(m).filter(b => b.players?.length);
+  const live = rl.on && rl.game && !rl.ended && !rl.game.hasWinner && Object.keys(rl.players).length
+    ? {live:true, us:ourTeamNum(m), goals:[rl.game.teams?.[0]?.score ?? 0, rl.game.teams?.[1]?.score ?? 0], players:snapshot()} : null;
+  const played = seriesGames(m).length;
+  if (SCOPE === "series"){ const boxes = [...done, ...(live ? [live] : [])]; return boxes.length ? {boxes, live:!!live, count:boxes.length} : null; }
+  const b = live || done[done.length - 1];
+  return b ? {boxes:[b], live:!!live, n:live ? Math.min(+m.bestOf || 9, played + 1) : Math.max(1, played), box:b} : null;
+}
+const STAT_KEYS = ["score", "goals", "assists", "saves", "shots", "demos", "touches"];
+function rlAgg(boxes){
+  const players = new Map(), team = {us:{}, them:{}};
+  STAT_KEYS.forEach(k => { team.us[k] = 0; team.them[k] = 0; });
+  boxes.forEach(b => b.players.forEach(p => {
+    const side = p.team === b.us ? "us" : "them", key = side + "|" + p.name.toLowerCase();
+    const r = players.get(key) || {name:p.name, side, gp:0, ...Object.fromEntries(STAT_KEYS.map(k => [k, 0]))};
+    r.gp++; STAT_KEYS.forEach(k => { r[k] += +p[k] || 0; team[side][k] += +p[k] || 0; }); players.set(key, r);
+  }));
+  return {players:[...players.values()], team};
+}
+const pct = (g, s) => s ? Math.round(g / s * 100) : 0;
+function rlTitle(d){ return SCOPE === "series" ? {title:"Series", script:"Stats"} : {title:`Game ${d.n}`, script:"Stats"}; }
+function rlFoot(m, d){
+  if (d.live) return SCOPE === "series" ? `Through ${d.count - 1} game${d.count === 2 ? "" : "s"} plus <em>live</em>` : `<em>Live</em>, updating as they play`;
+  if (SCOPE === "series") return `${d.count} game${d.count === 1 ? "" : "s"} added up`;
+  const b = d.box, us = b.goals[b.us], them = b.goals[1 - b.us];
+  return `Final: ${esc(us > them ? US.short : oppShort(m))} wins <em>${Math.max(us, them)}–${Math.min(us, them)}</em>`;
+}
+const rlWait = () => empty(SCOPE === "series" ? "Series stats show up once the first game starts." : "Stats show up once a game starts (the LevelUP Relay has to be running).");
+function rlTeam(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), d = rlData(m); if (!d){ rlWait(); return; }
+  const {team} = rlAgg(d.boxes), A = team[L.us ? "us" : "them"], B = team[L.us ? "them" : "us"];
+  const rows = [{k:"Goals", a:A.goals, b:B.goals}, {k:"Shots", a:A.shots, b:B.shots},
+    {k:"Shooting %", a:pct(A.goals, A.shots), b:pct(B.goals, B.shots), fa:pct(A.goals, A.shots) + "%", fb:pct(B.goals, B.shots) + "%"},
+    {k:"Saves", a:A.saves, b:B.saves}, {k:"Assists", a:A.assists, b:B.assists}, {k:"Demos", a:A.demos, b:B.demos}];
+  const head = (s, c) => `<div class="h ${c}" style="${skin(s)}"><div class="pic crest">${logoHTML(s.logo, s.name)}</div><div><b style="font-size:${fitName(s.name, 76, 470)}px">${esc(s.name)}</b><small>${esc(s.team || s.school)}</small></div></div>`;
+  out.html = frame("cmp", m, g, {...rlTitle(d), sub:eventLine(m), split:[L, R], foot:rlFoot(m, d),
+    body:`<div class="heads">${head(L, "l")}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${head(R, "r")}</div><div class="rows">${rowsHTML(rows)}</div>`});
+}
+function rlPlayers(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), d = rlData(m); if (!d){ rlWait(); return; }
+  const {players} = rlAgg(d.boxes), top = side => players.filter(p => p.side === side).sort((a, b) => b.score - a.score)[0];
+  const find = n => n && players.find(p => p.name.toLowerCase() === String(n).toLowerCase());
+  const pick = station.rlCompare || {};
+  let a = find(q.get("a") || pick.a) || top(L.us ? "us" : "them"), b = find(q.get("b") || pick.b) || top(L.us ? "them" : "us");
+  if (!a || !b){ rlWait(); return; }
+  const sideOf = p => p.side === "us" ? sides(m).find(s => s.us) : sides(m).find(s => !s.us);
+  const per = SCOPE === "series";
+  const rows = [["Score", "score"], ["Goals", "goals"], ["Assists", "assists"], ["Saves", "saves"], ["Shots", "shots"], ["Demos", "demos"]].map(([k, f]) => ({k, a:a[f], b:b[f]}));
+  const head = (p, r) => { const s = sideOf(p); return `<div class="h ${r ? "r" : "l"}" style="${skin(s)}"><div class="pic crest">${logoHTML(s.logo, s.name)}</div><div><b style="font-size:${fitName(p.name, 76, 470)}px">${esc(p.name)}</b><small>${esc(s.name)}${per ? `, ${p.gp} game${p.gp === 1 ? "" : "s"}` : ""}</small></div></div>`; };
+  out.html = frame("cmp", m, g, {title:"Player", script:"Matchup", sub:SCOPE === "series" ? "This match, every game" : `Game ${d.n}`, split:[sideOf(a), sideOf(b)], foot:rlFoot(m, d),
+    body:`<div class="heads">${head(a)}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${head(b, true)}</div><div class="rows">${rowsHTML(rows)}</div>`});
+}
+function rlBox(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), d = rlData(m); if (!d){ rlWait(); return; }
+  const {players, team} = rlAgg(d.boxes);
+  /* MVP: top score on the winning team of a finished game */
+  let mvp = "";
+  if (SCOPE === "game" && !d.live){ const w = d.box.winner; mvp = players.filter(p => p.side === w).sort((a, b) => b.score - a.score)[0]?.name || ""; }
+  const cols = [["Score", "score"], ["Goals", "goals"], ["Assists", "assists"], ["Saves", "saves"], ["Shots", "shots"], ["Demos", "demos"]];
+  const block = (s, i) => { const side = s.us ? "us" : "them", list = players.filter(p => p.side === side).sort((a, b) => b.score - a.score), T = team[side];
+    return `<div class="tm" style="${skin(s)};--i:${i}"><div class="th"><div class="who">${logoHTML(s.logo, s.name)}<b>${esc(s.name)}</b></div>${cols.map(([k]) => `<small>${k}</small>`).join("")}</div>
+      ${list.map((p, j) => `<div class="pr" style="--j:${j}"><div class="who"><b>${esc(p.name)}</b>${p.name === mvp ? `<i class="mvp">MVP</i>` : ""}${SCOPE === "series" ? `<small>${p.gp} gp</small>` : ""}</div>${cols.map(([, f]) => `<span>${p[f]}</span>`).join("")}</div>`).join("")}
+      <div class="pr tot"><div class="who"><b>Team</b></div>${cols.map(([, f]) => `<span>${T[f]}</span>`).join("")}</div></div>`; };
+  out.html = frame("box", m, g, {...rlTitle(d), title:SCOPE === "series" ? "Series" : "Box", script:SCOPE === "series" ? "Box Score" : "Score", sub:SCOPE === "series" ? eventLine(m) : `${eventLine(m)}${eventLine(m) ? " · " : ""}Game ${d.n}`, split:[L, R], foot:rlFoot(m, d),
+    body:`<div class="bx">${block(L, 0)}${block(R, 1)}</div>`});
+}
+
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox};
+const RL_LAYER = /^rl-/.test(LAYER || "");
+let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */
 let finalsReady = LAYER === "scorebug";
 setTimeout(() => { if (!finalsReady){ finalsReady = true; draw(); } }, 2500);
@@ -393,6 +481,14 @@ function draw(){
   if (!match){ empty("Loading the match…"); return; }
   const g = gameFor(site, match.game);
   if ((LAYER || "scorebug") === "scorebug" && g.liveFeed === "sos"){ startSOS(); rlbug(match); return; }
+  if (RL_LAYER){
+    if (g.liveFeed !== "sos"){ empty("This graphic is for Rocket League matches."); return; }
+    startSOS();
+    /* the game sends 30 updates a second; full-screen graphics only need a couple */
+    const wait = 500 - (Date.now() - rlDrawAt);
+    if (wait > 0){ if (!rlDrawTimer) rlDrawTimer = setTimeout(() => { rlDrawTimer = null; draw(); }, wait); return; }
+    rlDrawAt = Date.now(); diag();
+  }
   (LAYERS[LAYER] || scorebug)(match);
 }
 /* Replay the entrance: OBS tells a Browser Source when its scene goes live, so every cut to this graphic animates in. */

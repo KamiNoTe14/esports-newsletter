@@ -39,7 +39,7 @@ function fromStatsAPI(ev, d){
         assists:p.Assists, saves:p.Saves, touches:p.Touches, demos:p.Demos, boost:p.Boost ?? 0, speed:p.Speed, isDead:!!p.bDemolished}; });
       const tgt = g.bHasTarget && g.Target && g.Target.Name ? pkey(g.Target) : "";
       lastGame = {teams:[0, 1].map(i => ({score:(teams.find(t => t.TeamNum === i) || teams[i] || {}).Score ?? 0, name:(teams.find(t => t.TeamNum === i) || {}).Name || ""})),
-        time_seconds:g.TimeSeconds ?? 300, isOT:!!g.bOvertime, isReplay:!!g.bReplay, hasWinner:!!g.bHasWinner, winner:g.Winner || "", hasTarget:!!tgt, target:tgt, arena:g.Arena};
+        time_seconds:g.TimeSeconds ?? 300, isOT:!!g.bOvertime, isReplay:!!g.bReplay, hasWinner:!!g.bHasWinner, winner:g.Winner || "", hasTarget:!!tgt, target:tgt, arena:g.Arena, guid:d.MatchGuid || ""};
       return ["game:update_state", {hasGame:teams.length > 0, game:lastGame, players}];
     }
     case "ClockUpdatedSeconds":

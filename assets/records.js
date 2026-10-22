@@ -6,7 +6,7 @@
    - bioDraft(site, finals, id, who) writes a short playbill-style career summary to start a player's bio from.
    - Hand-entered records from before the scorekeeper (site.legacyRecords) are kept apart: see legacyRecords().
    "who" answers questions about a person: {name(id), current(id)}. Nothing here touches the page. */
-import {gameFor, seasonOf, postseason, rivalFor, shortSchool} from "./matches.js?v=18";
+import {gameFor, seasonOf, postseason, rivalFor, shortSchool} from "./matches.js?v=19";
 
 const OFFICIAL = m => m && m.stage !== "exhibition" && m.stage !== "scrim";
 const NEGATIVE = /death|lost|against|conceded/i;     // stats where more is worse never get a "most" record

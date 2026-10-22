@@ -57,7 +57,8 @@ service cloud.firestore {
         && d.tendencies is string && d.tendencies.size() <= 20000
         && d.picks is string && d.picks.size() <= 20000
         && d.players is list && d.players.size() <= 40
-        && d.vods is list && d.vods.size() <= 40;
+        && d.vods is list && d.vods.size() <= 40
+        && (!('statGames' in d) || (d.statGames is list && d.statGames.size() <= 60));
     }
 
     match /scoutMembers/{email} {
@@ -83,6 +84,28 @@ service cloud.firestore {
           && request.resource.data.text is string && request.resource.data.text.size() <= 4000;
         allow delete: if (canSee(resource.data.game) && resource.data.author == myEmail()) || canEdit(resource.data.game);
       }
+    }
+
+    // ---------- Rocket League stats from the stream ----------
+    // The stream's score bug isn't signed in. When a game ends it may ADD one box score here, only for a match
+    // that is live or final, with a fixed shape. Nobody but coaches can read, change or delete them; a coach
+    // applies each one in the scorekeeper (Hartland's stats to the match, the opponent's to scouting).
+    function validRLBox(id) {
+      let d = request.resource.data;
+      let m = /databases/$(database)/documents/matches/$(d.matchId);
+      return d.keys().hasOnly(['matchId', 'at', 'guid', 'us', 'winner', 'goals', 'players'])
+        && d.matchId is string && d.matchId.size() > 0 && d.matchId.size() <= 64
+        && id.matches(d.matchId + '_[A-Za-z0-9-]{1,80}')
+        && exists(m) && get(m).data.status in ['live', 'final']
+        && d.at is string && d.at.size() <= 40
+        && d.guid is string && d.guid.size() <= 80
+        && d.us in [0, 1] && d.winner in [0, 1]
+        && d.goals is list && d.goals.size() == 2
+        && d.players is list && d.players.size() <= 10;
+    }
+    match /rlInbox/{boxId} {
+      allow create: if validRLBox(boxId);
+      allow read, delete: if isCoach();
     }
 
     // Everything else is closed.

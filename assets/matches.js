@@ -234,7 +234,18 @@ async function firebaseBackend(){
     async setStation(n, data){ await fb.setDoc(fb.doc(db, "public", "broadcast"), {stations:{[n]:strip(data)}, updated:new Date().toISOString()}, {merge:true}); },
     /* public/ticker: announcements for the stream ticker */
     watchTicker(cb){ return fb.onSnapshot(fb.doc(db, "public", "ticker"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
-    async saveTicker(t){ await fb.setDoc(fb.doc(db, "public", "ticker"), strip(t)); }
+    async saveTicker(t){ await fb.setDoc(fb.doc(db, "public", "ticker"), strip(t)); },
+    /* rlInbox: Rocket League box scores the stream dropped off, waiting for a coach to apply them */
+    watchRLInbox(matchId, cb){ return fb.onSnapshot(fb.query(fb.collection(db, "rlInbox"), fb.where("matchId", "==", matchId)), s => cb(s.docs.map(d => ({id:d.id, ...d.data()}))), () => cb([])); },
+    async removeRLBox(id){ await fb.deleteDoc(fb.doc(db, "rlInbox", id)); },
+    /* scouting report for one opponent and game (coaches can read and write every report) */
+    async scoutFor(game, school){
+      const s = await fb.getDocs(fb.query(fb.collection(db, "scoutReports"), fb.where("game", "==", game)));
+      const d = s.docs.find(x => x.data().schoolKey === scoutKey(school) || scoutKey(x.data().school) === scoutKey(school));
+      return d ? {id:d.id, ...d.data()} : null;
+    },
+    newScoutId(){ return fb.doc(fb.collection(db, "scoutReports")).id; },
+    async saveScout(id, r){ await fb.setDoc(fb.doc(db, "scoutReports", id), strip(r)); }
   };
 }
 
@@ -268,6 +279,26 @@ function mockBackend(){
       b.stations = b.stations || {}; b.stations[n] = {...(b.stations[n] || {}), ...JSON.parse(JSON.stringify(data))}; b.updated = new Date().toISOString();
       localStorage.setItem("eagles-mock-broadcast", JSON.stringify(b)); tickSubs.forEach(f => f()); },
     watchTicker(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-ticker")) || {}); } catch(e){ cb({}); } }; f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-ticker") f(); }); tickSubs.add(f); return () => tickSubs.delete(f); },
-    async saveTicker(t){ localStorage.setItem("eagles-mock-ticker", JSON.stringify(t)); tickSubs.forEach(f => f()); }
+    async saveTicker(t){ localStorage.setItem("eagles-mock-ticker", JSON.stringify(t)); tickSubs.forEach(f => f()); },
+    watchRLInbox(matchId, cb){ const f = () => { let all = {}; try { all = JSON.parse(localStorage.getItem(RLK)) || {}; } catch(e){} cb(Object.entries(all).map(([id, b]) => ({id, ...b})).filter(b => b.matchId === matchId)); };
+      f(); const h = e => { if (e.key === RLK) f(); }; window.addEventListener("storage", h); const t = setInterval(f, 2000); return () => { window.removeEventListener("storage", h); clearInterval(t); }; },
+    async removeRLBox(id){ let all = {}; try { all = JSON.parse(localStorage.getItem(RLK)) || {}; } catch(e){} delete all[id]; localStorage.setItem(RLK, JSON.stringify(all)); },
+    async scoutFor(game, school){ const d = mockScout(); const e = Object.entries(d.reports).find(([, r]) => r.game === game && (r.schoolKey === scoutKey(school) || scoutKey(r.school) === scoutKey(school))); return e ? {id:e[0], ...e[1]} : null; },
+    newScoutId(){ return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+    async saveScout(id, r){ const d = mockScout(); d.reports[id] = JSON.parse(JSON.stringify(r)); localStorage.setItem("eagles-mock-scout", JSON.stringify(d)); }
   };
+}
+const RLK = "eagles-mock-rlinbox";
+/* how scouting reports are keyed (same as scout/): "Imlay City High School" -> "imlay city" */
+export const scoutKey = n => shortSchool(n).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+function mockScout(){ try { return JSON.parse(localStorage.getItem("eagles-mock-scout")) || {members:{}, reports:{}, notes:{}}; } catch(e){ return {members:{}, reports:{}, notes:{}}; } }
+
+/* The stream's Rocket League score bug drops each finished game's box score here (it isn't signed in, so it can only
+   add to rlInbox, and only for a match that's live or final). A coach applies it in the scorekeeper. */
+let _inbox = null;
+export async function sendRLBox(id, box){
+  if (isMock()){ let all = {}; try { all = JSON.parse(localStorage.getItem(RLK)) || {}; } catch(e){} if (!all[id]){ all[id] = box; localStorage.setItem(RLK, JSON.stringify(all)); } return; }
+  _inbox = _inbox || (async () => { const fb = await import(VENDOR + "firebase-full.js"); const app = fb.initializeApp(FIREBASE_CONFIG, "rl-inbox"); return {fb, db:fb.initializeFirestore(app, {localCache:fb.memoryLocalCache()})}; })();
+  const {fb, db} = await _inbox;
+  await fb.setDoc(fb.doc(db, "rlInbox", id), JSON.parse(JSON.stringify(box)));
 }

@@ -566,3 +566,27 @@ img{display:block}
 .cmp .row{height:60px}
 .cmp .row .v{font-size:46px}
 .full .foot{bottom:28px}
+
+/* ---------- Rocket League box score: each team on a sheet of cream paper with a header in its colors ---------- */
+.box .bx{position:absolute;top:362px;left:190px;right:190px;display:grid;gap:26px;filter:var(--rim)}
+.box .tm{background:var(--tex-s) center/cover,linear-gradient(var(--cream),var(--cream));background-blend-mode:overlay;color:var(--ink);
+  -webkit-mask:var(--tear-l) left top/16px 300px repeat-y,var(--tear-r) right top/16px 300px repeat-y,linear-gradient(#000,#000) center/calc(100% - 30px) 100% no-repeat}
+.box .tm:nth-child(1){transform:rotate(-.3deg)}.box .tm:nth-child(2){transform:rotate(.25deg)}
+.box .th,.box .pr{display:grid;grid-template-columns:1fr repeat(6,128px);align-items:center;padding:0 44px}
+.box .th{height:68px;background:var(--tex-s) center/cover,linear-gradient(var(--c1),var(--c1));background-blend-mode:overlay;color:var(--on)}
+.box .th .who{display:flex;align-items:center;gap:16px;min-width:0}
+.box .th .logo{width:60px;height:60px;font-size:30px;filter:var(--stk)}
+.box .th b{font:400 46px/1 var(--d);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.box .th small{text-align:center;font:600 18px/1 var(--t);letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.box .pr{height:54px;border-top:2px dashed rgba(11,20,32,.16)}
+.box .pr .who{display:flex;align-items:baseline;gap:14px;min-width:0}
+.box .pr b{font:400 38px/1 var(--d);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.box .pr .who small{font:600 18px/1 var(--t);color:#55606E;text-transform:uppercase;letter-spacing:.06em}
+.box .pr span{text-align:center;font:400 40px/1 var(--d);font-variant-numeric:tabular-nums}
+.box .pr .mvp{align-self:center;font:400 26px/1 var(--script);font-style:normal;color:var(--ink);padding:3px 12px 5px;transform:rotate(-4deg);
+  background:linear-gradient(100deg,transparent 3%,rgba(255,188,5,.92) 7%,rgba(255,200,40,.88) 93%,transparent 97%)}
+.box .pr.tot{height:48px;border-top:3px solid rgba(11,20,32,.55)}
+.box .pr.tot b,.box .pr.tot span{font-size:32px;color:#3A4656}
+.box.enter .tm{animation:slideL .6s calc(.7s + var(--i,0) * .2s) var(--snap) both}
+.box.enter .tm:nth-child(2){animation-name:slideR}
+.box.enter .pr{animation:rise .4s calc(1.1s + var(--j,0) * .08s) var(--ease) both}

@@ -168,6 +168,15 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .f textarea{min-height:90px}
 .f input:focus,.f select:focus,.f textarea:focus,.stats input:focus{outline:2px solid var(--gold);outline-offset:1px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* Rocket League stats from the stream */
+.rlbox{border:1px solid var(--line-2);border-radius:12px;padding:12px;margin-bottom:12px;display:grid;gap:10px}
+.rlbox .rlh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:700}
+.rlbox .rlh span{color:var(--muted);font-weight:600}
+.rlt{width:100%;border-collapse:collapse;font-size:14px}
+.rlt th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:4px}
+.rlt td{padding:4px;border-top:1px solid var(--line-2)}
+.rlt td.n,.rlt th.n{text-align:center;width:34px}
+.rlt select{width:100%;min-height:38px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:inherit;font:600 14px var(--body)}
 .hint{font-size:13px;color:var(--muted);margin:-6px 2px 0}
 .formbar{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 2fr;gap:10px;padding:12px 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,var(--bg) 30%)}
 .seasonbar{display:flex;align-items:center;gap:10px;margin:2px 0 4px}
@@ -227,8 +236,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo} from "../../assets/matches.js?v=18";
-import {watchFinals} from "../../assets/live.js?v=35";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=19";
+import {watchFinals} from "../../assets/live.js?v=36";
 import {recordBreaks} from "../../assets/records.js?v=1";
 
 const $ = s => document.querySelector(s);
@@ -410,9 +419,11 @@ function bindTicker(){
    A station is one streaming PC. Each one shows one match; every overlay on that PC (score bug, VS screen, lineups…)
    follows it. Saved in public/broadcast so the overlays update the moment a coach changes something. */
 const STATIONS = ["1", "2", "3", "4"];
-const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "Starting lineups"], ["team-compare", "Team comparison"], ["player-compare", "Player comparison"]];
+const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "Starting lineups"], ["team-compare", "Team comparison"], ["player-compare", "Player comparison"],
+  ["rl-team", "Rocket League: team stats (this game)"], ["rl-players", "Rocket League: player matchup (this game)"], ["rl-box", "Rocket League: box score (this game)"],
+  ["rl-team?scope=series", "Rocket League: team stats (whole match)"], ["rl-box?scope=series", "Rocket League: box score (whole match)"]];
 const stationOf = id => STATIONS.find(n => bc.stations[n]?.matchId === id) || "";
-const overlayURL = (layer, n) => `${SITE}overlay/${layer}.html${n === "1" ? "" : `?station=${n}`}`;
+const overlayURL = (layer, n) => { const [page, qs] = layer.split("?"), q = [qs, n === "1" ? "" : `station=${n}`].filter(Boolean).join("&"); return `${SITE}overlay/${page}.html${q ? "?" + q : ""}`; };
 async function setStation(n, data, msg){
   bc.stations[n] = data;
   try { await be.setStation(n, data); if (msg) toast(msg); } catch(e){ console.error(e); toast("Couldn't update the stream overlays. Check the connection."); }
@@ -578,6 +589,7 @@ function renderMatch(fromSnapshot){
   if (!cur){ const m = matches.find(x => x.id === openId); if (!m){ $("#app").innerHTML = `<p class="empty">Loading match…</p>`; return; } cur = clone(m); }
   const typing = fromSnapshot && document.activeElement?.closest?.("#details");
   const g = gameFor(site, cur.game), us = "Hartland", them = oppName(cur), unit = g.unit || "Game";
+  watchInbox(g);
   const status = cur.status, need = Math.floor(cur.bestOf / 2) + 1;
   const n = cur.current || 1, gm = (cur.games || []).find(x => x.n === n) || {n, us:0, them:0, winner:null};
   const head = `<div class="mhead"><button class="back" type="button" id="back" aria-label="Back to matches">←</button>
@@ -785,6 +797,7 @@ function detailsHTML(g, them){
         <p class="hint" style="margin:0">Saved to your past players list, so you only type each person once.</p></div></details>
       ${stats.length ? "" : `<p class="hint" style="margin-top:10px">To track stats for this game, list them on the Games tab in the Site Manager.</p>`}
     </div></details>
+    ${rlInboxHTML(g, them)}
     ${streamHTML(g, them)}
     <details class="sec"><summary>Stream links<span>${cur.stream?.live || cur.stream?.vod ? "Added" : "None yet"}</span></summary><div class="secb form">
       <label class="f"><span>YouTube live link</span><input type="url" inputmode="url" data-link="live" value="${esc(cur.stream?.live || "")}" placeholder="https://youtube.com/live/…"></label>
@@ -795,6 +808,99 @@ function detailsHTML(g, them){
       <button class="btn btn-line" type="button" id="byeBtn">${cur.bye ? "Undo bye week" : "Bye week: no opponent (automatic win)"}</button>
       <button class="btn btn-line" type="button" id="resetg">Clear all ${esc((g.unit || "game").toLowerCase())} scores</button></div></details>`;
 }
+/* ---------- Rocket League stats from the stream ----------
+   When a game ends, the stream's score bug sends both teams' box scores to rlInbox. Here a coach matches the in-game
+   names to our players, picks which game it was, and saves: Hartland's lines go into the match (per-game stats),
+   the opponent's go into that school's scouting report (gamertags only, never the public site). */
+let inbox = [], inboxFor = null, unInbox = null;
+function watchInbox(g){
+  if (!cur || inboxFor === cur.id) return;
+  if (unInbox){ Promise.resolve(unInbox).then(f => f && f()); unInbox = null; }
+  inboxFor = cur.id; inbox = [];
+  if (g.liveFeed !== "sos" || !be.watchRLInbox) return;
+  unInbox = be.watchRLInbox(cur.id, list => {
+    inbox = list.slice().sort((a, b) => String(a.at).localeCompare(String(b.at)));
+    const box = $("#rlInbox"); if (!box || cur?.id !== inboxFor || box.contains(document.activeElement)) return;
+    box.outerHTML = rlInboxHTML(gameFor(site, cur.game), oppName(cur)); bindInbox();
+  });
+}
+const rlKey = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+function rlGuess(name){
+  const k = rlKey(name); if (!k) return "";
+  const pool = [...(cur.players || []), ...everyone().values()];
+  const hit = pool.find(p => rlKey(p.tag) === k) || pool.find(p => rlKey(p.name) === k);
+  return hit?.id || "";
+}
+function rlInboxHTML(g, them){
+  if (g.liveFeed !== "sos") return "";
+  const all = [...everyone().values()], inMatch = cur.players || [];
+  const people = [...inMatch.map(p => ({id:p.id, label:p.tag || p.name})), ...all.filter(p => !inMatch.some(x => x.id === p.id)).map(p => ({id:p.id, label:(p.tag || p.name) + (p.tag && p.name ? ` (${p.name})` : "") + (p.alum ? " · past" : "")}))];
+  const free = Array.from({length:+cur.bestOf || 1}, (_, i) => i + 1).filter(n => !(cur.games || []).find(x => x.n === n)?.p);
+  const cols = [["G", "goals"], ["A", "assists"], ["Sv", "saves"], ["Sh", "shots"]];
+  const line = p => cols.map(([, f]) => `<td class="n">${+p[f] || 0}</td>`).join("");
+  const boxes = inbox.map((b, i) => {
+    const ours = (b.players || []).filter(p => p.team === b.us).sort((x, y) => y.score - x.score), theirs = (b.players || []).filter(p => p.team !== b.us).sort((x, y) => y.score - x.score);
+    const won = b.winner === b.us, gu = b.goals?.[b.us] ?? 0, gt = b.goals?.[1 - b.us] ?? 0, def = free[i] || free[free.length - 1] || 1;
+    return `<div class="rlbox" data-box="${i}"><div class="rlh"><b>${won ? "Hartland won" : `${esc(them)} won`} ${Math.max(gu, gt)}–${Math.min(gu, gt)}</b><span>ended ${esc(fmtTime(b.at))}</span></div>
+      <label class="f"><span>Which ${esc((g.unit || "game").toLowerCase())} was this?</span><select data-rn>${Array.from({length:+cur.bestOf || 1}, (_, k) => `<option value="${k + 1}"${k + 1 === def ? " selected" : ""}>${esc(g.unit || "Game")} ${k + 1}${(cur.games || []).find(x => x.n === k + 1)?.p ? " (has stats, will be replaced)" : ""}</option>`).join("")}</select></label>
+      <table class="rlt"><tr><th>Hartland, name in game</th><th>Player</th>${cols.map(([c]) => `<th class="n">${c}</th>`).join("")}</tr>
+        ${ours.map((p, k) => { const id = rlGuess(p.name); return `<tr><td>${esc(p.name)}</td><td><select data-who="${k}"><option value="">Skip</option>${people.map(o => `<option value="${esc(o.id)}"${o.id === id ? " selected" : ""}>${esc(o.label)}</option>`).join("")}</select></td>${line(p)}</tr>`; }).join("")}</table>
+      <table class="rlt"><tr><th>${esc(them)}</th><th></th>${cols.map(([c]) => `<th class="n">${c}</th>`).join("")}</tr>${theirs.map(p => `<tr><td>${esc(p.name)}</td><td></td>${line(p)}</tr>`).join("")}</table>
+      <label class="tog"><input type="checkbox" data-scout checked> Add ${esc(them)}'s stats to the scouting report</label>
+      <div class="two"><button class="btn btn-gold" type="button" data-apply>Save stats</button><button class="btn btn-line" type="button" data-drop>Dismiss</button></div></div>`;
+  }).join("");
+  return `<details class="sec" id="rlInbox"${inbox.length ? " open" : ""}><summary>Stats from the stream<span>${inbox.length ? `${inbox.length} ${esc((g.unit || "game").toLowerCase())}${inbox.length === 1 ? "" : "s"} waiting` : "None waiting"}</span></summary><div class="secb">
+    ${boxes || `<p class="hint" style="margin:0">When a Rocket League game ends on stream, the score bug sends both teams' stats here. Saving puts Hartland's into this match and ${esc(them)}'s into their scouting report.</p>`}</div></details>`;
+}
+function bindInbox(){
+  const box = $("#rlInbox"); if (!box) return;
+  box.querySelectorAll("[data-box]").forEach(el => {
+    const b = inbox[+el.dataset.box]; if (!b) return;
+    el.querySelector("[data-drop]").onclick = async () => { if (!confirm("Throw away these stats? They won't be saved anywhere.")) return; try { await be.removeRLBox(b.id); } catch(e){ toast("Couldn't remove it."); } };
+    el.querySelector("[data-apply]").onclick = async () => {
+      const g = gameFor(site, cur.game), keys = new Set((g.statList || []).map(d => d.key)), n = +el.querySelector("[data-rn]").value;
+      const ours = (b.players || []).filter(p => p.team === b.us).sort((x, y) => y.score - x.score), theirs = (b.players || []).filter(p => p.team !== b.us);
+      const who = [...el.querySelectorAll("[data-who]")].map(s => s.value);
+      if (new Set(who.filter(Boolean)).size !== who.filter(Boolean).length){ toast("Two in-game names are set to the same player."); return; }
+      const won = b.winner === b.us, gu = b.goals?.[b.us] ?? 0, gt = b.goals?.[1 - b.us] ?? 0;
+      change(m => {
+        const gm = gameRec(m, n); gm.p = {};
+        ours.forEach((p, k) => { const id = who[k]; if (!id) return;
+          const row = {}; ["goals", "assists", "saves", "shots"].forEach(f => { if (keys.has(f)) row[f] = +p[f] || 0; });
+          if (keys.has("mvps")) row.mvps = won && k === 0 ? 1 : 0;   // MVP: top score on the winning team
+          gm.p[id] = row;
+          m.players = m.players || []; if (!m.players.some(x => x.id === id)) m.players.push(snap(everyone().get(id) || {id}));
+        });
+        if (!Object.keys(gm.p).length) delete gm.p;
+        if (!gm.winner) gm.winner = won ? "us" : "them";
+        if (!gm.us && !gm.them){ gm.us = gu; gm.them = gt; }
+        if (m.status === "upcoming") m.status = "live";
+        settle(m);
+        const decided = m.games.filter(x => x.winner).length;
+        if (!m.clinched && decided < m.bestOf && (m.current || 1) <= n) m.current = Math.max(...m.games.map(x => x.n)) + 1;
+      });
+      let note = `Saved to ${g.unit || "Game"} ${n}.`;
+      if (el.querySelector("[data-scout]").checked && theirs.length){
+        try {
+          const school = cur.opponent?.school || cur.opponent?.team || oppName(cur), now = new Date().toISOString();
+          const r = await be.scoutFor(cur.game, school), id = r?.id || be.newScoutId();
+          const base = r ? Object.fromEntries(Object.entries(r).filter(([k]) => k !== "id"))
+            : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
+          base.players = base.players || [];
+          theirs.forEach(p => { if (base.players.length < 40 && !base.players.some(x => rlKey(x.tag) === rlKey(p.name))) base.players.push({tag:p.name, role:"", notes:""}); });
+          const entry = {matchId:cur.id, n, date:cur.startsAt, team:cur.teamName, result:won ? "L" : "W", score:`${gt}–${gu}`,
+            players:theirs.map(p => ({tag:p.name, score:+p.score || 0, goals:+p.goals || 0, assists:+p.assists || 0, saves:+p.saves || 0, shots:+p.shots || 0, demos:+p.demos || 0, touches:+p.touches || 0}))};
+          base.statGames = [...(base.statGames || []).filter(x => !(x.matchId === cur.id && x.n === n)), entry].slice(-60);
+          base.updatedAt = now; base.updatedBy = user?.email || "";
+          await be.saveScout(id, base); note += ` ${oppName(cur)}'s stats are in scouting.`;
+        } catch(e){ console.error(e); note += " Couldn't update scouting (are the new database rules published?)."; }
+      }
+      try { await be.removeRLBox(b.id); } catch(e){}
+      toast(note);
+    };
+  });
+}
+
 /* "On stream" panel for the open match: which station shows it and what the overlays need that isn't in the score. */
 function streamHTML(g, them){
   const n = stationOf(cur.id), st = n ? bc.stations[n] : null, ppl = cur.players || [];
@@ -838,7 +944,7 @@ function bindStream(){
 }
 function bindDetails(g){
   const D = $("#details");
-  bindStream();
+  bindStream(); bindInbox();
   const keep = fn => { const o = [...D.querySelectorAll("details")].map(d => d.open); fn(); $("#details").querySelectorAll("details").forEach((d, i) => { if (o[i]) d.open = true; }); };
   const addPlayer = (p, extra) => keep(() => change(m => { m.players = m.players || []; if (!m.players.some(x => x.id === p.id)) m.players.push(snap(p, extra)); }, true));
   D.querySelectorAll("[data-player]").forEach(b => b.onclick = () => {

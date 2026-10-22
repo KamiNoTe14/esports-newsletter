@@ -100,6 +100,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .note .tools button{border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;padding:0}
 .hist{width:100%;border-collapse:collapse;font-size:14px}
 .hist td{padding:6px 8px;border-top:1px solid var(--line)}
+.hist th{padding:6px 8px;font-size:12px;font-weight:600;color:var(--muted)}
 .hist .W{color:var(--ok);font-weight:700}.hist .L{color:var(--danger);font-weight:700}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{text-align:left;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 8px}
@@ -120,7 +121,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
    coaches and people a coach has added to a team can read it. Nothing here is ever written to the public site files.
    Coaches (EDITORS) manage members and edit everything. Captains edit reports for their games.
    Everyone on a team can read their games' reports and add notes. */
-import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=18";
+import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=19";
 const BASE = new URL("../", import.meta.url).href;
 const DOMAIN = "hartlandschools.us";
 const $ = s => document.querySelector(s);
@@ -276,6 +277,21 @@ function drawNew(M){
     if (reportFor(name, game)) return go({kind:"report", school:name, game});
     await startReport(name, game); go({kind:"report", school:name, game}); };
 }
+/* Rocket League box scores saved from our streamed games (the scorekeeper's "Stats from the stream"). Per gamertag:
+   games played and per-game averages, best first; then each game. */
+function statsHTML(r){
+  const list = (r.statGames || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.n - a.n);
+  if (!list.length) return "";
+  const F = [["Score", "score"], ["Goals", "goals"], ["Assists", "assists"], ["Saves", "saves"], ["Shots", "shots"], ["Demos", "demos"]];
+  const by = new Map();
+  list.forEach(gm => (gm.players || []).forEach(p => { const k = String(p.tag || "").toLowerCase(); const t = by.get(k) || {tag:p.tag, gp:0}; t.gp++; F.forEach(([, f]) => t[f] = (t[f] || 0) + (+p[f] || 0)); by.set(k, t); }));
+  const avg = (t, f) => (Math.round(t[f] / t.gp * 10) / 10).toLocaleString("en-US");
+  const rows = [...by.values()].sort((a, b) => b.score / b.gp - a.score / a.gp);
+  return `<div class="sec"><div class="sec-h"><h4>Stats against us</h4><span class="muted">${list.length} game${list.length === 1 ? "" : "s"}, averages per game</span></div>
+    <div style="overflow-x:auto"><table class="hist"><tr><th style="text-align:left">Gamertag</th><th>GP</th>${F.map(([l]) => `<th>${l}</th>`).join("")}</tr>
+      ${rows.map(t => `<tr><td><b>${esc(t.tag)}</b></td><td>${t.gp}</td>${F.map(([, f]) => `<td>${avg(t, f)}</td>`).join("")}</tr>`).join("")}</table></div>
+    <details><summary class="muted" style="cursor:pointer">Each game</summary><table class="hist">${list.map(gm => `<tr><td>${esc(fmtDay(gm.date))}, Game ${esc(gm.n)}</td><td>${esc(gm.team || "")}</td><td class="${gm.result === "W" ? "L" : "W"}">${gm.result === "W" ? "They won" : "We won"} ${esc(gm.score || "")}</td><td class="muted">${(gm.players || []).map(p => `${esc(p.tag)} ${+p.goals || 0}G ${+p.saves || 0}Sv`).join(" · ")}</td></tr>`).join("")}</table></details></div>`;
+}
 async function startReport(school, game){
   const id = db.newReportId();
   const r = {school, schoolKey:key(school), game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:new Date().toISOString(), createdBy:user.email, updatedAt:new Date().toISOString(), updatedBy:user.email};
@@ -315,6 +331,7 @@ function drawReport(M){
     <div class="sec"><div class="sec-h"><h4>Players to watch</h4>${ed ? `<button class="btn btn-line btn-sm" id="addP">+ Player</button>` : ""}</div>
       ${ed ? `<div class="plist">${players.map((p, i) => `<div class="prow"><input data-p="${i}" data-pk="tag" value="${esc(p.tag || "")}" placeholder="Gamertag"><input data-p="${i}" data-pk="role" value="${esc(p.role || "")}" placeholder="Main / role"><textarea data-p="${i}" data-pk="notes" rows="2" placeholder="What to expect">${esc(p.notes || "")}</textarea><button class="btn btn-line btn-sm danger" data-delp="${i}">Remove</button></div>`).join("")}</div><p class="muted" style="margin:0">Gamertags only, no real names. Opponent info stays in scouting and never appears on the public site.</p>`
         : players.length ? `<div class="plist">${players.map(p => `<div class="pcard"><b>${esc(p.tag)}</b>${p.role ? `<span class="r">${esc(p.role)}</span>` : ""}${p.notes ? `<p>${esc(p.notes)}</p>` : ""}</div>`).join("")}</div>` : `<p class="empty">Nothing yet.</p>`}</div>
+    ${statsHTML(r)}
     <div class="sec"><div class="sec-h"><h4>VODs and replays</h4>${ed ? `<button class="btn btn-line btn-sm" id="addV">+ Link</button>` : ""}</div>
       ${ed ? `<div class="plist">${vods.map((v, i) => `<div class="prow" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto"><input data-v="${i}" data-vk="label" value="${esc(v.label || "")}" placeholder="What it shows (Game 2, 4:10)"><input data-v="${i}" data-vk="url" value="${esc(v.url || "")}" placeholder="https://youtu.be/…"><button class="btn btn-line btn-sm danger" data-delv="${i}">Remove</button></div>`).join("")}</div>`
         : vods.filter(v => safe(v.url)).length ? `<ul class="vods">${vods.filter(v => safe(v.url)).map(v => `<li>▶ <a href="${esc(safe(v.url))}" target="_blank" rel="noopener">${esc(v.label || v.url)}</a></li>`).join("")}</ul>` : `<p class="empty">Nothing yet.</p>`}</div>
@@ -345,6 +362,7 @@ function bindReport(r){
       plan:editDraft.plan.trim(), tendencies:editDraft.tendencies.trim(), picks:editDraft.picks.trim(),
       players:editDraft.players.map(p => ({tag:String(p.tag || "").trim(), role:String(p.role || "").trim(), notes:String(p.notes || "").trim()})).filter(p => p.tag || p.notes).slice(0, 40),
       vods:editDraft.vods.map(v => ({label:String(v.label || "").trim(), url:String(v.url || "").trim()})).filter(v => v.url).slice(0, 40),
+      ...(r.statGames ? {statGames:r.statGames} : {}),
       updatedAt:new Date().toISOString(), updatedBy:user.email};
     try { await db.saveReport(r.id, data); editing = null; layout(); toast("Report saved."); } catch(e){ console.error(e); toast("Couldn't save. You may not have permission to edit this report."); } });
   q("#delR") && (q("#delR").onclick = async () => { if (!confirm(`Delete the ${gName(r.game)} report on ${r.school} and all its notes?`)) return; try { await db.removeReport(r.id); toast("Report deleted."); go({kind:"home"}); } catch(e){ toast("Couldn't delete it."); } });
@@ -399,7 +417,7 @@ const strip = ({id, ...m}) => m;
 (async function init(){
   try { site = await (await fetch(BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
   db = isMock() ? mockDB() : await firebaseDB();
-  const live = await import(BASE + "assets/live.js?v=35");
+  const live = await import(BASE + "assets/live.js?v=36");
   live.watchFinals(site, f => { finals = f; if (user && view.kind === "report" && !editing) drawMain(); });
   live.watchBoard(b => { board = b; if (user && (isCoach() || me) && !editing) layout(); });
   db.onUser(u => {

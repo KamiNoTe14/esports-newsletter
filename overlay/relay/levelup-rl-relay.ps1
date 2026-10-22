@@ -103,6 +103,34 @@ Say "Score bug can connect at ws://localhost:$WebPort" "Cyan"
 $clients = New-Object System.Collections.ArrayList
 $ctxTask = $listener.GetContextAsync()
 
+function SendText($r, [string]$text, [string]$type){ $b = [System.Text.Encoding]::UTF8.GetBytes($text); $r.ContentType = $type; $r.ContentLength64 = $b.Length; $r.OutputStream.Write($b, 0, $b.Length) }
+function ServeHttp($ctx){
+  $r = $ctx.Response; $path = $ctx.Request.Url.AbsolutePath
+  if ($path -eq "/clips"){
+    $list = @($clips | ForEach-Object { [ordered]@{id = $_.id; label = $_.label; game = $_.game; at = $_.at; url = "/clip/$($_.id)$([IO.Path]::GetExtension($_.path))"} })
+    $r.AddHeader("Cache-Control", "no-store"); SendText $r (ConvertTo-Json -Compress -Depth 4 @{game = $gameNo; clips = $list}) "application/json"; return
+  }
+  if ($path -match "^/clip/([0-9a-f]{12})"){
+    $c = $clips | Where-Object { $_.id -eq $Matches[1] } | Select-Object -First 1
+    if (-not $c -or -not (Test-Path -LiteralPath $c.path)){ $r.StatusCode = 404; return }
+    $ext = [IO.Path]::GetExtension($c.path).ToLower()
+    $r.ContentType = @{".mp4" = "video/mp4"; ".mov" = "video/quicktime"; ".mkv" = "video/x-matroska"; ".webm" = "video/webm"}[$ext]; if (-not $r.ContentType){ $r.ContentType = "application/octet-stream" }
+    $fs = [IO.File]::Open($c.path, "Open", "Read", "ReadWrite")
+    try {
+      $len = $fs.Length; $from = 0; $to = $len - 1
+      $r.AddHeader("Accept-Ranges", "bytes")
+      if ($ctx.Request.Headers["Range"] -match "bytes=(\d*)-(\d*)"){
+        if ($Matches[1]){ $from = [long]$Matches[1] }; if ($Matches[2]){ $to = [Math]::Min([long]$Matches[2], $len - 1) }
+        $r.StatusCode = 206; $r.AddHeader("Content-Range", "bytes $from-$to/$len")
+      }
+      $r.ContentLength64 = $to - $from + 1; [void]$fs.Seek($from, "Begin")
+      $buf = New-Object byte[] 262144; $left = $to - $from + 1
+      while ($left -gt 0){ $n = $fs.Read($buf, 0, [Math]::Min($buf.Length, $left)); if ($n -le 0){ break }; $r.OutputStream.Write($buf, 0, $n); $left -= $n }
+    } finally { $fs.Close() }
+    return
+  }
+  SendText $r "LevelUP Rocket League relay is running." "text/plain"
+}
 function Broadcast([string]$text){
   $bytes = [System.Text.Encoding]::UTF8.GetBytes($text)
   $seg = New-Object System.ArraySegment[byte] -ArgumentList (,$bytes)
@@ -137,6 +165,7 @@ try {
 if (-not $ClipFolder){ $desk = [Environment]::GetFolderPath("Desktop"); if (-not $desk){ $desk = Join-Path ([string]$env:USERPROFILE + [string]$env:HOME) "Desktop" }; $ClipFolder = Join-Path $desk "LevelUP Highlights" }
 $clipKinds = @($ClipEvents -split "," | ForEach-Object { $_.Trim().ToLower() } | Where-Object { $_ })
 $obs = $null; $obsReady = $false; $obsNext = [datetime]::MinValue; $obsRecv = $null; $obsBuf = New-Object byte[] 65536; $obsMsg = New-Object System.Text.StringBuilder
+$clips = New-Object System.Collections.ArrayList; $gameNo = 1; $lastEnd = [datetime]::MinValue   # clips saved this session, by game (for the Highlights scene)
 $obsReq = 0; $pendingClip = $null; $clipNames = New-Object System.Collections.Queue; $obsSaid = $false; $rbWarned = $false
 function ObsSend($obj){
   $b = [System.Text.Encoding]::UTF8.GetBytes(($obj | ConvertTo-Json -Compress -Depth 6))
@@ -192,18 +221,20 @@ function ObsTick {
         Say "OBS's Replay Buffer is off, so no clips can be saved. In OBS: Settings > Output > Replay Buffer > tick 'Enable Replay Buffer', then restart this window." "Yellow"; $script:rbWarned = $true }
       if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }
       if ($m.op -eq 5 -and $m.d.eventType -eq "ReplayBufferSaved"){
-        $src = $m.d.eventData.savedReplayPath; $label = if ($clipNames.Count){ $clipNames.Dequeue() } else { "Clip" }
+        $src = $m.d.eventData.savedReplayPath; $info = if ($clipNames.Count){ $clipNames.Dequeue() } else { @{label = "Clip"; game = $gameNo} }; $label = $info.label
         try {
           $day = Join-Path $ClipFolder (Get-Date).ToString("yyyy-MM-dd"); New-Item -ItemType Directory -Force -Path $day | Out-Null
           $name = ((Get-Date).ToString("h-mm-ss tt") + " " + $label) -replace '[\\/:*?"<>|]', "_"
           $dest = Join-Path $day ($name + [IO.Path]::GetExtension($src))
           Start-Sleep -Milliseconds 300; Move-Item -LiteralPath $src -Destination $dest -Force
+          [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $dest; label = $label; game = $info.game; at = (Get-Date).ToString("o")})
           Say "Saved clip: $label" "Green"
-        } catch { Say "Clip saved by OBS at $src (couldn't move it: $($_.Exception.Message))" "Yellow" }
+        } catch { Say "Clip saved by OBS at $src (couldn't move it: $($_.Exception.Message))" "Yellow"
+          if (Test-Path -LiteralPath $src){ [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $src; label = $label; game = $info.game; at = (Get-Date).ToString("o")}) } }
       }
     }
     if ($pendingClip -and (Get-Date) -ge $pendingClip.due){
-      $clipNames.Enqueue(($pendingClip.labels -join ", ")); $script:pendingClip = $null
+      $clipNames.Enqueue(@{label = ($pendingClip.labels -join ", "); game = $pendingClip.game}); $script:pendingClip = $null
       ObsRequest "SaveReplayBuffer" $null
     }
   } catch { Say "Lost the connection to OBS. Retrying..." "Yellow"; $script:obsReady = $false; $script:obsSaid = $false; $script:obsNext = (Get-Date).AddSeconds(5) }
@@ -212,7 +243,7 @@ function ObsTick {
 function QueueClip([string]$label){
   if (-not $clipsOn){ return }
   if ($pendingClip){ if ($pendingClip.labels -notcontains $label){ $pendingClip.labels += $label }; $pendingClip.due = (Get-Date).AddSeconds($ClipDelay); return }
-  $script:pendingClip = @{labels = @($label); due = (Get-Date).AddSeconds($ClipDelay)}
+  $script:pendingClip = @{labels = @($label); due = (Get-Date).AddSeconds($ClipDelay); game = $gameNo}
 }
 # Pull goals and stat-feed plays out of the game's data stream. Each message starts with {"Event"; the last piece may
 # still be arriving, so it's kept for next time.
@@ -221,9 +252,11 @@ function ScanPlays([string]$text){
   $script:scan += $text
   $last = $scan.LastIndexOf('{"Event"'); if ($last -le 0){ if ($scan.Length -gt 2000000){ $script:scan = "" }; return }
   $done = $scan.Substring(0, $last); $script:scan = $scan.Substring($last)
-  if ($done.IndexOf("GoalScored") -lt 0 -and $done.IndexOf("StatfeedEvent") -lt 0){ return }
+  if ($done.IndexOf("GoalScored") -lt 0 -and $done.IndexOf("StatfeedEvent") -lt 0 -and $done.IndexOf("MatchEnded") -lt 0){ return }
   foreach ($seg in ($done -split '(?=\{"Event")')){
-    if ($seg -match '^\{"Event"\s*:\s*"GoalScored"'){
+    if ($seg -match '^\{"Event"\s*:\s*"MatchEnded"'){   # the next game's clips go in a new group
+      if (((Get-Date) - $script:lastEnd).TotalSeconds -gt 30){ $script:gameNo++; $script:lastEnd = Get-Date }
+    } elseif ($seg -match '^\{"Event"\s*:\s*"GoalScored"'){
       $who = if ($seg -match 'Scorer\\?"\s*:\s*\{\\?"Name\\?"\s*:\s*\\?"((?:[^"\\]|\\[^"])*)\\?"'){ $Matches[1] } else { "" }
       if ($clipKinds -contains "goal"){ QueueClip ("Goal" + $(if ($who){ " - $who" } else { "" })) }
     } elseif ($seg -match '^\{"Event"\s*:\s*"StatfeedEvent"'){
@@ -252,13 +285,13 @@ while ($true){
         try { $wsc = $ctx.AcceptWebSocketAsync([NullString]::Value).GetAwaiter().GetResult(); [void]$clients.Add($wsc.WebSocket); Say "Score bug connected ($($clients.Count) connected)." "Green" }
         catch { Say "A browser tried to connect but the WebSocket failed: $($_.Exception.Message)" "Yellow" }
       } else {
-        # plain request (the score bug's permission check): answer politely so Chrome/OBS allow the connection
+        # plain requests: the score bug's permission check, and the Highlights scene's clip list and videos
         $r = $ctx.Response
         $r.AddHeader("Access-Control-Allow-Origin", "*")
         $r.AddHeader("Access-Control-Allow-Private-Network", "true")
         $r.AddHeader("Access-Control-Allow-Headers", "*")
-        $msg = [System.Text.Encoding]::UTF8.GetBytes("LevelUP Rocket League relay is running.")
-        $r.ContentType = "text/plain"; $r.OutputStream.Write($msg, 0, $msg.Length); $r.Close()
+        try { ServeHttp $ctx } catch { try { $r.StatusCode = 500 } catch {} }
+        try { $r.Close() } catch {}
       }
     }
   }

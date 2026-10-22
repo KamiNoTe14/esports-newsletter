@@ -483,8 +483,47 @@ function rlBox(m){
     body:`<div class="bx">${block(L, 0)}${block(R, 1)}</div>`});
 }
 
+/* ---------- highlights: the clips the LevelUP Relay saved (through OBS's replay buffer), played back between games ----------
+   Plays the most recent game's clips one after another, with what happened on a strip of tape, and loops the reel
+   while the scene is up. ?scope=series plays every clip from this session. The relay serves the clips on this PC. */
+const HL_BASE = "http://" + String(SOS_ADDR).replace(/^wss?:\/\//, "").split("/")[0];
+const hl = {list:[], i:0, v:null, wait:null};
+async function hlFetch(){
+  try { const d = await (await fetch(HL_BASE + "/clips", {cache:"no-store"})).json(), all = d.clips || [];
+    if (!all.length || SCOPE === "series") return all;
+    const last = Math.max(...all.map(c => +c.game || 0)); return all.filter(c => (+c.game || 0) === last);
+  } catch(e){ return null; }
+}
+function hlNote(msg){ const n = app.querySelector(".hlno"), cap = app.querySelector(".hlcap"); if (n){ n.hidden = !msg; n.textContent = msg || ""; } if (cap) cap.hidden = !!msg; }
+async function hlNext(){
+  const v = hl.v; if (!v || !document.body.contains(v)) return;
+  clearTimeout(hl.wait);
+  if (hl.i >= hl.list.length){
+    const list = await hlFetch(); if (hl.v !== v) return;
+    if (list === null){ hlNote("Highlights play from the LevelUP Relay on this PC. Start it, then show this scene again."); hl.wait = setTimeout(hlNext, 4000); return; }
+    if (!list.length){ hlNote("No highlights saved yet."); hl.wait = setTimeout(hlNext, 4000); return; }
+    hl.list = list; hl.i = 0;
+  }
+  const c = hl.list[hl.i++]; hlNote("");
+  app.querySelector("#hlcap").textContent = c.label; app.querySelector("#hlcount").textContent = hl.list.length > 1 ? `${hl.i} of ${hl.list.length}` : "";
+  v.src = HL_BASE + c.url; v.play().catch(() => {});
+}
+function hlStart(){
+  const v = app.querySelector("#hlv"); if (!v || v === hl.v) return;
+  hl.v = v; hl.list = []; hl.i = 0;
+  v.onended = hlNext;
+  v.onerror = () => { hlNote(/\.mkv/i.test(v.src) ? "These clips are MKV files, which can't play here. In OBS: Settings > Output > Recording Format > MP4." : "That clip couldn't play. Skipping it."); clearTimeout(hl.wait); hl.wait = setTimeout(hlNext, 3000); };
+  hlNext();
+}
+function highlights(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), played = seriesGames(m).length;
+  out.html = frame("hl", m, g, {title:SCOPE === "series" ? "Match" : played ? `Game ${played}` : "Game", script:"Highlights", sub:eventLine(m), split:[L, R],
+    body:`<div class="hlv"><div class="scr"><video id="hlv" playsinline></video><div class="hlno" hidden></div></div><div class="hlcap"><span class="tape"><span id="hlcap"></span><em id="hlcount"></em></span></div></div>`});
+  hlStart();
+}
+
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */

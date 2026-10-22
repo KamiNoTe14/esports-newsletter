@@ -1,7 +1,8 @@
 /* Live game data from Rocket League. Two sources are understood:
-   1. The official Rocket League Stats API (built into the game since the April 2026 update). Turned on in
-      <Rocket League>/TAGame/Config/TAStatsAPI.ini (or DefaultStatsAPI.ini) with PacketSendRate > 0; it serves a
-      WebSocket on ws://localhost:49124 ("WebPort"). Messages look like {"Event":"UpdateState","Data":{...}}.
+   1. The official Rocket League Stats API. Turned on in Documents/My Games/Rocket League/TAGame/Config/TAStatsAPI.ini
+      ([TAGame.MatchStatsExporter_TA] Port=49123 PacketSendRate=30). The game sends a plain TCP stream of JSON objects
+      ({"Event":"UpdateState","Data":"{...}"}) on port 49123, which a browser can't open, so overlay/relay/levelup-rl-relay.ps1
+      runs on the game PC and passes the stream to the score bug as a WebSocket on ws://localhost:49124.
    2. The older SOS BakkesMod plugin (ws://localhost:49122, or its relay on 49322). BakkesMod stopped working with
       Rocket League's Easy Anti-Cheat update (April 28, 2026), so this is only for old installs and offline setups.
    Both are turned into the same SOS-style events ("game:update_state", "game:goal_scored", ...) for the overlay.
@@ -74,13 +75,28 @@ export function connectSOS(address, on){
     };
     ws.onclose = ev => { on.status?.(false, ev.code); retry(); };
     ws.onerror = () => {};
+    let pending = "";
+    const handle = msg => {
+      if (msg && msg.Event){ const out = fromStatsAPI(msg.Event, msg.Data); if (out) on.event?.(out[0], out[1]); return; }
+      if (msg && msg.event) on.event?.(msg.event, msg.data);
+    };
     ws.onmessage = e => {
       let txt = typeof e.data === "string" ? e.data : "";
       if (!txt) return;
-      if (txt[0] !== "{"){ try { txt = atob(txt); } catch(err){ return; } }   // some plugin builds send base64
-      let msg; try { msg = JSON.parse(txt); } catch(err){ return; }
-      if (msg && msg.Event){ const out = fromStatsAPI(msg.Event, msg.Data); if (out) on.event?.(out[0], out[1]); return; }
-      if (msg && msg.event) on.event?.(msg.event, msg.data);
+      if (!pending && !/^\s*\{/.test(txt)){ try { txt = atob(txt); } catch(err){ return; } }   // some plugin builds send base64
+      /* The game's Stats API is a stream of JSON objects back to back, passed on by the relay in whatever chunks
+         arrive, so a message can hold several objects or half of one. Cut out each complete {...} and keep the rest. */
+      pending += txt;
+      let depth = 0, inStr = false, esc = false, start = -1, used = 0;
+      for (let i = 0; i < pending.length; i++){
+        const c = pending[i];
+        if (inStr){ if (esc) esc = false; else if (c === "\\") esc = true; else if (c === '"') inStr = false; continue; }
+        if (c === '"'){ inStr = true; continue; }
+        if (c === "{"){ if (depth === 0) start = i; depth++; }
+        else if (c === "}" && depth > 0){ depth--; if (depth === 0 && start >= 0){ try { handle(JSON.parse(pending.slice(start, i + 1))); } catch(err){} used = i + 1; start = -1; } }
+      }
+      pending = depth > 0 && start >= 0 ? pending.slice(start) : pending.slice(used).replace(/^[^{]*/, "");
+      if (pending.length > 2e6) pending = "";   // never let a broken stream grow without limit
     };
   }
   open();

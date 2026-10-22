@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare. Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf} from "../assets/matches.js?v=18";
 import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=35";
-import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=3";
+import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=4";
 
 const q = new URLSearchParams(location.search);
 const STATION = q.get("station") || "1", LAYER = document.body.dataset.layer;

@@ -604,7 +604,7 @@ export function startOpponent(site){
     const open = new Set([...host.querySelectorAll("details[open]")].map(d => d.id));
     const res = m => `<span class="${m.result}">${esc(m.result || "–")} ${m.score?.us ?? 0}–${m.score?.them ?? 0}</span>`;
     host.innerHTML = `<section class="page-h opp-h${skin ? " skinned" : ""}"${skin}><div class="wrap opp-top">${logo}
-        <div><p class="eyebrow">Head to head${lib?.league ? ` · ${esc(lib.league)}` : ""}</p><h1 style="font-size:clamp(36px,6vw,64px)">Hartland vs. ${esc(name)}</h1>
+        <div><p class="eyebrow">Head to head${(() => { const lg = [...new Set(all.map(m => String(m.league || "").trim()).filter(l => l && !/^(exhibition|scrimmage)$/i.test(l)))]; return lg.length ? ` · ${esc(lg.join(" · "))}` : lib?.league ? ` · ${esc(lib.league)}` : ""; })()}</p><h1 style="font-size:clamp(36px,6vw,64px)">Hartland vs. ${esc(name)}</h1>
         ${[lib?.mascot, placeOf(lib)].filter(Boolean).length ? `<p class="lead" style="margin:4px 0 0">${esc([lib?.mascot, placeOf(lib)].filter(Boolean).join(" · "))}</p>` : ""}
         <div class="opp-links">${rv ? `<a class="chip gold" href="${BASE}rival.html?school=${encodeURIComponent(rv.school)}">⚔ ${esc(rv.title || "Rivalry")}</a>` : ""}${links}</div></div></div></section>
       <section class="section"><div class="wrap">

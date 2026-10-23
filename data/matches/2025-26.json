@@ -1,6 +1,6 @@
 {
   "season": "2025-26",
-  "updated": "2026-10-23T17:11:53.462Z",
+  "updated": "2026-10-23T17:19:08.449Z",
   "matches": [
     {
       "id": "pv88a762c8bb0e4b9b9d",
@@ -16192,89 +16192,156 @@
     },
     {
       "id": "mvUQibluh4r2mFD6Ae9y",
-      "league": "MiHSEF",
+      "teamName": "Rocket League Varsity (2v2)",
+      "startsAt": "2026-04-25T20:00:00.000Z",
+      "term": "spring",
+      "seriesOnly": false,
       "result": "W",
       "forfeit": null,
-      "notes": "",
-      "term": "spring",
+      "league": "MiHSEF",
       "games": [
         {
-          "them": 0,
-          "us": 5,
           "n": 1,
-          "winner": "us"
+          "p": {
+            "p-0b11aaef": {
+              "goals": 2,
+              "assists": 1,
+              "shots": 4,
+              "saves": 0
+            },
+            "p-c0313a9e": {
+              "mvps": 1,
+              "goals": 3,
+              "saves": 5,
+              "assists": 2,
+              "shots": 5
+            }
+          },
+          "us": 5,
+          "winner": "us",
+          "them": 0
         },
         {
-          "n": 2,
           "us": 7,
+          "winner": "us",
           "them": 2,
-          "winner": "us"
+          "n": 2,
+          "p": {
+            "p-c0313a9e": {
+              "shots": 7,
+              "saves": 2,
+              "mvps": 1,
+              "goals": 5,
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "saves": 0,
+              "shots": 5,
+              "assists": 3,
+              "goals": 2
+            }
+          }
         },
         {
+          "p": {
+            "p-c0313a9e": {
+              "shots": 8,
+              "mvps": 1,
+              "goals": 4,
+              "saves": 1,
+              "assists": 0
+            },
+            "p-0b11aaef": {
+              "saves": 1,
+              "shots": 2,
+              "assists": 3,
+              "goals": 0
+            }
+          },
+          "n": 3,
           "us": 4,
           "winner": "us",
-          "n": 3,
           "them": 0
         }
       ],
+      "notes": "",
+      "teamId": "",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "teamId": "",
-      "teamName": "Rocket League Varsity (2v2)",
-      "startsAt": "2026-04-25T20:00:00.000Z",
-      "game": "rocket-league",
-      "season": "2025-26",
-      "bestOf": 5,
-      "players": [
-        {
-          "name": "Tavin Flanagan",
-          "stats": {},
-          "private": false,
-          "id": "p-0b11aaef",
-          "tag": "TRE4TY."
-        },
-        {
-          "name": "Dylan Reinwand",
-          "stats": {},
-          "tag": "Qyxical",
-          "private": false,
-          "id": "p-c0313a9e",
-          "alum": true
-        },
-        {
-          "private": false,
-          "stats": {},
-          "name": "Fred Nikitin",
-          "id": "p-61bdc66e",
-          "tag": "Stupid Nonsense"
-        }
-      ],
-      "clinched": "us",
-      "perGame": false,
-      "current": 3,
-      "status": "final",
-      "seriesOnly": false,
-      "stage": "playoffs",
-      "updatedAt": "2026-10-23T17:09:50.997Z",
-      "level": "Varsity",
-      "gameName": "Rocket League",
-      "event": "MiHSEF Spring 2026 State Championship LAN",
-      "opponent": {
-        "team": "Corunna Rocket League 2v2",
-        "abbr": "COR",
-        "school": "Corunna High School",
-        "short": "",
-        "logo": ""
-      },
-      "source": {},
+      "bye": false,
       "score": {
         "us": 3,
         "them": 0
       },
-      "bye": false,
-      "week": "Group Stage - Round 1"
+      "players": [
+        {
+          "stats": {
+            "shots": 11,
+            "saves": 1,
+            "goals": 4,
+            "assists": 7
+          },
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Tavin Flanagan",
+          "private": false,
+          "tag": "TRE4TY.",
+          "id": "p-0b11aaef"
+        },
+        {
+          "tag": "Qyxical",
+          "stats": {
+            "saves": 8,
+            "assists": 2,
+            "goals": 12,
+            "mvps": 3,
+            "shots": 20
+          },
+          "id": "p-c0313a9e",
+          "name": "Dylan Reinwand",
+          "private": false,
+          "alum": true,
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "tag": "Stupid Nonsense",
+          "stats": {},
+          "private": false,
+          "id": "p-61bdc66e",
+          "name": "Fred Nikitin",
+          "games": []
+        }
+      ],
+      "updatedAt": "2026-10-23T17:17:08.246Z",
+      "status": "final",
+      "game": "rocket-league",
+      "gameName": "Rocket League",
+      "event": "MiHSEF Spring 2026 State Championship LAN",
+      "season": "2025-26",
+      "bestOf": 5,
+      "opponent": {
+        "short": "",
+        "team": "Corunna Rocket League 2v2",
+        "abbr": "COR",
+        "school": "Corunna High School",
+        "logo": ""
+      },
+      "current": 3,
+      "level": "Varsity",
+      "perGame": true,
+      "stage": "playoffs",
+      "week": "Group Stage - Round 1",
+      "source": {},
+      "clinched": "us"
     }
   ]
 }

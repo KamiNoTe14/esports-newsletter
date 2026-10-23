@@ -171,7 +171,7 @@ function timelineHTML(site){
   const order = {championship:0, tournament:1, finish:2, milestone:3};
   return `<div class="tl">${seasons.map(se => { const list = by[se], main = list.filter(r => recType(r) !== "honor").sort((a, b) => order[recType(a)] - order[recType(b)]), hon = {};
     list.filter(r => recType(r) === "honor").forEach(r => (hon[r.title] = hon[r.title] || []).push(r));
-    return `<div><h3>${se.replace("-", "–")} <span data-season-rec="${se}"></span></h3><ul>${main.map(r => `<li>${recType(r) === "milestone" ? esc(r.title) : `<b>${esc([r.org, r.title].filter(Boolean).join(" "))}</b>${recGame(site, r) ? ` · ${esc(recGame(site, r).short || recGame(site, r).name)}` : ""}`}</li>`).join("")}${Object.entries(hon).map(([t, l]) => `<li>${esc(t)}: ${l.map(r => esc(r.detail || "")).filter(Boolean).join(", ")}</li>`).join("")}</ul></div>`; }).join("")}</div>`;
+    return `<div><h3>${se.replace("-", "–")} <span data-season-rec="${se}"></span></h3><ul>${main.map(r => `<li>${recType(r) === "milestone" && !recGame(site, r) ? esc(r.title) : `${recType(r) === "milestone" ? esc([r.org, r.title].filter(Boolean).join(" ")) : `<b>${esc([r.org, r.title].filter(Boolean).join(" "))}</b>`}${recGame(site, r) ? ` · ${esc(recGame(site, r).short || recGame(site, r).name)}` : ""}`}</li>`).join("")}${Object.entries(hon).map(([t, l]) => `<li>${esc(t)}: ${l.map(r => esc(r.detail || "")).filter(Boolean).join(", ")}</li>`).join("")}</ul></div>`; }).join("")}</div>`;
 }
 function recordTableHTML(site){
   const list = recs(site).filter(r => recType(r) === "record"); if (!list.length) return "";

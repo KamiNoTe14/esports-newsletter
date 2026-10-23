@@ -473,6 +473,30 @@ const wl = list => { const w = list.filter(m => m.result === "W").length, l = li
 const rivalKey = n => String(n || "").toLowerCase().replace(/\s+(high\s+school|hs|school)\s*$/i, "").replace(/[^a-z0-9]+/g, " ").trim();
 const byNewest = (a, b) => a.startsAt > b.startsAt ? -1 : 1;
 
+/* Teams page: each team's record this season and all-time, under its leagues. All-time follows the team across
+   seasons; a team that's new this season (Fortnite's numbered duos) shows the program's all-time record in that game
+   and level instead, and says so. Exhibitions and scrimmages don't count; byes count as wins. */
+export function startTeamRecords(site){
+  const official = m => m.stage !== "exhibition" && m.stage !== "scrim" && (m.result === "W" || m.result === "L");
+  const se = m => m.season || seasonOf(m.startsAt), NOW = seasonOf();
+  watchFinals(site, fin => {
+    const list = fin.filter(official);
+    document.querySelectorAll(".trec[data-rec]").forEach(el => {
+      const t = (site.teams || []).find(x => x.id === el.dataset.rec); if (!t) return;
+      const g = gameFor(site, t.gameKey), level = String(t.level || "").toLowerCase();
+      const mine = list.filter(m => m.teamId === t.id), cur = mine.filter(m => se(m) === NOW);
+      let all = mine, label = "All-time", whose = "";
+      if (new Set(mine.map(se)).size <= 1){
+        const prog = list.filter(m => m.game === t.gameKey && (!level || String(m.level || "").toLowerCase() === level || new RegExp("\\b" + level + "\\b", "i").test(m.teamName || "")));
+        if (prog.length > mine.length){ all = prog; label = "Program all-time"; whose = `${g.short || g.name} ${t.level || ""}`.trim() + ", "; }
+      }
+      if (!cur.length && !all.length) return;
+      const first = all.length ? Math.min(...all.map(m => +se(m).slice(0, 4))) : 0, r = wl(cur), a = wl(all);
+      el.innerHTML = `<div><small>This season</small><b>${cur.length ? r.text : "0–0"}</b></div><div><small>${esc(label)}</small><b>${a.text}</b>${first ? `<span>${esc(whose)}since ${first}</span>` : ""}</div>`;
+      el.hidden = false;
+    });
+  });
+}
 /* who: names and current/alum status for the record book (gamertag only for private players) */
 function whoFrom(site, fin){
   const seen = {}; fin.forEach(m => (m.players || []).forEach(p => { if (p.id && !seen[p.id]) seen[p.id] = p; }));

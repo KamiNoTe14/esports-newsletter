@@ -596,3 +596,11 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .player-h.senior .chip.gold{background:var(--navy);border-color:var(--navy);color:var(--gold)}
 .player-h.senior .player-photo{border-color:var(--navy);box-shadow:0 0 0 4px var(--gold),0 0 0 7px var(--navy),0 10px 24px rgba(0,0,0,.25)}
 .player-h.senior .player-rec{border-color:var(--navy);box-shadow:0 10px 24px rgba(0,0,0,.2)}
+
+/* teams: this season and all-time records */
+.trec{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trec[hidden]{display:none}
+.trec div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:grid;gap:2px}
+.trec small{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.trec b{font-family:var(--display);font-size:26px;line-height:1.05;color:#fff}
+.trec span{font-size:12px;color:var(--muted)}

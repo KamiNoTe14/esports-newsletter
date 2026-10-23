@@ -102,6 +102,7 @@ function teamCards(site){
       <h3>${esc(t.name)}</h3>
       ${t.note ? `<p class="muted" style="margin:0;font-size:15px">${esc(t.note)}</p>` : ""}
       <div class="chips">${lg.map((l, i) => `<span class="chip${i ? " gold" : ""}">${esc(l)}</span>`).join("")}</div>
+      <div class="trec" data-rec="${esc(t.id || "")}" hidden></div>
       ${showRoster && roster.length ? `<ul class="roster">${roster.map(p => `<li><span>${p.id ? `<a class="pl" href="${BASE}player.html?id=${encodeURIComponent(p.id)}">` : ""}${p.private || !p.name ? `<span class="tag">${esc(p.tag)}</span>` : esc(p.name)}${p.id ? "</a>" : ""}${p.captain ? ` <span class="cap" title="Team captain" aria-label="Team captain">C</span>` : ""}${p.role ? ` <span class="muted">· ${esc(p.role)}</span>` : ""}</span>${!p.private && p.name && p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </article>`; }).join("")}</div>`;
 }
@@ -405,8 +406,8 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "legacy", "rival", "opponent"].includes(PAGE)) import(BASE + "assets/live.js?v=37").then(L => {
-    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site);
+  if (["home", "schedule", "results", "player", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=38").then(L => {
+    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams") L.startTeamRecords(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#rival") || $("#opponent") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });

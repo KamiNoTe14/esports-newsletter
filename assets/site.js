@@ -91,6 +91,24 @@ function issueCard(is){
 }
 function gameArt(site, t){ return t.art || ((site.games || []).find(g => g.key === t.gameKey) || {}).art || ""; }
 function gameIcon(site, t){ return ((site.games || []).find(g => g.key === t.gameKey) || {}).icon || ""; }
+/* A team's place in each league's standings (Site Manager > Standings). A Hartland row can name its team ("Which of
+   our teams"); otherwise it's matched by game, JV/Varsity and a trailing number ("Hartland Fortnite 2" is Varsity #2). */
+function teamRanks(site, t){
+  const g = (site.games || []).find(x => x.key === t.gameKey) || {}, word = String(g.short || g.name || t.game || "").split(/\s+/)[0].toLowerCase();
+  if (!word) return [];
+  const num = s => (String(s || "").match(/(?:#|\s)(\d+)\s*$/) || [])[1] || "1", jv = s => /\bjv\b/i.test(String(s || ""));
+  const tables = (site.standings || []).filter(s => s.on !== false && String(s.title || "").toLowerCase().includes(word));
+  const leagues = String(t.leagues || "").split(",").map(s => s.trim()).filter(Boolean);
+  const out = [];
+  tables.forEach(s => {
+    const ours = (s.rows || []).filter(r => r.us);
+    const row = ours.find(r => r.teamId === t.id) || ours.find(r => !r.teamId && jv(r.team) === (String(t.level).toUpperCase() === "JV" || jv(t.name)) && num(r.team) === num(t.name));
+    if (!row || !String(row.rank || "").trim()) return;
+    const league = leagues.find(l => String(s.title).toLowerCase().includes(l.toLowerCase())) || String(s.title).trim().split(/\s+/)[0];
+    if (!out.some(x => x.league === league)) out.push({league, rank:String(row.rank).trim(), of:(s.rows || []).length});
+  });
+  return out;
+}
 function teamCards(site){
   const showRoster = on(site, "rosters");
   return `<div class="grid g3">${(site.teams || []).map(t => {
@@ -102,7 +120,7 @@ function teamCards(site){
       <h3>${esc(t.name)}</h3>
       ${t.note ? `<p class="muted" style="margin:0;font-size:15px">${esc(t.note)}</p>` : ""}
       <div class="chips">${lg.map((l, i) => `<span class="chip${i ? " gold" : ""}">${esc(l)}</span>`).join("")}</div>
-      <div class="trec" data-rec="${esc(t.id || "")}" hidden></div>
+      <div class="tstats"><div class="trec" data-rec="${esc(t.id || "")}" hidden></div>${teamRanks(site, t).map(r => `<div class="trank" title="${esc(r.league)} standings"><small>${esc(r.league.length > 9 ? r.league.split(/\s+/)[0] : r.league)}</small><b>#${esc(r.rank)}</b>${r.of ? `<span>of ${r.of} teams</span>` : ""}</div>`).join("")}</div>
       ${showRoster && roster.length ? `<ul class="roster">${roster.map(p => `<li><span>${p.id ? `<a class="pl" href="${BASE}player.html?id=${encodeURIComponent(p.id)}">` : ""}${p.private || !p.name ? `<span class="tag">${esc(p.tag)}</span>` : esc(p.name)}${p.id ? "</a>" : ""}${p.captain ? ` <span class="cap" title="Team captain" aria-label="Team captain">C</span>` : ""}${p.role ? ` <span class="muted">· ${esc(p.role)}</span>` : ""}</span>${!p.private && p.name && p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </article>`; }).join("")}</div>`;
 }
@@ -406,7 +424,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=39").then(L => {
+  if (["home", "schedule", "results", "player", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=40").then(L => {
     if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams") L.startTeamRecords(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);

@@ -481,7 +481,7 @@ export function startTeamRecords(site){
     const list = fin.filter(m => official(m) && (m.season || seasonOf(m.startsAt)) === NOW);
     document.querySelectorAll(".trec[data-rec]").forEach(el => {
       const cur = list.filter(m => m.teamId === el.dataset.rec);
-      el.innerHTML = `<small>This season</small><b>${wl(cur).text}</b>`; el.hidden = false;
+      el.innerHTML = `<small>Record</small><b>${wl(cur).text}</b><span>this season</span>`; el.hidden = false;
     });
   });
 }

@@ -613,3 +613,43 @@ img{display:block}
 .hl .hlcap em:empty{display:none}
 .hl .hlcap[hidden]{display:none}
 .hl.enter .hlv{animation:rise .6s .7s var(--ease) both}
+
+/* ---------- corner score bug: covers the island's round tracker in the top-right corner ---------- */
+.cbug{position:absolute;top:0;right:0;width:450px;padding:10px 12px 14px 22px;display:grid;gap:6px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45));
+  background:var(--tex-s) center/cover,linear-gradient(#141518,#141518);background-blend-mode:overlay;
+  -webkit-mask:var(--tear-l) left top/16px 300px repeat-y,var(--tear-b) bottom left/300px 12px repeat-x,linear-gradient(#000,#000) right top/calc(100% - 15px) calc(100% - 11px) no-repeat}
+.cbug .ctape{justify-self:start;display:flex;align-items:center;gap:8px;padding:5px 16px 6px;font:700 15px/1 var(--t);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);transform:rotate(-1.2deg);margin-left:6px;
+  background:var(--tex-s) center/cover,linear-gradient(rgba(237,227,198,.97),rgba(237,227,198,.97));background-blend-mode:overlay}
+.cbug .ctape .dot{width:9px;height:9px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(255,59,59,.6);animation:pulse 1.6s infinite}
+.cbug .crow{display:grid;grid-template-columns:46px minmax(0,1fr) auto 62px;align-items:center;gap:10px;height:52px;padding-left:8px;color:var(--on);
+  background:var(--tex-s) center/cover,linear-gradient(180deg,color-mix(in srgb,var(--c1) 88%,#fff),var(--c1));background-blend-mode:overlay;border-left:6px solid var(--c2)}
+.cbug .clg{height:44px;filter:var(--stk)}
+.cbug .clg .logo,.cbug .clg .mono{height:44px}
+.cbug .cnm{font:400 34px/1 var(--d);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbug .cpips{display:flex;gap:5px}
+.cbug .cpips i{width:14px;height:14px;transform:skewX(-14deg);background:color-mix(in srgb,var(--on) 25%,transparent)}
+.cbug .cpips i.on{background:var(--gold);box-shadow:0 0 8px rgba(255,188,5,.6)}
+.cbug .csc{align-self:stretch;display:grid;place-items:center;font:400 40px/1 var(--d);color:var(--ink);font-variant-numeric:tabular-nums;
+  background:var(--tex-s) center/cover,linear-gradient(var(--cream),var(--cream));background-blend-mode:overlay}
+.cbug .csc.pop{animation:cpop .6s var(--snap)}
+@keyframes cpop{0%{transform:scale(1.5);background-color:var(--gold)}100%{transform:none}}
+.cbug .cfoot{justify-self:end;font:600 15px/1 var(--t);letter-spacing:.06em;text-transform:uppercase;color:#C9D3DF;padding-right:4px}
+.cbug .cfoot em{font-style:normal;color:var(--gold)}
+.cbug .cfoot b{color:var(--gold)}
+.cbug.enter{animation:slideR .5s var(--snap) both}
+
+/* ---------- POV name plate ---------- */
+.pov{position:absolute;display:flex;align-items:center;gap:14px;filter:drop-shadow(0 8px 12px rgba(0,0,0,.45))}
+.pov.tl{top:22px;left:24px}
+.pov.bottom{bottom:150px;left:50%;transform:translateX(-50%)}
+.pov .plg{width:86px;height:86px;filter:var(--stk);transform:rotate(-5deg);z-index:2}
+.pov .plg .logo,.pov .plg .mono{height:86px}
+.pov .pbody{display:grid;gap:3px;margin-left:-34px;padding:10px 34px 12px 46px;min-width:300px;color:var(--on);
+  background:var(--tex-s) center/cover,linear-gradient(180deg,color-mix(in srgb,var(--c1) 88%,#fff),var(--c1));background-blend-mode:overlay;
+  -webkit-mask:var(--tear-r) right top/16px 300px repeat-y,linear-gradient(#000,#000) left/calc(100% - 15px) 100% no-repeat}
+.pov .pbody small{font:700 13px/1 var(--t);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.pov .pbody b{font:400 52px/1 var(--d);text-transform:uppercase;letter-spacing:.01em;white-space:nowrap}
+.pov .pbody span{font:400 20px/1.1 var(--hand);color:color-mix(in srgb,var(--on) 80%,transparent)}
+.pov.enter .plg{animation:plgIn .55s .25s var(--snap) both}
+@keyframes plgIn{0%{opacity:0;transform:scale(2) rotate(-25deg)}60%{opacity:1;transform:scale(.92) rotate(-3deg)}100%{transform:rotate(-5deg)}}
+.pov.enter .pbody{animation:slideL .5s var(--snap) both}

@@ -424,7 +424,8 @@ const STATIONS = ["1", "2", "3", "4"];
 const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "Starting lineups"], ["team-compare", "Team comparison"], ["player-compare", "Player comparison"],
   ["rl-team", "Rocket League: team stats (this game)"], ["rl-players", "Rocket League: player matchup (this game)"], ["rl-box", "Rocket League: box score (this game)"],
   ["rl-team?scope=series", "Rocket League: team stats (whole match)"], ["rl-box?scope=series", "Rocket League: box score (whole match)"],
-  ["highlights", "Highlights: last game's clips"], ["highlights?scope=series", "Highlights: every clip this session"]];
+  ["highlights", "Highlights: last game's clips"], ["highlights?scope=series", "Highlights: every clip this session"],
+  ["corner", "Corner score bug (Fortnite: covers the round tracker)"], ["pov?slot=1", "POV name plate: player 1 in the lineup"], ["pov?slot=2", "POV name plate: player 2 in the lineup"]];
 const stationOf = id => STATIONS.find(n => bc.stations[n]?.matchId === id) || "";
 const overlayURL = (layer, n) => { const [page, qs] = layer.split("?"), q = [qs, n === "1" ? "" : `station=${n}`].filter(Boolean).join("&"); return `${SITE}overlay/${page}.html${q ? "?" + q : ""}`; };
 async function setStation(n, data, msg){
@@ -754,6 +755,14 @@ function bindTop(){
     if (m.seriesOnly){ m.seriesOnly = false; m.games = []; m.current = 1; }
     const gm = gameRec(m, m.current || 1); gm[b.dataset.pt] = Math.max(0, (gm[b.dataset.pt] || 0) + (+b.dataset.d));
     if (m.status === "upcoming") m.status = "live";
+    /* "first to 10" games (Fortnite Zone Wars): reaching it wins the game and moves on to the next one */
+    const to = +gameFor(site, m.game).firstTo || 0, side = b.dataset.pt;
+    if (to && +b.dataset.d > 0 && !gm.winner && gm[side] >= to){
+      gm.winner = side; settle(m);
+      const decided = m.games.filter(x => x.winner).length;
+      if (!m.clinched && decided < m.bestOf) m.current = Math.max(...m.games.map(x => x.n)) + 1;
+      toast(`${side === "us" ? "Hartland" : oppName(m)} wins ${gameFor(site, m.game).unit || "Game"} ${gm.n} ${gm[side]}–${gm[side === "us" ? "them" : "us"]}.`);
+    }
   }));
   $("#scoreTop").querySelectorAll("[data-win]").forEach(b => b.onclick = () => change(m => {
     const n = m.current || 1, gm = gameRec(m, n), who = b.dataset.win;

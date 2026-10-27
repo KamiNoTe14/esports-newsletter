@@ -522,8 +522,44 @@ function highlights(m){
   hlStart();
 }
 
+/* ---------- corner score bug (Fortnite Zone Wars and other round-scored games) ----------
+   Sits flush in the top-right corner, over the island's own round tracker. Each team on a strip of paper in its colors:
+   games won as pips, the current game's rounds in a big box. Rounds are tapped in the scorekeeper. */
+let lastCorner = null;
+function corner(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), need = Math.floor((+m.bestOf || 1) / 2) + 1;
+  const n = m.status === "final" ? Math.max(1, (m.games || []).filter(x => x.winner).length) : (m.current || 1);
+  const cur = (m.games || []).find(x => x.n === n) || {}, pts = s => s.us ? +cur.us || 0 : +cur.them || 0;
+  const firstTo = +g.firstTo || 0, unit = g.unit || "Game";
+  const row = (s, i) => `<div class="crow ${s.us ? "us" : "them"}" style="${skin(s)}"><div class="clg">${logoHTML(s.logo, s.name)}</div><b class="cnm" style="font-size:${fitName(s.name, 34, 190)}px">${esc(s.name)}</b>
+      <span class="cpips">${Array.from({length:need}, (_, k) => `<i class="${k < s.won ? "on" : ""}"></i>`).join("")}</span><span class="csc" data-i="${i}">${m.status === "final" ? s.won : pts(s)}</span></div>`;
+  out.html = `<div class="cbug">
+      <div class="ctape">${m.status === "live" ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
+      ${row(L, 0)}${row(R, 1)}
+      <div class="cfoot">${m.status === "final" ? `<b>Final</b>` : `${esc(unit)} <em>${n}</em>${firstTo ? ` · First to <em>${firstTo}</em>` : ""}`} · Best of <em>${esc(m.bestOf)}</em></div></div>`;
+  /* a round that just went up gets a pop */
+  const now = [L, R].map(s => m.status === "final" ? s.won : pts(s));
+  if (lastCorner) now.forEach((v, i) => { if (v > lastCorner[i]){ const el = app.querySelector(`.csc[data-i="${i}"]`); el?.classList.add("pop"); } });
+  lastCorner = now;
+}
+
+/* ---------- POV name plate: whose screen the stream is showing ----------
+   One browser source per player's scene: ?slot=1 / ?slot=2 is that position in the match lineup (scorekeeper order),
+   or ?player=TRE4TY. picks by gamertag or name. ?name=TAVIN753 shows a different in-game name. ?pos=bottom moves it
+   from the top-left corner to the bottom middle. */
+function pov(m){
+  const ppl = m.players || [], want = String(q.get("player") || "").toLowerCase();
+  const p = want ? ppl.find(x => [x.tag, x.name, x.id, tagOf(x), nameOf(x)].some(v => String(v || "").toLowerCase() === want))
+    : ppl[Math.max(0, (+q.get("slot") || 1) - 1)];
+  if (!p && !q.get("name")){ empty(`No player ${want ? `"${q.get("player")}"` : `in slot ${q.get("slot") || 1}`} in this match's lineup. Add the lineup in the scorekeeper (Players & stats).`); return; }
+  const tag = q.get("name") || (p ? tagOf(p) || nameOf(p) : ""), real = p && tagOf(p) && nameOf(p) !== tag ? nameOf(p) : "";
+  const us = sides(m).find(s => s.us);
+  out.html = `<div class="pov ${q.get("pos") === "bottom" ? "bottom" : "tl"}" style="${skin(us)}"><div class="plg">${logoHTML(US.logo, US.short)}</div>
+    <div class="pbody"><small>Now watching</small><b style="font-size:${fitName(tag, 52, 330)}px">${esc(tag)}</b>${real || m.teamName ? `<span>${esc([real, m.teamName].filter(Boolean).join(" · "))}</span>` : ""}</div></div>`;
+}
+
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */
@@ -546,7 +582,7 @@ function draw(){
   (LAYERS[LAYER] || scorebug)(match);
 }
 /* Replay the entrance: OBS tells a Browser Source when its scene goes live, so every cut to this graphic animates in. */
-function replay(){ clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; lastScores = null; rlStatic = ""; draw(); }
+function replay(){ clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; lastScores = null; lastCorner = null; rlStatic = ""; draw(); }
 /* OBS keeps showing a Browser Source's last frame for a moment when it comes back on screen. So the moment a graphic is
    hidden (eye icon off, or its scene switched away) it clears itself and stops drawing; nothing old can flash when it
    returns, and it starts straight into its entrance. */

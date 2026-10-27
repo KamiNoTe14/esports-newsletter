@@ -543,6 +543,36 @@ function corner(m){
   lastCorner = now;
 }
 
+/* ---------- box score popup (any scorekeeper-scored game, made for Fortnite) ----------
+   A paper card centered on a transparent background, to drop over gameplay: both teams and the series score, each
+   game's score, and Hartland's players with the stats typed into the scorekeeper (plus K/D when there are elims and
+   deaths). ?scope=game shows only the game being played (or the last one finished). */
+function boxScore(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), unit = g.unit || "Game", firstTo = +g.firstTo || 0;
+  const games = (m.games || []).filter(x => x.winner || x.us || x.them).sort((a, b) => a.n - b.n);
+  const thisGame = (m.games || []).find(x => x.n === m.current && (x.us || x.them || x.p)) || games[games.length - 1];
+  const one = q.get("scope") === "game";
+  const defs = (g.statList || []).filter(d => !d.avg);
+  const has = k => defs.some(d => d.key === k), kd = has("elims") && has("deaths");
+  const rows = (m.players || []).map(p => {
+    const st = one ? (thisGame?.p?.[p.id] || null) : (p.stats && Object.keys(p.stats).length ? p.stats : null);
+    return {p, st};
+  }).filter(r => r.st || !one);
+  const val = (st, k) => st && st[k] != null && st[k] !== "" ? +st[k] : null;
+  const fmtKD = st => { const e = val(st, "elims"), d = val(st, "deaths"); return e == null ? "–" : d ? (Math.round(e / d * 100) / 100).toFixed(2) : e ? e.toFixed(2) : "0.00"; };
+  const cols = [...defs.map(d => d.label), ...(kd ? ["K/D"] : [])];
+  const team = s => `<div class="bxt ${s.us ? "us" : "them"}" style="${skin(s)}"><div class="bxl">${logoHTML(s.logo, s.name)}</div><b style="font-size:${fitName(s.name, 46, 280)}px">${esc(s.name)}</b><span class="bxw">${s.won}</span></div>`;
+  const chip = x => `<span class="bxg${x.winner ? " " + (x.winner === "us" ? "w" : "l") : " live"}"><small>${esc(unit[0])}${x.n}</small>${L.us ? `${x.us || 0}–${x.them || 0}` : `${x.them || 0}–${x.us || 0}`}</span>`;
+  out.html = `<div class="bxs">
+    <div class="bxh"><span class="tape">${esc(eventLine(m) || g.name)}</span><i>${one && thisGame ? `${esc(unit)} ${thisGame.n} ` : ""}Box Score</i></div>
+    <div class="bxteams">${team(L)}<span class="bxvs">${m.status === "final" ? "Final" : "Series"}</span>${team(R)}</div>
+    ${games.length ? `<div class="bxgames">${(one && thisGame ? [thisGame] : games).map(chip).join("")}${firstTo ? `<em>First to ${firstTo} · Best of ${esc(m.bestOf)}</em>` : `<em>Best of ${esc(m.bestOf)}</em>`}</div>` : ""}
+    ${rows.length && cols.length ? `<div class="bxtab" style="--n:${cols.length}"><div class="bxr hd"><span>${esc(US.short)}</span>${cols.map(c => `<span>${esc(c)}</span>`).join("")}</div>
+      ${rows.map((r, i) => `<div class="bxr" style="--i:${i}"><b>${esc(tagOf(r.p) || nameOf(r.p))}${tagOf(r.p) && nameOf(r.p) !== tagOf(r.p) ? `<small>${esc(nameOf(r.p))}</small>` : ""}</b>${defs.map(d => `<span>${val(r.st, d.key) ?? "–"}</span>`).join("")}${kd ? `<span>${fmtKD(r.st)}</span>` : ""}</div>`).join("")}</div>`
+      : `<p class="bxnone">Player stats show up here once they're typed into the scorekeeper.</p>`}
+  </div>`;
+}
+
 /* ---------- POV name plate: whose screen the stream is showing ----------
    One browser source per player's scene: ?slot=1 / ?slot=2 is that position in the match lineup (scorekeeper order),
    or ?player=TRE4TY. picks by gamertag or name. ?name=TAVIN753 shows a different in-game name. ?pos=bottom moves it
@@ -559,7 +589,7 @@ function pov(m){
 }
 
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */

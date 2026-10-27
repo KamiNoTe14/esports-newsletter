@@ -573,6 +573,32 @@ function boxScore(m){
   </div>`;
 }
 
+/* ---------- post-game stats (full screen) ----------
+   The match result, every game's score, then a card for each Hartland player with the stats typed into the
+   scorekeeper (plus K/D when there are elims and deaths). The leader in the first stat gets the MVP sticker. */
+function postGame(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), unit = g.unit || "Game";
+  const games = (m.games || []).filter(x => x.winner || x.us || x.them).sort((a, b) => a.n - b.n);
+  const defs = (g.statList || []).filter(d => !d.avg), has = k => defs.some(d => d.key === k), kd = has("elims") && has("deaths");
+  const val = (st, k) => st && st[k] != null && st[k] !== "" ? +st[k] : null;
+  const players = (m.players || []).map(p => ({p, st:p.stats || {}})).filter(r => Object.keys(r.st).length || !defs.length);
+  const lead = defs[0] && players.length > 1 ? players.slice().sort((a, b) => (val(b.st, defs[0].key) ?? -1) - (val(a.st, defs[0].key) ?? -1))[0] : null;
+  const mvp = lead && (val(lead.st, defs[0].key) ?? 0) > 0 ? lead.p.id : "";
+  const fin = m.status === "final", us = L.us ? L : R, them = L.us ? R : L, won = us.won > them.won;
+  const head = s => `<div class="pgt ${s.us ? "us" : "them"}" style="${skin(s)}"><div class="pgl">${logoHTML(s.logo, s.name)}</div><b style="font-size:${fitName(s.name, 64, 380)}px">${esc(s.name)}</b></div>`;
+  const chip = x => `<span class="pgg${x.winner ? " " + (x.winner === "us" ? "w" : "l") : " live"}"><small>${esc(unit)} ${x.n}</small>${L.us ? `${x.us || 0}–${x.them || 0}` : `${x.them || 0}–${x.us || 0}`}</span>`;
+  const kdOf = st => { const e = val(st, "elims"), d = val(st, "deaths"); return e == null ? "–" : d ? (Math.round(e / d * 100) / 100).toFixed(2) : e.toFixed(2); };
+  const card = (r, i) => `<div class="pgc" style="${skin(us)};--i:${i}">${r.p.id === mvp ? `<span class="pgmvp">MVP</span>` : ""}
+      <div class="pgn"><b style="font-size:${fitName(tagOf(r.p) || nameOf(r.p), 52, 360)}px">${esc(tagOf(r.p) || nameOf(r.p))}</b>${tagOf(r.p) && nameOf(r.p) !== tagOf(r.p) ? `<small>${esc(nameOf(r.p))}</small>` : ""}</div>
+      <div class="pgs">${defs.map(d => `<span><em data-count="${i}">${val(r.st, d.key) ?? "–"}</em>${esc(d.label)}</span>`).join("")}${kd ? `<span><em>${kdOf(r.st)}</em>K/D</span>` : ""}</div></div>`;
+  const score = `${L.won}–${R.won}`;
+  out.html = frame("pg", m, g, {title:fin ? "Post Game" : `${unit} ${games.filter(x => x.winner).length || 1}`, script:"Stats", sub:eventLine(m), split:[L, R],
+    body:`<div class="pgline">${head(L)}<div class="pgmid"><b>${score}</b><small>${fin ? (won ? "Eagles win!" : "Final") : "Series"}</small></div>${head(R)}</div>
+      ${games.length ? `<div class="pggames">${games.map(chip).join("")}</div>` : ""}
+      ${players.length && defs.length ? `<div class="pgcards" style="--n:${Math.min(players.length, 5)}">${players.slice(0, 5).map(card).join("")}</div>`
+        : `<div class="pgcards"><p class="pgnone">Player stats show up here once they're typed into the scorekeeper.</p></div>`}`});
+}
+
 /* ---------- POV name plate: whose screen the stream is showing ----------
    One browser source per player's scene: ?slot=1 / ?slot=2 is that position in the match lineup (scorekeeper order),
    or ?player=TRE4TY. picks by gamertag or name. ?name=TAVIN753 shows a different in-game name. ?pos=bottom moves it
@@ -589,7 +615,7 @@ function pov(m){
 }
 
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */

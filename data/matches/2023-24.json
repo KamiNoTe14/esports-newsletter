@@ -1,12 +1,30 @@
 {
   "season": "2023-24",
-  "updated": "2026-10-27T07:49:12.703Z",
+  "updated": "2026-10-27T14:28:50.517Z",
   "matches": [
     {
       "id": "pvceea3bad325e41fb87",
-      "current": 3,
-      "league": "MHSEL",
+      "opponent": {
+        "school": "",
+        "logo": "",
+        "team": "Electric Tigers 2",
+        "short": "",
+        "abbr": ""
+      },
+      "startsAt": "2023-09-27T20:00:00.000Z",
+      "level": "Varsity",
+      "forfeit": null,
+      "teamName": "Smash Varsity",
+      "event": "MHSEL Fall 2023",
       "week": "",
+      "stage": "regular",
+      "gameName": "Super Smash Bros. Ultimate",
+      "status": "final",
+      "clinched": "us",
+      "score": {
+        "them": 0,
+        "us": 3
+      },
       "games": [
         {
           "n": 1,
@@ -36,6 +54,7 @@
           }
         }
       ],
+      "result": "W",
       "players": [
         {
           "id": "p-7d79ca92",
@@ -62,45 +81,28 @@
           "stats": {}
         }
       ],
-      "event": "MHSEL Fall 2023",
-      "season": "2023-24",
-      "teamName": "Smash Varsity",
       "updatedAt": "2026-10-08T19:56:21.285Z",
-      "level": "Varsity",
-      "gameName": "Super Smash Bros. Ultimate",
-      "startsAt": "2023-09-27T20:00:00.000Z",
       "teamId": "t3",
-      "source": {
-        "playvs": "ceea3bad-325e-41fb-870e-ebdb5ed42af5"
-      },
-      "notes": "",
-      "status": "final",
-      "term": "fall",
-      "forfeit": null,
-      "opponent": {
-        "logo": "",
-        "school": "",
-        "short": "",
-        "team": "Electric Tigers 2",
-        "abbr": ""
-      },
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "result": "W",
+      "game": "smash",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "game": "smash",
-      "stage": "regular",
-      "clinched": "us",
-      "bestOf": 5
+      "bestOf": 5,
+      "league": "MHSEL",
+      "current": 3,
+      "source": {
+        "playvs": "ceea3bad-325e-41fb-870e-ebdb5ed42af5"
+      },
+      "term": "fall",
+      "notes": "",
+      "season": "2023-24"
     },
     {
       "id": "ACJuoYrbX0GUp1X2H5Py",
-      "notes": "",
+      "event": "MHSEL Fall 2023",
+      "term": "fall",
+      "seriesOnly": true,
       "players": [
         {
           "alum": true,
@@ -142,26 +144,34 @@
           "name": "Troy Beaudoin"
         }
       ],
-      "term": "fall",
-      "teamId": "t5",
-      "game": "rocket-league",
       "gameName": "Rocket League",
-      "source": {},
+      "clinched": "us",
+      "notes": "",
+      "bestOf": 5,
+      "stage": "regular",
+      "teamName": "Rocket League Varsity",
+      "startsAt": "2023-09-28T20:00:00.000Z",
+      "status": "final",
+      "forfeit": null,
       "opponent": {
-        "school": "Fenton High School",
+        "team": "Fenton High School",
         "logo": "",
         "short": "",
         "abbr": "FEN",
-        "team": "Fenton High School"
+        "school": "Fenton High School"
       },
-      "event": "MHSEL Fall 2023",
-      "stage": "regular",
-      "perGame": false,
-      "clinched": "us",
+      "result": "W",
+      "league": "MHSEL",
       "score": {
-        "them": 0,
-        "us": 3
+        "us": 3,
+        "them": 0
       },
+      "perGame": false,
+      "source": {},
+      "updatedAt": "2026-10-05T19:50:58.253Z",
+      "week": "1",
+      "current": 3,
+      "teamId": "t5",
       "games": [
         {
           "n": 1,
@@ -182,47 +192,75 @@
           "winner": "us"
         }
       ],
-      "seriesOnly": true,
+      "game": "rocket-league",
       "season": "2023-24",
-      "level": "Varsity",
-      "teamName": "Rocket League Varsity",
-      "bestOf": 5,
-      "startsAt": "2023-09-28T20:00:00.000Z",
-      "current": 3,
-      "result": "W",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "updatedAt": "2026-10-05T19:50:58.253Z",
-      "forfeit": null,
-      "week": "1",
-      "league": "MHSEL",
-      "status": "final"
+      "level": "Varsity"
     },
     {
       "id": "pv91ceba4e0fbf4a95b9",
-      "current": 3,
       "season": "2023-24",
-      "bestOf": 5,
-      "week": "",
-      "result": "L",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "level": "Varsity",
-      "teamName": "Smash Varsity",
-      "league": "MHSEL",
-      "forfeit": null,
-      "status": "final",
-      "startsAt": "2023-10-04T20:00:00.000Z",
-      "score": {
-        "them": 3,
-        "us": 0
-      },
       "teamId": "t3",
+      "notes": "",
+      "event": "MHSEL Fall 2023",
+      "source": {
+        "playvs": "91ceba4e-0fbf-4a95-b971-bb2a85f92db4"
+      },
+      "current": 3,
+      "week": "",
+      "opponent": {
+        "school": "Saline High School",
+        "abbr": "",
+        "team": "Saline Kremling Krew",
+        "logo": "",
+        "short": ""
+      },
+      "result": "L",
+      "league": "MHSEL",
+      "game": "smash",
+      "stage": "regular",
+      "status": "final",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "players": [
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-e6d4c255",
+          "name": "Zack Towne",
+          "tag": "Mof#11130",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "term": "fall",
+      "teamName": "Smash Varsity",
+      "startsAt": "2023-10-04T20:00:00.000Z",
+      "bestOf": 5,
       "games": [
         {
           "n": 1,
@@ -252,59 +290,110 @@
           }
         }
       ],
+      "level": "Varsity",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "clinched": "them",
-      "players": [
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-e6d4c255",
-          "name": "Zack Towne",
-          "tag": "Mof#11130",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "source": {
-        "playvs": "91ceba4e-0fbf-4a95-b971-bb2a85f92db4"
-      },
-      "game": "smash",
-      "gameName": "Super Smash Bros. Ultimate",
-      "term": "fall",
-      "stage": "regular",
-      "event": "MHSEL Fall 2023",
-      "notes": "",
-      "opponent": {
-        "school": "Saline High School",
-        "logo": "",
-        "short": "",
-        "team": "Saline Kremling Krew",
-        "abbr": ""
-      }
+      "forfeit": null,
+      "gameName": "Super Smash Bros. Ultimate"
     },
     {
       "id": "qyECFNiPcsCIWZAIb0bN",
       "season": "2023-24",
-      "level": "Varsity",
-      "game": "rocket-league",
-      "seriesOnly": false,
-      "perGame": true,
-      "event": "MHSEL Fall 2023",
+      "notes": "",
+      "term": "fall",
+      "source": {},
+      "players": [
+        {
+          "stats": {
+            "goals": 7,
+            "assists": 3,
+            "saves": 2,
+            "shots": 17
+          },
+          "private": false,
+          "tag": "Ksquiggly.RL",
+          "name": "Kyle Greig",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "id": "p-88ef0aea",
+          "alum": true
+        },
+        {
+          "stats": {},
+          "private": false,
+          "id": "p-a1be1608",
+          "tag": "goodnics",
+          "games": [],
+          "name": "Lincoln Deman",
+          "alum": true
+        },
+        {
+          "name": "Troy Beaudoin",
+          "private": false,
+          "alum": true,
+          "games": [],
+          "tag": "Tyro.",
+          "id": "p-8a733446",
+          "stats": {}
+        },
+        {
+          "private": false,
+          "id": "p-5310cd2b",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Christian Gatien",
+          "stats": {
+            "goals": 9,
+            "assists": 3,
+            "saves": 2,
+            "shots": 18
+          },
+          "tag": "SsnowyGG",
+          "alum": true
+        },
+        {
+          "stats": {
+            "goals": 1,
+            "assists": 5,
+            "saves": 0,
+            "shots": 10
+          },
+          "tag": "GoodName.mp4",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "alum": true,
+          "id": "p-a7fe3ce9",
+          "name": "Joseph Wisniewski"
+        }
+      ],
       "league": "MHSEL",
+      "seriesOnly": false,
+      "bestOf": 5,
+      "teamId": "t5",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "current": 3,
+      "perGame": true,
+      "game": "rocket-league",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "result": "W",
+      "week": "2",
+      "gameName": "Rocket League",
       "games": [
         {
           "n": 1,
@@ -385,119 +474,37 @@
           }
         }
       ],
-      "term": "fall",
-      "teamName": "Rocket League Varsity",
-      "forfeit": null,
-      "gameName": "Rocket League",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "result": "W",
-      "updatedAt": "2026-10-05T19:59:41.580Z",
       "stage": "regular",
+      "status": "final",
+      "clinched": "us",
+      "updatedAt": "2026-10-05T19:59:41.580Z",
+      "forfeit": null,
       "startsAt": "2023-10-05T20:00:00.000Z",
-      "bestOf": 5,
-      "score": {
-        "them": 0,
-        "us": 3
-      },
       "opponent": {
         "school": "Grandville High School",
-        "team": "Grandville High School",
         "short": "",
         "abbr": "GRA",
+        "team": "Grandville High School",
         "logo": ""
       },
-      "source": {},
-      "teamId": "t5",
-      "current": 3,
-      "week": "2",
-      "clinched": "us",
-      "notes": "",
-      "players": [
-        {
-          "stats": {
-            "goals": 7,
-            "assists": 3,
-            "saves": 2,
-            "shots": 17
-          },
-          "private": false,
-          "tag": "Ksquiggly.RL",
-          "name": "Kyle Greig",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "id": "p-88ef0aea",
-          "alum": true
-        },
-        {
-          "stats": {},
-          "private": false,
-          "id": "p-a1be1608",
-          "tag": "goodnics",
-          "games": [],
-          "name": "Lincoln Deman",
-          "alum": true
-        },
-        {
-          "name": "Troy Beaudoin",
-          "private": false,
-          "alum": true,
-          "games": [],
-          "tag": "Tyro.",
-          "id": "p-8a733446",
-          "stats": {}
-        },
-        {
-          "private": false,
-          "id": "p-5310cd2b",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "name": "Christian Gatien",
-          "stats": {
-            "goals": 9,
-            "assists": 3,
-            "saves": 2,
-            "shots": 18
-          },
-          "tag": "SsnowyGG",
-          "alum": true
-        },
-        {
-          "stats": {
-            "goals": 1,
-            "assists": 5,
-            "saves": 0,
-            "shots": 10
-          },
-          "tag": "GoodName.mp4",
-          "private": false,
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "alum": true,
-          "id": "p-a7fe3ce9",
-          "name": "Joseph Wisniewski"
-        }
-      ],
-      "status": "final"
+      "event": "MHSEL Fall 2023",
+      "teamName": "Rocket League Varsity",
+      "level": "Varsity"
     },
     {
       "id": "pv6176abcb657448ef9c",
-      "forfeit": null,
-      "score": {
-        "us": 1,
-        "them": 3
-      },
+      "teamName": "Smash Varsity",
+      "term": "fall",
+      "bestOf": 5,
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "status": "final",
+      "stage": "regular",
+      "startsAt": "2023-10-11T20:00:00.000Z",
+      "notes": "",
+      "event": "MHSEL Fall 2023",
+      "gameName": "Super Smash Bros. Ultimate",
+      "clinched": "them",
+      "current": 4,
       "games": [
         {
           "n": 1,
@@ -536,37 +543,15 @@
           }
         }
       ],
-      "bestOf": 5,
-      "week": "",
-      "clinched": "them",
-      "season": "2023-24",
-      "opponent": {
-        "logo": "",
-        "abbr": "",
-        "school": "Howell High School",
-        "team": "Howell Smash Green",
-        "short": ""
+      "source": {
+        "playvs": "6176abcb-6574-48ef-9c80-3211048390e7"
       },
-      "event": "MHSEL Fall 2023",
-      "league": "MHSEL",
-      "stage": "regular",
-      "status": "final",
-      "current": 4,
-      "notes": "",
-      "result": "L",
-      "gameName": "Super Smash Bros. Ultimate",
+      "level": "Varsity",
+      "season": "2023-24",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "source": {
-        "playvs": "6176abcb-6574-48ef-9c80-3211048390e7"
-      },
-      "teamId": "t3",
-      "startsAt": "2023-10-11T20:00:00.000Z",
-      "teamName": "Smash Varsity",
-      "term": "fall",
       "players": [
         {
           "id": "p-5ecf28c2",
@@ -593,24 +578,132 @@
           "stats": {}
         }
       ],
-      "game": "smash",
-      "level": "Varsity"
+      "teamId": "t3",
+      "opponent": {
+        "abbr": "",
+        "team": "Howell Smash Green",
+        "logo": "",
+        "short": "",
+        "school": "Howell High School"
+      },
+      "result": "L",
+      "league": "MHSEL",
+      "score": {
+        "us": 1,
+        "them": 3
+      },
+      "forfeit": null,
+      "week": "",
+      "game": "smash"
     },
     {
       "id": "b89q52rFBiWj0OOCx6eE",
+      "event": "MHSEL Fall 2023",
+      "players": [
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "private": false,
+          "id": "p-88ef0aea",
+          "tag": "Ksquiggly.RL",
+          "alum": true,
+          "stats": {
+            "goals": 5,
+            "assists": 6,
+            "saves": 2,
+            "shots": 18
+          },
+          "name": "Kyle Greig"
+        },
+        {
+          "name": "Lincoln Deman",
+          "stats": {
+            "goals": 3,
+            "assists": 2,
+            "saves": 4,
+            "shots": 8
+          },
+          "alum": true,
+          "private": false,
+          "tag": "goodnics",
+          "id": "p-a1be1608",
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "tag": "Tyro.",
+          "alum": true,
+          "stats": {},
+          "name": "Troy Beaudoin",
+          "id": "p-8a733446",
+          "private": false,
+          "games": []
+        },
+        {
+          "alum": true,
+          "id": "p-5310cd2b",
+          "name": "Christian Gatien",
+          "tag": "SsnowyGG",
+          "stats": {
+            "goals": 9,
+            "assists": 4,
+            "saves": 3,
+            "shots": 25
+          },
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "name": "Joseph Wisniewski",
+          "id": "p-a7fe3ce9",
+          "private": false,
+          "stats": {},
+          "alum": true,
+          "tag": "GoodName.mp4",
+          "games": []
+        }
+      ],
+      "week": "3",
+      "gameName": "Rocket League",
+      "clinched": "us",
+      "game": "rocket-league",
+      "notes": "",
       "bestOf": 5,
+      "teamName": "Rocket League Varsity",
+      "stage": "regular",
+      "startsAt": "2023-10-12T20:00:00.000Z",
+      "status": "final",
+      "forfeit": null,
       "opponent": {
+        "abbr": "NB",
+        "team": "North Branch High School",
         "logo": "",
         "school": "North Branch High School",
-        "team": "North Branch High School",
-        "short": "",
-        "abbr": "NB"
+        "short": ""
       },
-      "season": "2023-24",
+      "result": "W",
+      "league": "MHSEL",
       "score": {
         "us": 3,
         "them": 0
       },
+      "perGame": true,
+      "term": "fall",
+      "source": {},
+      "updatedAt": "2026-10-05T20:11:18.482Z",
+      "current": 3,
+      "seriesOnly": false,
+      "teamId": "t5",
       "games": [
         {
           "n": 1,
@@ -688,116 +781,70 @@
           }
         }
       ],
-      "gameName": "Rocket League",
-      "notes": "",
-      "league": "MHSEL",
-      "term": "fall",
-      "status": "final",
-      "game": "rocket-league",
-      "players": [
-        {
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "private": false,
-          "id": "p-88ef0aea",
-          "tag": "Ksquiggly.RL",
-          "alum": true,
-          "stats": {
-            "goals": 5,
-            "assists": 6,
-            "saves": 2,
-            "shots": 18
-          },
-          "name": "Kyle Greig"
-        },
-        {
-          "name": "Lincoln Deman",
-          "stats": {
-            "goals": 3,
-            "assists": 2,
-            "saves": 4,
-            "shots": 8
-          },
-          "alum": true,
-          "private": false,
-          "tag": "goodnics",
-          "id": "p-a1be1608",
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "tag": "Tyro.",
-          "alum": true,
-          "stats": {},
-          "name": "Troy Beaudoin",
-          "id": "p-8a733446",
-          "private": false,
-          "games": []
-        },
-        {
-          "alum": true,
-          "id": "p-5310cd2b",
-          "name": "Christian Gatien",
-          "tag": "SsnowyGG",
-          "stats": {
-            "goals": 9,
-            "assists": 4,
-            "saves": 3,
-            "shots": 25
-          },
-          "private": false,
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "name": "Joseph Wisniewski",
-          "id": "p-a7fe3ce9",
-          "private": false,
-          "stats": {},
-          "alum": true,
-          "tag": "GoodName.mp4",
-          "games": []
-        }
-      ],
-      "clinched": "us",
-      "result": "W",
-      "perGame": true,
+      "season": "2023-24",
       "stream": {
-        "vod": "",
-        "live": ""
+        "live": "",
+        "vod": ""
       },
-      "event": "MHSEL Fall 2023",
-      "stage": "regular",
-      "startsAt": "2023-10-12T20:00:00.000Z",
-      "source": {},
-      "forfeit": null,
-      "teamName": "Rocket League Varsity",
-      "seriesOnly": false,
-      "week": "3",
-      "teamId": "t5",
-      "level": "Varsity",
-      "updatedAt": "2026-10-05T20:11:18.482Z",
-      "current": 3
+      "level": "Varsity"
     },
     {
       "id": "pv8493b511fd7b4c2bbf",
-      "bestOf": 5,
-      "forfeit": null,
-      "season": "2023-24",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "score": {
-        "us": 3,
-        "them": 0
+      "event": "MHSEL Fall 2023",
+      "startsAt": "2023-10-12T20:00:00.000Z",
+      "current": 3,
+      "week": "",
+      "result": "W",
+      "league": "MHSEL",
+      "game": "rocket-league",
+      "notes": "",
+      "teamName": "Rocket League Varsity",
+      "source": {
+        "playvs": "8493b511-fd7b-4c2b-bffc-c7f6182a8790"
       },
+      "gameName": "Rocket League",
+      "clinched": "us",
+      "stage": "regular",
+      "teamId": "t5",
+      "season": "2023-24",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "score": {
+        "them": 0,
+        "us": 3
+      },
+      "forfeit": null,
+      "term": "fall",
+      "bestOf": 5,
+      "players": [
+        {
+          "id": "p-a1be1608",
+          "name": "Lincoln Deman",
+          "tag": "goodnics",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-5310cd2b",
+          "name": "Christian Gatien",
+          "tag": "SsnowyGG",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-88ef0aea",
+          "name": "Kyle Greig",
+          "tag": "Ksquiggly.RL",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "games": [
         {
           "n": 1,
@@ -878,81 +925,48 @@
           }
         }
       ],
-      "startsAt": "2023-10-12T20:00:00.000Z",
-      "notes": "",
-      "league": "MHSEL",
-      "term": "fall",
-      "teamName": "Rocket League Varsity",
       "status": "final",
-      "game": "rocket-league",
-      "result": "W",
-      "current": 3,
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "event": "MHSEL Fall 2023",
-      "stage": "regular",
-      "source": {
-        "playvs": "8493b511-fd7b-4c2b-bffc-c7f6182a8790"
-      },
-      "clinched": "us",
-      "week": "",
-      "teamId": "t5",
       "opponent": {
         "abbr": "",
-        "short": "",
         "school": "",
+        "short": "",
         "team": "Ballistic Broncos",
         "logo": ""
       },
-      "level": "Varsity",
-      "players": [
-        {
-          "id": "p-a1be1608",
-          "name": "Lincoln Deman",
-          "tag": "goodnics",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-5310cd2b",
-          "name": "Christian Gatien",
-          "tag": "SsnowyGG",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-88ef0aea",
-          "name": "Kyle Greig",
-          "tag": "Ksquiggly.RL",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "gameName": "Rocket League"
+      "level": "Varsity"
     },
     {
       "id": "pve4f8f9f7bfc34b3397",
-      "level": "Varsity",
-      "result": "W",
+      "forfeit": null,
+      "event": "MHSEL Fall 2023",
+      "opponent": {
+        "logo": "",
+        "team": "Belding Smash",
+        "abbr": "",
+        "short": "",
+        "school": ""
+      },
+      "startsAt": "2023-10-18T20:00:00.000Z",
+      "game": "smash",
+      "teamId": "t3",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "bestOf": 5,
-      "clinched": "us",
-      "event": "MHSEL Fall 2023",
-      "week": "",
-      "forfeit": null,
+      "level": "Varsity",
+      "teamName": "Smash Varsity",
+      "gameName": "Super Smash Bros. Ultimate",
       "source": {
         "playvs": "e4f8f9f7-bfc3-4b33-9789-538c49180494"
       },
-      "teamId": "t3",
-      "startsAt": "2023-10-18T20:00:00.000Z",
+      "score": {
+        "us": 3,
+        "them": 1
+      },
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "term": "fall",
+      "league": "MHSEL",
+      "bestOf": 5,
       "games": [
         {
           "n": 1,
@@ -991,24 +1005,9 @@
           }
         }
       ],
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "opponent": {
-        "team": "Belding Smash",
-        "school": "",
-        "abbr": "",
-        "short": "",
-        "logo": ""
-      },
-      "status": "final",
       "stage": "regular",
-      "current": 4,
       "season": "2023-24",
-      "teamName": "Smash Varsity",
-      "term": "fall",
-      "score": {
-        "us": 3,
-        "them": 1
-      },
+      "clinched": "us",
       "players": [
         {
           "id": "p-5ecf28c2",
@@ -1035,100 +1034,18 @@
           "stats": {}
         }
       ],
-      "gameName": "Super Smash Bros. Ultimate",
-      "game": "smash",
-      "league": "MHSEL",
-      "notes": ""
+      "status": "final",
+      "notes": "",
+      "week": "",
+      "current": 4,
+      "result": "W"
     },
     {
       "id": "2RcaPpAUyFSu0FENEVj7",
-      "term": "fall",
-      "players": [
-        {
-          "stats": {
-            "goals": 4,
-            "assists": 6,
-            "saves": 6,
-            "shots": 19
-          },
-          "private": false,
-          "id": "p-88ef0aea",
-          "alum": true,
-          "name": "Kyle Greig",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "tag": "Ksquiggly.RL"
-        },
-        {
-          "stats": {},
-          "alum": true,
-          "name": "Lincoln Deman",
-          "private": false,
-          "games": [],
-          "id": "p-a1be1608",
-          "tag": "goodnics"
-        },
-        {
-          "alum": true,
-          "private": false,
-          "name": "Troy Beaudoin",
-          "stats": {},
-          "games": [],
-          "id": "p-8a733446",
-          "tag": "Tyro."
-        },
-        {
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "stats": {
-            "goals": 7,
-            "assists": 4,
-            "saves": 3,
-            "shots": 14
-          },
-          "name": "Christian Gatien",
-          "id": "p-5310cd2b",
-          "alum": true,
-          "private": false,
-          "tag": "SsnowyGG"
-        },
-        {
-          "stats": {
-            "goals": 3,
-            "assists": 1,
-            "saves": 0,
-            "shots": 11
-          },
-          "tag": "GoodName.mp4",
-          "private": false,
-          "id": "p-a7fe3ce9",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "name": "Joseph Wisniewski",
-          "alum": true
-        }
-      ],
-      "game": "rocket-league",
-      "teamId": "t5",
       "teamName": "Rocket League Varsity",
-      "startsAt": "2023-10-19T20:00:00.000Z",
+      "status": "final",
       "perGame": true,
-      "source": {},
-      "level": "Varsity",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "season": "2023-24",
+      "bestOf": 5,
       "games": [
         {
           "n": 1,
@@ -1209,41 +1126,175 @@
           }
         }
       ],
+      "startsAt": "2023-10-19T20:00:00.000Z",
+      "level": "Varsity",
+      "week": "4",
+      "seriesOnly": false,
+      "current": 3,
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "game": "rocket-league",
+      "clinched": "us",
       "gameName": "Rocket League",
+      "updatedAt": "2026-10-05T20:13:04.463Z",
+      "term": "fall",
+      "teamId": "t5",
+      "season": "2023-24",
+      "stage": "regular",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "players": [
+        {
+          "stats": {
+            "goals": 4,
+            "assists": 6,
+            "saves": 6,
+            "shots": 19
+          },
+          "private": false,
+          "id": "p-88ef0aea",
+          "alum": true,
+          "name": "Kyle Greig",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "Ksquiggly.RL"
+        },
+        {
+          "stats": {},
+          "alum": true,
+          "name": "Lincoln Deman",
+          "private": false,
+          "games": [],
+          "id": "p-a1be1608",
+          "tag": "goodnics"
+        },
+        {
+          "alum": true,
+          "private": false,
+          "name": "Troy Beaudoin",
+          "stats": {},
+          "games": [],
+          "id": "p-8a733446",
+          "tag": "Tyro."
+        },
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "stats": {
+            "goals": 7,
+            "assists": 4,
+            "saves": 3,
+            "shots": 14
+          },
+          "name": "Christian Gatien",
+          "id": "p-5310cd2b",
+          "alum": true,
+          "private": false,
+          "tag": "SsnowyGG"
+        },
+        {
+          "stats": {
+            "goals": 3,
+            "assists": 1,
+            "saves": 0,
+            "shots": 11
+          },
+          "tag": "GoodName.mp4",
+          "private": false,
+          "id": "p-a7fe3ce9",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Joseph Wisniewski",
+          "alum": true
+        }
+      ],
+      "source": {},
+      "event": "MHSEL Fall 2023",
       "opponent": {
-        "short": "",
+        "abbr": "ROC",
+        "logo": "",
         "team": "Rockford High School",
         "school": "Rockford High School",
-        "abbr": "ROC",
-        "logo": ""
+        "short": ""
       },
-      "current": 3,
-      "bestOf": 5,
-      "clinched": "us",
-      "stage": "regular",
       "forfeit": null,
-      "result": "W",
-      "event": "MHSEL Fall 2023",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
       "notes": "",
-      "seriesOnly": false,
-      "week": "4",
-      "updatedAt": "2026-10-05T20:13:04.463Z",
-      "league": "MHSEL",
-      "status": "final"
+      "result": "W",
+      "league": "MHSEL"
     },
     {
       "id": "pve5a311946e38441289",
-      "level": "Varsity",
-      "season": "2023-24",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "gameName": "Super Smash Bros. Ultimate",
+      "term": "fall",
+      "players": [
+        {
+          "id": "p-348eb1ef",
+          "name": "Nicholas Cipolla",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-c527d65f",
+          "name": "Talan Brown",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "level": "Varsity",
       "event": "MHSEL Fall 2023",
-      "week": "",
-      "teamName": "Smash Varsity",
+      "teamId": "t3",
+      "clinched": "us",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
       "league": "MHSEL",
+      "stage": "regular",
+      "bestOf": 5,
+      "opponent": {
+        "abbr": "",
+        "school": "",
+        "short": "",
+        "team": "Dakota High School Green",
+        "logo": ""
+      },
+      "source": {
+        "playvs": "e5a31194-6e38-4412-8920-bd9c98384df2"
+      },
+      "startsAt": "2023-11-01T20:00:00.000Z",
+      "score": {
+        "them": 0,
+        "us": 3
+      },
+      "game": "smash",
+      "current": 3,
+      "season": "2023-24",
       "games": [
         {
           "n": 1,
@@ -1273,70 +1324,30 @@
           }
         }
       ],
+      "teamName": "Smash Varsity",
       "forfeit": null,
-      "stage": "regular",
-      "result": "W",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "clinched": "us",
-      "bestOf": 5,
-      "term": "fall",
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "game": "smash",
-      "teamId": "t3",
-      "source": {
-        "playvs": "e5a31194-6e38-4412-8920-bd9c98384df2"
-      },
-      "current": 3,
-      "opponent": {
-        "school": "",
-        "abbr": "",
-        "team": "Dakota High School Green",
-        "short": "",
-        "logo": ""
-      },
-      "startsAt": "2023-11-01T20:00:00.000Z",
-      "players": [
-        {
-          "id": "p-348eb1ef",
-          "name": "Nicholas Cipolla",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-c527d65f",
-          "name": "Talan Brown",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
+      "week": "",
+      "status": "final",
       "notes": "",
-      "status": "final"
+      "result": "W"
     },
     {
       "id": "jAC7zYjwALdcPxj2Z3EQ",
-      "league": "MHSEL",
-      "notes": "",
-      "status": "final",
+      "clinched": "us",
+      "stage": "regular",
+      "gameName": "Rocket League",
+      "seriesOnly": false,
+      "perGame": true,
+      "current": 5,
       "updatedAt": "2026-10-05T20:15:58.116Z",
+      "startsAt": "2023-11-02T20:00:00.000Z",
+      "game": "rocket-league",
+      "event": "MHSEL Fall 2023",
+      "status": "final",
+      "notes": "",
+      "bestOf": 5,
+      "week": "6",
+      "teamName": "Rocket League Varsity",
       "players": [
         {
           "tag": "Ksquiggly.RL",
@@ -1406,22 +1417,14 @@
           "private": false
         }
       ],
-      "startsAt": "2023-11-02T20:00:00.000Z",
-      "result": "W",
-      "perGame": true,
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "teamName": "Rocket League Varsity",
-      "stage": "regular",
-      "event": "MHSEL Fall 2023",
-      "week": "6",
-      "bestOf": 5,
-      "season": "2023-24",
-      "score": {
-        "them": 2,
-        "us": 3
+      "term": "fall",
+      "level": "Varsity",
+      "opponent": {
+        "logo": "",
+        "team": "Marquette Senior High School",
+        "school": "Marquette Senior High School",
+        "abbr": "MAR",
+        "short": ""
       },
       "games": [
         {
@@ -1525,68 +1528,35 @@
           }
         }
       ],
-      "level": "Varsity",
-      "gameName": "Rocket League",
-      "opponent": {
-        "team": "Marquette Senior High School",
-        "abbr": "MAR",
-        "school": "Marquette Senior High School",
-        "short": "",
-        "logo": ""
+      "result": "W",
+      "league": "MHSEL",
+      "teamId": "t5",
+      "stream": {
+        "vod": "",
+        "live": ""
       },
-      "seriesOnly": false,
-      "current": 5,
+      "season": "2023-24",
       "source": {},
-      "clinched": "us",
       "forfeit": null,
-      "game": "rocket-league",
-      "term": "fall",
-      "teamId": "t5"
+      "score": {
+        "them": 2,
+        "us": 3
+      }
     },
     {
       "id": "pv1e7cfcf792ea4b12a4",
-      "teamId": "t3",
-      "players": [
-        {
-          "id": "p-348eb1ef",
-          "name": "Nicholas Cipolla",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-c527d65f",
-          "name": "Talan Brown",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "clinched": "us",
-      "source": {
-        "playvs": "1e7cfcf7-92ea-4b12-a406-0f8ee046d4f3"
-      },
-      "week": "",
-      "opponent": {
-        "abbr": "",
-        "team": "MHS Smash",
-        "short": "",
-        "logo": "",
-        "school": ""
-      },
-      "level": "Varsity",
+      "teamName": "Smash Varsity",
+      "term": "fall",
+      "bestOf": 5,
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "status": "final",
+      "stage": "regular",
+      "startsAt": "2023-11-08T21:00:00.000Z",
+      "notes": "",
+      "event": "MHSEL Fall 2023",
       "gameName": "Super Smash Bros. Ultimate",
-      "season": "2023-24",
+      "clinched": "us",
+      "current": 4,
       "games": [
         {
           "n": 1,
@@ -1625,31 +1595,69 @@
           }
         }
       ],
-      "term": "fall",
-      "bestOf": 5,
-      "current": 4,
-      "game": "smash",
-      "score": {
-        "us": 3,
-        "them": 1
+      "source": {
+        "playvs": "1e7cfcf7-92ea-4b12-a406-0f8ee046d4f3"
       },
-      "teamName": "Smash Varsity",
+      "level": "Varsity",
+      "season": "2023-24",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "startsAt": "2023-11-08T21:00:00.000Z",
+      "players": [
+        {
+          "id": "p-348eb1ef",
+          "name": "Nicholas Cipolla",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-c527d65f",
+          "name": "Talan Brown",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "teamId": "t3",
+      "league": "MHSEL",
       "result": "W",
-      "notes": "",
+      "opponent": {
+        "logo": "",
+        "team": "MHS Smash",
+        "abbr": "",
+        "short": "",
+        "school": ""
+      },
+      "score": {
+        "us": 3,
+        "them": 1
+      },
       "forfeit": null,
-      "stage": "regular",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "event": "MHSEL Fall 2023",
-      "status": "final",
-      "league": "MHSEL"
+      "week": "",
+      "game": "smash"
     },
     {
       "id": "flN7Q3gtoYOBvUjhQUXR",
+      "event": "MHSEL Fall 2023",
+      "teamName": "Rocket League Varsity",
+      "status": "final",
+      "startsAt": "2023-11-09T21:00:00.000Z",
+      "forfeit": null,
+      "bestOf": 5,
+      "notes": "",
+      "term": "fall",
       "players": [
         {
           "name": "Kyle Greig",
@@ -1730,6 +1738,33 @@
           "id": "p-a7fe3ce9"
         }
       ],
+      "stage": "regular",
+      "clinched": "them",
+      "gameName": "Rocket League",
+      "current": 5,
+      "teamId": "t5",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "season": "2023-24",
+      "seriesOnly": false,
+      "source": {},
+      "score": {
+        "them": 3,
+        "us": 2
+      },
+      "game": "rocket-league",
+      "opponent": {
+        "abbr": "DCC",
+        "logo": "",
+        "team": "Detroit Catholic Central",
+        "school": "Detroit Catholic Central",
+        "short": ""
+      },
+      "level": "Varsity",
+      "week": "7",
+      "updatedAt": "2026-10-05T20:21:01.147Z",
       "games": [
         {
           "n": 1,
@@ -1862,54 +1897,17 @@
           }
         }
       ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "score": {
-        "us": 2,
-        "them": 3
-      },
-      "week": "7",
-      "result": "L",
-      "status": "final",
       "perGame": true,
       "league": "MHSEL",
-      "teamName": "Rocket League Varsity",
-      "stage": "regular",
-      "event": "MHSEL Fall 2023",
-      "startsAt": "2023-11-09T21:00:00.000Z",
-      "season": "2023-24",
-      "notes": "",
-      "bestOf": 5,
-      "clinched": "them",
-      "current": 5,
-      "updatedAt": "2026-10-05T20:21:01.147Z",
-      "opponent": {
-        "abbr": "DCC",
-        "team": "Detroit Catholic Central",
-        "short": "",
-        "logo": "",
-        "school": "Detroit Catholic Central"
-      },
-      "teamId": "t5",
-      "forfeit": null,
-      "game": "rocket-league",
-      "seriesOnly": false,
-      "term": "fall",
-      "source": {},
-      "level": "Varsity",
-      "gameName": "Rocket League"
+      "result": "L"
     },
     {
       "id": "pvd5226a87c6574afeb5",
       "league": "MHSEL",
-      "clinched": "them",
-      "current": 4,
-      "stage": "regular",
-      "score": {
-        "us": 1,
-        "them": 3
+      "bestOf": 5,
+      "term": "fall",
+      "source": {
+        "playvs": "d5226a87-c657-4afe-b5b7-dedbb8e5cb5e"
       },
       "players": [
         {
@@ -1937,27 +1935,37 @@
           "stats": {}
         }
       ],
-      "game": "smash",
       "season": "2023-24",
-      "term": "fall",
+      "current": 4,
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "game": "smash",
+      "notes": "",
+      "teamId": "t3",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "status": "final",
+      "level": "Varsity",
+      "week": "",
+      "gameName": "Super Smash Bros. Ultimate",
+      "forfeit": null,
+      "clinched": "them",
+      "event": "MHSEL Fall 2023",
+      "result": "L",
       "opponent": {
         "team": "TED Talk",
-        "short": "",
-        "abbr": "",
         "school": "Williamston High School",
-        "logo": ""
+        "logo": "",
+        "short": "",
+        "abbr": ""
       },
-      "notes": "",
+      "stage": "regular",
       "startsAt": "2023-11-15T21:00:00.000Z",
-      "source": {
-        "playvs": "d5226a87-c657-4afe-b5b7-dedbb8e5cb5e"
+      "score": {
+        "us": 1,
+        "them": 3
       },
-      "teamId": "t3",
-      "gameName": "Super Smash Bros. Ultimate",
-      "level": "Varsity",
-      "status": "final",
-      "event": "MHSEL Fall 2023",
-      "forfeit": null,
       "teamName": "Smash Varsity",
       "games": [
         {
@@ -1996,21 +2004,14 @@
             "p-5ecf28c2": {}
           }
         }
-      ],
+      ]
+    },
+    {
+      "id": "G71uwjLw4HJnYuvRcJ5X",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "week": "",
-      "result": "L",
-      "bestOf": 5,
-      "updatedAt": "2026-10-08T19:56:21.285Z"
-    },
-    {
-      "id": "G71uwjLw4HJnYuvRcJ5X",
-      "stage": "regular",
-      "event": "MHSEL Fall 2023",
-      "status": "final",
       "players": [
         {
           "stats": {},
@@ -2067,17 +2068,40 @@
           "tag": "GoodName.mp4"
         }
       ],
-      "league": "MHSEL",
-      "perGame": false,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
+      "season": "2023-24",
       "notes": "",
+      "teamId": "t5",
+      "event": "MHSEL Fall 2023",
+      "source": {},
+      "forfeit": null,
       "result": "L",
+      "league": "MHSEL",
+      "stage": "regular",
+      "term": "fall",
+      "opponent": {
+        "abbr": "SAL",
+        "team": "Saline High School",
+        "logo": "",
+        "short": "",
+        "school": "Saline High School"
+      },
       "startsAt": "2023-11-16T21:00:00.000Z",
-      "updatedAt": "2026-10-05T20:22:50.917Z",
+      "status": "final",
+      "score": {
+        "them": 3,
+        "us": 0
+      },
+      "game": "rocket-league",
+      "week": "8",
+      "perGame": false,
+      "bestOf": 5,
       "teamName": "Rocket League Varsity",
+      "seriesOnly": false,
+      "level": "Varsity",
+      "clinched": "them",
+      "updatedAt": "2026-10-05T20:22:50.917Z",
+      "gameName": "Rocket League",
+      "current": 3,
       "games": [
         {
           "n": 1,
@@ -2097,37 +2121,26 @@
           "them": 3,
           "winner": "them"
         }
-      ],
-      "score": {
-        "them": 3,
-        "us": 0
-      },
-      "bestOf": 5,
-      "game": "rocket-league",
-      "term": "fall",
-      "season": "2023-24",
-      "week": "8",
-      "current": 3,
-      "clinched": "them",
-      "level": "Varsity",
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "school": "Saline High School",
-        "team": "Saline High School",
-        "abbr": "SAL"
-      },
-      "forfeit": null,
-      "seriesOnly": false,
-      "source": {},
-      "teamId": "t5",
-      "gameName": "Rocket League"
+      ]
     },
     {
       "id": "pvccf84df5958b4e059a",
-      "notes": "",
-      "week": "",
+      "clinched": "them",
       "season": "2023-24",
+      "level": "Varsity",
+      "bestOf": 5,
+      "league": "MHSEL",
+      "gameName": "Rocket League",
+      "source": {
+        "playvs": "ccf84df5-958b-4e05-9ad7-cf6f1183efaf"
+      },
+      "current": 3,
+      "event": "MHSEL Fall 2023",
+      "perGame": true,
+      "week": "",
+      "stage": "regular",
+      "teamId": "t5",
+      "teamName": "Rocket League Varsity",
       "players": [
         {
           "id": "p-5310cd2b",
@@ -2182,31 +2195,14 @@
           ]
         }
       ],
-      "clinched": "them",
-      "current": 3,
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "abbr": "",
-        "school": "",
-        "team": "Saline Stick Shifters"
-      },
-      "league": "MHSEL",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "startsAt": "2023-11-16T21:00:00.000Z",
-      "stage": "regular",
-      "gameName": "Rocket League",
-      "term": "fall",
       "stream": {
-        "vod": "",
-        "live": ""
+        "live": "",
+        "vod": ""
       },
-      "updatedAt": "2026-10-22T19:30:11.708Z",
-      "result": "L",
-      "forfeit": null,
+      "score": {
+        "them": 3,
+        "us": 0
+      },
       "games": [
         {
           "n": 1,
@@ -2275,37 +2271,81 @@
           }
         }
       ],
-      "teamName": "Rocket League Varsity",
-      "bestOf": 5,
-      "event": "MHSEL Fall 2023",
-      "teamId": "t5",
-      "source": {
-        "playvs": "ccf84df5-958b-4e05-9ad7-cf6f1183efaf"
+      "startsAt": "2023-11-16T21:00:00.000Z",
+      "opponent": {
+        "school": "",
+        "short": "",
+        "abbr": "",
+        "team": "Saline Stick Shifters",
+        "logo": ""
       },
-      "perGame": true,
+      "updatedAt": "2026-10-22T19:30:11.708Z",
+      "result": "L",
       "status": "final",
       "game": "rocket-league",
-      "level": "Varsity"
+      "forfeit": null,
+      "term": "fall",
+      "notes": ""
     },
     {
       "id": "gp0ZrpypmuOMLgu8FNbw",
-      "season": "2023-24",
-      "notes": "",
-      "opponent": {
-        "short": "",
-        "team": "Belleville High School",
-        "abbr": "BEL",
-        "school": "Belleville High School",
-        "logo": ""
-      },
+      "current": 4,
       "term": "fall",
-      "game": "rocket-league",
-      "bestOf": 7,
-      "event": "MHSEL Fall 2023",
-      "stage": "playoffs",
-      "gameName": "Rocket League",
-      "updatedAt": "2026-10-05T20:24:51.909Z",
+      "score": {
+        "us": 4,
+        "them": 0
+      },
+      "league": "MHSEL",
       "result": "W",
+      "teamId": "t5",
+      "season": "2023-24",
+      "stream": {
+        "vod": "",
+        "live": "https://youtu.be/PL9CjheFQ0w"
+      },
+      "source": {},
+      "games": [
+        {
+          "n": 1,
+          "us": 8,
+          "them": 1,
+          "winner": "us"
+        },
+        {
+          "n": 2,
+          "us": 8,
+          "them": 1,
+          "winner": "us"
+        },
+        {
+          "n": 3,
+          "us": 3,
+          "them": 1,
+          "winner": "us"
+        },
+        {
+          "n": 4,
+          "us": 5,
+          "them": 3,
+          "winner": "us"
+        }
+      ],
+      "opponent": {
+        "school": "Belleville High School",
+        "logo": "",
+        "team": "Belleville High School",
+        "short": "",
+        "abbr": "BEL"
+      },
+      "level": "Varsity",
+      "perGame": false,
+      "event": "MHSEL Fall 2023",
+      "startsAt": "2023-11-27T21:00:00.000Z",
+      "updatedAt": "2026-10-05T20:24:51.909Z",
+      "forfeit": null,
+      "notes": "",
+      "teamName": "Rocket League Varsity",
+      "clinched": "us",
       "players": [
         {
           "games": [
@@ -2377,113 +2417,20 @@
           "tag": "GoodName.mp4"
         }
       ],
-      "stream": {
-        "vod": "",
-        "live": "https://youtu.be/PL9CjheFQ0w"
-      },
-      "league": "MHSEL",
-      "clinched": "us",
-      "score": {
-        "them": 0,
-        "us": 4
-      },
+      "gameName": "Rocket League",
       "status": "final",
-      "games": [
-        {
-          "n": 1,
-          "us": 8,
-          "them": 1,
-          "winner": "us"
-        },
-        {
-          "n": 2,
-          "us": 8,
-          "them": 1,
-          "winner": "us"
-        },
-        {
-          "n": 3,
-          "us": 3,
-          "them": 1,
-          "winner": "us"
-        },
-        {
-          "n": 4,
-          "us": 5,
-          "them": 3,
-          "winner": "us"
-        }
-      ],
-      "perGame": false,
-      "level": "Varsity",
-      "teamName": "Rocket League Varsity",
-      "startsAt": "2023-11-27T21:00:00.000Z",
-      "teamId": "t5",
-      "forfeit": null,
-      "source": {},
+      "stage": "playoffs",
       "week": "Round of 32",
       "seriesOnly": false,
-      "current": 4
+      "bestOf": 7,
+      "game": "rocket-league"
     },
     {
       "id": "pvf3556ab14f414b5d81",
-      "players": [
-        {
-          "id": "p-c527d65f",
-          "name": "Talan Brown",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-348eb1ef",
-          "name": "Nicholas Cipolla",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "term": "fall",
-      "clinched": "them",
-      "status": "final",
-      "notes": "",
-      "teamId": "t3",
-      "source": {
-        "playvs": "f3556ab1-4f41-4b5d-8196-9c7ece601c66"
-      },
-      "current": 3,
-      "opponent": {
-        "logo": "",
-        "abbr": "",
-        "short": "",
-        "team": "BCC SSB Varsity",
-        "school": "Bay City Central High School"
-      },
-      "bestOf": 5,
-      "stage": "playoffs",
       "stream": {
-        "live": "",
-        "vod": ""
+        "vod": "",
+        "live": ""
       },
-      "game": "smash",
-      "startsAt": "2023-11-27T21:00:00.000Z",
-      "result": "L",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "forfeit": null,
       "games": [
         {
           "n": 1,
@@ -2513,80 +2460,72 @@
           }
         }
       ],
-      "gameName": "Super Smash Bros. Ultimate",
-      "week": "",
-      "teamName": "Smash Varsity",
-      "league": "MHSEL",
-      "level": "Varsity",
-      "season": "2023-24",
-      "event": "MHSEL Fall 2023"
-    },
-    {
-      "id": "pva5410fa75f7c4e75b5",
-      "level": "Varsity",
-      "bestOf": 7,
-      "term": "fall",
-      "forfeit": null,
-      "game": "rocket-league",
-      "season": "2023-24",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "startsAt": "2023-11-29T21:00:00.000Z",
-      "league": "MHSEL",
-      "teamName": "Rocket League Varsity",
-      "status": "final",
-      "result": "W",
-      "current": 4,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "notes": "",
-      "source": {
-        "playvs": "a5410fa7-5f7c-4e75-b520-b3c0cbf4e84e"
-      },
-      "clinched": "us",
-      "teamId": "t5",
-      "stage": "playoffs",
-      "event": "MHSEL Fall 2023",
-      "opponent": {
-        "short": "",
-        "team": "Dakota High School Blue",
-        "school": "",
-        "abbr": "",
-        "logo": ""
+      "teamId": "t3",
+      "score": {
+        "them": 3,
+        "us": 0
       },
       "players": [
         {
-          "id": "p-5310cd2b",
-          "name": "Christian Gatien",
-          "tag": "SsnowyGG",
+          "id": "p-c527d65f",
+          "name": "Talan Brown",
+          "tag": "",
           "private": false,
           "alum": true,
           "stats": {}
         },
         {
-          "id": "p-88ef0aea",
-          "name": "Kyle Greig",
-          "tag": "Ksquiggly.RL",
+          "id": "p-348eb1ef",
+          "name": "Nicholas Cipolla",
+          "tag": "",
           "private": false,
           "alum": true,
           "stats": {}
         },
         {
-          "id": "p-a1be1608",
-          "name": "Lincoln Deman",
-          "tag": "goodnics",
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
           "private": false,
           "alum": true,
           "stats": {}
         }
       ],
-      "week": "",
-      "score": {
-        "us": 4,
-        "them": 0
+      "term": "fall",
+      "stage": "playoffs",
+      "event": "MHSEL Fall 2023",
+      "season": "2023-24",
+      "game": "smash",
+      "level": "Varsity",
+      "source": {
+        "playvs": "f3556ab1-4f41-4b5d-8196-9c7ece601c66"
       },
-      "gameName": "Rocket League",
+      "current": 3,
+      "league": "MHSEL",
+      "bestOf": 5,
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "teamName": "Smash Varsity",
+      "notes": "",
+      "forfeit": null,
+      "startsAt": "2023-11-27T21:00:00.000Z",
+      "week": "",
+      "opponent": {
+        "team": "BCC SSB Varsity",
+        "logo": "",
+        "school": "Bay City Central High School",
+        "short": "",
+        "abbr": ""
+      },
+      "result": "L",
+      "clinched": "them",
+      "status": "final",
+      "gameName": "Super Smash Bros. Ultimate"
+    },
+    {
+      "id": "pva5410fa75f7c4e75b5",
+      "teamName": "Rocket League Varsity",
+      "status": "final",
+      "bestOf": 7,
       "games": [
         {
           "n": 1,
@@ -2692,74 +2631,84 @@
             }
           }
         }
-      ]
+      ],
+      "startsAt": "2023-11-29T21:00:00.000Z",
+      "level": "Varsity",
+      "term": "fall",
+      "current": 4,
+      "score": {
+        "us": 4,
+        "them": 0
+      },
+      "clinched": "us",
+      "gameName": "Rocket League",
+      "teamId": "t5",
+      "season": "2023-24",
+      "stage": "playoffs",
+      "week": "",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "source": {
+        "playvs": "a5410fa7-5f7c-4e75-b520-b3c0cbf4e84e"
+      },
+      "players": [
+        {
+          "id": "p-5310cd2b",
+          "name": "Christian Gatien",
+          "tag": "SsnowyGG",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-88ef0aea",
+          "name": "Kyle Greig",
+          "tag": "Ksquiggly.RL",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-a1be1608",
+          "name": "Lincoln Deman",
+          "tag": "goodnics",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "game": "rocket-league",
+      "event": "MHSEL Fall 2023",
+      "opponent": {
+        "abbr": "",
+        "logo": "",
+        "team": "Dakota High School Blue",
+        "short": "",
+        "school": ""
+      },
+      "forfeit": null,
+      "notes": "",
+      "result": "W",
+      "league": "MHSEL",
+      "updatedAt": "2026-10-08T19:56:21.285Z"
     },
     {
       "id": "sqqvvdTXH8Lm6CYOIGc2",
-      "notes": "",
+      "game": "rocket-league",
       "season": "2023-24",
-      "week": "Round of 16",
-      "perGame": false,
-      "seriesOnly": false,
+      "bestOf": 7,
       "league": "MHSEL",
-      "score": {
-        "them": 0,
-        "us": 4
-      },
-      "teamName": "Rocket League Varsity",
-      "gameName": "Rocket League",
-      "stage": "playoffs",
-      "forfeit": null,
-      "term": "fall",
+      "notes": "",
+      "perGame": false,
+      "current": 4,
+      "source": {},
       "stream": {
         "live": "",
         "vod": ""
       },
-      "startsAt": "2023-11-29T21:00:00.000Z",
-      "result": "W",
-      "games": [
-        {
-          "n": 1,
-          "us": 5,
-          "them": 0,
-          "winner": "us"
-        },
-        {
-          "n": 2,
-          "us": 4,
-          "them": 2,
-          "winner": "us"
-        },
-        {
-          "n": 3,
-          "us": 6,
-          "them": 0,
-          "winner": "us"
-        },
-        {
-          "n": 4,
-          "us": 5,
-          "them": 1,
-          "winner": "us"
-        }
-      ],
-      "opponent": {
-        "school": "Dakota High School",
-        "logo": "",
-        "short": "",
-        "abbr": "DAK",
-        "team": "Dakota High School"
-      },
-      "bestOf": 7,
-      "current": 4,
-      "event": "MHSEL Fall 2023",
-      "source": {},
       "teamId": "t5",
-      "status": "final",
-      "updatedAt": "2026-10-05T20:26:36.991Z",
-      "game": "rocket-league",
-      "clinched": "us",
-      "level": "Varsity",
       "players": [
         {
           "games": [
@@ -2830,12 +2779,82 @@
           "name": "Joseph Wisniewski",
           "games": []
         }
-      ]
+      ],
+      "term": "fall",
+      "startsAt": "2023-11-29T21:00:00.000Z",
+      "opponent": {
+        "abbr": "DAK",
+        "school": "Dakota High School",
+        "logo": "",
+        "short": "",
+        "team": "Dakota High School"
+      },
+      "stage": "playoffs",
+      "result": "W",
+      "games": [
+        {
+          "n": 1,
+          "us": 5,
+          "them": 0,
+          "winner": "us"
+        },
+        {
+          "n": 2,
+          "us": 4,
+          "them": 2,
+          "winner": "us"
+        },
+        {
+          "n": 3,
+          "us": 6,
+          "them": 0,
+          "winner": "us"
+        },
+        {
+          "n": 4,
+          "us": 5,
+          "them": 1,
+          "winner": "us"
+        }
+      ],
+      "seriesOnly": false,
+      "teamName": "Rocket League Varsity",
+      "score": {
+        "us": 4,
+        "them": 0
+      },
+      "status": "final",
+      "level": "Varsity",
+      "gameName": "Rocket League",
+      "forfeit": null,
+      "updatedAt": "2026-10-05T20:26:36.991Z",
+      "week": "Round of 16",
+      "event": "MHSEL Fall 2023",
+      "clinched": "us"
     },
     {
       "id": "PdPmjhtDg8ejsvjfxxhB",
+      "clinched": "us",
+      "teamId": "t5",
+      "gameName": "Rocket League",
+      "stream": {
+        "vod": "",
+        "live": "https://youtu.be/Trz7rZWNkTo"
+      },
+      "game": "rocket-league",
+      "event": "MHSEL Fall 2023",
+      "season": "2023-24",
       "source": {},
-      "level": "Varsity",
+      "notes": "",
+      "week": "Quarterfinal",
+      "perGame": true,
+      "seriesOnly": false,
+      "current": 6,
+      "startsAt": "2023-12-01T21:00:00.000Z",
+      "stage": "playoffs",
+      "result": "W",
+      "league": "MHSEL",
+      "teamName": "Rocket League Varsity",
       "players": [
         {
           "games": [
@@ -2910,36 +2929,22 @@
           "name": "Joseph Wisniewski"
         }
       ],
-      "teamId": "t5",
-      "updatedAt": "2026-10-05T20:33:43.869Z",
-      "term": "fall",
-      "perGame": true,
-      "game": "rocket-league",
-      "startsAt": "2023-12-01T21:00:00.000Z",
-      "teamName": "Rocket League Varsity",
-      "seriesOnly": false,
-      "bestOf": 7,
-      "notes": "",
-      "stage": "playoffs",
-      "clinched": "us",
-      "event": "MHSEL Fall 2023",
-      "current": 6,
-      "season": "2023-24",
       "status": "final",
+      "bestOf": 7,
+      "score": {
+        "them": 2,
+        "us": 4
+      },
       "opponent": {
-        "short": "",
-        "team": "Divine Child High School",
         "abbr": "DC",
         "logo": "",
-        "school": "Divine Child High School"
+        "team": "Divine Child High School",
+        "school": "Divine Child High School",
+        "short": ""
       },
-      "week": "Quarterfinal",
-      "league": "MHSEL",
+      "updatedAt": "2026-10-05T20:33:43.869Z",
+      "level": "Varsity",
       "forfeit": null,
-      "stream": {
-        "live": "https://youtu.be/Trz7rZWNkTo",
-        "vod": ""
-      },
       "games": [
         {
           "n": 1,
@@ -3098,36 +3103,41 @@
           }
         }
       ],
-      "result": "W",
-      "gameName": "Rocket League",
-      "score": {
-        "them": 2,
-        "us": 4
-      }
+      "term": "fall"
     },
     {
       "id": "QL52moN4rlOQ5UiFar42",
-      "status": "final",
-      "league": "MHSEL",
-      "clinched": "us",
-      "stream": {
-        "vod": "",
-        "live": "https://youtu.be/NBTij5eZnx4"
-      },
-      "result": "W",
-      "gameName": "Rocket League",
-      "week": "Semifinal",
       "perGame": false,
-      "bestOf": 7,
+      "gameName": "Rocket League",
+      "clinched": "us",
       "seriesOnly": true,
-      "level": "Varsity",
+      "result": "W",
+      "league": "MHSEL",
+      "event": "MHSEL Fall 2023 State Championships at Oakland University",
+      "notes": "",
+      "term": "fall",
+      "updatedAt": "2026-10-05T20:36:08.833Z",
+      "stage": "playoffs",
+      "source": {},
+      "startsAt": "2023-12-09T15:00:00.000Z",
+      "teamName": "Rocket League Varsity",
+      "teamId": "t5",
+      "stream": {
+        "live": "https://youtu.be/NBTij5eZnx4",
+        "vod": ""
+      },
+      "current": 5,
       "season": "2023-24",
       "opponent": {
-        "short": "",
-        "abbr": "DCC",
         "team": "Detroit Catholic Central",
+        "logo": "",
         "school": "Detroit Catholic Central",
-        "logo": ""
+        "abbr": "DCC",
+        "short": ""
+      },
+      "score": {
+        "us": 4,
+        "them": 1
       },
       "players": [
         {
@@ -3188,7 +3198,11 @@
           "id": "p-a7fe3ce9"
         }
       ],
-      "updatedAt": "2026-10-05T20:36:08.833Z",
+      "bestOf": 7,
+      "forfeit": null,
+      "game": "rocket-league",
+      "week": "Semifinal",
+      "level": "Varsity",
       "games": [
         {
           "n": 1,
@@ -3221,34 +3235,20 @@
           "winner": "them"
         }
       ],
-      "forfeit": null,
-      "term": "fall",
-      "game": "rocket-league",
-      "score": {
-        "them": 1,
-        "us": 4
-      },
-      "current": 5,
-      "source": {},
-      "notes": "",
-      "event": "MHSEL Fall 2023 State Championships at Oakland University",
-      "stage": "playoffs",
-      "teamId": "t5",
-      "startsAt": "2023-12-09T15:00:00.000Z",
-      "teamName": "Rocket League Varsity"
+      "status": "final"
     },
     {
       "id": "sXH5skx5S8zgYVJHUIjo",
-      "event": "MHSEL Fall 2023 State Championship at Oakland University",
       "teamName": "Rocket League Varsity",
-      "forfeit": null,
-      "level": "Varsity",
-      "term": "fall",
-      "gameName": "Rocket League",
-      "league": "MHSEL",
-      "updatedAt": "2026-10-05T20:41:32.639Z",
-      "game": "rocket-league",
-      "perGame": false,
+      "teamId": "t5",
+      "score": {
+        "us": 2,
+        "them": 4
+      },
+      "stream": {
+        "live": "https://youtu.be/P6Rm-8SNoXU",
+        "vod": ""
+      },
       "games": [
         {
           "n": 1,
@@ -3287,16 +3287,34 @@
           "winner": "them"
         }
       ],
-      "season": "2023-24",
-      "score": {
-        "us": 2,
-        "them": 4
-      },
-      "status": "final",
-      "current": 6,
-      "clinched": "them",
+      "term": "fall",
+      "startsAt": "2023-12-09T16:00:00.000Z",
       "stage": "playoffs",
+      "opponent": {
+        "logo": "",
+        "team": "Linden High School",
+        "short": "",
+        "school": "Linden High School",
+        "abbr": "LIN"
+      },
+      "clinched": "them",
+      "season": "2023-24",
+      "event": "MHSEL Fall 2023 State Championship at Oakland University",
+      "updatedAt": "2026-10-05T20:41:32.639Z",
+      "source": {},
+      "bestOf": 7,
+      "seriesOnly": true,
+      "league": "MHSEL",
+      "game": "rocket-league",
+      "gameName": "Rocket League",
+      "level": "Varsity",
+      "forfeit": null,
       "week": "State Final",
+      "notes": "",
+      "current": 6,
+      "perGame": false,
+      "result": "L",
+      "status": "final",
       "players": [
         {
           "name": "Kyle Greig",
@@ -3355,42 +3373,27 @@
           "private": false,
           "stats": {}
         }
-      ],
-      "teamId": "t5",
-      "source": {},
-      "bestOf": 7,
-      "notes": "",
-      "startsAt": "2023-12-09T16:00:00.000Z",
-      "seriesOnly": true,
-      "result": "L",
-      "opponent": {
-        "logo": "",
-        "abbr": "LIN",
-        "short": "",
-        "team": "Linden High School",
-        "school": "Linden High School"
-      },
-      "stream": {
-        "live": "https://youtu.be/P6Rm-8SNoXU",
-        "vod": ""
-      }
+      ]
     },
     {
       "id": "pv31338476c849446184",
-      "current": 6,
-      "season": "2023-24",
-      "event": "MHSEL Fall 2023",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "stage": "playoffs",
-      "clinched": "them",
-      "notes": "",
-      "bestOf": 7,
+      "week": "",
+      "game": "rocket-league",
       "score": {
         "them": 4,
         "us": 2
       },
-      "gameName": "Rocket League",
-      "result": "L",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "current": 6,
+      "status": "final",
+      "opponent": {
+        "logo": "",
+        "team": "LHS Rocket League Black",
+        "short": "",
+        "abbr": "",
+        "school": ""
+      },
+      "bestOf": 7,
       "games": [
         {
           "n": 1,
@@ -3429,39 +3432,56 @@
           "winner": "them"
         }
       ],
+      "level": "Varsity",
+      "players": [],
+      "event": "MHSEL Fall 2023",
+      "teamName": "Rocket League Varsity",
+      "startsAt": "2023-12-09T18:00:00.000Z",
+      "notes": "",
+      "league": "MHSEL",
+      "result": "L",
+      "teamId": "t5",
+      "term": "fall",
+      "season": "2023-24",
+      "stage": "playoffs",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "league": "MHSEL",
-      "forfeit": null,
-      "week": "",
-      "status": "final",
-      "opponent": {
-        "abbr": "",
-        "team": "LHS Rocket League Black",
-        "short": "",
-        "logo": "",
-        "school": ""
-      },
-      "game": "rocket-league",
-      "teamId": "t5",
-      "term": "fall",
-      "players": [],
-      "level": "Varsity",
+      "clinched": "them",
       "source": {
         "playvs": "31338476-c849-4461-845d-ec7897130c00"
       },
-      "teamName": "Rocket League Varsity",
-      "startsAt": "2023-12-09T18:00:00.000Z"
+      "gameName": "Rocket League",
+      "forfeit": null
     },
     {
       "id": "pv3f72b9d456f04832ad",
+      "startsAt": "2024-02-20T21:00:00.000Z",
+      "current": 3,
+      "event": "MHSEL Spring 2024",
+      "status": "final",
       "term": "spring",
+      "bestOf": 5,
+      "teamName": "Splatoon 3 Varsity",
+      "notes": "",
+      "clinched": "them",
+      "gameName": "Splatoon 3",
+      "stage": "regular",
+      "teamId": "",
+      "season": "2023-24",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "source": {
+        "playvs": "3f72b9d4-56f0-4832-ad7e-89f1e78eeb12"
+      },
       "score": {
         "us": 0,
         "them": 3
       },
+      "forfeit": null,
       "players": [
         {
           "id": "p-25d442ad",
@@ -3494,6 +3514,8 @@
           "stats": {}
         }
       ],
+      "week": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "games": [
         {
           "n": 1,
@@ -3532,68 +3554,30 @@
           }
         }
       ],
+      "result": "L",
+      "league": "MHSEL",
+      "level": "Varsity",
       "game": "splatoon",
-      "source": {
-        "playvs": "3f72b9d4-56f0-4832-ad7e-89f1e78eeb12"
-      },
-      "startsAt": "2024-02-20T21:00:00.000Z",
-      "teamName": "Splatoon 3 Varsity",
-      "teamId": "",
-      "event": "MHSEL Spring 2024",
-      "stage": "regular",
-      "notes": "",
-      "gameName": "Splatoon 3",
-      "bestOf": 5,
       "opponent": {
-        "logo": "",
-        "short": "",
         "school": "Huron High School",
+        "short": "",
+        "logo": "",
         "team": "Huron Chiefs",
         "abbr": ""
-      },
-      "current": 3,
-      "season": "2023-24",
-      "forfeit": null,
-      "clinched": "them",
-      "league": "MHSEL",
-      "status": "final",
-      "week": "",
-      "level": "Varsity",
-      "result": "L",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "stream": {
-        "live": "",
-        "vod": ""
       }
     },
     {
       "id": "pvb8246e78dc0d4249ba",
-      "startsAt": "2024-02-21T21:00:00.000Z",
-      "status": "final",
-      "league": "MHSEL",
-      "teamName": "Overwatch 2 Varsity",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "current": 3,
-      "result": "W",
-      "bestOf": 5,
-      "forfeit": null,
-      "level": "Varsity",
-      "game": "overwatch",
-      "season": "2023-24",
-      "term": "spring",
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "school": "",
-        "team": "Blue Devils Overwatch Team 2",
-        "abbr": ""
-      },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "event": "MHSEL Spring 2024",
       "week": "",
+      "current": 3,
+      "level": "Varsity",
       "players": [],
+      "status": "final",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
       "games": [
         {
           "n": 1,
@@ -3614,85 +3598,45 @@
           "winner": "us"
         }
       ],
-      "gameName": "Overwatch 2",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "source": {
-        "playvs": "b8246e78-dc0d-4249-ba05-698f6cd8057d"
-      },
-      "notes": "",
-      "teamId": "",
-      "clinched": "us",
-      "event": "MHSEL Spring 2024",
-      "stage": "regular"
-    },
-    {
-      "id": "pve9c8f2beac8749bda6",
-      "score": {
-        "us": 3,
-        "them": 1
-      },
-      "bestOf": 5,
       "stage": "regular",
       "result": "W",
       "term": "spring",
+      "clinched": "us",
+      "gameName": "Overwatch 2",
+      "teamId": "",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "gameName": "Super Smash Bros. Ultimate",
-      "status": "final",
-      "players": [
-        {
-          "id": "p-348eb1ef",
-          "name": "Nicholas Cipolla",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "notes": "",
-      "game": "smash",
-      "teamName": "Smash Varsity",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "source": {
-        "playvs": "e9c8f2be-ac87-49bd-a6ad-2a234438b25e"
+        "playvs": "b8246e78-dc0d-4249-ba05-698f6cd8057d"
       },
-      "teamId": "t3",
-      "current": 4,
-      "event": "MHSEL Spring 2024",
+      "forfeit": null,
+      "notes": "",
+      "league": "MHSEL",
+      "bestOf": 5,
+      "teamName": "Overwatch 2 Varsity",
+      "game": "overwatch",
+      "season": "2023-24",
       "opponent": {
-        "team": "Lakeview Smash",
         "abbr": "",
         "short": "",
-        "school": "Lakeview High School",
-        "logo": ""
+        "logo": "",
+        "school": "",
+        "team": "Blue Devils Overwatch Team 2"
       },
-      "startsAt": "2024-02-21T21:00:00.000Z",
-      "week": "",
-      "level": "Varsity",
-      "season": "2023-24",
+      "startsAt": "2024-02-21T21:00:00.000Z"
+    },
+    {
+      "id": "pve9c8f2beac8749bda6",
+      "result": "W",
+      "notes": "",
+      "status": "final",
+      "term": "spring",
+      "game": "smash",
       "forfeit": null,
-      "clinched": "us",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "season": "2023-24",
       "games": [
         {
           "n": 1,
@@ -3731,54 +3675,119 @@
           }
         }
       ],
-      "league": "MHSEL"
-    },
-    {
-      "id": "pv48925159d3f44821ba",
+      "score": {
+        "them": 1,
+        "us": 3
+      },
+      "current": 4,
+      "gameName": "Super Smash Bros. Ultimate",
+      "clinched": "us",
+      "source": {
+        "playvs": "e9c8f2be-ac87-49bd-a6ad-2a234438b25e"
+      },
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "stage": "regular",
+      "week": "",
       "league": "MHSEL",
-      "notes": "",
-      "status": "final",
-      "game": "madden",
-      "term": "spring",
-      "result": "W",
+      "bestOf": 5,
+      "event": "MHSEL Spring 2024",
+      "startsAt": "2024-02-21T21:00:00.000Z",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "current": 1,
-      "stage": "regular",
+      "opponent": {
+        "abbr": "",
+        "school": "Lakeview High School",
+        "logo": "",
+        "short": "",
+        "team": "Lakeview Smash"
+      },
+      "teamId": "t3",
+      "level": "Varsity",
+      "teamName": "Smash Varsity",
+      "players": [
+        {
+          "id": "p-348eb1ef",
+          "name": "Nicholas Cipolla",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ]
+    },
+    {
+      "id": "pv48925159d3f44821ba",
+      "gameName": "Madden NFL",
+      "league": "MHSEL",
+      "result": "W",
+      "clinched": "us",
+      "notes": "",
       "event": "MHSEL Spring 2024",
-      "bestOf": 3,
       "forfeit": "them",
       "startsAt": "2024-02-22T21:00:00.000Z",
+      "source": {
+        "playvs": "48925159-d3f4-4821-bacf-f9422fdc60b7"
+      },
+      "week": "",
+      "players": [],
       "season": "2023-24",
+      "game": "madden",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "stage": "regular",
+      "teamName": "Madden NFL Madden JTROX",
+      "teamId": "",
+      "term": "spring",
       "score": {
         "us": 2,
         "them": 0
       },
-      "teamName": "Madden NFL Madden JTROX",
-      "games": [],
-      "clinched": "us",
-      "level": "Varsity",
-      "players": [],
+      "current": 1,
       "updatedAt": "2026-10-08T19:56:21.285Z",
-      "source": {
-        "playvs": "48925159-d3f4-4821-bacf-f9422fdc60b7"
-      },
-      "gameName": "Madden NFL",
       "opponent": {
+        "team": "Tiger Claw Jaedyn",
         "logo": "",
         "short": "",
-        "school": "",
         "abbr": "",
-        "team": "Tiger Claw Jaedyn"
+        "school": ""
       },
-      "teamId": "",
-      "week": ""
+      "games": [],
+      "bestOf": 3,
+      "level": "Varsity",
+      "status": "final"
     },
     {
       "id": "pv75adab7cc96449b498",
-      "result": "W",
+      "bestOf": 5,
+      "teamName": "Splatoon 3 Varsity",
+      "startsAt": "2024-02-27T21:00:00.000Z",
+      "score": {
+        "us": 3,
+        "them": 1
+      },
+      "term": "spring",
+      "forfeit": null,
+      "status": "final",
       "players": [
         {
           "id": "p-25d442ad",
@@ -3811,43 +3820,9 @@
           "stats": {}
         }
       ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "level": "Varsity",
       "gameName": "Splatoon 3",
-      "league": "MHSEL",
-      "status": "final",
-      "opponent": {
-        "abbr": "",
-        "team": "FHS Splatoon1",
-        "short": "",
-        "logo": "",
-        "school": "Fremont High School"
-      },
-      "week": "",
-      "season": "2023-24",
+      "level": "Varsity",
       "clinched": "us",
-      "bestOf": 5,
-      "notes": "",
-      "teamName": "Splatoon 3 Varsity",
-      "startsAt": "2024-02-27T21:00:00.000Z",
-      "event": "MHSEL Spring 2024",
-      "current": 4,
-      "stage": "regular",
-      "game": "splatoon",
-      "teamId": "",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "forfeit": null,
-      "term": "spring",
-      "source": {
-        "playvs": "75adab7c-c964-49b4-98ec-0f309e527692"
-      },
-      "score": {
-        "them": 1,
-        "us": 3
-      },
       "games": [
         {
           "n": 1,
@@ -3897,21 +3872,38 @@
             "p-cef94125": {}
           }
         }
-      ]
+      ],
+      "source": {
+        "playvs": "75adab7c-c964-49b4-98ec-0f309e527692"
+      },
+      "current": 4,
+      "event": "MHSEL Spring 2024",
+      "teamId": "",
+      "notes": "",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "season": "2023-24",
+      "stage": "regular",
+      "opponent": {
+        "abbr": "",
+        "logo": "",
+        "team": "FHS Splatoon1",
+        "short": "",
+        "school": "Fremont High School"
+      },
+      "result": "W",
+      "league": "MHSEL",
+      "game": "splatoon",
+      "week": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z"
     },
     {
       "id": "pvf11d348514e14508bf",
-      "opponent": {
-        "team": "Quincy Crushers",
-        "abbr": "",
-        "school": "Quincy High School",
-        "short": "",
-        "logo": ""
-      },
-      "event": "MHSEL Spring 2024",
-      "level": "Varsity",
-      "startsAt": "2024-02-29T20:00:11.000Z",
-      "league": "MHSEL",
+      "teamName": "Smash Varsity",
+      "game": "smash",
+      "result": "W",
       "players": [
         {
           "id": "p-e6d4c255",
@@ -3938,10 +3930,23 @@
           "stats": {}
         }
       ],
+      "startsAt": "2024-02-29T20:00:11.000Z",
+      "notes": "",
+      "opponent": {
+        "logo": "",
+        "team": "Quincy Crushers",
+        "abbr": "",
+        "short": "",
+        "school": "Quincy High School"
+      },
+      "status": "final",
       "clinched": "us",
+      "gameName": "Super Smash Bros. Ultimate",
+      "term": "spring",
       "current": 3,
-      "week": "",
+      "forfeit": null,
       "season": "2023-24",
+      "stage": "regular",
       "games": [
         {
           "n": 1,
@@ -3971,32 +3976,31 @@
           }
         }
       ],
-      "game": "smash",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "status": "final",
-      "stage": "regular",
+      "bestOf": 5,
+      "league": "MHSEL",
       "updatedAt": "2026-10-08T19:56:21.285Z",
+      "score": {
+        "them": 0,
+        "us": 3
+      },
       "source": {
         "playvs": "f11d3485-14e1-4508-bfea-607caed0ac87"
       },
-      "teamId": "t3",
-      "forfeit": null,
-      "gameName": "Super Smash Bros. Ultimate",
-      "bestOf": 5,
-      "notes": "",
-      "term": "spring",
-      "teamName": "Smash Varsity",
-      "result": "W",
+      "level": "Varsity",
       "stream": {
         "vod": "",
         "live": ""
-      }
+      },
+      "teamId": "t3",
+      "week": "",
+      "event": "MHSEL Spring 2024"
     },
     {
       "id": "pv2d05405fa43e4539b8",
+      "status": "final",
+      "game": "rocket-league",
+      "level": "Varsity",
+      "startsAt": "2024-02-29T21:00:00.000Z",
       "games": [
         {
           "n": 1,
@@ -4077,41 +4081,6 @@
           }
         }
       ],
-      "week": "",
-      "forfeit": null,
-      "gameName": "Rocket League",
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "bestOf": 5,
-      "opponent": {
-        "abbr": "",
-        "school": "L'Anse Creuse High School - North",
-        "short": "",
-        "team": "North Stars",
-        "logo": ""
-      },
-      "updatedAt": "2026-10-22T19:30:11.708Z",
-      "season": "2023-24",
-      "event": "MHSEL Spring 2024",
-      "stage": "regular",
-      "clinched": "us",
-      "status": "final",
-      "league": "MHSEL",
-      "current": 3,
-      "notes": "",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "result": "W",
-      "source": {
-        "playvs": "2d05405f-a43e-4539-b853-1c0faa3d555b"
-      },
-      "startsAt": "2024-02-29T21:00:00.000Z",
-      "teamName": "Rocket League Varsity",
-      "teamId": "t5",
       "players": [
         {
           "id": "p-a7fe3ce9",
@@ -4168,19 +4137,65 @@
           ]
         }
       ],
+      "teamName": "Rocket League Varsity",
+      "week": "",
+      "bestOf": 5,
+      "forfeit": null,
+      "clinched": "us",
+      "gameName": "Rocket League",
+      "score": {
+        "them": 0,
+        "us": 3
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "season": "2023-24",
+      "updatedAt": "2026-10-22T19:30:11.708Z",
+      "teamId": "t5",
       "perGame": true,
+      "stage": "regular",
+      "source": {
+        "playvs": "2d05405f-a43e-4539-b853-1c0faa3d555b"
+      },
+      "notes": "",
       "term": "spring",
-      "game": "rocket-league",
-      "level": "Varsity"
+      "current": 3,
+      "league": "MHSEL",
+      "result": "W",
+      "opponent": {
+        "school": "L'Anse Creuse High School - North",
+        "short": "",
+        "abbr": "",
+        "logo": "",
+        "team": "North Stars"
+      },
+      "event": "MHSEL Spring 2024"
     },
     {
       "id": "pvd5929c2f507a461d96",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "level": "Varsity",
+      "result": "W",
+      "startsAt": "2024-02-29T21:00:00.000Z",
       "forfeit": null,
-      "league": "MHSEL",
+      "opponent": {
+        "team": "North Huron Schools 1",
+        "school": "",
+        "logo": "",
+        "short": "",
+        "abbr": ""
+      },
       "event": "MHSEL Spring 2024",
+      "status": "final",
+      "teamName": "Madden NFL Madden JTROX",
       "game": "madden",
+      "level": "Varsity",
+      "gameName": "Madden NFL",
+      "score": {
+        "us": 2,
+        "them": 0
+      },
+      "term": "spring",
       "games": [
         {
           "n": 1,
@@ -4201,20 +4216,9 @@
           }
         }
       ],
-      "term": "spring",
-      "gameName": "Madden NFL",
-      "season": "2023-24",
-      "teamName": "Madden NFL Madden JTROX",
-      "status": "final",
-      "opponent": {
-        "team": "North Huron Schools 1",
-        "abbr": "",
-        "logo": "",
-        "short": "",
-        "school": ""
-      },
       "stage": "regular",
-      "current": 2,
+      "clinched": "us",
+      "season": "2023-24",
       "players": [
         {
           "id": "p-76fdf892",
@@ -4228,53 +4232,98 @@
       "source": {
         "playvs": "d5929c2f-507a-461d-96fe-99e0c49aab79"
       },
-      "teamId": "",
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "startsAt": "2024-02-29T21:00:00.000Z",
-      "clinched": "us",
       "bestOf": 3,
+      "league": "MHSEL",
+      "teamId": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "notes": "",
       "week": "",
       "stream": {
-        "live": "",
-        "vod": ""
+        "vod": "",
+        "live": ""
       },
-      "notes": "",
-      "result": "W"
+      "current": 2
     },
     {
       "id": "pv918781aa51c641669c",
-      "current": 4,
-      "season": "2023-24",
-      "clinched": "them",
-      "bestOf": 5,
-      "week": "",
-      "gameName": "Rocket League",
+      "stage": "regular",
+      "teamName": "Rocket League Varsity",
+      "startsAt": "2024-02-29T22:00:03.000Z",
+      "forfeit": null,
       "result": "L",
+      "league": "MHSEL",
+      "teamId": "t5",
+      "players": [
+        {
+          "id": "p-a7fe3ce9",
+          "name": "Joseph Wisniewski",
+          "tag": "GoodName.mp4",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 0,
+            "assists": 0,
+            "saves": 2,
+            "shots": 0
+          },
+          "games": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "p-5310cd2b",
+          "name": "Christian Gatien",
+          "tag": "SsnowyGG",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 0,
+            "assists": 1,
+            "saves": 0,
+            "shots": 2
+          },
+          "games": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "p-61bdc66e",
+          "name": "Fred Nikitin",
+          "tag": "Stupid Nonsense",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 0,
+            "assists": 0,
+            "saves": 0,
+            "shots": 0
+          },
+          "games": [
+            1,
+            2
+          ]
+        }
+      ],
+      "game": "rocket-league",
+      "event": "MHSEL Spring 2024",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "level": "Varsity",
-      "league": "MHSEL",
-      "forfeit": null,
-      "status": "final",
-      "opponent": {
-        "abbr": "",
-        "team": "LHS Rocket League Black",
-        "short": "",
-        "logo": "",
-        "school": ""
+      "season": "2023-24",
+      "clinched": "them",
+      "notes": "",
+      "source": {
+        "playvs": "918781aa-51c6-4166-9c72-af220311a35d"
       },
-      "score": {
-        "them": 3,
-        "us": 1
-      },
-      "perGame": true,
-      "teamId": "t5",
+      "gameName": "Rocket League",
+      "week": "",
       "updatedAt": "2026-10-22T19:30:11.708Z",
+      "current": 4,
+      "term": "spring",
+      "level": "Varsity",
       "games": [
         {
           "n": 1,
@@ -4341,132 +4390,37 @@
           "winner": "them"
         }
       ],
-      "players": [
-        {
-          "id": "p-a7fe3ce9",
-          "name": "Joseph Wisniewski",
-          "tag": "GoodName.mp4",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 0,
-            "assists": 0,
-            "saves": 2,
-            "shots": 0
-          },
-          "games": [
-            1,
-            2
-          ]
-        },
-        {
-          "id": "p-5310cd2b",
-          "name": "Christian Gatien",
-          "tag": "SsnowyGG",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 0,
-            "assists": 1,
-            "saves": 0,
-            "shots": 2
-          },
-          "games": [
-            1,
-            2
-          ]
-        },
-        {
-          "id": "p-61bdc66e",
-          "name": "Fred Nikitin",
-          "tag": "Stupid Nonsense",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 0,
-            "assists": 0,
-            "saves": 0,
-            "shots": 0
-          },
-          "games": [
-            1,
-            2
-          ]
-        }
-      ],
-      "source": {
-        "playvs": "918781aa-51c6-4166-9c72-af220311a35d"
+      "status": "final",
+      "opponent": {
+        "abbr": "",
+        "team": "LHS Rocket League Black",
+        "logo": "",
+        "school": "",
+        "short": ""
       },
-      "game": "rocket-league",
-      "term": "spring",
-      "stage": "regular",
-      "event": "MHSEL Spring 2024",
-      "notes": "",
-      "teamName": "Rocket League Varsity",
-      "startsAt": "2024-02-29T22:00:03.000Z"
+      "bestOf": 5,
+      "perGame": true,
+      "score": {
+        "us": 1,
+        "them": 3
+      }
     },
     {
       "id": "pv48c976fb012e4dd1bb",
-      "clinched": "them",
-      "league": "MHSEL",
-      "status": "final",
-      "result": "L",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "current": 3,
       "bestOf": 5,
-      "game": "splatoon",
-      "forfeit": null,
-      "level": "Varsity",
+      "current": 3,
       "gameName": "Splatoon 3",
-      "term": "spring",
-      "opponent": {
-        "team": "Octopus Offspring",
-        "short": "",
-        "school": "Howell High School",
-        "abbr": "",
-        "logo": ""
-      },
-      "season": "2023-24",
-      "players": [
-        {
-          "id": "p-7b5cf8bf",
-          "name": "Austin Howe",
-          "tag": "3516-7033-9908",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-25d442ad",
-          "name": "Nathaniel Smith",
-          "tag": "SW-2221-7069-7622",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-cef94125",
-          "name": "Alexander Berry",
-          "tag": "Squish212",
-          "private": false,
-          "stats": {}
-        },
-        {
-          "id": "p-66fae53c",
-          "name": "Bo West",
-          "tag": "DeviousDawgs",
-          "private": false,
-          "stats": {}
-        }
-      ],
+      "clinched": "them",
       "score": {
         "us": 0,
         "them": 3
       },
-      "week": "",
+      "term": "spring",
+      "status": "final",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "teamName": "Splatoon 3 Varsity",
+      "level": "Varsity",
+      "startsAt": "2024-03-05T21:00:00.000Z",
       "games": [
         {
           "n": 1,
@@ -4508,105 +4462,154 @@
       "source": {
         "playvs": "48c976fb-012e-4dd1-bbdd-9f9a2fbcd4a7"
       },
-      "notes": "",
-      "startsAt": "2024-03-05T21:00:00.000Z",
-      "teamId": "",
-      "teamName": "Splatoon 3 Varsity",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "event": "MHSEL Spring 2024",
-      "stage": "regular"
-    },
-    {
-      "id": "pvd298f0e9f89e472588",
-      "game": "overwatch",
-      "result": "W",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "teamName": "Overwatch 2 Varsity",
-      "notes": "",
-      "gameName": "Overwatch 2",
-      "bestOf": 5,
-      "forfeit": null,
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "source": {
-        "playvs": "d298f0e9-f89e-4725-8882-cffa3fd986aa"
-      },
-      "teamId": "",
-      "term": "spring",
-      "stage": "regular",
-      "status": "final",
-      "current": 3,
-      "season": "2023-24",
-      "clinched": "us",
-      "players": [],
-      "games": [
-        {
-          "n": 1,
-          "us": 0,
-          "them": 0,
-          "winner": "us"
-        },
-        {
-          "n": 2,
-          "us": 0,
-          "them": 0,
-          "winner": "us"
-        },
-        {
-          "n": 3,
-          "us": 0,
-          "them": 0,
-          "winner": "us"
-        }
-      ],
-      "event": "MHSEL Spring 2024",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "startsAt": "2024-03-06T20:30:00.000Z",
-      "league": "MHSEL",
-      "level": "Varsity",
       "opponent": {
-        "team": "Manistee Overwatch",
+        "school": "Howell High School",
+        "logo": "",
+        "team": "Octopus Offspring",
         "short": "",
-        "abbr": "",
-        "school": "",
-        "logo": ""
+        "abbr": ""
       },
-      "week": ""
-    },
-    {
-      "id": "pv2716853eca7340f28e",
-      "level": "Varsity",
-      "game": "overwatch",
-      "term": "spring",
+      "event": "MHSEL Spring 2024",
       "teamId": "",
-      "players": [],
-      "teamName": "Overwatch 2 Varsity",
-      "source": {
-        "playvs": "2716853e-ca73-40f2-8edc-86df05dc3473"
-      },
-      "startsAt": "2024-03-06T21:00:00.000Z",
+      "notes": "",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "clinched": "them",
+      "forfeit": null,
+      "season": "2023-24",
+      "stage": "regular",
+      "players": [
+        {
+          "id": "p-7b5cf8bf",
+          "name": "Austin Howe",
+          "tag": "3516-7033-9908",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-25d442ad",
+          "name": "Nathaniel Smith",
+          "tag": "SW-2221-7069-7622",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-cef94125",
+          "name": "Alexander Berry",
+          "tag": "Squish212",
+          "private": false,
+          "stats": {}
+        },
+        {
+          "id": "p-66fae53c",
+          "name": "Bo West",
+          "tag": "DeviousDawgs",
+          "private": false,
+          "stats": {}
+        }
+      ],
       "result": "L",
+      "league": "MHSEL",
+      "game": "splatoon",
+      "week": ""
+    },
+    {
+      "id": "pvd298f0e9f89e472588",
+      "result": "W",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "players": [],
+      "notes": "",
+      "status": "final",
+      "term": "spring",
+      "game": "overwatch",
+      "current": 3,
+      "games": [
+        {
+          "n": 1,
+          "us": 0,
+          "them": 0,
+          "winner": "us"
+        },
+        {
+          "n": 2,
+          "us": 0,
+          "them": 0,
+          "winner": "us"
+        },
+        {
+          "n": 3,
+          "us": 0,
+          "them": 0,
+          "winner": "us"
+        }
+      ],
+      "season": "2023-24",
+      "teamName": "Overwatch 2 Varsity",
+      "score": {
+        "them": 0,
+        "us": 3
+      },
+      "forfeit": null,
+      "week": "",
+      "source": {
+        "playvs": "d298f0e9-f89e-4725-8882-cffa3fd986aa"
+      },
+      "startsAt": "2024-03-06T20:30:00.000Z",
+      "bestOf": 5,
+      "stage": "regular",
+      "league": "MHSEL",
+      "opponent": {
+        "school": "",
+        "abbr": "",
+        "short": "",
+        "team": "Manistee Overwatch",
+        "logo": ""
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "event": "MHSEL Spring 2024",
+      "teamId": "",
+      "clinched": "us",
+      "level": "Varsity",
+      "gameName": "Overwatch 2"
+    },
+    {
+      "id": "pv2716853eca7340f28e",
+      "teamName": "Overwatch 2 Varsity",
       "notes": "",
       "forfeit": null,
-      "status": "final",
-      "event": "MHSEL Spring 2024",
-      "league": "MHSEL",
-      "stage": "regular",
       "updatedAt": "2026-10-08T19:56:21.285Z",
-      "season": "2023-24",
-      "week": "",
-      "gameName": "Overwatch 2",
+      "startsAt": "2024-03-06T21:00:00.000Z",
+      "event": "MHSEL Spring 2024",
       "bestOf": 5,
+      "game": "overwatch",
+      "week": "",
+      "stage": "regular",
+      "status": "final",
+      "gameName": "Overwatch 2",
+      "clinched": "them",
+      "players": [],
+      "league": "MHSEL",
+      "result": "L",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "term": "spring",
+      "current": 3,
+      "opponent": {
+        "team": "PRYME",
+        "logo": "",
+        "abbr": "",
+        "school": "Utica High School",
+        "short": ""
+      },
+      "level": "Varsity",
       "games": [
         {
           "n": 1,
@@ -4627,47 +4630,39 @@
           "winner": "them"
         }
       ],
-      "opponent": {
-        "logo": "",
-        "abbr": "",
-        "school": "Utica High School",
-        "team": "PRYME",
-        "short": ""
+      "source": {
+        "playvs": "2716853e-ca73-40f2-8edc-86df05dc3473"
       },
-      "score": {
-        "us": 0,
-        "them": 3
+      "stream": {
+        "live": "",
+        "vod": ""
       },
-      "current": 3
+      "season": "2023-24",
+      "teamId": ""
     },
     {
       "id": "pv563625773dc343b0b6",
+      "teamName": "Madden NFL Madden JTROX",
+      "term": "spring",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "result": "L",
+      "league": "MHSEL",
+      "startsAt": "2024-03-07T21:00:00.000Z",
+      "stage": "regular",
+      "season": "2023-24",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "notes": "",
       "teamId": "",
+      "event": "MHSEL Spring 2024",
+      "current": 2,
+      "clinched": "them",
       "source": {
         "playvs": "56362577-3dc3-43b0-b6f3-e6623f6c1b79"
       },
-      "clinched": "them",
-      "forfeit": null,
-      "level": "Varsity",
-      "game": "madden",
-      "term": "spring",
-      "current": 2,
-      "opponent": {
-        "team": "IAmNumber1",
-        "abbr": "",
-        "short": "",
-        "logo": "",
-        "school": ""
-      },
       "gameName": "Madden NFL",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "season": "2023-24",
-      "bestOf": 3,
-      "score": {
-        "us": 0,
-        "them": 2
-      },
-      "week": "",
       "games": [
         {
           "n": 1,
@@ -4688,16 +4683,7 @@
           }
         }
       ],
-      "result": "L",
-      "notes": "",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "teamName": "Madden NFL Madden JTROX",
-      "startsAt": "2024-03-07T21:00:00.000Z",
-      "league": "MHSEL",
-      "status": "final",
+      "level": "Varsity",
       "players": [
         {
           "id": "p-76fdf892",
@@ -4708,17 +4694,80 @@
           "stats": {}
         }
       ],
-      "stage": "regular",
-      "event": "MHSEL Spring 2024"
+      "score": {
+        "us": 0,
+        "them": 2
+      },
+      "status": "final",
+      "week": "",
+      "forfeit": null,
+      "opponent": {
+        "team": "IAmNumber1",
+        "logo": "",
+        "short": "",
+        "abbr": "",
+        "school": ""
+      },
+      "bestOf": 3,
+      "game": "madden"
     },
     {
       "id": "pva07ee7f3f2d3421d81",
-      "clinched": "them",
-      "current": 4,
-      "score": {
-        "them": 3,
-        "us": 1
+      "stage": "regular",
+      "bestOf": 5,
+      "opponent": {
+        "abbr": "",
+        "team": "Howell Smash Green",
+        "logo": "",
+        "school": "Howell High School",
+        "short": ""
       },
+      "status": "final",
+      "game": "smash",
+      "event": "MHSEL Spring 2024",
+      "notes": "",
+      "current": 4,
+      "week": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "source": {
+        "playvs": "a07ee7f3-f2d3-421d-811c-48263ecdc5ce"
+      },
+      "gameName": "Super Smash Bros. Ultimate",
+      "clinched": "them",
+      "teamId": "t3",
+      "level": "Varsity",
+      "term": "spring",
+      "players": [
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-348eb1ef",
+          "name": "Nicholas Cipolla",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "season": "2023-24",
       "games": [
         {
           "n": 1,
@@ -4757,137 +4806,36 @@
           }
         }
       ],
-      "notes": "",
-      "gameName": "Super Smash Bros. Ultimate",
-      "teamId": "t3",
-      "source": {
-        "playvs": "a07ee7f3-f2d3-421d-811c-48263ecdc5ce"
-      },
-      "week": "",
-      "stage": "regular",
-      "event": "MHSEL Spring 2024",
       "forfeit": null,
-      "opponent": {
-        "short": "",
-        "team": "Howell Smash Green",
-        "abbr": "",
-        "school": "Howell High School",
-        "logo": ""
-      },
-      "result": "L",
-      "term": "spring",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "game": "smash",
-      "league": "MHSEL",
-      "players": [
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-348eb1ef",
-          "name": "Nicholas Cipolla",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "status": "final",
-      "level": "Varsity",
-      "season": "2023-24",
-      "bestOf": 5,
-      "teamName": "Smash Varsity",
       "startsAt": "2024-03-12T18:30:00.000Z",
-      "updatedAt": "2026-10-08T19:56:21.285Z"
+      "league": "MHSEL",
+      "result": "L",
+      "teamName": "Smash Varsity",
+      "score": {
+        "us": 1,
+        "them": 3
+      }
     },
     {
       "id": "pvf7fdf85969e94c788d",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "teamName": "Splatoon 3 Varsity",
-      "source": {
-        "playvs": "f7fdf859-69e9-4c78-8d8e-b6558c8e17c0"
-      },
+      "level": "Varsity",
       "teamId": "",
-      "forfeit": null,
-      "stage": "regular",
-      "gameName": "Splatoon 3",
-      "term": "spring",
-      "status": "final",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "game": "splatoon",
-      "result": "W",
+      "event": "MHSEL Spring 2024",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "notes": "",
       "bestOf": 5,
-      "event": "MHSEL Spring 2024",
-      "league": "MHSEL",
-      "players": [
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-66fae53c",
-          "name": "Bo West",
-          "tag": "DeviousDawgs",
-          "private": false,
-          "stats": {}
-        },
-        {
-          "id": "p-25d442ad",
-          "name": "Nathaniel Smith",
-          "tag": "SW-2221-7069-7622",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-7b5cf8bf",
-          "name": "Austin Howe",
-          "tag": "3516-7033-9908",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "level": "Varsity",
-      "current": 3,
       "week": "",
-      "clinched": "us",
-      "startsAt": "2024-03-12T20:00:00.000Z",
-      "season": "2023-24",
-      "opponent": {
-        "abbr": "",
-        "team": "FHS Tigers",
-        "short": "",
-        "school": "Fenton Senior High School",
-        "logo": ""
+      "league": "MHSEL",
+      "stage": "regular",
+      "source": {
+        "playvs": "f7fdf859-69e9-4c78-8d8e-b6558c8e17c0"
+      },
+      "forfeit": null,
+      "score": {
+        "us": 3,
+        "them": 0
       },
       "games": [
         {
@@ -4926,16 +4874,65 @@
             "p-7b5cf8bf": {}
           }
         }
-      ]
+      ],
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "season": "2023-24",
+      "current": 3,
+      "teamName": "Splatoon 3 Varsity",
+      "opponent": {
+        "school": "Fenton Senior High School",
+        "short": "",
+        "abbr": "",
+        "team": "FHS Tigers",
+        "logo": ""
+      },
+      "startsAt": "2024-03-12T20:00:00.000Z",
+      "game": "splatoon",
+      "clinched": "us",
+      "status": "final",
+      "term": "spring",
+      "notes": "",
+      "players": [
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-66fae53c",
+          "name": "Bo West",
+          "tag": "DeviousDawgs",
+          "private": false,
+          "stats": {}
+        },
+        {
+          "id": "p-25d442ad",
+          "name": "Nathaniel Smith",
+          "tag": "SW-2221-7069-7622",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-7b5cf8bf",
+          "name": "Austin Howe",
+          "tag": "3516-7033-9908",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "result": "W",
+      "gameName": "Splatoon 3"
     },
     {
       "id": "pv3c41af6173674d0495",
-      "forfeit": null,
-      "score": {
-        "us": 3,
-        "them": 1
-      },
-      "clinched": "us",
+      "level": "Varsity",
+      "result": "W",
+      "league": "MHSEL",
       "games": [
         {
           "n": 1,
@@ -4974,36 +4971,22 @@
           }
         }
       ],
-      "teamId": "t3",
-      "notes": "",
+      "term": "spring",
+      "forfeit": null,
       "opponent": {
-        "abbr": "",
         "short": "",
-        "school": "Portage Northern High School",
+        "abbr": "",
         "team": "PNHS SSBU Orange",
+        "school": "Portage Northern High School",
         "logo": ""
       },
-      "game": "smash",
-      "term": "spring",
       "source": {
         "playvs": "3c41af61-7367-4d04-95e0-4a2ff2ef3ed3"
       },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "gameName": "Super Smash Bros. Ultimate",
-      "stage": "regular",
-      "event": "MHSEL Spring 2024",
-      "current": 4,
-      "result": "W",
-      "stream": {
-        "live": "",
-        "vod": ""
+      "score": {
+        "us": 3,
+        "them": 1
       },
-      "league": "MHSEL",
-      "status": "final",
-      "week": "",
-      "season": "2023-24",
-      "teamName": "Smash Varsity",
-      "startsAt": "2024-03-13T20:00:00.000Z",
       "players": [
         {
           "id": "p-e6d4c255",
@@ -5030,21 +5013,55 @@
           "stats": {}
         }
       ],
-      "level": "Varsity",
-      "bestOf": 5
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "season": "2023-24",
+      "teamId": "t3",
+      "teamName": "Smash Varsity",
+      "current": 4,
+      "stage": "regular",
+      "startsAt": "2024-03-13T20:00:00.000Z",
+      "game": "smash",
+      "notes": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "bestOf": 5,
+      "gameName": "Super Smash Bros. Ultimate",
+      "status": "final",
+      "clinched": "us",
+      "event": "MHSEL Spring 2024",
+      "week": ""
     },
     {
       "id": "pv7d68bd7d82944f7ba3",
-      "teamId": "",
       "week": "",
+      "forfeit": null,
+      "league": "MHSEL",
+      "result": "W",
+      "game": "overwatch",
+      "stage": "regular",
+      "opponent": {
+        "school": "American International Academy High School/Middle School",
+        "short": "",
+        "abbr": "",
+        "team": "Valhalla Raiders",
+        "logo": ""
+      },
+      "season": "2023-24",
+      "players": [],
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "notes": "",
+      "teamId": "",
+      "event": "MHSEL Spring 2024",
       "source": {
         "playvs": "7d68bd7d-8294-4f7b-a390-8b0583a3b808"
       },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "players": [],
-      "teamName": "Overwatch 2 Varsity",
-      "level": "Varsity",
-      "startsAt": "2024-03-13T20:00:00.000Z",
+      "clinched": "us",
+      "gameName": "Overwatch 2",
       "games": [
         {
           "n": 1,
@@ -5065,40 +5082,38 @@
           "winner": "us"
         }
       ],
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "season": "2023-24",
-      "clinched": "us",
-      "forfeit": null,
-      "bestOf": 5,
-      "stage": "regular",
-      "event": "MHSEL Spring 2024",
-      "gameName": "Overwatch 2",
       "current": 3,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "result": "W",
-      "game": "overwatch",
+      "level": "Varsity",
       "status": "final",
+      "startsAt": "2024-03-13T20:00:00.000Z",
       "term": "spring",
-      "opponent": {
-        "logo": "",
-        "team": "Valhalla Raiders",
-        "school": "American International Academy High School/Middle School",
-        "short": "",
-        "abbr": ""
+      "score": {
+        "them": 0,
+        "us": 3
       },
-      "notes": "",
-      "league": "MHSEL"
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "bestOf": 5,
+      "teamName": "Overwatch 2 Varsity"
     },
     {
       "id": "pv490beaa02d7647b899",
-      "bestOf": 5,
       "perGame": true,
+      "gameName": "Rocket League",
+      "clinched": "them",
+      "bestOf": 5,
+      "stage": "regular",
+      "term": "spring",
+      "status": "final",
+      "updatedAt": "2026-10-22T19:30:11.708Z",
+      "notes": "",
+      "startsAt": "2024-03-14T20:00:00.000Z",
+      "teamName": "Rocket League Varsity",
+      "event": "MHSEL Spring 2024",
+      "current": 3,
+      "level": "Varsity",
+      "source": {
+        "playvs": "490beaa0-2d76-47b8-99e2-56dffc3fb5a4"
+      },
       "games": [
         {
           "n": 1,
@@ -5167,12 +5182,19 @@
           }
         }
       ],
-      "season": "2023-24",
-      "clinched": "them",
-      "score": {
-        "us": 0,
-        "them": 3
+      "stream": {
+        "live": "",
+        "vod": ""
       },
+      "opponent": {
+        "logo": "",
+        "team": "Novi Wildcats Varsity",
+        "short": "",
+        "abbr": "",
+        "school": "Novi High School"
+      },
+      "season": "2023-24",
+      "teamId": "t5",
       "players": [
         {
           "id": "p-8a733446",
@@ -5227,71 +5249,28 @@
           ]
         }
       ],
-      "status": "final",
-      "league": "MHSEL",
-      "week": "",
-      "opponent": {
-        "short": "",
-        "school": "Novi High School",
-        "abbr": "",
-        "team": "Novi Wildcats Varsity",
-        "logo": ""
-      },
-      "notes": "",
-      "gameName": "Rocket League",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "event": "MHSEL Spring 2024",
-      "stage": "regular",
-      "result": "L",
-      "current": 3,
-      "source": {
-        "playvs": "490beaa0-2d76-47b8-99e2-56dffc3fb5a4"
-      },
-      "teamId": "t5",
       "game": "rocket-league",
-      "term": "spring",
-      "startsAt": "2024-03-14T20:00:00.000Z",
-      "level": "Varsity",
-      "teamName": "Rocket League Varsity",
-      "updatedAt": "2026-10-22T19:30:11.708Z",
-      "forfeit": null
+      "result": "L",
+      "league": "MHSEL",
+      "forfeit": null,
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "week": ""
     },
     {
       "id": "pvba4b506e025e468ca5",
-      "startsAt": "2024-03-14T20:00:00.000Z",
-      "notes": "",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "result": "L",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "opponent": {
-        "abbr": "",
-        "school": "Coopersville High School",
-        "team": "CAPSMADDEN",
-        "logo": "",
-        "short": ""
-      },
-      "bestOf": 3,
-      "game": "madden",
-      "term": "spring",
-      "score": {
-        "us": 0,
-        "them": 2
-      },
       "source": {
         "playvs": "ba4b506e-025e-468c-a545-05ccf862c6fe"
       },
-      "teamId": "",
-      "forfeit": null,
-      "status": "final",
-      "stage": "regular",
+      "score": {
+        "them": 2,
+        "us": 0
+      },
       "clinched": "them",
-      "season": "2023-24",
+      "bestOf": 3,
+      "league": "MHSEL",
       "games": [
         {
           "n": 1,
@@ -5312,10 +5291,10 @@
           }
         }
       ],
-      "week": "",
-      "teamName": "Madden NFL Madden JTROX",
-      "event": "MHSEL Spring 2024",
-      "league": "MHSEL",
+      "gameName": "Madden NFL",
+      "current": 2,
+      "stage": "regular",
+      "season": "2023-24",
       "players": [
         {
           "id": "p-76fdf892",
@@ -5326,120 +5305,101 @@
           "stats": {}
         }
       ],
-      "gameName": "Madden NFL",
-      "current": 2,
-      "level": "Varsity"
-    },
-    {
-      "id": "pv54c8f0e08d7b4a0593",
-      "bestOf": 5,
-      "clinched": "them",
-      "players": [],
-      "level": "Varsity",
-      "season": "2023-24",
-      "opponent": {
-        "school": "Detroit Catholic Central High School",
-        "logo": "",
-        "abbr": "",
-        "short": "",
-        "team": "DCC Varsity"
-      },
-      "status": "final",
-      "league": "MHSEL",
-      "gameName": "Rocket League",
-      "game": "rocket-league",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "term": "spring",
-      "result": "L",
-      "current": 1,
-      "stage": "regular",
+      "week": "",
+      "teamName": "Madden NFL Madden JTROX",
       "event": "MHSEL Spring 2024",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "week": "",
-      "source": {
-        "playvs": "54c8f0e0-8d7b-4a05-93d8-b60c65e74fe3"
-      },
-      "teamId": "t5",
-      "notes": "",
-      "games": [],
-      "startsAt": "2024-03-15T20:00:09.000Z",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "teamName": "Rocket League Varsity",
-      "forfeit": "us"
-    },
-    {
-      "id": "pv0cda86a611534beb94",
-      "current": 4,
-      "startsAt": "2024-03-19T20:00:00.000Z",
-      "bestOf": 5,
-      "teamName": "Splatoon 3 Varsity",
-      "level": "Varsity",
-      "season": "2023-24",
-      "status": "final",
-      "league": "MHSEL",
-      "week": "",
-      "forfeit": null,
+      "teamId": "",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "result": "L",
-      "stage": "regular",
-      "event": "MHSEL Spring 2024",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "opponent": {
-        "team": "Squirt Squad",
+        "short": "",
+        "logo": "",
+        "team": "CAPSMADDEN",
+        "abbr": "",
+        "school": "Coopersville High School"
+      },
+      "startsAt": "2024-03-14T20:00:00.000Z",
+      "level": "Varsity",
+      "notes": "",
+      "status": "final",
+      "result": "L",
+      "game": "madden",
+      "forfeit": null,
+      "term": "spring"
+    },
+    {
+      "id": "pv54c8f0e08d7b4a0593",
+      "source": {
+        "playvs": "54c8f0e0-8d7b-4a05-93d8-b60c65e74fe3"
+      },
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "season": "2023-24",
+      "teamId": "t5",
+      "gameName": "Rocket League",
+      "current": 1,
+      "clinched": "them",
+      "teamName": "Rocket League Varsity",
+      "game": "rocket-league",
+      "result": "L",
+      "league": "MHSEL",
+      "level": "Varsity",
+      "games": [],
+      "week": "",
+      "startsAt": "2024-03-15T20:00:09.000Z",
+      "notes": "",
+      "opponent": {
+        "team": "DCC Varsity",
+        "logo": "",
         "short": "",
         "abbr": "",
-        "logo": "",
-        "school": "Manistee High School"
+        "school": "Detroit Catholic Central High School"
       },
+      "forfeit": "us",
+      "bestOf": 5,
+      "term": "spring",
+      "status": "final",
+      "event": "MHSEL Spring 2024",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "stage": "regular",
+      "players": []
+    },
+    {
+      "id": "pv0cda86a611534beb94",
       "source": {
         "playvs": "0cda86a6-1153-4beb-948f-292d67e16b23"
       },
-      "gameName": "Splatoon 3",
-      "game": "splatoon",
-      "teamId": "",
       "term": "spring",
-      "players": [
-        {
-          "id": "p-7b5cf8bf",
-          "name": "Austin Howe",
-          "tag": "3516-7033-9908",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-25d442ad",
-          "name": "Nathaniel Smith",
-          "tag": "SW-2221-7069-7622",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-66fae53c",
-          "name": "Bo West",
-          "tag": "DeviousDawgs",
-          "private": false,
-          "stats": {}
-        },
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "notes": "",
+      "score": {
+        "us": 1,
+        "them": 3
+      },
+      "teamId": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "season": "2023-24",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "opponent": {
+        "team": "Squirt Squad",
+        "logo": "",
+        "short": "",
+        "abbr": "",
+        "school": "Manistee High School"
+      },
+      "league": "MHSEL",
+      "result": "L",
+      "current": 4,
       "games": [
         {
           "n": 1,
@@ -5490,30 +5450,65 @@
           }
         }
       ],
-      "score": {
-        "them": 3,
-        "us": 1
-      },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "clinched": "them"
+      "level": "Varsity",
+      "bestOf": 5,
+      "event": "MHSEL Spring 2024",
+      "players": [
+        {
+          "id": "p-7b5cf8bf",
+          "name": "Austin Howe",
+          "tag": "3516-7033-9908",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-25d442ad",
+          "name": "Nathaniel Smith",
+          "tag": "SW-2221-7069-7622",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-66fae53c",
+          "name": "Bo West",
+          "tag": "DeviousDawgs",
+          "private": false,
+          "stats": {}
+        },
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "teamName": "Splatoon 3 Varsity",
+      "startsAt": "2024-03-19T20:00:00.000Z",
+      "status": "final",
+      "notes": "",
+      "week": "",
+      "stage": "regular",
+      "gameName": "Splatoon 3",
+      "clinched": "them",
+      "game": "splatoon",
+      "forfeit": null
     },
     {
       "id": "pv0cb3fc53ef4b4b20b1",
-      "season": "2023-24",
-      "week": "",
-      "notes": "",
-      "bestOf": 5,
-      "event": "MHSEL Spring 2024",
-      "stage": "regular",
-      "players": [],
-      "stream": {
-        "live": "",
-        "vod": ""
+      "score": {
+        "us": 3,
+        "them": 1
       },
-      "result": "W",
       "teamName": "Overwatch 2 Varsity",
+      "bestOf": 5,
       "startsAt": "2024-03-20T20:00:00.000Z",
       "status": "final",
+      "forfeit": null,
+      "level": "Varsity",
       "games": [
         {
           "n": 1,
@@ -5540,86 +5535,41 @@
           "winner": "us"
         }
       ],
-      "league": "MHSEL",
-      "score": {
-        "them": 1,
-        "us": 3
-      },
-      "teamId": "",
+      "players": [],
+      "gameName": "Overwatch 2",
+      "clinched": "us",
+      "term": "spring",
+      "notes": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "current": 4,
-      "level": "Varsity",
       "source": {
         "playvs": "0cb3fc53-ef4b-4b20-b143-e4b205fa651a"
       },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "clinched": "us",
+      "game": "overwatch",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "week": "",
+      "season": "2023-24",
+      "teamId": "",
+      "event": "MHSEL Spring 2024",
+      "result": "W",
+      "league": "MHSEL",
       "opponent": {
-        "short": "",
-        "team": "DCC Varsity",
         "school": "Detroit Catholic Central High School",
         "abbr": "",
-        "logo": ""
+        "short": "",
+        "logo": "",
+        "team": "DCC Varsity"
       },
-      "game": "overwatch",
-      "gameName": "Overwatch 2",
-      "term": "spring",
-      "forfeit": null
+      "stage": "regular"
     },
     {
       "id": "pvded7a18706eb4b1caf",
-      "opponent": {
-        "abbr": "",
-        "short": "",
-        "team": "TED Talk",
-        "school": "Williamston High School",
-        "logo": ""
-      },
-      "status": "final",
+      "teamName": "Smash Varsity",
       "source": {
         "playvs": "ded7a187-06eb-4b1c-af04-64d59a8de2be"
-      },
-      "teamId": "t3",
-      "notes": "",
-      "startsAt": "2024-03-20T20:00:00.000Z",
-      "bestOf": 5,
-      "clinched": "us",
-      "stage": "regular",
-      "current": 4,
-      "result": "W",
-      "score": {
-        "us": 3,
-        "them": 1
-      },
-      "week": "",
-      "players": [
-        {
-          "id": "p-b22687a0",
-          "name": "Carter Derby",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "stream": {
-        "live": "",
-        "vod": ""
       },
       "games": [
         {
@@ -5659,64 +5609,121 @@
           }
         }
       ],
-      "game": "smash",
+      "score": {
+        "them": 1,
+        "us": 3
+      },
       "league": "MHSEL",
-      "level": "Varsity",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "gameName": "Super Smash Bros. Ultimate",
-      "forfeit": null,
-      "event": "MHSEL Spring 2024",
+      "bestOf": 5,
       "season": "2023-24",
-      "teamName": "Smash Varsity",
-      "term": "spring"
+      "term": "spring",
+      "opponent": {
+        "abbr": "",
+        "short": "",
+        "team": "TED Talk",
+        "logo": "",
+        "school": "Williamston High School"
+      },
+      "players": [
+        {
+          "id": "p-b22687a0",
+          "name": "Carter Derby",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "startsAt": "2024-03-20T20:00:00.000Z",
+      "stage": "regular",
+      "clinched": "us",
+      "event": "MHSEL Spring 2024",
+      "current": 4,
+      "game": "smash",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "level": "Varsity",
+      "teamId": "t3",
+      "gameName": "Super Smash Bros. Ultimate",
+      "status": "final",
+      "notes": "",
+      "forfeit": null,
+      "result": "W",
+      "week": ""
     },
     {
       "id": "pv2d76065082104e0588",
+      "forfeit": "them",
+      "stage": "regular",
+      "term": "spring",
+      "notes": "",
       "status": "final",
       "opponent": {
-        "team": "Whitehall eVikings",
-        "abbr": "",
         "short": "",
+        "school": "Whitehall Senior High School",
+        "team": "Whitehall eVikings",
         "logo": "",
-        "school": "Whitehall Senior High School"
+        "abbr": ""
       },
-      "league": "MHSEL",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "players": [],
+      "bestOf": 3,
+      "event": "MHSEL Spring 2024",
+      "level": "Varsity",
+      "teamName": "Madden NFL Madden JTROX",
+      "games": [],
       "current": 1,
       "result": "W",
-      "gameName": "Madden NFL",
-      "bestOf": 3,
-      "forfeit": "them",
-      "level": "Varsity",
-      "clinched": "us",
-      "game": "madden",
-      "season": "2023-24",
-      "term": "spring",
+      "league": "MHSEL",
       "startsAt": "2024-03-21T20:00:00.000Z",
-      "teamName": "Madden NFL Madden JTROX",
-      "week": "",
-      "players": [],
-      "games": [],
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "season": "2023-24",
       "score": {
         "us": 2,
         "them": 0
       },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "teamId": "",
+      "game": "madden",
+      "week": "",
+      "clinched": "us",
+      "gameName": "Madden NFL",
       "source": {
         "playvs": "2d760650-8210-4e05-8881-cb931427f212"
-      },
-      "notes": "",
-      "teamId": "",
-      "event": "MHSEL Spring 2024",
-      "stage": "regular"
+      }
     },
     {
       "id": "pvfc90ca087c3241bd86",
-      "updatedAt": "2026-10-22T19:30:11.708Z",
-      "level": "Varsity",
+      "bestOf": 5,
+      "league": "MHSEL",
+      "source": {
+        "playvs": "fc90ca08-7c32-41bd-8634-2d5c562736bf"
+      },
+      "perGame": true,
+      "current": 3,
+      "season": "2023-24",
+      "term": "spring",
       "players": [
         {
           "id": "p-88ef0aea",
@@ -5774,15 +5781,29 @@
         }
       ],
       "game": "rocket-league",
-      "status": "final",
-      "source": {
-        "playvs": "fc90ca08-7c32-41bd-8634-2d5c562736bf"
+      "stream": {
+        "live": "",
+        "vod": ""
       },
+      "notes": "",
       "teamId": "t5",
+      "level": "Varsity",
+      "opponent": {
+        "abbr": "",
+        "school": "Big Bay De Noc School",
+        "logo": "",
+        "short": "",
+        "team": "Bear Bytes"
+      },
+      "startsAt": "2024-03-21T20:00:00.000Z",
+      "status": "final",
+      "week": "",
       "event": "MHSEL Spring 2024",
-      "current": 3,
+      "result": "W",
       "teamName": "Rocket League Varsity",
-      "bestOf": 5,
+      "forfeit": null,
+      "gameName": "Rocket League",
+      "stage": "regular",
       "games": [
         {
           "n": 1,
@@ -5863,98 +5884,39 @@
           }
         }
       ],
-      "result": "W",
-      "term": "spring",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "gameName": "Rocket League",
-      "forfeit": null,
-      "stage": "regular",
-      "startsAt": "2024-03-21T20:00:00.000Z",
-      "opponent": {
-        "abbr": "",
-        "team": "Bear Bytes",
-        "short": "",
-        "logo": "",
-        "school": "Big Bay De Noc School"
-      },
-      "league": "MHSEL",
+      "updatedAt": "2026-10-22T19:30:11.708Z",
+      "clinched": "us",
       "score": {
         "us": 3,
         "them": 0
-      },
-      "perGame": true,
-      "season": "2023-24",
-      "clinched": "us",
-      "week": "",
-      "notes": ""
+      }
     },
     {
       "id": "pv631b45519dba4a9188",
-      "teamName": "Splatoon 3 Varsity",
-      "startsAt": "2024-04-02T20:00:00.000Z",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "result": "W",
-      "current": 3,
-      "status": "final",
-      "league": "MHSEL",
-      "level": "Varsity",
-      "week": "",
-      "forfeit": null,
-      "season": "2023-24",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "bestOf": 5,
-      "players": [
-        {
-          "id": "p-7b5cf8bf",
-          "name": "Austin Howe",
-          "tag": "3516-7033-9908",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-25d442ad",
-          "name": "Nathaniel Smith",
-          "tag": "SW-2221-7069-7622",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-66fae53c",
-          "name": "Bo West",
-          "tag": "DeviousDawgs",
-          "private": false,
-          "stats": {}
-        }
-      ],
-      "event": "MHSEL Spring 2024",
-      "opponent": {
-        "school": "",
-        "logo": "",
-        "short": "",
-        "abbr": "",
-        "team": "THS Splatoon"
-      },
-      "stage": "regular",
-      "game": "splatoon",
       "term": "spring",
-      "gameName": "Splatoon 3",
+      "league": "MHSEL",
+      "result": "W",
+      "stage": "regular",
+      "season": "2023-24",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "opponent": {
+        "abbr": "",
+        "short": "",
+        "team": "THS Splatoon",
+        "logo": "",
+        "school": ""
+      },
       "notes": "",
+      "teamId": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "event": "MHSEL Spring 2024",
+      "current": 3,
+      "source": {
+        "playvs": "631b4551-9dba-4a91-88dc-5eed851d2958"
+      },
       "games": [
         {
           "n": 1,
@@ -5993,37 +5955,21 @@
           }
         }
       ],
-      "teamId": "",
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "clinched": "us",
-      "source": {
-        "playvs": "631b4551-9dba-4a91-88dc-5eed851d2958"
-      }
-    },
-    {
-      "id": "pv562001ed85594aecbf",
-      "notes": "",
-      "term": "spring",
-      "game": "smash",
-      "stage": "regular",
-      "startsAt": "2024-04-03T20:00:00.000Z",
-      "event": "MHSEL Spring 2024",
+      "teamName": "Splatoon 3 Varsity",
+      "level": "Varsity",
       "players": [
         {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
+          "id": "p-7b5cf8bf",
+          "name": "Austin Howe",
+          "tag": "3516-7033-9908",
           "private": false,
           "alum": true,
           "stats": {}
         },
         {
-          "id": "p-348eb1ef",
-          "name": "Nicholas Cipolla",
-          "tag": "",
+          "id": "p-25d442ad",
+          "name": "Nathaniel Smith",
+          "tag": "SW-2221-7069-7622",
           "private": false,
           "alum": true,
           "stats": {}
@@ -6035,17 +5981,52 @@
           "private": false,
           "alum": true,
           "stats": {}
+        },
+        {
+          "id": "p-66fae53c",
+          "name": "Bo West",
+          "tag": "DeviousDawgs",
+          "private": false,
+          "stats": {}
         }
       ],
-      "teamName": "Smash Varsity",
-      "source": {
-        "playvs": "562001ed-8559-4aec-bfdf-4624d18be9df"
+      "startsAt": "2024-04-02T20:00:00.000Z",
+      "score": {
+        "us": 3,
+        "them": 0
       },
-      "teamId": "t3",
+      "status": "final",
+      "week": "",
+      "forfeit": null,
+      "bestOf": 5,
+      "clinched": "us",
+      "gameName": "Splatoon 3",
+      "game": "splatoon"
+    },
+    {
+      "id": "pv562001ed85594aecbf",
+      "startsAt": "2024-04-03T20:00:00.000Z",
+      "current": 4,
+      "term": "spring",
       "score": {
         "us": 1,
         "them": 3
       },
+      "result": "L",
+      "league": "MHSEL",
+      "teamName": "Smash Varsity",
+      "clinched": "them",
+      "teamId": "t3",
+      "gameName": "Super Smash Bros. Ultimate",
+      "season": "2023-24",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "source": {
+        "playvs": "562001ed-8559-4aec-bfdf-4624d18be9df"
+      },
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "games": [
         {
           "n": 1,
@@ -6084,62 +6065,63 @@
           }
         }
       ],
-      "gameName": "Super Smash Bros. Ultimate",
       "level": "Varsity",
-      "league": "MHSEL",
+      "event": "MHSEL Spring 2024",
+      "forfeit": null,
+      "notes": "",
+      "players": [
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-348eb1ef",
+          "name": "Nicholas Cipolla",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
       "status": "final",
-      "current": 4,
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "result": "L",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
+      "stage": "regular",
+      "week": "",
+      "bestOf": 5,
+      "game": "smash",
       "opponent": {
-        "logo": "",
-        "abbr": "",
+        "team": "Charging Rams- Varsity Smash",
         "school": "",
         "short": "",
-        "team": "Charging Rams- Varsity Smash"
-      },
-      "bestOf": 5,
-      "clinched": "them",
-      "season": "2023-24",
-      "week": "",
-      "forfeit": null
+        "logo": "",
+        "abbr": ""
+      }
     },
     {
       "id": "pvfaa551dc4d5a411f92",
-      "clinched": "us",
-      "status": "final",
-      "teamId": "",
-      "source": {
-        "playvs": "faa551dc-4d5a-411f-92ef-b5d978e45f8f"
-      },
-      "notes": "",
-      "term": "spring",
-      "bestOf": 5,
+      "level": "Varsity",
+      "players": [],
+      "event": "MHSEL Spring 2024",
+      "week": "",
       "stage": "regular",
-      "game": "overwatch",
-      "opponent": {
-        "logo": "",
-        "school": "Linden High School",
-        "short": "",
-        "team": "Linden Overwatch",
-        "abbr": ""
-      },
+      "current": 5,
+      "status": "final",
       "score": {
         "them": 2,
         "us": 3
       },
       "result": "W",
-      "forfeit": null,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "startsAt": "2024-04-03T20:00:00.000Z",
       "games": [
         {
           "n": 1,
@@ -6173,18 +6155,126 @@
         }
       ],
       "gameName": "Overwatch 2",
-      "week": "",
+      "forfeit": null,
+      "clinched": "us",
+      "teamId": "",
+      "game": "overwatch",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "opponent": {
+        "school": "Linden High School",
+        "abbr": "",
+        "team": "Linden Overwatch",
+        "logo": "",
+        "short": ""
+      },
+      "bestOf": 5,
       "league": "MHSEL",
+      "startsAt": "2024-04-03T20:00:00.000Z",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "source": {
+        "playvs": "faa551dc-4d5a-411f-92ef-b5d978e45f8f"
+      },
+      "term": "spring",
+      "notes": "",
       "teamName": "Overwatch 2 Varsity",
-      "level": "Varsity",
-      "current": 5,
-      "event": "MHSEL Spring 2024",
-      "players": [],
       "season": "2023-24"
     },
     {
       "id": "pv0f551fcd16cf493995",
+      "status": "final",
+      "notes": "",
+      "event": "MHSEL Spring 2024",
+      "players": [
+        {
+          "id": "p-a7fe3ce9",
+          "name": "Joseph Wisniewski",
+          "tag": "GoodName.mp4",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 2,
+            "assists": 3,
+            "saves": 1,
+            "shots": 9
+          },
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": "p-88ef0aea",
+          "name": "Kyle Greig",
+          "tag": "Ksquiggly.RL",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 7,
+            "assists": 1,
+            "saves": 6,
+            "shots": 21
+          },
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": "p-61bdc66e",
+          "name": "Fred Nikitin",
+          "tag": "Stupid Nonsense",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 0,
+            "assists": 0,
+            "saves": 3,
+            "shots": 0
+          },
+          "games": [
+            1,
+            2,
+            3
+          ]
+        }
+      ],
+      "clinched": "us",
       "bestOf": 5,
+      "gameName": "Rocket League",
+      "updatedAt": "2026-10-22T19:30:11.708Z",
+      "forfeit": null,
+      "term": "spring",
+      "teamName": "Rocket League Varsity",
+      "startsAt": "2024-04-04T20:00:00.000Z",
+      "stage": "regular",
+      "season": "2023-24",
+      "opponent": {
+        "short": "",
+        "school": "Rochester Adams High School",
+        "team": "Rochester Adams RL",
+        "logo": "",
+        "abbr": ""
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "perGame": true,
+      "teamId": "t5",
+      "week": "",
+      "game": "rocket-league",
+      "source": {
+        "playvs": "0f551fcd-16cf-4939-9516-e5b08ce39bcb"
+      },
       "games": [
         {
           "n": 1,
@@ -6265,123 +6355,15 @@
           }
         }
       ],
-      "season": "2023-24",
-      "updatedAt": "2026-10-22T19:30:11.708Z",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "status": "final",
-      "league": "MHSEL",
-      "notes": "",
-      "players": [
-        {
-          "id": "p-a7fe3ce9",
-          "name": "Joseph Wisniewski",
-          "tag": "GoodName.mp4",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 2,
-            "assists": 3,
-            "saves": 1,
-            "shots": 9
-          },
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "id": "p-88ef0aea",
-          "name": "Kyle Greig",
-          "tag": "Ksquiggly.RL",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 7,
-            "assists": 1,
-            "saves": 6,
-            "shots": 21
-          },
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "id": "p-61bdc66e",
-          "name": "Fred Nikitin",
-          "tag": "Stupid Nonsense",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 0,
-            "assists": 0,
-            "saves": 3,
-            "shots": 0
-          },
-          "games": [
-            1,
-            2,
-            3
-          ]
-        }
-      ],
-      "event": "MHSEL Spring 2024",
-      "startsAt": "2024-04-04T20:00:00.000Z",
-      "stage": "regular",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "term": "spring",
-      "result": "W",
-      "perGame": true,
-      "teamName": "Rocket League Varsity",
-      "game": "rocket-league",
-      "clinched": "us",
-      "week": "",
-      "source": {
-        "playvs": "0f551fcd-16cf-4939-9516-e5b08ce39bcb"
-      },
-      "forfeit": null,
-      "teamId": "t5",
-      "gameName": "Rocket League",
       "level": "Varsity",
-      "opponent": {
-        "abbr": "",
-        "team": "Rochester Adams RL",
-        "school": "Rochester Adams High School",
-        "short": "",
-        "logo": ""
-      },
+      "league": "MHSEL",
+      "result": "W",
       "current": 3
     },
     {
       "id": "pv614505dc0c1a474aaf",
-      "season": "2023-24",
-      "notes": "",
-      "current": 3,
-      "bestOf": 5,
-      "week": "",
-      "event": "MHSEL Spring 2024",
-      "stage": "regular",
-      "result": "L",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "score": {
-        "us": 0,
-        "them": 3
-      },
       "league": "MHSEL",
-      "status": "final",
-      "teamName": "Smash Varsity",
-      "startsAt": "2024-04-10T20:00:00.000Z",
+      "result": "L",
       "games": [
         {
           "n": 1,
@@ -6411,13 +6393,32 @@
           }
         }
       ],
-      "forfeit": null,
-      "teamId": "t3",
+      "week": "",
       "level": "Varsity",
-      "clinched": "them",
+      "game": "smash",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "opponent": {
+        "team": "Warrior Purple SSBU",
+        "logo": "",
+        "short": "",
+        "abbr": "",
+        "school": ""
+      },
       "source": {
         "playvs": "614505dc-0c1a-474a-afd8-e40d2a76a297"
       },
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "season": "2023-24",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "teamId": "t3",
+      "current": 3,
+      "teamName": "Smash Varsity",
       "players": [
         {
           "id": "p-5ecf28c2",
@@ -6444,55 +6445,58 @@
           "stats": {}
         }
       ],
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "game": "smash",
-      "gameName": "Super Smash Bros. Ultimate",
+      "startsAt": "2024-04-10T20:00:00.000Z",
+      "stage": "regular",
+      "bestOf": 5,
+      "forfeit": null,
+      "notes": "",
       "term": "spring",
-      "opponent": {
-        "short": "",
-        "school": "",
-        "team": "Warrior Purple SSBU",
-        "abbr": "",
-        "logo": ""
-      }
+      "status": "final",
+      "event": "MHSEL Spring 2024",
+      "gameName": "Super Smash Bros. Ultimate",
+      "clinched": "them"
     },
     {
       "id": "pv9385f40fbaee48e7a6",
-      "season": "2023-24",
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "team": "The Silk Dragons",
-        "school": "Belding High School",
-        "abbr": ""
-      },
-      "bestOf": 5,
-      "gameName": "Overwatch 2",
-      "level": "Varsity",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "game": "overwatch",
+      "event": "MHSEL Spring 2024",
+      "league": "MHSEL",
       "result": "W",
+      "notes": "",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "week": "",
+      "forfeit": null,
+      "stage": "regular",
+      "source": {
+        "playvs": "9385f40f-baee-48e7-a626-07e10d925e2f"
+      },
+      "opponent": {
+        "short": "",
+        "abbr": "",
+        "school": "Belding High School",
+        "team": "The Silk Dragons",
+        "logo": ""
+      },
       "players": [],
+      "teamId": "",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "league": "MHSEL",
-      "week": "",
-      "clinched": "us",
-      "status": "final",
+      "season": "2023-24",
+      "current": 3,
       "teamName": "Overwatch 2 Varsity",
-      "term": "spring",
       "startsAt": "2024-04-10T20:00:00.000Z",
-      "teamId": "",
-      "forfeit": null,
-      "game": "overwatch",
-      "source": {
-        "playvs": "9385f40f-baee-48e7-a626-07e10d925e2f"
-      },
       "score": {
-        "us": 3,
-        "them": 0
+        "them": 0,
+        "us": 3
       },
+      "bestOf": 5,
+      "term": "spring",
+      "gameName": "Overwatch 2",
+      "clinched": "us",
+      "level": "Varsity",
+      "status": "final",
       "games": [
         {
           "n": 1,
@@ -6512,14 +6516,101 @@
           "them": 0,
           "winner": "us"
         }
-      ],
-      "notes": "",
-      "stage": "regular",
-      "event": "MHSEL Spring 2024",
-      "current": 3
+      ]
     },
     {
       "id": "pv47ea8f64d88a487580",
+      "source": {
+        "playvs": "47ea8f64-d88a-4875-8014-d4151d0598fc"
+      },
+      "updatedAt": "2026-10-22T19:30:11.708Z",
+      "stage": "regular",
+      "forfeit": null,
+      "opponent": {
+        "abbr": "",
+        "team": "OHS RL Varsity",
+        "logo": "",
+        "school": "Oakridge High School",
+        "short": ""
+      },
+      "teamId": "t5",
+      "season": "2023-24",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "event": "MHSEL Spring 2024",
+      "term": "spring",
+      "result": "W",
+      "league": "MHSEL",
+      "players": [
+        {
+          "id": "p-88ef0aea",
+          "name": "Kyle Greig",
+          "tag": "Ksquiggly.RL",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 9,
+            "assists": 4,
+            "saves": 6,
+            "shots": 24
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "id": "p-a7fe3ce9",
+          "name": "Joseph Wisniewski",
+          "tag": "GoodName.mp4",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 3,
+            "assists": 3,
+            "saves": 3,
+            "shots": 12
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "id": "p-61bdc66e",
+          "name": "Fred Nikitin",
+          "tag": "Stupid Nonsense",
+          "private": false,
+          "alum": true,
+          "stats": {
+            "goals": 5,
+            "assists": 2,
+            "saves": 5,
+            "shots": 12
+          },
+          "games": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        }
+      ],
+      "notes": "",
+      "bestOf": 5,
+      "gameName": "Rocket League",
+      "clinched": "us",
+      "week": "",
+      "game": "rocket-league",
       "games": [
         {
           "n": 1,
@@ -6652,156 +6743,36 @@
           }
         }
       ],
-      "score": {
-        "them": 2,
-        "us": 3
-      },
-      "forfeit": null,
-      "week": "",
-      "gameName": "Rocket League",
-      "opponent": {
-        "abbr": "",
-        "school": "Oakridge High School",
-        "team": "OHS RL Varsity",
-        "short": "",
-        "logo": ""
-      },
-      "stage": "regular",
-      "event": "MHSEL Spring 2024",
-      "clinched": "us",
-      "teamId": "t5",
-      "current": 5,
-      "source": {
-        "playvs": "47ea8f64-d88a-4875-8014-d4151d0598fc"
-      },
-      "notes": "",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "result": "W",
-      "teamName": "Rocket League Varsity",
-      "startsAt": "2024-04-11T20:00:00.000Z",
       "status": "final",
-      "updatedAt": "2026-10-22T19:30:11.708Z",
-      "league": "MHSEL",
-      "players": [
-        {
-          "id": "p-88ef0aea",
-          "name": "Kyle Greig",
-          "tag": "Ksquiggly.RL",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 9,
-            "assists": 4,
-            "saves": 6,
-            "shots": 24
-          },
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "id": "p-a7fe3ce9",
-          "name": "Joseph Wisniewski",
-          "tag": "GoodName.mp4",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 3,
-            "assists": 3,
-            "saves": 3,
-            "shots": 12
-          },
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        },
-        {
-          "id": "p-61bdc66e",
-          "name": "Fred Nikitin",
-          "tag": "Stupid Nonsense",
-          "private": false,
-          "alum": true,
-          "stats": {
-            "goals": 5,
-            "assists": 2,
-            "saves": 5,
-            "shots": 12
-          },
-          "games": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ]
-        }
-      ],
-      "season": "2023-24",
-      "game": "rocket-league",
-      "term": "spring",
+      "current": 5,
+      "level": "Varsity",
       "perGame": true,
-      "bestOf": 5,
-      "level": "Varsity"
+      "startsAt": "2024-04-11T20:00:00.000Z",
+      "teamName": "Rocket League Varsity",
+      "score": {
+        "us": 3,
+        "them": 2
+      }
     },
     {
       "id": "pvd42cf035b95643d4aa",
-      "current": 2,
-      "score": {
-        "us": 0,
-        "them": 2
-      },
-      "gameName": "Madden NFL",
-      "league": "MHSEL",
+      "forfeit": null,
       "stage": "regular",
-      "players": [
-        {
-          "id": "p-76fdf892",
-          "name": "Jack Tenbusch",
-          "tag": "JTR0X12308",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "teamName": "Madden NFL Madden JTROX",
-      "week": "",
-      "notes": "",
-      "season": "2023-24",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "clinched": "them",
-      "event": "MHSEL Spring 2024",
-      "teamId": "",
-      "source": {
-        "playvs": "d42cf035-b956-43d4-aae9-e87473387820"
+      "opponent": {
+        "short": "",
+        "logo": "",
+        "team": "Grand Blanc Madden Black",
+        "abbr": "",
+        "school": "Grand Blanc Community High School"
       },
       "status": "final",
-      "game": "madden",
-      "level": "Varsity",
-      "forfeit": null,
-      "stream": {
-        "vod": "",
-        "live": ""
+      "startsAt": "2024-04-11T20:00:00.000Z",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "score": {
+        "them": 2,
+        "us": 0
       },
       "result": "L",
-      "term": "spring",
-      "opponent": {
-        "logo": "",
-        "school": "Grand Blanc Community High School",
-        "short": "",
-        "abbr": "",
-        "team": "Grand Blanc Madden Black"
-      },
       "games": [
         {
           "n": 1,
@@ -6822,23 +6793,95 @@
           }
         }
       ],
-      "startsAt": "2024-04-11T20:00:00.000Z",
-      "bestOf": 3
+      "teamName": "Madden NFL Madden JTROX",
+      "game": "madden",
+      "gameName": "Madden NFL",
+      "term": "spring",
+      "level": "Varsity",
+      "clinched": "them",
+      "event": "MHSEL Spring 2024",
+      "bestOf": 3,
+      "league": "MHSEL",
+      "players": [
+        {
+          "id": "p-76fdf892",
+          "name": "Jack Tenbusch",
+          "tag": "JTR0X12308",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "source": {
+        "playvs": "d42cf035-b956-43d4-aae9-e87473387820"
+      },
+      "notes": "",
+      "season": "2023-24",
+      "week": "",
+      "current": 2,
+      "teamId": "",
+      "stream": {
+        "live": "",
+        "vod": ""
+      }
     },
     {
       "id": "pv99ea001f28a748dfb6",
-      "event": "MHSEL Spring 2024",
-      "season": "2023-24",
-      "forfeit": null,
-      "stage": "regular",
-      "notes": "",
-      "bestOf": 5,
       "teamName": "Splatoon 3 Varsity",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
       "startsAt": "2024-04-12T20:00:57.000Z",
+      "forfeit": null,
+      "term": "spring",
+      "league": "MHSEL",
+      "score": {
+        "them": 3,
+        "us": 0
+      },
+      "result": "L",
+      "teamId": "",
+      "players": [
+        {
+          "id": "p-7b5cf8bf",
+          "name": "Austin Howe",
+          "tag": "3516-7033-9908",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-66fae53c",
+          "name": "Bo West",
+          "tag": "DeviousDawgs",
+          "private": false,
+          "stats": {}
+        },
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-25d442ad",
+          "name": "Nathaniel Smith",
+          "tag": "SW-2221-7069-7622",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "season": "2023-24",
+      "clinched": "them",
+      "source": {
+        "playvs": "99ea001f-28a7-48df-b6c3-ba721015090d"
+      },
+      "level": "Varsity",
+      "gameName": "Splatoon 3",
       "games": [
         {
           "n": 1,
@@ -6877,92 +6920,38 @@
           }
         }
       ],
-      "result": "L",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "week": "",
       "current": 3,
-      "league": "MHSEL",
-      "status": "final",
-      "term": "spring",
+      "event": "MHSEL Spring 2024",
+      "notes": "",
+      "stage": "regular",
       "game": "splatoon",
-      "teamId": "",
-      "level": "Varsity",
-      "clinched": "them",
-      "source": {
-        "playvs": "99ea001f-28a7-48df-b6c3-ba721015090d"
-      },
-      "players": [
-        {
-          "id": "p-7b5cf8bf",
-          "name": "Austin Howe",
-          "tag": "3516-7033-9908",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-66fae53c",
-          "name": "Bo West",
-          "tag": "DeviousDawgs",
-          "private": false,
-          "stats": {}
-        },
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-25d442ad",
-          "name": "Nathaniel Smith",
-          "tag": "SW-2221-7069-7622",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "status": "final",
       "opponent": {
-        "team": "Bloomfield Hills Black Hawks (Silver)",
-        "abbr": "",
         "short": "",
+        "school": "Bloomfield Hills High School",
         "logo": "",
-        "school": "Bloomfield Hills High School"
+        "team": "Bloomfield Hills Black Hawks (Silver)",
+        "abbr": ""
       },
-      "gameName": "Splatoon 3"
+      "bestOf": 5,
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "week": ""
     },
     {
       "id": "pv567546bb58884488bb",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "startsAt": "2024-04-15T20:00:00.000Z",
+      "week": "",
+      "bestOf": 5,
+      "current": 4,
+      "status": "final",
       "game": "overwatch",
       "teamName": "Overwatch 2 Varsity",
-      "term": "spring",
-      "players": [],
-      "source": {
-        "playvs": "567546bb-5888-4488-bb40-29a024155aae"
-      },
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "level": "Varsity",
-      "teamId": "",
-      "opponent": {
-        "school": "",
-        "logo": "",
-        "abbr": "",
-        "team": "Rockford Rush",
-        "short": ""
-      },
-      "score": {
-        "them": 1,
-        "us": 3
-      },
-      "forfeit": null,
-      "league": "MHSEL",
+      "stage": "playoffs",
+      "gameName": "Overwatch 2",
+      "clinched": "us",
+      "notes": "",
+      "event": "MHSEL Spring 2024",
       "games": [
         {
           "n": 1,
@@ -6989,29 +6978,54 @@
           "winner": "us"
         }
       ],
-      "status": "final",
-      "gameName": "Overwatch 2",
-      "result": "W",
+      "level": "Varsity",
+      "source": {
+        "playvs": "567546bb-5888-4488-bb40-29a024155aae"
+      },
+      "season": "2023-24",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "bestOf": 5,
-      "event": "MHSEL Spring 2024",
-      "stage": "playoffs",
-      "current": 4,
-      "clinched": "us",
-      "notes": "",
-      "week": "",
-      "season": "2023-24"
+      "forfeit": null,
+      "teamId": "",
+      "result": "W",
+      "league": "MHSEL",
+      "score": {
+        "us": 3,
+        "them": 1
+      },
+      "players": [],
+      "term": "spring",
+      "opponent": {
+        "short": "",
+        "school": "",
+        "abbr": "",
+        "logo": "",
+        "team": "Rockford Rush"
+      }
     },
     {
       "id": "pv97e710b9635045a695",
+      "teamId": "t5",
+      "opponent": {
+        "abbr": "",
+        "team": "LHS Rocket League Black",
+        "logo": "",
+        "school": "",
+        "short": ""
+      },
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "season": "2023-24",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "current": 5,
       "source": {
         "playvs": "97e710b9-6350-45a6-95c0-d9292d720a8e"
       },
-      "clinched": "them",
-      "teamId": "t5",
+      "level": "Varsity",
       "games": [
         {
           "n": 1,
@@ -7144,22 +7158,24 @@
           }
         }
       ],
+      "game": "rocket-league",
+      "week": "",
       "score": {
         "us": 1,
         "them": 4
       },
-      "gameName": "Rocket League",
-      "week": "",
-      "notes": "",
-      "event": "MHSEL Spring 2024",
+      "league": "MHSEL",
+      "result": "L",
       "stage": "playoffs",
-      "opponent": {
-        "logo": "",
-        "short": "",
-        "school": "",
-        "team": "LHS Rocket League Black",
-        "abbr": ""
-      },
+      "forfeit": null,
+      "status": "final",
+      "term": "spring",
+      "bestOf": 7,
+      "clinched": "them",
+      "gameName": "Rocket League",
+      "teamName": "Rocket League Varsity",
+      "event": "MHSEL Spring 2024",
+      "notes": "",
       "players": [
         {
           "id": "p-8a733446",
@@ -7186,44 +7202,58 @@
           "stats": {}
         }
       ],
-      "bestOf": 7,
-      "game": "rocket-league",
-      "season": "2023-24",
-      "forfeit": null,
-      "term": "spring",
-      "status": "final",
-      "current": 5,
-      "league": "MHSEL",
-      "level": "Varsity",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "result": "L",
-      "startsAt": "2024-04-15T20:00:00.000Z",
-      "teamName": "Rocket League Varsity",
-      "updatedAt": "2026-10-08T19:56:21.285Z"
+      "startsAt": "2024-04-15T20:00:00.000Z"
     },
     {
       "id": "pvd6e8b3ead9ee49bba0",
-      "season": "2023-24",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "result": "W",
+      "clinched": "us",
       "notes": "",
-      "league": "MHSEL",
-      "stage": "playoffs",
+      "current": 3,
+      "status": "final",
+      "gameName": "Super Smash Bros. Ultimate",
       "teamName": "Smash Varsity",
       "week": "",
-      "forfeit": null,
-      "gameName": "Super Smash Bros. Ultimate",
+      "startsAt": "2024-04-15T20:00:00.000Z",
+      "opponent": {
+        "school": "Caro High School",
+        "team": "Caro Tigers Super Smash",
+        "logo": "",
+        "short": "",
+        "abbr": ""
+      },
+      "players": [
+        {
+          "id": "p-5ecf28c2",
+          "name": "Griffen Applebee",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-348eb1ef",
+          "name": "Nicholas Cipolla",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        },
+        {
+          "id": "p-7d79ca92",
+          "name": "Brandon Sommers",
+          "tag": "",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "updatedAt": "2026-10-08T19:56:21.285Z",
       "score": {
-        "them": 0,
-        "us": 3
+        "us": 3,
+        "them": 0
       },
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "result": "W",
+      "season": "2023-24",
       "games": [
         {
           "n": 1,
@@ -7253,81 +7283,61 @@
           }
         }
       ],
-      "startsAt": "2024-04-15T20:00:00.000Z",
       "game": "smash",
-      "bestOf": 5,
-      "opponent": {
-        "short": "",
-        "logo": "",
-        "school": "Caro High School",
-        "team": "Caro Tigers Super Smash",
-        "abbr": ""
-      },
-      "term": "spring",
+      "stage": "playoffs",
       "source": {
         "playvs": "d6e8b3ea-d9ee-49bb-a063-fd2e6a43927d"
       },
+      "league": "MHSEL",
+      "bestOf": 5,
       "teamId": "t3",
-      "current": 3,
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "term": "spring",
+      "event": "MHSEL Spring 2024",
       "level": "Varsity",
-      "clinched": "us",
-      "players": [
-        {
-          "id": "p-5ecf28c2",
-          "name": "Griffen Applebee",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-348eb1ef",
-          "name": "Nicholas Cipolla",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        },
-        {
-          "id": "p-7d79ca92",
-          "name": "Brandon Sommers",
-          "tag": "",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "status": "final",
-      "event": "MHSEL Spring 2024"
+      "forfeit": null
     },
     {
       "id": "pv72d1fa0282424a659e",
+      "event": "MHSEL Spring 2024",
+      "teamName": "Overwatch 2 Varsity",
+      "status": "final",
+      "week": "",
+      "game": "overwatch",
+      "bestOf": 5,
+      "notes": "",
+      "startsAt": "2024-04-17T20:00:00.000Z",
+      "stage": "playoffs",
+      "current": 3,
+      "clinched": "them",
+      "gameName": "Overwatch 2",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "teamId": "",
+      "season": "2023-24",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
       "players": [],
       "source": {
         "playvs": "72d1fa02-8242-4a65-9ec1-fbff89713525"
       },
-      "clinched": "them",
-      "level": "Varsity",
-      "teamId": "",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
       "opponent": {
         "abbr": "",
-        "school": "Novi High School",
-        "short": "",
+        "logo": "",
         "team": "Novi Wildcats Varsity",
-        "logo": ""
+        "school": "Novi High School",
+        "short": ""
       },
       "term": "spring",
-      "gameName": "Overwatch 2",
-      "game": "overwatch",
-      "stage": "playoffs",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "event": "MHSEL Spring 2024",
-      "week": "",
-      "bestOf": 5,
-      "current": 3,
-      "notes": "",
-      "season": "2023-24",
-      "startsAt": "2024-04-17T20:00:00.000Z",
+      "forfeit": null,
       "games": [
         {
           "n": 1,
@@ -7348,25 +7358,27 @@
           "winner": "them"
         }
       ],
-      "forfeit": null,
-      "teamName": "Overwatch 2 Varsity",
-      "status": "final",
-      "score": {
-        "them": 3,
-        "us": 0
-      },
       "league": "MHSEL",
+      "result": "L",
+      "level": "Varsity"
+    },
+    {
+      "id": "pve806c850e2414615b1",
+      "forfeit": null,
+      "notes": "",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "result": "L"
-    },
-    {
-      "id": "pve806c850e2414615b1",
-      "notes": "",
-      "week": "",
+      "teamId": "t3",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "source": {
+        "playvs": "e806c850-e241-4615-b1e8-2766458d28c3"
+      },
+      "league": "MHSEL",
+      "bestOf": 5,
       "season": "2023-24",
+      "week": "",
       "players": [
         {
           "id": "p-5ecf28c2",
@@ -7393,31 +7405,7 @@
           "stats": {}
         }
       ],
-      "clinched": "us",
-      "current": 4,
-      "opponent": {
-        "short": "",
-        "logo": "",
-        "team": "Marauder Smash",
-        "school": "Oscar A. Carlson High School",
-        "abbr": ""
-      },
-      "score": {
-        "them": 1,
-        "us": 3
-      },
-      "league": "MHSEL",
-      "startsAt": "2024-04-17T20:00:00.000Z",
-      "stage": "playoffs",
-      "gameName": "Super Smash Bros. Ultimate",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "term": "spring",
-      "updatedAt": "2026-10-08T19:56:21.285Z",
-      "result": "W",
-      "forfeit": null,
+      "game": "smash",
       "games": [
         {
           "n": 1,
@@ -7456,20 +7444,57 @@
           }
         }
       ],
-      "teamName": "Smash Varsity",
-      "bestOf": 5,
-      "event": "MHSEL Spring 2024",
-      "teamId": "t3",
-      "source": {
-        "playvs": "e806c850-e241-4615-b1e8-2766458d28c3"
+      "clinched": "us",
+      "score": {
+        "us": 3,
+        "them": 1
       },
+      "gameName": "Super Smash Bros. Ultimate",
+      "stage": "playoffs",
+      "event": "MHSEL Spring 2024",
       "status": "final",
+      "teamName": "Smash Varsity",
+      "term": "spring",
+      "current": 4,
       "level": "Varsity",
-      "game": "smash"
+      "result": "W",
+      "opponent": {
+        "logo": "",
+        "team": "Marauder Smash",
+        "short": "",
+        "abbr": "",
+        "school": "Oscar A. Carlson High School"
+      },
+      "startsAt": "2024-04-17T20:00:00.000Z"
     },
     {
       "id": "pv79718dee6472494792",
-      "current": 2,
+      "startsAt": "2024-04-18T20:00:00.000Z",
+      "bestOf": 3,
+      "stage": "playoffs",
+      "teamName": "Madden NFL Madden JTROX",
+      "term": "spring",
+      "status": "final",
+      "players": [
+        {
+          "id": "p-76fdf892",
+          "name": "Jack Tenbusch",
+          "tag": "JTR0X12308",
+          "private": false,
+          "alum": true,
+          "stats": {}
+        }
+      ],
+      "notes": "",
+      "gameName": "Madden NFL",
+      "forfeit": null,
+      "clinched": "them",
+      "event": "MHSEL Spring 2024",
+      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "level": "Varsity",
+      "source": {
+        "playvs": "79718dee-6472-4947-92ec-1480e5907b07"
+      },
       "games": [
         {
           "n": 1,
@@ -7490,68 +7515,56 @@
           }
         }
       ],
-      "week": "",
-      "score": {
-        "them": 2,
-        "us": 0
+      "stream": {
+        "live": "",
+        "vod": ""
       },
-      "startsAt": "2024-04-18T20:00:00.000Z",
-      "bestOf": 3,
-      "teamName": "Madden NFL Madden JTROX",
       "season": "2023-24",
-      "event": "MHSEL Spring 2024",
-      "stage": "playoffs",
-      "status": "final",
+      "teamId": "",
+      "game": "madden",
+      "result": "L",
       "league": "MHSEL",
-      "forfeit": null,
-      "updatedAt": "2026-10-08T19:56:21.285Z",
+      "score": {
+        "us": 0,
+        "them": 2
+      },
+      "opponent": {
+        "short": "",
+        "abbr": "",
+        "school": "Grand Blanc Community High School",
+        "logo": "",
+        "team": "Grand Blanc Madden Black"
+      },
+      "current": 2,
+      "week": ""
+    },
+    {
+      "id": "pvcaf21d6d77154b4f92",
+      "clinched": "them",
+      "teamId": "t3",
+      "term": "spring",
+      "current": 5,
       "stream": {
         "vod": "",
         "live": ""
       },
+      "gameName": "Super Smash Bros. Ultimate",
+      "teamName": "Smash Varsity",
+      "season": "2023-24",
       "notes": "",
-      "result": "L",
+      "bestOf": 5,
+      "startsAt": "2024-04-19T20:00:00.000Z",
+      "league": "MHSEL",
       "opponent": {
-        "logo": "",
-        "team": "Grand Blanc Madden Black",
+        "team": "Wildcat Smash 1",
         "short": "",
-        "abbr": "",
-        "school": "Grand Blanc Community High School"
+        "logo": "",
+        "school": "Northview High School",
+        "abbr": ""
       },
-      "source": {
-        "playvs": "79718dee-6472-4947-92ec-1480e5907b07"
-      },
-      "gameName": "Madden NFL",
-      "teamId": "",
-      "players": [
-        {
-          "id": "p-76fdf892",
-          "name": "Jack Tenbusch",
-          "tag": "JTR0X12308",
-          "private": false,
-          "alum": true,
-          "stats": {}
-        }
-      ],
-      "game": "madden",
-      "clinched": "them",
-      "level": "Varsity",
-      "term": "spring"
-    },
-    {
-      "id": "pvcaf21d6d77154b4f92",
-      "status": "final",
-      "notes": "",
-      "clinched": "them",
-      "teamId": "t3",
       "source": {
         "playvs": "caf21d6d-7715-4b4f-9257-44dee5cfd718"
       },
-      "week": "",
-      "bestOf": 5,
-      "stage": "playoffs",
-      "current": 5,
-      "startsAt": "2024-04-19T20:00:00.000Z",
       "players": [
         {
           "id": "p-348eb1ef",
@@ -7578,23 +7591,18 @@
           "stats": {}
         }
       ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
+      "game": "smash",
+      "week": "",
       "updatedAt": "2026-10-08T19:56:21.285Z",
+      "level": "Varsity",
+      "event": "MHSEL Spring 2024",
+      "stage": "playoffs",
       "result": "L",
       "score": {
-        "them": 3,
-        "us": 2
+        "us": 2,
+        "them": 3
       },
-      "opponent": {
-        "logo": "",
-        "team": "Wildcat Smash 1",
-        "short": "",
-        "abbr": "",
-        "school": "Northview High School"
-      },
+      "forfeit": null,
       "games": [
         {
           "n": 1,
@@ -7642,15 +7650,7 @@
           }
         }
       ],
-      "teamName": "Smash Varsity",
-      "league": "MHSEL",
-      "game": "smash",
-      "gameName": "Super Smash Bros. Ultimate",
-      "level": "Varsity",
-      "term": "spring",
-      "season": "2023-24",
-      "forfeit": null,
-      "event": "MHSEL Spring 2024"
+      "status": "final"
     }
   ]
 }

@@ -405,11 +405,11 @@ function crossCompare(m, c){
   const T = c.themStats || {}, ours = teamSeason(m).concat(m.status === "final" ? [m] : []), ourRec = record(ours), st = standingFor(m);
   const out1 = [{k:"Team record", a:ourRec.w, b:st ? +st.w : 0, fa:ourRec.text, fb:st ? `${st.w}–${st.l}` : "–"},
     ...defs.filter(d => avg(d.key) != null || T[d.key] != null).map(d => ({k:`${d.label} / ${(g.unit || "game").toLowerCase()}`, a:avg(d.key) || 0, b:+T[d.key] || 0, fa:f1(avg(d.key)), fb:T[d.key] != null ? f1(+T[d.key]) : "–", lower:/death|lost/i.test(d.label)}))].slice(0, 6);
-  const ch = mainChar(m, a.id), themCh = c.themChar || "";
+  const ch = mainChar(m, a.id), themCh = c.themChar || c.themMain || "";
   const headUs = `<div class="h ${L.us ? "l" : "r"}" style="${skin(us)}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="">` : `<div class="mono">${monogram(nameOf(a))}</div>`}</div><div><b style="font-size:${fitName(tagOf(a) || nameOf(a), 76, 470)}px">${esc(tagOf(a) || nameOf(a))}</b><small>${esc([US.short, ch].filter(Boolean).join(", "))}</small></div></div>`;
   const headThem = `<div class="h ${L.us ? "r" : "l"}" style="${skin(them)}"><div class="pic${charImg(g, themCh) ? "" : " crest"}">${charImg(g, themCh) ? `<img src="${esc(charImg(g, themCh))}" alt="">` : logoHTML(them.logo, them.name)}</div><div><b style="font-size:${fitName(c.them, 76, 470)}px">${esc(c.them)}</b><small>${esc([them.name, themCh || c.themRole].filter(Boolean).join(", "))}</small></div></div>`;
   const rowsLR = L.us ? out1 : out1.map(r => ({...r, a:r.b, b:r.a, fa:r.fb, fb:r.fa}));
-  out.html = frame("cmp", m, g, {title:"Player", script:"Matchup", sub:eventLine(m), split:[L, R], foot:c.themGp ? `Per ${esc((g.unit || "game").toLowerCase())} · theirs from ${c.themGp} game${c.themGp === 1 ? "" : "s"} vs Hartland` : `Per ${esc((g.unit || "game").toLowerCase())}, this season`,
+  out.html = frame("cmp", m, g, {title:"Player", script:"Matchup", sub:eventLine(m), split:[L, R], foot:c.themGp ? `Per ${esc((g.unit || "game").toLowerCase())} · theirs from ${c.themGp} ${esc((g.unit || "game").toLowerCase())}${c.themGp === 1 ? "" : "s"} vs Hartland` : `Per ${esc((g.unit || "game").toLowerCase())}, this season`,
     body:`<div class="heads">${L.us ? headUs : headThem}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${L.us ? headThem : headUs}</div><div class="rows">${rowsHTML(rowsLR)}</div>`});
 }
 function playerCompare(m){

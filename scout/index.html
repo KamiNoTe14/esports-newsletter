@@ -282,15 +282,21 @@ function drawNew(M){
 function statsHTML(r){
   const list = (r.statGames || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.n - a.n);
   if (!list.length) return "";
-  const F = [["Score", "score"], ["Goals", "goals"], ["Assists", "assists"], ["Saves", "saves"], ["Shots", "shots"], ["Demos", "demos"]];
+  /* columns: whatever numbers the saved games have (Rocket League box scores, Smash stocks), in a sensible order */
+  const LABEL = {score:"Score", goals:"Goals", assists:"Assists", saves:"Saves", shots:"Shots", demos:"Demos", touches:"Touches", stocks_taken:"Stocks taken", stocks_lost:"Stocks lost", elims:"Elims", deaths:"Deaths"};
+  const keys = [...new Set(list.flatMap(gm => (gm.players || []).flatMap(p => Object.keys(p).filter(k => k !== "tag" && k !== "char" && !isNaN(+p[k])))))];
+  const F = [...Object.keys(LABEL).filter(k => keys.includes(k)), ...keys.filter(k => !(k in LABEL))].filter(k => k !== "touches").map(k => [LABEL[k] || k.replace(/_/g, " "), k]);
+  const unitOf = gm => /smash/.test(r.game) ? "Set" : "Game";
   const by = new Map();
   list.forEach(gm => (gm.players || []).forEach(p => { const k = String(p.tag || "").toLowerCase(); const t = by.get(k) || {tag:p.tag, gp:0}; t.gp++; F.forEach(([, f]) => t[f] = (t[f] || 0) + (+p[f] || 0)); by.set(k, t); }));
   const avg = (t, f) => (Math.round(t[f] / t.gp * 10) / 10).toLocaleString("en-US");
-  const rows = [...by.values()].sort((a, b) => b.score / b.gp - a.score / a.gp);
+  const chars = {}; list.forEach(gm => (gm.players || []).forEach(p => { if (p.char){ const k = String(p.tag || "").toLowerCase(); (chars[k] = chars[k] || {})[p.char] = (chars[k][p.char] || 0) + 1; } }));
+  const mainOf = t => Object.entries(chars[String(t.tag || "").toLowerCase()] || {}).sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 2).join(", ");
+  const sortKey = F[0]?.[1] || "score", rows = [...by.values()].sort((a, b) => (b[sortKey] || 0) / b.gp - (a[sortKey] || 0) / a.gp);
   return `<div class="sec"><div class="sec-h"><h4>Stats against us</h4><span class="muted">${list.length} game${list.length === 1 ? "" : "s"}, averages per game</span></div>
-    <div style="overflow-x:auto"><table class="hist"><tr><th style="text-align:left">Gamertag</th><th>GP</th>${F.map(([l]) => `<th>${l}</th>`).join("")}</tr>
-      ${rows.map(t => `<tr><td><b>${esc(t.tag)}</b></td><td>${t.gp}</td>${F.map(([, f]) => `<td>${avg(t, f)}</td>`).join("")}</tr>`).join("")}</table></div>
-    <details><summary class="muted" style="cursor:pointer">Each game</summary><table class="hist">${list.map(gm => `<tr><td>${esc(fmtDay(gm.date))}, Game ${esc(gm.n)}</td><td>${esc(gm.team || "")}</td><td class="${gm.result === "W" ? "L" : "W"}">${gm.result === "W" ? "They won" : "We won"} ${esc(gm.score || "")}</td><td class="muted">${(gm.players || []).map(p => `${esc(p.tag)} ${+p.goals || 0}G ${+p.saves || 0}Sv`).join(" · ")}</td></tr>`).join("")}</table></details></div>`;
+    <div style="overflow-x:auto"><table class="hist"><tr><th style="text-align:left">Gamertag</th>${Object.keys(chars).length ? "<th style=\"text-align:left\">Plays</th>" : ""}<th>GP</th>${F.map(([l]) => `<th>${l}</th>`).join("")}</tr>
+      ${rows.map(t => `<tr><td><b>${esc(t.tag)}</b></td>${Object.keys(chars).length ? `<td class="muted">${esc(mainOf(t))}</td>` : ""}<td>${t.gp}</td>${F.map(([, f]) => `<td>${avg(t, f)}</td>`).join("")}</tr>`).join("")}</table></div>
+    <details><summary class="muted" style="cursor:pointer">Each game</summary><table class="hist">${list.map(gm => `<tr><td>${esc(fmtDay(gm.date))}, ${unitOf(gm)} ${esc(gm.n)}</td><td>${esc(gm.team || "")}</td><td class="${gm.result === "W" ? "L" : gm.result === "L" ? "W" : ""}">${gm.result === "W" ? "They won" : gm.result === "L" ? "We won" : ""} ${esc(gm.score || "")}</td><td class="muted">${(gm.players || []).map(p => `${esc(p.tag)}${p.char ? ` (${esc(p.char)})` : ""} ${F.slice(0, 2).map(([l, f]) => `${+p[f] || 0} ${esc(l.toLowerCase())}`).join(", ")}`).join(" · ")}</td></tr>`).join("")}</table></details></div>`;
 }
 async function startReport(school, game){
   const id = db.newReportId();

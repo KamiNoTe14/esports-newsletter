@@ -816,7 +816,47 @@ function statTabs(g, unit){
   return `<div class="gtabs" role="tablist" aria-label="Which ${esc(unit.toLowerCase())} the stats are for">
     <button type="button" data-stab="total" aria-pressed="${statTab === "total"}">Total</button>
     ${Array.from({length:n}, (_, i) => `<button type="button" data-stab="${i + 1}" aria-pressed="${String(statTab) === String(i + 1)}" class="${has(i + 1) ? "has" : ""}">${esc(unit[0])}${i + 1}</button>`).join("")}</div>
-    <p class="hint" style="margin:0 0 10px">${statTab === "total" ? (cur.perGame ? `Totals are added up from each ${esc(unit.toLowerCase())}. Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to change them.` : `Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to enter stats for each ${esc(unit.toLowerCase())}, or type match totals here if that's all you have.`) : `Stats for ${esc(unit)} ${esc(statTab)}. Leave a player blank if they sat out.`}</p>`;
+    <p class="hint" style="margin:0 0 10px">${statTab === "total" ? (cur.perGame ? `Totals are added up from each ${esc(unit.toLowerCase())}. Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to change them.` : `Pick ${esc(unit[0])}1, ${esc(unit[0])}2… to enter stats for each ${esc(unit.toLowerCase())}, or type match totals here if that's all you have.`) : `Stats for ${esc(unit)} ${esc(statTab)}. Leave a player blank if they sat out.`}</p>${statTab !== "total" ? oppSetHTML(g, +statTab, unit) : ""}`;
+}
+/* ---------- their player in each set (one-on-one games like Smash) ----------
+   Who we faced in a set, and their character. Saved only to the opponent's private scouting report, never to the
+   match (match data is public). Their numbers are ours mirrored: their stocks taken are our player's stocks lost. */
+const mirrorKey = k => /taken/.test(k) ? k.replace("taken", "lost") : /lost/.test(k) ? k.replace("lost", "taken") : "";
+const mirrors = g => (g.statList || []).some(d => mirrorKey(d.key) && (g.statList || []).some(x => x.key === mirrorKey(d.key)));
+let oppSets = {}, oppSetT = null;   // matchId -> {n: {tag, char}}
+function oppSetHTML(g, n, unit){
+  if (!mirrors(g)) return "";
+  const v = oppSets[cur.id]?.[n] || {}, them = oppName(cur), cl = (g.charLabel || "").trim();
+  if (!oppSets[cur.id]) loadOppSets();
+  return `<div class="two oppset" data-oset="${n}"><label class="f"><span>${esc(them)} player in ${esc(unit[0])}${n}</span><input data-oppset="tag" list="cmpThem" value="${esc(v.tag || "")}" placeholder="Their gamertag" autocomplete="off"></label>
+    ${cl ? `<label class="f"><span>Their ${esc(cl.toLowerCase())}</span><input data-oppset="char" list="charList" value="${esc(v.char || "")}" autocomplete="off"></label>` : ""}</div>
+    <p class="hint" style="margin:-4px 0 10px">Saved to ${esc(them)}'s scouting report only, with their stats worked out from ours. It feeds the Player comparison.</p>`;
+}
+async function loadOppSets(){
+  const id = cur.id; oppSets[id] = {};
+  try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || "");
+    (r?.statGames || []).filter(x => x.matchId === id).forEach(x => { const p = (x.players || [])[0]; if (p) oppSets[id][x.n] = {tag:p.tag || "", char:p.char || ""}; });
+    if (cur?.id === id && Object.keys(oppSets[id]).length) $("#details") && !document.activeElement?.closest?.("#details") && renderMatch(); } catch(e){}
+}
+function saveOppSetSoon(n){ clearTimeout(oppSetT); oppSetT = setTimeout(() => saveOppSet(n), 1200); }
+async function saveOppSet(n){
+  const g = gameFor(site, cur.game), v = oppSets[cur.id]?.[n]; if (!v) return;
+  try {
+    const school = cur.opponent?.school || cur.opponent?.team || oppName(cur), now = new Date().toISOString();
+    const r = await be.scoutFor(cur.game, school), id = r?.id || be.newScoutId();
+    const base = r ? Object.fromEntries(Object.entries(r).filter(([k]) => k !== "id"))
+      : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
+    base.statGames = (base.statGames || []).filter(x => !(x.matchId === cur.id && x.n === n));
+    if (v.tag){
+      const gm = (cur.games || []).find(x => x.n === n) || {}, ours = Object.values(gm.p || {})[0] || {}, them = {tag:v.tag, ...(v.char ? {char:v.char} : {})};
+      (g.statList || []).forEach(d => { const m = mirrorKey(d.key); if (m && ours[m] != null && ours[m] !== "") them[d.key] = +ours[m]; });
+      base.statGames.push({matchId:cur.id, n, date:cur.startsAt, team:cur.teamName, result:gm.winner === "us" ? "L" : gm.winner === "them" ? "W" : "", score:`${gm.them || 0}–${gm.us || 0}`, players:[them]});
+      base.players = base.players || [];
+      if (base.players.length < 40 && !base.players.some(x => String(x.tag || "").toLowerCase() === v.tag.toLowerCase())) base.players.push({tag:v.tag, role:v.char ? `Main: ${v.char}` : "", notes:""});
+    }
+    base.statGames = base.statGames.slice(-60); base.updatedAt = now; base.updatedBy = user?.email || "";
+    await be.saveScout(id, base);
+  } catch(e){ console.error(e); toast("Couldn't save to scouting (are the database rules published?)."); }
 }
 /* Small icons beside stat names, matching the in-game scoreboards (Marvel Rivals: swords = eliminations,
    broken heart = deaths, …), so stats can be copied straight off the end-of-match screen. */
@@ -1053,8 +1093,10 @@ async function cmpScout(n, name){
     const role = (r?.players || []).find(p => String(p.tag || "").toLowerCase().replace(/[^a-z0-9]/g, "") === k)?.role || "";
     const sum = {}; rows.forEach(p => Object.entries(p).forEach(([key, v]) => { if (key !== "tag" && !isNaN(+v)) sum[key] = (sum[key] || 0) + (+v); }));
     const avg = rows.length ? Object.fromEntries(Object.entries(sum).map(([key, v]) => [key, Math.round(v / rows.length * 10) / 10])) : null;
+    const cc = {}; rows.forEach(p => { if (p.char) cc[p.char] = (cc[p.char] || 0) + 1; });
+    const main = Object.entries(cc).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
     const st = bc.stations[n]; if (!st || st.compare?.them !== name) return;
-    await setStation(n, {...st, compare:{...st.compare, themStats:avg, themGp:rows.length, themRole:role}});
+    await setStation(n, {...st, compare:{...st.compare, themStats:avg, themGp:rows.length, themRole:role, themMain:main}});
   } catch(e){ console.error(e); }
 }
 async function loadOppNames(){
@@ -1164,13 +1206,15 @@ function bindDetails(g){
   D.querySelectorAll("[data-rpick]").forEach(b => b.onclick = () => { const box = b.closest(".rolepick"), sel = box.querySelector("select"), on = b.classList.contains("on");
     sel.value = on ? "" : b.dataset.rpick; box.querySelectorAll(".rbtn").forEach(x => { const sel2 = !on && x === b; x.classList.toggle("on", sel2); x.setAttribute("aria-pressed", sel2); });
     sel.dispatchEvent(new Event("change", {bubbles:true})); });
+  D.querySelectorAll("[data-oppset]").forEach(inp => inp.oninput = () => { const n = +inp.closest("[data-oset]").dataset.oset;
+    const o = (oppSets[cur.id] = oppSets[cur.id] || {})[n] = {...(oppSets[cur.id][n] || {}), [inp.dataset.oppset]:inp.value.trim()}; saveOppSetSoon(n); });
   D.querySelectorAll("[data-gk]").forEach(inp => { const h = () => {
     const n = +statTab, gm = gameRec(cur, n); gm.p = gm.p || {}; const row = gm.p[inp.dataset.pid] = gm.p[inp.dataset.pid] || {};
     const v = inp.value.trim(); if (v === "") delete row[inp.dataset.gk]; else row[inp.dataset.gk] = inp.dataset.num ? +v : v;
     if (!Object.keys(row).length) delete gm.p[inp.dataset.pid];
     if (!Object.keys(gm.p).length) delete gm.p;
     cur.games = cur.games.filter(x => x.winner || x.us || x.them || x.n === cur.current || (x.p && Object.keys(x.p).length));
-    rollup(cur, g); queueSave();
+    rollup(cur, g); queueSave(); if (oppSets[cur.id]?.[n]?.tag) saveOppSetSoon(n);
     const tb = D.querySelector(`[data-stab="${n}"]`); if (tb) tb.classList.toggle("has", !!gm.p);
   }; inp.oninput = h; inp.onchange = h; });
   D.querySelectorAll("[data-stat]").forEach(inp => inp.oninput = () => {

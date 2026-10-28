@@ -290,13 +290,13 @@ function statsHTML(r){
   const by = new Map();
   list.forEach(gm => (gm.players || []).forEach(p => { const k = String(p.tag || "").toLowerCase(); const t = by.get(k) || {tag:p.tag, gp:0}; t.gp++; F.forEach(([, f]) => t[f] = (t[f] || 0) + (+p[f] || 0)); by.set(k, t); }));
   const avg = (t, f) => (Math.round(t[f] / t.gp * 10) / 10).toLocaleString("en-US");
-  const chars = {}; list.forEach(gm => (gm.players || []).forEach(p => { if (p.char){ const k = String(p.tag || "").toLowerCase(); (chars[k] = chars[k] || {})[p.char] = (chars[k][p.char] || 0) + 1; } }));
+  const chars = {}; list.forEach(gm => (gm.players || []).forEach(p => { const k = String(p.tag || "").toLowerCase(); (p.chars?.length ? p.chars : [p.char]).filter(Boolean).forEach(c => { (chars[k] = chars[k] || {})[c] = (chars[k][c] || 0) + 1; }); }));
   const mainOf = t => Object.entries(chars[String(t.tag || "").toLowerCase()] || {}).sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 2).join(", ");
   const sortKey = F[0]?.[1] || "score", rows = [...by.values()].sort((a, b) => (b[sortKey] || 0) / b.gp - (a[sortKey] || 0) / a.gp);
   return `<div class="sec"><div class="sec-h"><h4>Stats against us</h4><span class="muted">${list.length} game${list.length === 1 ? "" : "s"}, averages per game</span></div>
     <div style="overflow-x:auto"><table class="hist"><tr><th style="text-align:left">Gamertag</th>${Object.keys(chars).length ? "<th style=\"text-align:left\">Plays</th>" : ""}<th>GP</th>${F.map(([l]) => `<th>${l}</th>`).join("")}</tr>
       ${rows.map(t => `<tr><td><b>${esc(t.tag)}</b></td>${Object.keys(chars).length ? `<td class="muted">${esc(mainOf(t))}</td>` : ""}<td>${t.gp}</td>${F.map(([, f]) => `<td>${avg(t, f)}</td>`).join("")}</tr>`).join("")}</table></div>
-    <details><summary class="muted" style="cursor:pointer">Each game</summary><table class="hist">${list.map(gm => `<tr><td>${esc(fmtDay(gm.date))}, ${unitOf(gm)} ${esc(gm.n)}</td><td>${esc(gm.team || "")}</td><td class="${gm.result === "W" ? "L" : gm.result === "L" ? "W" : ""}">${gm.result === "W" ? "They won" : gm.result === "L" ? "We won" : ""} ${esc(gm.score || "")}</td><td class="muted">${(gm.players || []).map(p => `${esc(p.tag)}${p.char ? ` (${esc(p.char)})` : ""} ${F.slice(0, 2).map(([l, f]) => `${+p[f] || 0} ${esc(l.toLowerCase())}`).join(", ")}`).join(" · ")}</td></tr>`).join("")}</table></details></div>`;
+    <details><summary class="muted" style="cursor:pointer">Each game</summary><table class="hist">${list.map(gm => `<tr><td>${esc(fmtDay(gm.date))}, ${unitOf(gm)} ${esc(gm.n)}</td><td>${esc(gm.team || "")}</td><td class="${gm.result === "W" ? "L" : gm.result === "L" ? "W" : ""}">${gm.result === "W" ? "They won" : gm.result === "L" ? "We won" : ""} ${esc(gm.score || "")}</td><td class="muted">${(gm.players || []).map(p => `${esc(p.tag)}${p.chars?.length ? ` (${esc(p.chars.join(" / "))})` : p.char ? ` (${esc(p.char)})` : ""} ${F.slice(0, 2).map(([l, f]) => `${+p[f] || 0} ${esc(l.toLowerCase())}`).join(", ")}`).join(" · ")}</td></tr>`).join("")}</table></details></div>`;
 }
 async function startReport(school, game){
   const id = db.newReportId();

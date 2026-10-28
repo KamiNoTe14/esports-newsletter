@@ -719,3 +719,75 @@ img{display:block}
 .pg.enter .pgline{animation:rise .55s .6s var(--ease) both}
 .pg.enter .pggames{animation:rise .5s .85s var(--ease) both}
 .pg.enter .pgc{animation:rise .5s calc(1.05s + var(--i,0) * .12s) var(--ease) both}
+
+/* =============== Smash: player plates under the score bug (sets of best-of-3 games) =============== */
+.bug.sets{position:absolute}
+.splate{position:absolute;top:146px;display:grid;grid-template-columns:62px minmax(0,1fr) auto;align-items:center;gap:12px;width:392px;height:66px;padding:0 18px 4px 10px;
+  background:var(--tex-s) center/cover,linear-gradient(var(--cream),var(--cream));background-blend-mode:overlay;color:var(--ink);
+  -webkit-mask:var(--tear-b) bottom left/300px 12px repeat-x,linear-gradient(#000,#000) top/100% calc(100% - 11px) no-repeat;}
+.bug.enter .splate{animation:dropIn .45s 1s var(--snap) both}
+.splate.l{left:10px;transform:rotate(-.6deg)}
+.splate.r{right:10px;grid-template-columns:auto minmax(0,1fr) 62px;padding:0 10px 4px 18px;text-align:right;transform:rotate(.6deg)}
+.splate.r .sic{order:3}.splate.r .sinf{order:2}.splate.r .gp{order:1}
+.splate .sic{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:var(--tex-s) center/cover,linear-gradient(var(--c1),var(--c1));background-blend-mode:overlay;box-shadow:0 0 0 3px var(--c2)}
+.splate.us .sic{box-shadow:0 0 0 3px var(--gold)}
+.splate .sic img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.splate .sinf{min-width:0;display:grid;gap:2px}
+.splate .sinf b{font:400 34px/1 var(--d);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.splate .sinf small{font:600 15px/1 var(--t);letter-spacing:.1em;text-transform:uppercase;color:#4A6280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.splate .sinf small:empty{display:none}
+.gp{display:flex;align-items:center;gap:7px}
+.gp i{width:20px;height:20px;border-radius:50%;border:3px solid rgba(11,20,32,.35);transition:background .3s,border-color .3s}
+.gp i.on{background:var(--navy);border-color:var(--navy)}
+.splate.us .gp i.on{background:var(--gold);border-color:#B98500;box-shadow:0 0 10px rgba(255,188,5,.7)}
+
+/* =============== Smash VS screen =============== */
+.svs .ftr{position:absolute;top:0;bottom:0;width:820px}
+.svs .ftr.l{left:0}.svs .ftr.r{right:0}
+.svs .rnd{position:absolute;bottom:250px;height:620px;width:640px;object-fit:contain;object-position:50% 100%;filter:var(--stk)}
+.svs .ftr.l .rnd{left:70px;transform:rotate(-3deg)}
+.svs .ftr.r .rnd{right:70px;transform:scaleX(-1) rotate(-3deg)}
+.svs .ftr.r .rnd.keep{transform:rotate(3deg)}
+.svs .rnd.none{display:grid;place-items:center;width:360px;height:360px;bottom:360px;border-radius:50%;font:400 150px/1 var(--d);color:var(--gold);
+  background:var(--tex-s) center/cover,linear-gradient(var(--c1),var(--c1));background-blend-mode:overlay}
+.svs .ftr.l .rnd.none{left:230px}.svs .ftr.r .rnd.none{right:230px;transform:rotate(3deg)}
+.svs .plt{position:absolute;bottom:150px;width:700px;display:grid;gap:8px;padding:22px 36px 26px;filter:var(--rim);
+  background:var(--tex-s) center/cover,linear-gradient(var(--cream),var(--cream));background-blend-mode:overlay;color:var(--ink)}
+.svs .ftr.l .plt{left:60px;transform:rotate(-1.2deg);-webkit-mask:var(--tear-r) right top/18px 300px repeat-y,linear-gradient(#000,#000) left/calc(100% - 17px) 100% no-repeat}
+.svs .ftr.r .plt{right:60px;justify-items:end;text-align:right;transform:rotate(1.2deg);-webkit-mask:var(--tear-l) left top/18px 300px repeat-y,linear-gradient(#000,#000) right/calc(100% - 17px) 100% no-repeat}
+.svs .plt b{font:400 104px/.95 var(--d);text-transform:uppercase;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.svs .ftr.us .plt b{color:var(--navy)}
+.svs .who{display:flex;align-items:center;gap:12px;font:600 24px/1 var(--t);letter-spacing:.08em;text-transform:uppercase;color:#4A6280}
+.svs .ftr.r .who{flex-direction:row-reverse}
+.svs .who .lg{width:46px;height:46px;font-size:22px;filter:var(--stk)}.svs .who .logo{width:100%;height:100%}
+.svs .chr{display:flex;align-items:center;gap:12px}
+.svs .ftr.r .chr{flex-direction:row-reverse}
+.svs .chr img{width:52px;height:52px;object-fit:contain;padding:4px;border-radius:50%;background:var(--tex-s) center/cover,linear-gradient(var(--c1),var(--c1));background-blend-mode:overlay}
+.svs .chr i{font:400 44px/1 var(--script);font-style:normal;color:#B3261E;transform:rotate(-3deg)}
+.svs .plt .gp{position:absolute;top:24px;right:34px;gap:10px}
+.svs .ftr.r .plt .gp{right:auto;left:34px;flex-direction:row-reverse}
+.svs .plt .gp i{width:30px;height:30px;border-width:4px}
+.svs .ftr.us .plt .gp i.on{background:var(--gold);border-color:#B98500;box-shadow:0 0 12px rgba(255,188,5,.7)}
+.svs .plt .gp small{font:600 18px/1 var(--t);letter-spacing:.1em;text-transform:uppercase;color:#4A6280}
+.svs .smid{position:absolute;top:250px;left:50%;width:440px;margin-left:-220px;display:grid;justify-items:center;gap:14px;text-align:center}
+.svs .vsx{position:static;width:auto;margin:0;font-size:230px}
+.svs .smid .tape-w{filter:drop-shadow(0 6px 8px rgba(0,0,0,.35));transform:rotate(-1.5deg)}
+.svs .smid .tape{font-size:32px}.svs .smid .tape em{font-style:normal;color:#B3261E}
+.svs .sset{display:flex;align-items:center;gap:30px;font:400 150px/1 var(--d);color:#fff;text-shadow:0 8px 0 rgba(0,8,20,.55)}
+.svs .sset i{font-style:normal;color:var(--gold);font-size:90px;margin:0 8px}
+.svs .ssl{font:400 30px/1.1 var(--hand);color:#fff;text-shadow:0 3px 0 rgba(0,8,20,.6);transform:rotate(-2deg)}
+.svs .foot .tape{display:inline-flex;align-items:center;gap:22px}
+.svs .foot .sets{display:inline-flex;gap:16px;padding-right:22px;border-right:3px solid rgba(11,20,32,.25);font:400 26px/1 var(--d);text-transform:uppercase;letter-spacing:.02em}
+.svs .foot .sets span{display:inline-flex;align-items:center;gap:8px;color:#4A6280}
+.svs .foot .sets span.w{color:var(--ink)}
+.svs .foot .sets em{font:600 16px/1 var(--t);letter-spacing:.1em;padding:4px 7px;border-radius:4px;background:rgba(11,20,32,.12);color:var(--ink)}
+.svs .foot .sets span.w em{background:var(--gold)}
+.svs .foot .sets b{font-weight:400;color:#B3261E}
+.svs.enter .ftr.l .rnd{animation:rndL .8s .5s var(--snap) both}
+.svs.enter .ftr.r .rnd{animation:rndR .8s .5s var(--snap) both}
+.svs.enter .ftr.r .rnd.keep{animation:rndK .8s .5s var(--snap) both}
+.svs.enter .plt{animation:rise .5s 1.2s var(--ease) both}
+.svs.enter .sset,.svs.enter .ssl,.svs.enter .smid .tape-w{animation:rise .5s 1.35s var(--ease) both}
+@keyframes rndL{0%{opacity:0;transform:translateX(-260px) rotate(-12deg) scale(1.15)}60%{opacity:1;transform:rotate(-1deg)}100%{transform:rotate(-3deg)}}
+@keyframes rndR{0%{opacity:0;transform:scaleX(-1) translateX(-260px) rotate(-12deg) scale(1.15)}60%{opacity:1;transform:scaleX(-1) rotate(-1deg)}100%{transform:scaleX(-1) rotate(-3deg)}}
+@keyframes rndK{0%{opacity:0;transform:translateX(260px) rotate(12deg) scale(1.15)}60%{opacity:1;transform:rotate(1deg)}100%{transform:rotate(3deg)}}

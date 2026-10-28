@@ -60,7 +60,7 @@ function eventLine(m){
 function sides(m){
   /* Who's playing right now: the current game's lineup, or the latest game that has one (1v1 sets carry over). */
   const g = gameFor(site, m.game), withP = (m.games || []).filter(x => x.p && Object.keys(x.p).length && x.n <= (m.current || 1)).sort((a, b) => b.n - a.n);
-  const cur = (m.games || []).find(x => x.n === m.current && x.p && Object.keys(x.p).length) || withP[0] || {};
+  const cur = (m.games || []).find(x => x.n === m.current && x.p && Object.keys(x.p).length) || (setMode(g) ? {} : withP[0]) || {};
   const ourNow = cur.p ? Object.keys(cur.p) : [];
   const ourPlayer = g.teamSize === 1 || /solo/i.test(m.teamName) || (ourNow.length === 1 && ((m.players || []).length > 1 || +g.teamSize > 1)) ? (m.players || []).find(p => p.id === ourNow[0]) : null;
   /* the character on now: the latest game of the set that has one (Smash sets are best of 3, a pick per game) */
@@ -69,11 +69,24 @@ function sides(m){
     now:ourPlayer ? {name:tagOf(ourPlayer) || nameOf(ourPlayer), char:charOf(ourPlayer.id)} : null, us:true, ...OUR_COLORS};
   const lib = schoolInfo(site, m.opponent?.school);
   const them = {name:(!String(m.opponent?.short || "").trim() && lib?.short) || oppShort(m), team:m.opponent?.team || "", school:m.opponent?.school || "", logo:station.oppLogo || m.opponent?.logo || lib?.logo || "", score:m.score?.them ?? 0,
-    won:(m.games || []).filter(x => x.winner === "them").length, now:station.oppNow ? {name:station.oppNow, char:station.oppChar} : null, ...teamColors(lib)};
+    won:(m.games || []).filter(x => x.winner === "them").length, now:oppNowOf(m), ...teamColors(lib)};
   if (m.show){ Object.assign(us, {name:m.showSides[0], team:"", logo:US.logo, now:null}); Object.assign(them, {name:m.showSides[1], team:"", school:"", logo:US.logo, now:null, ...OUR_COLORS}); }
   return station.swap ? [them, us] : [us, them];
 }
 const oppList = m => m.show ? [m.showSides[1]] : listOf(station.oppLineup);
+/* Their player on now: the scorekeeper's Set desk keeps each set's gamertag and per-game characters on the station
+   (oppSets); older setups typed one player and character (oppNow / oppChar). */
+function oppNowOf(m){
+  const o = station.oppSets?.[m.current || 1];
+  if (o?.tag) return {name:o.tag, char:[...(o.chars || [])].reverse().find(Boolean) || "", chars:o.chars || []};
+  if (station.oppSets && Object.keys(station.oppSets).length) return null;
+  return station.oppNow ? {name:station.oppNow, char:station.oppChar} : null;
+}
+/* Sets of games (Smash: each set is a best of 3): games won in the current set, in order. */
+const setMode = g => +g.charSlots > 1 && !!g.points && !!(g.charLabel || "").trim();
+const setLen = g => Math.max(1, Math.min(5, +g.charSlots || 3)), setNeed = g => Math.floor(setLen(g) / 2) + 1;
+const gwOf = gm => Array.isArray(gm?.gw) ? gm.gw : [...Array(+gm?.us || 0).fill("us"), ...Array(+gm?.them || 0).fill("them")];
+function charRender(g, name){ const dir = String(g.charArt || "").replace(/\/$/, ""); return dir && name ? BASE + dir + "/" + slug(name) + "-render.webp" : ""; }
 function charImg(g, name){
   const dir = String(g.charArt || g.charIcons || "").replace(/\/$/, ""); if (!dir || !name) return "";
   return BASE + dir + "/" + slug(name) + (g.key === "marvel-rivals" ? "-face.webp" : "-logo.webp");
@@ -135,12 +148,20 @@ function scorebug(m){
   const card = (s, r) => { if (!s.now || !live || q.get("card") === "0") return ""; const pic = charImg(g, s.now.char);
     return `<div class="pcard char${r ? " r" : ""}${s.us ? " us" : " them"}" style="${skin(s)}"><div class="ring">${pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : `<b>${monogram(s.now.name)}</b>`}</div>
       <div class="pinfo"><b>${esc(s.now.name)}</b><div class="pst"><span><em>${esc(s.now.char || "—")}</em>${esc(g.charLabel || "Character")}</span><span><em>${s.won}</em>${esc(unit)}s won</span></div></div></div>`; };
-  out.html = `<div class="bug gen">
+  /* Smash and other best-of-3 sets: player plates hang under the bar (the bottom of the screen is the game's damage
+     display), with the character's stock icon and a pip for each game won in this set. ?card=bottom keeps the cards. */
+  const sm = setMode(g) && q.get("card") !== "bottom", cs = (m.games || []).find(x => x.n === m.current) || {}, sneed = setNeed(g), sw = gwOf(cs);
+  const plate = (s, r) => { if (!sm || !s.now || !live || q.get("card") === "0") return ""; const pic = charImg(g, s.now.char), w = sw.filter(x => x === (s.us ? "us" : "them")).length;
+    const dots = `<span class="gp">${Array.from({length:sneed}, (_, i) => `<i class="${i < w ? "on" : ""}"></i>`).join("")}</span>`;
+    return `<div class="splate ${r ? "r" : "l"} ${s.us ? "us" : "them"}" style="${skin(s)}"><div class="sic">${pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : ""}</div>
+      <div class="sinf"><b style="font-size:${fitName(s.now.name, 34, 250)}px">${esc(s.now.name)}</b><small>${esc(s.now.char || "")}</small></div>${dots}</div>`; };
+  out.html = `<div class="bug gen${sm ? " sets" : ""}">
       <div class="ev">${live ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
       <div class="bar">${wing(L)}<div class="mid">${gl ? `<img src="${esc(gl)}" alt="${esc(g.name)}">` : `<span class="gname">${esc(g.short || g.name)}</span>`}${state}</div>${wing(R, true)}</div>
       <div class="sub">${pips(L)}<span>${fin ? "" : `${esc(unit)} <em>${n}</em> &nbsp;|&nbsp; `}Best of <em>${esc(m.bestOf)}</em></span>${pips(R, true)}</div>
+      ${plate(L)}${plate(R, true)}
       ${banner ? `<div class="goal"><i class="${banner.us ? "us" : "them"}"></i><b>${esc(banner.title)}</b><span>${esc(banner.name)}</span><small>${esc(banner.note)}</small></div>` : ""}
-    </div>${card(L)}${card(R, true)}`;
+    </div>${sm ? "" : card(L) + card(R, true)}`;
   /* a score that just changed rolls in with a gold flash and claw; a newly won game lights its pip */
   if (lastScores){
     [["l", L, 0], ["r", R, 1]].forEach(([side, s, idx]) => {
@@ -330,6 +351,43 @@ function vs(m){
   const foot = [`Best of <em>${esc(m.bestOf)}</em>`, m.status === "upcoming" ? esc(fmtTime(m.startsAt)) : "",
     m.show ? "" : h2h.length ? (hh.w === hh.l ? `All-time series tied ${hh.w}–${hh.l}` : `All-time: ${esc(hh.w > hh.l ? US.short : oppShort(m))} leads ${Math.max(hh.w, hh.l)}–${Math.min(hh.w, hh.l)}`) : "First meeting"].filter(Boolean).join(" &nbsp;/&nbsp; ");
   out.html = frame("vs", m, g, {sub:eventLine(m), split:[L, R], body:`${side(L, "l")}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${side(R, "r")}`, foot});
+}
+
+/* ---------- Smash VS screen: between games of a set ----------
+   Both players with their characters as big die-cut stickers, the set and game, a pip per game won, and every set
+   played so far. Characters and players come from the scorekeeper's Set desk; it updates the moment a game is won
+   or a character is changed. */
+/* characters whose art has writing on it, so the right-hand one isn't mirrored */
+const NO_FLIP = /game & watch|steve|mega man|pac-man|duck hunt/i;
+function smashVs(m){
+  const g = gameFor(site, m.game); if (!setMode(g)){ empty("This graphic is for games played in sets, like Smash."); return; }
+  const [L, R] = sides(m), n = m.current || 1, cs = (m.games || []).find(x => x.n === n) || {}, gw = gwOf(cs), need = setNeed(g), len = setLen(g);
+  const gameNo = cs.winner ? 0 : Math.min(len, gw.length + 1);
+  /* the next game's characters: ours from the set's player record, theirs from the station */
+  const ourId = Object.keys(cs.p || {})[0], row = cs.p?.[ourId] || {}, CK = ["hero", "hero2", "hero3", "hero4", "hero5"];
+  const k = Math.max(0, (gameNo || gw.length) - 1);
+  const T = L.us ? R : L, o = station.oppSets?.[n];
+  const ourChar = row[CK[k]] || [...CK].reverse().map(c => row[c]).find(Boolean) || "", theirChar = o?.chars?.[k] || T.now?.char || "";
+  const who = s => ({name:s.now?.name || "", char:s.us ? ourChar : theirChar});
+  const won = s => gw.filter(x => x === (s.us ? "us" : "them")).length;
+  const fighter = (s, side) => { const w = who(s), img = charRender(g, w.char), icon = charImg(g, w.char);
+    return `<div class="ftr ${side} ${s.us ? "us" : "them"}" style="${skin(s)}">
+      ${img ? `<img class="rnd${NO_FLIP.test(w.char) ? " keep" : ""}" src="${esc(img)}" alt="" onerror="this.src='${esc(icon.replace(/-logo\.webp$/, "-art.webp"))}';this.onerror=null">` : `<div class="rnd none">${monogram(w.name || s.name)}</div>`}
+      <div class="plt"><div class="who"><div class="lg">${logoHTML(s.logo, s.name)}</div><span>${esc(s.name)}${s.team && s.us ? ` · ${esc(s.team)}` : ""}</span></div>
+        <b style="font-size:${fitName(w.name || "TBD", 104, 620)}px">${esc(w.name || "TBD")}</b>
+        <div class="chr">${icon ? `<img src="${esc(icon)}" alt="" onerror="this.remove()">` : ""}<i>${esc(w.char || "Character TBD")}</i></div>
+        <span class="gp">${Array.from({length:need}, (_, i) => `<i class="${i < won(s) ? "on" : ""}"></i>`).join("")}<small>${won(s)} ${won(s) === 1 ? "game" : "games"}</small></span></div></div>`; };
+  /* every set so far: S1 Lypuff 2–1, winner marked */
+  const done = (m.games || []).filter(x => x.winner).sort((a, b) => a.n - b.n);
+  const setRow = x => { const pid = Object.keys(x.p || {})[0], p = (m.players || []).find(y => y.id === pid), them = station.oppSets?.[x.n]?.tag || "";
+    const a = {us:p ? (tagOf(p) || nameOf(p)) : US.short, them:them || oppShort(m), su:x.us || 0, st:x.them || 0}, [l, r] = station.swap ? ["them", "us"] : ["us", "them"];
+    return `<span class="${x.winner === "us" ? "w" : "l"}"><em>${esc((g.unit || "Set")[0])}${x.n}</em>${esc(a[l])} <b>${station.swap ? a.st : a.su}–${station.swap ? a.su : a.st}</b> ${esc(a[r])}</span>`; };
+  const mid = `<div class="smid"><div class="vsx"><span><b class="gold-text">VS</b></span></div>
+    <div class="tape-w"><span class="tape">${esc(g.unit || "Set")} <em>${n}</em>${gameNo ? ` &nbsp;·&nbsp; Game <em>${gameNo}</em>` : " &nbsp;·&nbsp; <em>Final</em>"}</span></div>
+    <div class="sset"><b>${won(L)}</b><i>–</i><b>${won(R)}</b></div><small class="ssl">${esc(g.points || "Games")} this ${esc((g.unit || "set").toLowerCase())} · first to ${need}</small></div>`;
+  const lead = L.score === R.score ? `Tied ${L.score}–${R.score}` : `${esc(L.score > R.score ? L.name : R.name)} leads ${Math.max(L.score, R.score)}–${Math.min(L.score, R.score)}`;
+  const foot = `${done.length ? `<span class="sets">${done.map(setRow).join("")}</span>` : ""}${lead} &nbsp;/&nbsp; Best of <em>${esc(m.bestOf)}</em>`;
+  out.html = frame("vs svs", m, g, {sub:eventLine(m), split:[L, R], body:fighter(L, "l") + mid + fighter(R, "r"), foot});
 }
 
 /* ---------- starting lineups ---------- */
@@ -641,7 +699,7 @@ function pov(m){
 }
 
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame, "smash-vs":smashVs};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */

@@ -142,6 +142,29 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .pk-grid{overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:12px}
 .pk-grid button{display:grid;gap:4px;justify-items:center;padding:6px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font:700 12.5px/1.15 var(--body);text-align:center}
 .pk-grid button.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}.pk-grid img{width:72px;height:72px;border-radius:8px;object-fit:cover;background:var(--navy)}
+.pk-usual{border-bottom:1px solid var(--line);background:var(--surface-2)}.pk-usual>small{display:block;padding:10px 12px 0;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}.pk-usual .pk-grid{overflow:visible}
+/* Set desk */
+.dpl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dside{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0}
+.dside>small{display:block;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}.dside.us>small{color:var(--gold)}
+.dside input{width:100%;min-height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);padding:0 10px;margin-bottom:6px}
+.dchips{display:flex;flex-wrap:wrap;gap:6px}
+.dchips button{min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);font:700 14px/1 var(--body);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dchips button.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}.dside:not(.us) .dchips button.on{background:var(--white);border-color:var(--white)}
+.dgames{display:grid;gap:10px;margin-top:12px}
+.drow{border:1px solid var(--line);border-radius:14px;padding:8px 10px 10px;background:var(--bg)}
+.drow.now{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font:800 14px/1 var(--display);letter-spacing:.1em;text-transform:uppercase}
+.dh span{font:600 12px/1 var(--body);letter-spacing:.04em;text-transform:none;color:var(--muted)}.dh .dnow{color:var(--live);font-weight:700}
+.dg{display:grid;grid-template-columns:96px 1fr 96px;gap:8px;align-items:stretch}
+.dchar{display:grid;justify-items:center;align-content:center;gap:4px;padding:6px 4px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);font:700 12px/1.1 var(--body);text-align:center;min-height:96px}
+.dchar img{width:56px;height:56px;object-fit:contain}.dchar i{width:56px;height:56px;display:grid;place-items:center;border-radius:50%;border:2px dashed var(--line-2);font:800 22px/1 var(--display);color:var(--muted);font-style:normal}
+.dchar.us{border-color:rgba(255,188,5,.55)}
+.dwin{display:grid;gap:6px}
+.dwin button{min-height:44px;border-radius:10px;border:2px solid var(--line-2);font:800 14px/1.05 var(--display);letter-spacing:.04em;text-transform:uppercase;padding:4px 6px;overflow:hidden;text-overflow:ellipsis}
+.dwin button.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}.dwin button.on.them{background:var(--white);border-color:var(--white)}
+.dwin button:disabled{opacity:.4}
+.drow.done .dchar{min-height:72px}.drow.done .dchar img{width:40px;height:40px}
 details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -452,7 +475,7 @@ const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "S
   ["rl-team?scope=series", "Rocket League: team stats (whole match)"], ["rl-box?scope=series", "Rocket League: box score (whole match)"],
   ["highlights", "Highlights: last game's clips"], ["highlights?scope=series", "Highlights: every clip this session"],
   ["corner", "Corner score bug (Fortnite: covers the round tracker)"], ["pov?slot=1", "POV name plate: player 1 in the lineup"], ["pov?slot=2", "POV name plate: player 2 in the lineup"],
-  ["box-score", "Box score popup (whole match, transparent)"], ["box-score?scope=game", "Box score popup (current game only)"], ["post-game", "Post-game stats (full screen)"]];
+  ["box-score", "Box score popup (whole match, transparent)"], ["box-score?scope=game", "Box score popup (current game only)"], ["post-game", "Post-game stats (full screen)"], ["smash-vs", "Smash VS screen (between games of a set)"]];
 const stationOf = id => STATIONS.find(n => bc.stations[n]?.matchId === id) || "";
 const overlayURL = (layer, n) => { const [page, qs] = layer.split("?"), q = [qs, n === "1" ? "" : `station=${n}`].filter(Boolean).join("&"); return `${SITE}overlay/${page}.html${q ? "?" + q : ""}`; };
 async function setStation(n, data, msg){
@@ -508,7 +531,7 @@ function bindShow(box){
   });
 }
 function bindCopy(root){ root.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast("Link copied."); } catch(e){ prompt("Copy this link:", b.dataset.copy); } }); }
-function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}}; }
+function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppSets:{}, oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}}; }
 function bindStations(){
   const box = $("#stBox"); if (!box) return;
   box.querySelectorAll("[data-st]").forEach(sel => sel.onchange = async () => {
@@ -743,7 +766,9 @@ function renderMatch(fromSnapshot){
   let panel = "";
   if (cur.forfeit){
     panel = `<div class="panel"><div class="panel-h"><b>Forfeit</b></div><p class="muted" style="margin:0 0 12px">${cur.forfeit === "them" ? `${esc(them)} forfeited. Hartland wins` : `Hartland forfeited. ${esc(them)} wins`} ${cur.score.us}–${cur.score.them}.</p><button class="btn btn-line btn-block" type="button" data-ff="">Undo forfeit</button></div>`;
-  } else if (g.points){
+  } else if (deskOn(g)){
+    panel = deskHTML(g, them);
+} else if (g.points){
     panel = `<div class="panel"><div class="panel-h"><b>${esc(unit)} ${n}</b><span>${esc(g.points)}${gm.winner ? ` · won by ${gm.winner === "us" ? "Hartland" : esc(them)}` : ""}</span></div>
       <div class="pts">
         <div class="pcol us"><div class="nm">${us}</div><div class="v">${gm.us || 0}</div><div class="row"><button class="step" type="button" data-pt="us" data-d="-1" aria-label="Hartland minus one">−</button><button class="step plus" type="button" data-pt="us" data-d="1" aria-label="Hartland plus one">+1</button></div></div>
@@ -760,11 +785,134 @@ function renderMatch(fromSnapshot){
   const tools = `<div class="tools"><button class="btn btn-line" type="button" id="undo"${(undo[cur.id] || []).length ? "" : " disabled style=\"opacity:.4\""}>↶ Undo</button>
       ${cur.stream?.live ? `<a class="btn btn-line" style="flex:1;text-decoration:none" href="${esc(cur.stream.live)}" target="_blank" rel="noopener">▶ Stream</a>` : ""}</div>`;
   const top = head + seg + board + recordHTML(cur) + clinch + panel + tools;
-  if (typing && $("#scoreTop")){ $("#scoreTop").innerHTML = top; bindTop(); return; }
+  if (typing && $("#scoreTop")){ $("#scoreTop").innerHTML = top; bindTop(); bindDesk(g); return; }
   const wasOpen = [...document.querySelectorAll("#details details")].map(d => d.open);
   $("#app").innerHTML = `<div id="scoreTop">${top}</div><div id="details">${detailsHTML(g, them)}</div>`;
   document.querySelectorAll("#details details").forEach((d, i) => { if (wasOpen[i]) d.open = true; });
-  bindTop(); bindDetails(g);
+  bindTop(); bindDesk(g); bindDetails(g);
+}
+/* ---------- Set desk (Smash: 1v1 sets, each a best of 3 games) ----------
+   One panel runs the set on stream: tap our player and theirs, and each game's characters start on that player's
+   usual pick (ours from every match we've saved, theirs from scouting) and carry over to the next game. Tapping who
+   won a game updates the set score (1–0, 1–1) on the overlays; two game wins take the set and move on to the next.
+   Their gamertag and characters go to the station (for the overlays) and scouting, never into the public match. */
+const CK = ["hero", "hero2", "hero3", "hero4", "hero5"], OK = ["char", "char2", "char3", "char4", "char5"];
+const deskOn = g => +g.charSlots > 1 && !!g.points && !!(g.charLabel || "").trim() && !cur.seriesOnly && !cur.forfeit && !cur.bye;
+const setLen = g => Math.max(1, Math.min(5, +g.charSlots || 3)), setNeed = g => Math.floor(setLen(g) / 2) + 1;
+const tagKey = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+/* who won each game of a set, in order (older sets typed in as 2–1 have no order, so wins come first) */
+const gwOf = gm => Array.isArray(gm?.gw) ? gm.gw : [...Array(+gm?.us || 0).fill("us"), ...Array(+gm?.them || 0).fill("them")];
+let pastMatches = null, oppRep = {};
+function loadPast(){
+  if (pastMatches) return; pastMatches = [];
+  fetch(SITE + "data/matches/index.json", {cache:"no-store"}).then(r => r.json())
+    .then(ix => Promise.all((ix.seasons || []).filter(s => s !== season).map(s => fetch(SITE + `data/matches/${s}.json`, {cache:"no-store"}).then(r => r.json()).catch(() => null))))
+    .then(list => { pastMatches = list.filter(Boolean).flatMap(d => d.matches || []); if (cur && deskOn(gameFor(site, cur.game)) && !document.activeElement?.closest?.("#scoreTop")) renderMatch(true); }).catch(() => {});
+}
+/* a player's characters, most played first */
+function usualOf(pid){
+  const c = {}, seen = new Set(matches.map(m => m.id));
+  [...matches, ...(pastMatches || []).filter(m => !seen.has(m.id))].filter(m => m.game === cur.game).forEach(m => (m.games || []).forEach(x => { const r = x.p?.[pid]; if (r) CK.forEach(k => { if (r[k]) c[r[k]] = (c[r[k]] || 0) + 1; }); }));
+  return Object.entries(c).sort((a, b) => b[1] - a[1]).map(([k]) => k);
+}
+function theirUsual(tag){
+  const r = oppRep[cur.id], k = tagKey(tag), c = {}; if (!k) return [];
+  (r?.statGames || []).forEach(x => (x.players || []).forEach(p => { if (tagKey(p.tag) === k) (p.chars?.length ? p.chars : [p.char]).filter(Boolean).forEach(ch => c[ch] = (c[ch] || 0) + 1); }));
+  Object.values(oppSets[cur.id] || {}).forEach(v => { if (tagKey(v.tag) === k) OK.forEach(f => { if (v[f]) c[v[f]] = (c[v[f]] || 0) + .5; }); });
+  const list = Object.entries(c).sort((a, b) => b[1] - a[1]).map(([x]) => x);
+  const main = /main:\s*([^,;]+)/i.exec((r?.players || []).find(p => tagKey(p.tag) === k)?.role || "")?.[1]?.trim();
+  if (main && !list.includes(main)) list.push(main);
+  return list;
+}
+function deskPeople(){
+  const team = (site.teams || []).find(t => t.id === cur.teamId), inM = cur.players || [];
+  const ros = (team?.roster || []).filter(p => (p.name || p.tag) && !inM.some(x => x.id === (p.id || p.name))).map(r => ({id:r.id || r.name, name:r.name, tag:r.tag, private:!!r.private}));
+  return [...inM, ...ros];
+}
+function deskHTML(g, them){
+  loadPast(); if (!oppSets[cur.id]) loadOppSets(); if (!rlOppNames[cur.id]) loadOppNames();
+  const n = cur.current || 1, gm = (cur.games || []).find(x => x.n === n) || {n, us:0, them:0}, unit = g.unit || "Set", L = setLen(g), need = setNeed(g);
+  const gw = gwOf(gm), ourId = Object.keys(gm.p || {})[0] || "", row = gm.p?.[ourId] || {}, opp = oppSets[cur.id]?.[n] || {};
+  const sn = stationOf(cur.id), st = sn ? bc.stations[sn] : null;
+  const theirs = [...new Set([...listOf(st?.oppLineup), ...(rlOppNames[cur.id] || [])].filter(Boolean))].slice(0, 12);
+  const shown = Math.min(L, gm.winner ? gw.length : gw.length + 1);
+  const pic = (side, k, name) => `<button type="button" class="dchar ${side}" data-dchar="${side}" data-k="${k}" aria-label="${side === "us" ? "Hartland" : esc(them)} ${esc(g.charLabel)} in game ${k + 1}: ${esc(name || "none")}. Tap to change.">${name ? `<img src="${esc(charThumb(g, name))}" alt="" onerror="this.remove()">` : `<i>?</i>`}<span>${esc(name || "Pick")}</span></button>`;
+  const games = Array.from({length:shown}, (_, k) => { const w = gw[k], now = !w && !gm.winner;
+    return `<div class="drow${w ? " done" : ""}${now ? " now" : ""}"><div class="dh"><b>Game ${k + 1}</b>${now ? `<span class="dnow">● on now</span>` : w ? `<span>${w === "us" ? "Hartland" : esc(them)} won</span>` : ""}</div>
+      <div class="dg">${pic("us", k, row[CK[k]])}<div class="dwin"><button type="button" data-gwin="us" data-k="${k}" class="${w === "us" ? "on" : ""}"${ourId ? "" : " disabled"}>Hartland won</button><button type="button" data-gwin="them" data-k="${k}" class="${w === "them" ? "on them" : ""}"${ourId ? "" : " disabled"}>${esc(them)} won</button></div>${pic("them", k, opp[OK[k]])}</div></div>`; }).join("");
+  const us = gw.filter(x => x === "us").length, th = gw.filter(x => x === "them").length;
+  return `<div class="panel desk"><div class="panel-h"><b>${esc(unit)} ${n}</b><span>${gm.winner ? `won by ${gm.winner === "us" ? "Hartland" : esc(them)} ` : ""}${esc(g.points)} ${us}–${th} · first to ${need}</span></div>
+    <div class="dpl"><div class="dside us"><small>Hartland player</small><div class="dchips">${deskPeople().map(p => `<button type="button" data-dp="${esc(p.id)}" class="${p.id === ourId ? "on" : ""}">${esc(p.tag || p.name || "Player")}</button>`).join("") || `<span class="hint">Add players under Players & stats.</span>`}</div></div>
+      <div class="dside"><small>${esc(them)} player</small><input data-dopp list="deskThem" value="${esc(opp.tag || "")}" placeholder="Their gamertag" autocomplete="off" aria-label="${esc(them)} player in ${esc(unit)} ${n}">
+        ${theirs.length ? `<div class="dchips">${theirs.map(t => `<button type="button" data-dt="${esc(t)}" class="${tagKey(t) === tagKey(opp.tag) ? "on" : ""}">${esc(t)}</button>`).join("")}</div>` : ""}<datalist id="deskThem">${theirs.map(t => `<option value="${esc(t)}">`).join("")}</datalist></div></div>
+    ${ourId ? "" : `<p class="hint" style="margin:10px 0 0">Tap our player first. Their usual ${esc(g.charLabel.toLowerCase())} fills in by itself.</p>`}
+    <div class="dgames">${games}</div>
+    ${chips(g, them)}</div>`;
+}
+/* the opponent's side of the current set goes to the station so the overlays show it */
+function deskStation(){
+  const sn = stationOf(cur.id); if (!sn) return;
+  const g = gameFor(site, cur.game), n = cur.current || 1, gm = (cur.games || []).find(x => x.n === n) || {}, gw = gwOf(gm), sets = {};
+  Object.entries(oppSets[cur.id] || {}).forEach(([k, v]) => { if (v.tag || v.char) sets[k] = {tag:v.tag || "", chars:OK.map(f => v[f] || "")}; });
+  const o = sets[n] || {tag:"", chars:[]}, k = Math.min(setLen(g) - 1, Math.max(0, gm.winner ? gw.length - 1 : gw.length));
+  const st = bc.stations[sn], next = {...st, oppNow:o.tag, oppChar:o.chars[k] || o.chars.filter(Boolean).pop() || "", oppSets:sets};
+  if (JSON.stringify(next) !== JSON.stringify(st)) setStation(sn, next);
+}
+function setOpp(n, patch){
+  const o = (oppSets[cur.id] = oppSets[cur.id] || {})[n] = {...(oppSets[cur.id][n] || {}), ...patch};
+  Object.keys(o).forEach(k => { if (!o[k]) delete o[k]; });
+  saveOppSetSoon(n); deskStation(); return o;
+}
+function bindDesk(g){
+  const box = $("#scoreTop .desk"); if (!box) return;
+  const n = cur.current || 1, L = setLen(g), need = setNeed(g);
+  box.querySelectorAll("[data-dp]").forEach(b => b.onclick = () => {
+    const id = b.dataset.dp, gm0 = (cur.games || []).find(x => x.n === n), old = Object.keys(gm0?.p || {});
+    if (old[0] === id) return;
+    const statsIn = old.some(o => Object.keys(gm0.p[o]).some(k => !CK.includes(k)));
+    if (statsIn && !confirm("This set already has stats for another player. Switch players and clear them?")) return;
+    const main = usualOf(id)[0] || "";
+    change(m => { const gm = gameRec(m, n); gm.p = {}; const r = gm.p[id] = {};
+      if (main) for (let k = 0; k <= Math.min(gwOf(gm).length, L - 1); k++) r[CK[k]] = main;
+      m.players = m.players || []; if (!m.players.some(p => p.id === id)){ const p = everyone().get(id) || deskPeople().find(x => x.id === id); if (p) m.players.push(snap(p)); }
+      if (m.status === "upcoming") m.status = "live"; }, true);
+    deskStation();
+  });
+  const pickThem = tag => { const o0 = oppSets[cur.id]?.[n] || {}; if (tagKey(tag) === tagKey(o0.tag) && (o0.char || !tag)) return;
+    const main = theirUsual(tag)[0] || "", done = gwOf((cur.games || []).find(x => x.n === n)).length, patch = {tag};
+    OK.forEach((f, k) => patch[f] = tag && k <= Math.min(done, L - 1) ? main : "");
+    setOpp(n, patch); renderMatch(); };
+  box.querySelectorAll("[data-dt]").forEach(b => b.onclick = () => pickThem(b.dataset.dt));
+  const inp = box.querySelector("[data-dopp]");
+  if (inp){ inp.onchange = () => pickThem(inp.value.trim()); inp.onkeydown = e => { if (e.key === "Enter"){ e.preventDefault(); inp.blur(); } }; }
+  box.querySelectorAll("[data-dchar]").forEach(b => b.onclick = () => {
+    const k = +b.dataset.k, side = b.dataset.dchar, gm = (cur.games || []).find(x => x.n === n) || {}, ourId = Object.keys(gm.p || {})[0];
+    const now = side === "us" ? gm.p?.[ourId]?.[CK[k]] : oppSets[cur.id]?.[n]?.[OK[k]];
+    const top = side === "us" ? (ourId ? usualOf(ourId) : []) : theirUsual(oppSets[cur.id]?.[n]?.tag);
+    if (side === "us" && !ourId){ toast("Tap our player first."); return; }
+    openCharPicker(g, now || "", top, name => {
+      if (side === "us") change(m => { const r = gameRec(m, n).p[ourId]; if (name) r[CK[k]] = name; else delete r[CK[k]]; }, true);
+      else { setOpp(n, {[OK[k]]:name}); renderMatch(); }
+    });
+  });
+  box.querySelectorAll("[data-gwin]").forEach(b => b.onclick = () => {
+    const k = +b.dataset.k, who = b.dataset.gwin; let msg = "";
+    change(m => {
+      const gm = gameRec(m, n), was = gm.winner, w = gwOf(gm).slice(0, k); if (gwOf(gm)[k] !== who) w.push(who);
+      gm.gw = w; gm.us = w.filter(x => x === "us").length; gm.them = w.filter(x => x === "them").length;
+      gm.winner = gm.us >= need ? "us" : gm.them >= need ? "them" : null;
+      if (m.status === "upcoming") m.status = "live";
+      /* the next game starts on the same characters; change them if someone switches */
+      const r = gm.p?.[Object.keys(gm.p || {})[0]]; if (r && !gm.winner && w.length > k && w.length < L && !r[CK[w.length]] && r[CK[w.length - 1]]) r[CK[w.length]] = r[CK[w.length - 1]];
+      settle(m);
+      if (gm.winner && !was){ const decided = m.games.filter(x => x.winner).length; msg = `${gm.winner === "us" ? "Hartland" : oppName(m)} wins ${g.unit || "Set"} ${n}, ${Math.max(gm.us, gm.them)}–${Math.min(gm.us, gm.them)}.`;
+        if (!m.clinched && decided < m.bestOf) m.current = Math.max(...m.games.map(x => x.n)) + 1; }
+      if (!gm.winner && was) m.current = n;
+    });
+    const o = oppSets[cur.id]?.[n], len = gwOf((cur.games || []).find(x => x.n === n)).length;
+    if (o && len < L && !o[OK[len]] && o[OK[len - 1]]) setOpp(n, {[OK[len]]:o[OK[len - 1]]}); else { saveOppSetSoon(n); deskStation(); }
+    if (msg) toast(msg);
+  });
 }
 function chips(g, them){
   if (cur.seriesOnly) return `<p class="hint" style="margin:12px 0 0">Only the series score was entered for this match.</p>`;
@@ -869,7 +1017,8 @@ function oppSetHTML(g, n, unit){
 async function loadOppSets(){
   const id = cur.id; oppSets[id] = {};
   try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || "");
-    (r?.statGames || []).filter(x => x.matchId === id).forEach(x => { const p = (x.players || [])[0]; if (p) oppSets[id][x.n] = {tag:p.tag || "", char:p.char || ""}; });
+    oppRep[id] = r || null;
+    (r?.statGames || []).filter(x => x.matchId === id).forEach(x => { const p = (x.players || [])[0]; if (p){ const o = oppSets[id][x.n] = {tag:p.tag || ""}; (p.chars?.length ? p.chars : [p.char]).forEach((c, k) => { if (c && k < OK.length) o[OK[k]] = c; }); } });
     if (cur?.id === id && Object.keys(oppSets[id]).length) $("#details") && !document.activeElement?.closest?.("#details") && renderMatch(); } catch(e){}
 }
 function saveOppSetSoon(n){ clearTimeout(oppSetT); oppSetT = setTimeout(() => saveOppSet(n), 1200); }
@@ -882,7 +1031,8 @@ async function saveOppSet(n){
       : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
     base.statGames = (base.statGames || []).filter(x => !(x.matchId === cur.id && x.n === n));
     if (v.tag){
-      const gm = (cur.games || []).find(x => x.n === n) || {}, ours = Object.values(gm.p || {})[0] || {}, them = {tag:v.tag, ...(v.char ? {char:v.char} : {})};
+      const gm = (cur.games || []).find(x => x.n === n) || {}, ours = Object.values(gm.p || {})[0] || {}, chars = OK.map(f => v[f] || "").filter(Boolean);
+      const them = {tag:v.tag, ...(chars.length ? {char:chars[0]} : {}), ...(chars.length > 1 ? {chars} : {})};
       (g.statList || []).forEach(d => { const m = mirrorKey(d.key); if (m && ours[m] != null && ours[m] !== "") them[d.key] = +ours[m]; });
       base.statGames.push({matchId:cur.id, n, date:cur.startsAt, team:cur.teamName, result:gm.winner === "us" ? "L" : gm.winner === "them" ? "W" : "", score:`${gm.them || 0}–${gm.us || 0}`, players:[them]});
       base.players = base.players || [];
@@ -890,7 +1040,7 @@ async function saveOppSet(n){
     }
     base.statGames = base.statGames.slice(-60); base.updatedAt = now; base.updatedBy = user?.email || "";
     await be.saveScout(id, base);
-  } catch(e){ console.error(e); toast("Couldn't save to scouting (are the database rules published?)."); }
+  } catch(e){ console.error(e); if (role === "coach") toast("Couldn't save to scouting (are the database rules published?)."); }
 }
 /* Small icons beside stat names, matching the in-game scoreboards (Marvel Rivals: swords = eliminations,
    broken heart = deaths, …), so stats can be copied straight off the end-of-match screen. */
@@ -915,18 +1065,24 @@ function charThumb(g, name){
   const dir = String(g.charArt || g.charIcons || "").replace(/\/$/, ""); if (!dir || !name) return "";
   return SITE + dir + "/" + slug(name) + (g.key === "marvel-rivals" ? "-face.webp" : "-logo.webp");
 }
-function openCharPicker(g, input){
-  const names = listOf(g.chars).sort((a, b) => a.localeCompare(b));
+function openCharPicker(g, input, top, onPick){
+  /* input: the text box to fill (Players & stats), or the current name with onPick(name) (Set desk) */
+  const value = typeof input === "string" ? input : input.value;
+  const pick = onPick || (name => { input.value = name; input.dispatchEvent(new Event("change", {bubbles:true})); renderMatch(); });
+  const names = listOf(g.chars).sort((a, b) => a.localeCompare(b)), usual = (top || []).filter(n => names.includes(n)).slice(0, 6);
+  const btn = n => `<button type="button" data-name="${esc(n)}"${n === value ? ' class="on"' : ""}><img src="${esc(charThumb(g, n))}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${esc(n)}</span></button>`;
   const dlg = document.createElement("div"); dlg.className = "picker";
-  dlg.innerHTML = `<div class="pk-in" role="dialog" aria-label="Choose a ${esc(g.charLabel || "character")}"><div class="pk-h"><input type="search" placeholder="Search ${esc((g.charLabel || "character").toLowerCase())}es…" aria-label="Search"><button type="button" class="pk-x" aria-label="Close">×</button></div>
-    <div class="pk-grid">${names.map(n => `<button type="button" data-name="${esc(n)}"${n === input.value ? ' class="on"' : ""}><img src="${esc(charThumb(g, n))}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><span>${esc(n)}</span></button>`).join("")}</div></div>`;
+  dlg.innerHTML = `<div class="pk-in" role="dialog" aria-label="Choose a ${esc(g.charLabel || "character")}"><div class="pk-h"><input type="search" placeholder="Search ${esc((g.charLabel || "character").toLowerCase())}s…" aria-label="Search"><button type="button" class="pk-x" aria-label="Close">×</button></div>
+    ${usual.length ? `<div class="pk-usual"><small>Usual picks</small><div class="pk-grid">${usual.map(btn).join("")}</div></div>` : ""}
+    <div class="pk-grid pk-all">${names.map(btn).join("")}</div></div>`;
   document.body.appendChild(dlg);
   const close = () => dlg.remove();
   dlg.onclick = e => { if (e.target === dlg) close(); };
   dlg.querySelector(".pk-x").onclick = close;
-  const q = dlg.querySelector("input"); q.oninput = () => { const t = q.value.toLowerCase(); dlg.querySelectorAll(".pk-grid button").forEach(b => b.hidden = !b.dataset.name.toLowerCase().includes(t)); };
-  dlg.querySelectorAll(".pk-grid button").forEach(b => b.onclick = () => { input.value = b.dataset.name; input.dispatchEvent(new Event("change", {bubbles:true})); close(); renderMatch(); });
-  setTimeout(() => q.focus(), 50);
+  const q = dlg.querySelector("input"); q.oninput = () => { const t = q.value.toLowerCase(), u = dlg.querySelector(".pk-usual"); if (u) u.hidden = !!t; dlg.querySelectorAll(".pk-all button").forEach(b => b.hidden = !b.dataset.name.toLowerCase().includes(t)); };
+  q.onkeydown = e => { if (e.key === "Enter"){ const b = [...dlg.querySelectorAll(".pk-all button")].find(x => !x.hidden); if (b){ close(); pick(b.dataset.name); } } };
+  dlg.querySelectorAll(".pk-grid button").forEach(b => b.onclick = () => { close(); pick(b.dataset.name); });
+  if (!usual.length || matchMedia("(pointer:fine)").matches) setTimeout(() => q.focus(), 50);
 }
 function statInputs(g, p, on, unit){
   const stats = g.statList || [], roles = listOf(g.roles), charLabel = (g.charLabel || "").trim();
@@ -1153,7 +1309,7 @@ function streamHTML(g, them){
       <p class="hint" style="margin:0">The score bug reads the clock and goals straight from Rocket League on the PC running the game (through the LevelUP Relay). When a game ends, its stats and winner show up under Stats from the stream to save.</p>`
       : `<label class="tog"><input type="checkbox" data-bc="swap"${st.swap ? " checked" : ""}> Hartland on the right side (we're the away team)</label>`}
       <label class="f"><span>${esc(them)} lineup (gamertags, commas between)</span><input data-bc="oppLineup" value="${esc(st.oppLineup || "")}" placeholder="Shown on the VS screen and starting lineups" autocomplete="off"></label>
-      ${oneVone ? `<div class="two"><label class="f"><span>${esc(them)} player on now</span><input data-bc="oppNow" value="${esc(st.oppNow || "")}" autocomplete="off"></label>
+      ${oneVone && deskOn(g) ? `<p class="hint" style="margin:0">Who's playing and their ${esc(g.charLabel.toLowerCase())}s come from the ${esc(g.unit || "Set")} desk at the top.</p>` : oneVone ? `<div class="two"><label class="f"><span>${esc(them)} player on now</span><input data-bc="oppNow" value="${esc(st.oppNow || "")}" autocomplete="off"></label>
         <label class="f"><span>Their ${esc(g.charLabel.toLowerCase())}</span><input data-bc="oppChar" list="charList" value="${esc(st.oppChar || "")}" autocomplete="off"></label></div>
         <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
       <label class="f"><span>${esc(them)} logo link (optional)</span><input type="url" inputmode="url" data-bc="oppLogo" value="${esc(st.oppLogo || "")}" placeholder="https://… .png" autocomplete="off"></label>
@@ -1171,7 +1327,7 @@ function bindStream(){
     const other = bc.stations[k]?.matchId;
     if (other && !confirm(`Station ${k} is showing another match. Switch it to this one?`)) return;
     if (n) await setStation(n, {matchId:""});
-    await setStation(k, freshStation(cur.id), `On station ${k}. The overlays on that PC show this match now.`); renderMatch(); $("#onStream").open = true;
+    await setStation(k, freshStation(cur.id), `On station ${k}. The overlays on that PC show this match now.`); deskStation(); renderMatch(); $("#onStream").open = true;
   });
   if (!n) return;
   const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};

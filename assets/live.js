@@ -3,7 +3,7 @@
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
 import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo, shortSchool} from "./matches.js?v=20";
-import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=2";
+import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=3";
 
 const BASE = new URL("../", import.meta.url).href;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -494,8 +494,9 @@ function whoFrom(site, fin){
 /* ---------- auto-computed leaderboards, program honors, and pre-tracking legends ---------- */
 function drawBoards(site, host, fin){
   const who = whoFrom(site, fin), R = buildRecords(site, fin, who), prog = programRecords(site, fin), leg = legacyRecords(site);
-  const flag = w => w.kind === "player" ? (w.current ? `<span class="rflag cur">Current</span>` : `<span class="rflag alum">Alum</span>`) : "";
-  const nm = w => w.kind === "player" ? `<a href="${BASE}player.html?id=${encodeURIComponent(w.id)}">${esc(w.name)}</a>` : esc(w.name);
+  const flag = w => w.kind === "player" || w.kind === "duo" ? (w.current ? `<span class="rflag cur">Current</span>` : w.kind === "player" ? `<span class="rflag alum">Alum</span>` : "") : "";
+  const link = id => `<a href="${BASE}player.html?id=${encodeURIComponent(id)}">${esc(who.name(id))}</a>`;
+  const nm = w => w.kind === "player" ? `<a href="${BASE}player.html?id=${encodeURIComponent(w.id)}">${esc(w.name)}</a>` : w.kind === "duo" ? w.id.slice(4).split("+").map(link).join(" &amp; ") : esc(w.name);
   const card = r => { const [a, ...rest] = r.rows; return `<div class="rcard"><p class="rt">${esc(r.title)}${r.since ? `<span class="since">since ${esc(r.since)}</span>` : ""}</p>
       ${a ? `<div class="rlead"><b class="rv">${esc(a.display || a.value)}</b><span class="rwho">${nm(a.who)} ${flag(a.who)}${a.detail ? `<small>${esc(a.detail)}</small>` : ""}</span></div>
       ${rest.length ? `<ol class="rnext" start="2">${rest.slice(0, 2).map(x => `<li>${nm(x.who)} <b>${esc(x.display || x.value)}</b></li>`).join("")}</ol>` : ""}` : `<p class="muted" style="margin:0;font-size:14px">Open. The first entry sets it.</p>`}</div>`; };

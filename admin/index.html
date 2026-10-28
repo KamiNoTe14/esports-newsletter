@@ -791,14 +791,14 @@ $("#standInput").addEventListener("change", async e => {
 let finalsP = null;
 function loadFinals(){
   return finalsP = finalsP || (async () => {
-    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=42");
+    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=43");
     return new Promise(res => { let latest = null, t = null;
       live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
       setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });
   })();
 }
 async function draftBio(id){
-  const [{fin, dir}, R] = await Promise.all([loadFinals(), import(SITE_BASE + "assets/records.js?v=2")]);
+  const [{fin, dir}, R] = await Promise.all([loadFinals(), import(SITE_BASE + "assets/records.js?v=3")]);
   const names = {}, cur = new Set();
   fin.forEach(m => (m.players || []).forEach(p => { if (p.id) names[p.id] = p.private ? p.tag : (p.name || p.tag); }));
   [...(dir?.alumni || []), ...(site.alumni || [])].forEach(p => names[p.id] = p.private ? p.tag : (p.name || p.tag));

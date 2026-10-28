@@ -10,7 +10,7 @@ import {gameFor, seasonOf, postseason, rivalFor, shortSchool} from "./matches.js
 
 const OFFICIAL = m => m && m.stage !== "exhibition" && m.stage !== "scrim";
 const NEGATIVE = /death|lost|against|conceded/i;     // stats where more is worse never get a "most" record
-const MIN_WINPCT = 10, MIN_SEASON = 5, MIN_SETPCT = 15;               // matches needed before a win % counts
+const MIN_WINPCT = 10, MIN_SEASON = 5, MIN_SETPCT = 15, MIN_KD = 10, MIN_DUO = 5;               // matches needed before a win % counts
 const seasonOfM = m => m.season || seasonOf(m.startsAt);
 const byDate = (a, b) => String(a.startsAt).localeCompare(String(b.startsAt));
 /* "2026-27" + "2026-08-24" -> "Fall 2026" */
@@ -73,6 +73,45 @@ export function buildRecords(site, finals, who){
     if (g.points && /goal|point|kill|elim/i.test(g.points)){
       const pts = list.map(m => ({who:T(m.teamName), value:teamPoints(m, slugStat(g.points)), at:m.startsAt, matchId:m.id, detail:`vs ${opp(m)}, ${day(m.startsAt)}`}));
       recs.push(board(`${k}:team:points`, `Most ${g.points.toLowerCase()} in a match (team)`, pts.map(r => ({...r, display:fmt(r.value)}))));
+    }
+    /* Games with elims and deaths (Fortnite): K/D, deathless games, elims in a season; and for duos, records that
+       belong to the pair, since partners share every result. */
+    const hasStat = key => (g.statList || []).some(d => d.key === key);
+    if (hasStat("elims") && hasStat("deaths")){
+      const unit = String(g.unit || "game").toLowerCase();
+      /* one row per player per game they played: per-game stats when typed, otherwise the match totals as one */
+      const rows = [];
+      list.forEach(m => {
+        const per = (m.games || []).filter(x => x.p && Object.keys(x.p).length).sort((a, b) => a.n - b.n);
+        if (per.length) per.forEach(x => Object.entries(x.p).forEach(([id, st]) => { if ("elims" in st || "deaths" in st) rows.push({id, m, n:x.n, e:num(st.elims), d:num(st.deaths), hasD:"deaths" in st}); }));
+        else (m.players || []).forEach(p => { const st = p.stats || {}; if (p.id && ("elims" in st || "deaths" in st)) rows.push({id:p.id, m, n:0, e:num(st.elims), d:num(st.deaths), hasD:"deaths" in st}); });
+      });
+      if (rows.length){
+        const since = termLabel(rows.map(r => r.m.startsAt).sort()[0]), byP = {};
+        rows.forEach(r => (byP[r.id] = byP[r.id] || []).push(r));
+        const kd = Object.entries(byP).filter(([, l]) => l.length >= MIN_KD).map(([id, l]) => { const e = l.reduce((a, r) => a + r.e, 0), d = l.reduce((a, r) => a + r.d, 0);
+          return {who:P(id), value:d ? e / d : e, display:(d ? e / d : e).toFixed(2), detail:`${e} elims, ${d} deaths in ${l.length} ${unit}s`, at:l[0].m.startsAt}; });
+        recs.push(board(`${k}:kd`, `Career K/D (${MIN_KD}+ ${unit}s)`, kd, {since}));
+        const clean = Object.entries(byP).map(([id, l]) => { const n = l.filter(r => r.hasD && r.d === 0).length; return {who:P(id), value:n, display:String(n), at:l[0].m.startsAt}; });
+        recs.push(board(`${k}:deathless`, `Deathless ${unit}s`, clean, {since}));
+        const cleanRun = Object.entries(byP).map(([id, l]) => { const s2 = streak(l, r => r.hasD && r.d === 0); return s2.best ? {who:P(id), value:s2.best, display:String(s2.best), detail:`in a row, ${day(s2.from.m.startsAt)} to ${day(s2.to.m.startsAt)}`, at:s2.to.m.startsAt} : null; }).filter(Boolean);
+        recs.push(board(`${k}:deathless:streak`, `Longest deathless streak`, cleanRun, {since}));
+        const se = {}; rows.forEach(r => { const key = r.id + "|" + seasonOfM(r.m), x = se[key] = se[key] || {id:r.id, se:seasonOfM(r.m), e:0, at:r.m.startsAt}; x.e += r.e; });
+        recs.push(board(`${k}:elims:season`, `Elims in a season`, Object.values(se).map(x => ({who:P(x.id), value:x.e, display:String(x.e), detail:x.se.replace("-", "–"), at:x.at})), {since}));
+      }
+      /* duos: the same two players in a match's lineup */
+      if (+g.teamSize === 2){
+        const duoOf = m => { const ids = [...new Set((m.players || []).map(p => p.id).filter(Boolean))].sort(); return ids.length === 2 ? ids : null; };
+        const D = ids => ({kind:"duo", id:"duo:" + ids.join("+"), name:ids.map(id => who.name(id)).join(" & "), current:ids.every(id => who.current(id))});
+        const duos = {}; list.forEach(m => { const ids = duoOf(m); if (ids) (duos[ids.join("+")] = duos[ids.join("+")] || {ids, list:[]}).list.push(m); });
+        const dv = Object.values(duos);
+        recs.push(board(`${k}:duo:record`, `Best duo record (${MIN_DUO}+ matches)`, dv.filter(d => d.list.length >= MIN_DUO).map(d => { const w = d.list.filter(m => m.result === "W").length, l = d.list.length - w;
+          return {who:D(d.ids), value:w / d.list.length + w / 1000, display:pct(w / d.list.length), detail:`${w}–${l} together`, at:d.list[0].startsAt}; })));
+        recs.push(board(`${k}:duo:streak`, `Longest duo win streak`, dv.map(d => { const s2 = streak(d.list, m => m.result === "W"); return s2.best ? {who:D(d.ids), value:s2.best, display:String(s2.best), detail:`in a row, ${day(s2.from.startsAt)} to ${day(s2.to.startsAt)}`, at:s2.to.startsAt} : null; }).filter(Boolean)));
+        const dse = {}; list.forEach(m => { const ids = duoOf(m); if (!ids) return; const key = ids.join("+") + "|" + seasonOfM(m), x = dse[key] = dse[key] || {ids, se:seasonOfM(m), e:0, at:m.startsAt};
+          x.e += (m.players || []).reduce((a, p) => a + num(p.stats?.elims), 0); });
+        recs.push(board(`${k}:duo:elims`, `Most combined elims in a season (duo)`, Object.values(dse).map(x => ({who:D(x.ids), value:x.e, display:String(x.e), detail:x.se.replace("-", "–"), at:x.at}))));
+      }
     }
     groups.push({id:k, title:g.name || k, game:k, icon:g.icon || "", records:recs});
   });

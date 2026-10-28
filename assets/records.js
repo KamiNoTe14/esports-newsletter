@@ -10,7 +10,7 @@ import {gameFor, seasonOf, postseason, rivalFor, shortSchool} from "./matches.js
 
 const OFFICIAL = m => m && m.stage !== "exhibition" && m.stage !== "scrim";
 const NEGATIVE = /death|lost|against|conceded/i;     // stats where more is worse never get a "most" record
-const MIN_WINPCT = 10, MIN_SEASON = 5;               // matches needed before a win % counts
+const MIN_WINPCT = 10, MIN_SEASON = 5, MIN_SETPCT = 15;               // matches needed before a win % counts
 const seasonOfM = m => m.season || seasonOf(m.startsAt);
 const byDate = (a, b) => String(a.startsAt).localeCompare(String(b.startsAt));
 /* "2026-27" + "2026-08-24" -> "Fall 2026" */
@@ -47,6 +47,18 @@ export function buildRecords(site, finals, who){
     const g = gameFor(site, k), stats = (g.statList || []).filter(d => !d.avg && !NEGATIVE.test(d.label));
     if (!stats.length) return;
     const list = fin.filter(m => m.game === k), recs = [];
+    /* Games played one player at a time (Smash sets): each player's own set wins and set win %. */
+    const sets = list.flatMap(m => (m.games || []).filter(x => x.winner && x.p && Object.keys(x.p).length === 1).map(x => ({m, x, id:Object.keys(x.p)[0]})));
+    const withP = list.flatMap(m => (m.games || []).filter(x => x.p && Object.keys(x.p).length));
+    if (sets.length && sets.length >= withP.length * .8){
+      const unit = String(g.unit || "game").toLowerCase(), by = {}, season = {};
+      sets.forEach(({m, x, id}) => { const r = by[id] = by[id] || {w:0, l:0, at:m.startsAt}; x.winner === "us" ? r.w++ : r.l++;
+        const sk = id + "|" + seasonOfM(m), sr = season[sk] = season[sk] || {id, se:seasonOfM(m), w:0, l:0, at:m.startsAt}; x.winner === "us" ? sr.w++ : sr.l++; });
+      const since = termLabel(sets.map(s => s.m.startsAt).sort()[0]);
+      recs.push(board(`${k}:sets:wins`, `Career ${unit} wins`, Object.entries(by).map(([id, r]) => ({who:P(id), value:r.w, display:String(r.w), detail:`${r.w}–${r.l}`, at:r.at})), {since}));
+      recs.push(board(`${k}:sets:pct`, `Best ${unit} win % (${MIN_SETPCT}+ ${unit}s)`, Object.entries(by).filter(([, r]) => r.w + r.l >= MIN_SETPCT).map(([id, r]) => ({who:P(id), value:r.w / (r.w + r.l), display:pct(r.w / (r.w + r.l)), detail:`${r.w}–${r.l} in ${r.w + r.l} ${unit}s`, at:r.at})), {since}));
+      recs.push(board(`${k}:sets:season`, `${unit[0].toUpperCase() + unit.slice(1)} wins in a season`, Object.values(season).map(r => ({who:P(r.id), value:r.w, display:String(r.w), detail:`${r.w}–${r.l}, ${r.se.replace("-", "–")}`, at:r.at})), {since}));
+    }
     stats.forEach(d => {
       const career = {}, first = {}, single = [];
       list.forEach(m => (m.players || []).forEach(p => { if (!p.id || !(d.key in (p.stats || {}))) return; const v = num(p.stats[d.key]);

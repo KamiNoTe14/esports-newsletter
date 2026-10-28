@@ -380,7 +380,7 @@ function drawPlayer(site, host, all, dir){
       else if (d.key in st){ s.tot[d.key] = (s.tot[d.key] || 0) + (+st[d.key] || 0); s.cnt[d.key] = (s.cnt[d.key] || 0) + 1; }
     });
     (rows.length ? rows.map(r => r.role) : (mine.roles || [])).filter(Boolean).forEach(r => s.roles[r] = (s.roles[r] || 0) + 1);
-    rows.map(r => r.hero).filter(Boolean).forEach(c => s.chars[c] = (s.chars[c] || 0) + 1); });
+    rows.flatMap(r => [r.hero, r.hero2, r.hero3, r.hero4, r.hero5]).filter(Boolean).forEach(c => s.chars[c] = (s.chars[c] || 0) + 1); });   // every game of a set
   /* Top characters: the main first, then two more. The coach can type them on the player's profile ("chars"); otherwise they are
      ranked from the characters picked in final matches. How often each was played is never shown. */
   const ranked = o => Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3).map(x => x[0]);

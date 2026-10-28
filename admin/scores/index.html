@@ -133,7 +133,7 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .rolepick{grid-column:1/-1;display:grid;gap:4px;font-size:12px;color:var(--muted)}.rolepick>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
 .rbtn{min-width:0;overflow:hidden;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);color:var(--muted);font:700 14px var(--display);letter-spacing:.05em;text-transform:uppercase}
 .rbtn img{width:28px;height:28px;flex:none;opacity:.55}.rbtn small{font:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media (max-width:440px){.rbtn small{display:none}}.rbtn.on{border-color:var(--gold);background:rgba(255,188,5,.14);color:var(--text);box-shadow:0 0 0 1px var(--gold) inset}.rbtn.on img{opacity:1}
-.hlab{grid-column:1/-1}.hpick{display:flex;align-items:center;gap:6px;position:relative}.hpick input{flex:1;min-width:0}.hpick img{width:40px;height:40px;border-radius:8px;flex:none;object-fit:cover;background:var(--navy)}
+.hlab{grid-column:1/-1}.hlab.multi{grid-column:auto/span 2}.hlab small{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}.hpick{display:flex;align-items:center;gap:6px;position:relative}.hpick input{flex:1;min-width:0}.hpick img{width:40px;height:40px;border-radius:8px;flex:none;object-fit:cover;background:var(--navy)}
 .hbtn{flex:none;width:44px;min-height:44px;border-radius:9px;border:1px solid var(--line-2);background:var(--surface);color:var(--gold);font-size:20px}
 .picker{position:fixed;inset:0;z-index:80;background:rgba(0,10,25,.7);display:flex;align-items:flex-end;justify-content:center}
 .pk-in{width:min(760px,100%);max-height:86vh;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line-2);border-radius:18px 18px 0 0;overflow:hidden}
@@ -237,7 +237,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=22";
-import {watchFinals} from "../../assets/live.js?v=47";
+import {watchFinals} from "../../assets/live.js?v=48";
 import {recordBreaks} from "../../assets/records.js?v=5";
 
 const $ = s => document.querySelector(s);
@@ -942,7 +942,8 @@ function statInputs(g, p, on, unit){
   return `<div class="stats">
     ${roles.length ? (g.roleIcons ? `<div class="rolepick" role="group" aria-label="Role"><span>Role</span><div>${roles.map(r => `<button type="button" class="rbtn${row.role === r ? " on" : ""}" data-rpick="${esc(r)}" data-pid="${esc(p.id)}" title="${esc(r)}" aria-pressed="${row.role === r}">${g.roleIcons[r] ? `<img src="${esc(SITE + g.roleIcons[r])}" alt="">` : ""}<small>${esc(r)}</small></button>`).join("")}</div><select data-gk="role" data-pid="${esc(p.id)}" hidden><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></div>`
       : `<label>Role<select data-gk="role" data-pid="${esc(p.id)}"><option value="">—</option>${roles.map(r => `<option${row.role === r ? " selected" : ""}>${esc(r)}</option>`).join("")}</select></label>`) : ""}
-    ${charLabel ? `<label class="hlab">${esc(charLabel)}<span class="hpick">${charThumb(g, row.hero) ? `<img src="${esc(charThumb(g, row.hero))}" alt="" onerror="this.remove()">` : ""}<input type="text" list="charList" autocomplete="off" data-gk="hero" data-pid="${esc(p.id)}" value="${esc(row.hero || "")}"><button type="button" class="hbtn" data-hpick="${esc(p.id)}" aria-label="Choose from pictures">▦</button></span></label>` : ""}
+    ${charLabel ? (() => { const slots = Math.max(1, Math.min(5, +g.charSlots || 1)), keys = ["hero", "hero2", "hero3", "hero4", "hero5"].slice(0, slots), sub = slots > 1 ? "Game" : "";
+      return keys.map((k, i) => `<label class="hlab${slots > 1 ? " multi" : ""}">${esc(charLabel)}${sub ? ` <small>${sub} ${i + 1}${i ? " (if played)" : ""}</small>` : ""}<span class="hpick">${charThumb(g, row[k]) ? `<img src="${esc(charThumb(g, row[k]))}" alt="" onerror="this.remove()">` : ""}<input type="text" list="charList" autocomplete="off" data-gk="${k}" data-pid="${esc(p.id)}" value="${esc(row[k] || "")}"><button type="button" class="hbtn" data-hpick="${esc(p.id)}" aria-label="Choose from pictures">▦</button></span></label>`).join(""); })() : ""}
     ${stats.map(st => `<label>${statLabel(st)}<input type="number" inputmode="decimal" min="0" step="any" data-gk="${esc(st.key)}" data-num="1" data-pid="${esc(p.id)}" value="${esc(row[st.key] ?? "")}"></label>`).join("")}
   </div>`;
 }

@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=22";
-import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=47";
+import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=48";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -63,7 +63,8 @@ function sides(m){
   const cur = (m.games || []).find(x => x.n === m.current && x.p && Object.keys(x.p).length) || withP[0] || {};
   const ourNow = cur.p ? Object.keys(cur.p) : [];
   const ourPlayer = g.teamSize === 1 || /solo/i.test(m.teamName) || (ourNow.length === 1 && ((m.players || []).length > 1 || +g.teamSize > 1)) ? (m.players || []).find(p => p.id === ourNow[0]) : null;
-  const charOf = id => cur.p?.[id]?.hero;
+  /* the character on now: the latest game of the set that has one (Smash sets are best of 3, a pick per game) */
+  const charOf = id => { const r = cur.p?.[id] || {}; return [r.hero5, r.hero4, r.hero3, r.hero2, r.hero].find(Boolean); };
   const us = {name:US.short, team:m.teamName, logo:US.logo, score:m.score?.us ?? 0, won:(m.games || []).filter(x => x.winner === "us").length,
     now:ourPlayer ? {name:tagOf(ourPlayer) || nameOf(ourPlayer), char:charOf(ourPlayer.id)} : null, us:true, ...OUR_COLORS};
   const lib = schoolInfo(site, m.opponent?.school);
@@ -333,9 +334,10 @@ function vs(m){
 
 /* ---------- starting lineups ---------- */
 function mainChar(m, id){
-  const c = {}; (m.games || []).forEach(x => { const h = x.p?.[id]?.hero; if (h) c[h] = (c[h] || 0) + 1; });
+  const picks = r => r ? [r.hero, r.hero2, r.hero3, r.hero4, r.hero5].filter(Boolean) : [];
+  const c = {}; (m.games || []).forEach(x => picks(x.p?.[id]).forEach(h => c[h] = (c[h] || 0) + 1));
   let best = Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0];
-  if (!best){ finals.filter(x => x.game === m.game).forEach(x => (x.games || []).forEach(gm => { const h = gm.p?.[id]?.hero; if (h) c[h] = (c[h] || 0) + 1; })); best = Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0]; }
+  if (!best){ finals.filter(x => x.game === m.game).forEach(x => (x.games || []).forEach(gm => picks(gm.p?.[id]).forEach(h => c[h] = (c[h] || 0) + 1))); best = Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0]; }
   return best || (site.profiles?.[id]?.chars || "").split(",")[0].trim() || "";
 }
 function mainRole(m, id){ const c = {}; (m.games || []).forEach(x => { const r = x.p?.[id]?.role; if (r) c[r] = (c[r] || 0) + 1; }); return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] || ""; }

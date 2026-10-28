@@ -289,6 +289,22 @@ let finalIds = new Set(); const synced = new Set();
 const sb = all => season === NOW ? scoreboardFrom(all.filter(m => m.season === NOW), site) : null;
 function seasonSum(all, id, nowFinal){ return nowFinal || finalIds.has(id) ? seasonDocFrom(all, season) : null; }
 function noteSeason(se){ if (role === "coach" && !dir.seasons.includes(se)){ dir.seasons = [...dir.seasons, se].sort().reverse(); be.saveDirectory(dir).catch(e => console.error(e)); } }
+/* Coaches: matches students sent for approval show in the browser tab ("(2) Needs approval"), with a red dot on the
+   tab icon, so it's noticed even with the tab in the background. A new one also pops a message. */
+const BASE_TITLE = document.title; let seenReview = null, iconHref = null;
+function reviewAlert(){
+  if (role !== "coach") return;
+  const list = matches.filter(m => m.status === "review"), n = list.length;
+  document.title = n ? `(${n}) Needs approval · Scorekeeper` : BASE_TITLE;
+  const link = document.querySelector('link[rel~="icon"]');
+  if (link){ iconHref = iconHref || link.href;
+    if (!n) link.href = iconHref;
+    else { const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => { try { const c = document.createElement("canvas"); c.width = c.height = 64; const x = c.getContext("2d");
+      x.drawImage(img, 0, 0, 64, 64); x.fillStyle = "#FF3B3B"; x.beginPath(); x.arc(48, 16, 15, 0, 7); x.fill(); x.strokeStyle = "#fff"; x.lineWidth = 3; x.stroke(); link.href = c.toDataURL("image/png"); } catch(e){} }; img.src = iconHref; } }
+  const ids = new Set(list.map(m => m.id));
+  if (seenReview){ const fresh = list.filter(m => !seenReview.has(m.id)); if (fresh.length) toast(`${fresh[0].teamName} vs ${oppName(fresh[0])} needs your approval.`, 6000); }
+  seenReview = ids;
+}
 function setSeason(se){
   if (se === season) return;
   if (pendingSaves.size) flush();
@@ -303,6 +319,7 @@ function onMatches(list, meta){
     be.syncSummaries(sb(all), seasonDocFrom(all, se)).then(() => { if (finalIds.size) noteSeason(se); }).catch(e => { synced.delete(se); console.error(e); });
   }
   matches = list.map(m => settle(pendingSaves.get(m.id) || m));
+  reviewAlert();
   if (cur && !dirtyIds.has(cur.id)){ const fresh = matches.find(m => m.id === cur.id); if (fresh) cur = clone(fresh); }
   if (view === "list") renderList();
   else if (view === "match") renderMatch(true);

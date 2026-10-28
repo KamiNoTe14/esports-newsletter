@@ -515,7 +515,7 @@ function drawBoards(site, host, fin){
 export function startLegacy(site){
   startNextLevel(site);
   const host = $("#allTime"), boards = $("#leaders");
-  watchFinals(site, fin => {
+  watchFinals(site, (fin, dir) => {
     if (boards) drawBoards(site, boards, fin);
     document.querySelectorAll("[data-rival]").forEach(c => { const r = {school:c.dataset.rival}; const vs = fin.filter(m => rivalFor({rivals:[r]}, m)); c.querySelector("[data-rec]").textContent = vs.length ? wl(vs).text : "0–0"; });
     document.querySelectorAll("[data-season-rec]").forEach(el => { const l = fin.filter(m => (m.season || seasonOf(m.startsAt)) === el.dataset.seasonRec); el.textContent = l.length ? wl(l).text : ""; });
@@ -532,8 +532,26 @@ export function startLegacy(site){
         <div class="tbl-wrap"><table class="tbl"><thead><tr><th>By game</th><th class="n">W</th><th class="n">L</th></tr></thead><tbody>${games.map(x => `<tr><td>${esc((x.g.name !== x.g.key ? x.g.name : "") || x.list[0].gameName || "Other")}</td><td class="n">${wl(x.list).w}</td><td class="n">${wl(x.list).l}</td></tr>`).join("")}</tbody></table></div>
         <div class="tbl-wrap"><table class="tbl"><thead><tr><th>By season</th><th class="n">W</th><th class="n">L</th></tr></thead><tbody>${seasons.map(se => { const l = fin.filter(m => (m.season || seasonOf(m.startsAt)) === se); return `<tr><td><a href="${BASE}results.html#season-${se}">${esc(seasonLabel(se))}</a></td><td class="n">${wl(l).w}</td><td class="n">${wl(l).l}</td></tr>`; }).join("")}</tbody></table></div>
       </div>
+      ${classTable(site, fin, dir)}
       <p class="muted" style="margin:14px 0 0;font-size:14px">Counts every match marked final. Matches in progress are never included.</p>`;
   });
+}
+/* Record by graduating class: every match at least one member of that class played in (a match counts once per class,
+   however many of the class played). Class years come from player profiles and the past-players list. */
+function classTable(site, fin, dir){
+  const year = {};
+  Object.entries(site.profiles || {}).forEach(([id, p]) => { if (/^\d{4}$/.test(String(p?.gradYear || "").trim())) year[id] = String(p.gradYear).trim(); });
+  [...(site.alumni || []), ...(dir?.alumni || [])].forEach(a => { const y = String(a?.gradYear || "").trim(); if (a?.id && /^\d{4}$/.test(y) && !year[a.id]) year[a.id] = y; });
+  const by = {}, seen = new Set(), missing = new Set();
+  fin.forEach(m => { const ys = new Set(); (m.players || []).forEach(p => { if (!p.id) return; seen.add(p.id); if (year[p.id]) ys.add(year[p.id]); else missing.add(p.id); });
+    ys.forEach(y => { const c = by[y] = by[y] || {list:[], ids:new Set()}; c.list.push(m); }); });
+  Object.entries(year).forEach(([id, y]) => { if (by[y] && seen.has(id)) by[y].ids.add(id); });
+  const rows = Object.entries(by).sort((a, b) => b[0].localeCompare(a[0]));
+  if (!rows.length) return "";
+  const now = new Date(), senior = now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
+  return `<div class="tbl-wrap" style="margin-top:18px"><table class="tbl"><thead><tr><th>By graduating class</th><th class="n">Players</th><th class="n">W</th><th class="n">L</th><th class="n">Win %</th></tr></thead><tbody>
+    ${rows.map(([y, c]) => { const r = wl(c.list), n = r.w + r.l; return `<tr><td>Class of ${esc(y)}${+y >= senior ? ` <span class="muted" style="font-size:13px">${+y === senior ? "seniors" : "still playing"}</span>` : ""}</td><td class="n">${c.ids.size}</td><td class="n">${r.w}</td><td class="n">${r.l}</td><td class="n">${n ? Math.round(r.w / n * 1000) / 10 + "%" : "–"}</td></tr>`; }).join("")}</tbody></table></div>
+    ${missing.size ? `<p class="muted" style="margin:8px 0 0;font-size:14px">${missing.size} player${missing.size === 1 ? " doesn't" : "s don't"} have a class year yet, so their matches only count once a year is added.</p>` : ""}`;
 }
 
 /* ---------- one rivalry: head-to-head, next meeting, every meeting ---------- */

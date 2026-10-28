@@ -2,8 +2,8 @@
    ?station=1 (default). The scorekeeper decides which match is on each station; every overlay updates itself live.
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
-import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=21";
-import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=46";
+import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=22";
+import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=47";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);

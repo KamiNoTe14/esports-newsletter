@@ -236,9 +236,9 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=21";
-import {watchFinals} from "../../assets/live.js?v=46";
-import {recordBreaks} from "../../assets/records.js?v=4";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=22";
+import {watchFinals} from "../../assets/live.js?v=47";
+import {recordBreaks} from "../../assets/records.js?v=5";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -370,6 +370,7 @@ function rowHTML(m){
   const live = m.status === "live", fin = m.status === "final";
   const st = live ? `${m.score.us}–${m.score.them}<small><span class="pill-live">LIVE</span></small>`
     : fin ? (m.bye ? `<span class="W">W</span> Bye<small>Auto win</small>` : `<span class="${m.result}">${m.result}</span> ${m.score.us}–${m.score.them}<small>Final${m.forfeit ? " · FF" : ""}</small>`)
+    : m.status === "review" ? `${m.score.us}–${m.score.them}<small>Needs approval</small>`
     : m.status === "postponed" ? `<small>Postponed</small>` : m.status === "canceled" ? `<small>Canceled</small>`
     : `${esc(fmtTime(m.startsAt))}<small>${esc(fmtDay(m.startsAt))}</small>`;
   return `<button class="mrow${live ? " live" : ""}" type="button" data-open="${esc(m.id)}">${gameBadge(m)}
@@ -379,7 +380,7 @@ function rowHTML(m){
 function renderList(){
   const coach = role === "coach", mine = m => coach || myTeams.has(m.teamId);
   const by = s => matches.filter(m => s.includes(m.status) && mine(m));
-  const live = by(["live"]), up = by(["upcoming", "postponed"]).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1), done = by(["final", "canceled"]).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
+  const review = by(["review"]), live = by(["live"]), up = by(["upcoming", "postponed"]).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1), done = by(["final", "canceled"]).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
   const sec = (title, list, empty) => `<h2>${title}</h2>${list.length ? `<div class="mlist">${list.map(rowHTML).join("")}</div>` : `<div class="card empty">${empty}</div>`}`;
   const gh = ghCfg();
   const rec = `${done.filter(m => m.result === "W").length}–${done.filter(m => m.result === "L").length}`;
@@ -389,6 +390,7 @@ function renderList(){
     + (coach ? "" : `<div class="card" style="margin-bottom:12px"><b>Student scorekeeper</b><p class="hint" style="margin:6px 0 0">You can score, edit and stream ${esc([...myTeams].map(id => teamLabel(site, (site.teams || []).find(t => t.id === id) || {})).filter(Boolean).join(", ") || "your teams")} matches. Ask a coach for anything else.</p></div>`)
     + (coach ? pendingMergeHTML() + tickerHTML() : "")
     + stationsHTML()
+    + (review.length ? sec(coach ? "Waiting for your approval" : "Waiting for a coach", review, "") : "")
     + (live.length ? sec("Live now", live, "") : "")
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
@@ -713,7 +715,8 @@ function renderMatch(fromSnapshot){
   const seg = `<div class="seg" role="group" aria-label="Match status">
       <button type="button" data-status="upcoming" aria-pressed="${status === "upcoming" || status === "postponed"}">Upcoming</button>
       <button type="button" class="s-live" data-status="live" aria-pressed="${status === "live"}">● Live</button>
-      <button type="button" class="s-final" data-status="final" aria-pressed="${status === "final"}">Final</button></div>`;
+      <button type="button" class="s-final" data-status="final" aria-pressed="${status === "final" || status === "review"}">${role === "coach" ? "Final" : status === "review" ? "Sent for approval" : "Submit final"}</button></div>
+    ${status === "review" ? `<div class="clinch" style="margin-top:10px"><b>Waiting for approval${cur.review?.name ? `: submitted by ${esc(cur.review.name)}` : ""}</b>${role === "coach" ? `<span style="display:flex;gap:8px"><button class="btn" type="button" id="approve">Approve</button><button class="btn btn-line" type="button" id="sendBack">Send back</button></span>` : `<span style="color:var(--navy);font-weight:600">A coach will check it. It isn't on the website yet.</span>`}</div>` : ""}`;
   const resultTxt = status === "final" ? `<span class="${cur.result}">${cur.result === "W" ? "Hartland wins" : cur.result === "L" ? `${esc(them)} wins` : "Tied"}</span>` : cur.clinched ? "Series decided" : status === "live" ? `${esc(unit)} ${n} in progress` : `First to ${need}`;
   const board = `<div class="board" aria-live="polite">
       <div class="side us"><div class="nm">${us}</div><div class="full">${esc(cur.teamName)}</div><div class="num">${cur.score.us}</div></div>
@@ -736,7 +739,7 @@ function renderMatch(fromSnapshot){
       <div class="big2"><button class="u" type="button" data-win="us">+1 Hartland<br><small style="font-size:14px">won ${esc(unit.toLowerCase())} ${n}</small></button><button class="t" type="button" data-win="them">+1 ${esc(them)}<br><small style="font-size:14px">won ${esc(unit.toLowerCase())} ${n}</small></button></div>
       ${chips(g, them)}</div>`;
   }
-  const clinch = status !== "final" && cur.clinched ? `<div class="clinch${cur.clinched === "them" ? " them" : ""}"><b>${cur.clinched === "us" ? "Hartland" : esc(them)} wins ${Math.max(cur.score.us, cur.score.them)}–${Math.min(cur.score.us, cur.score.them)}</b><button class="btn" type="button" data-status="final">Mark final</button></div>` : "";
+  const clinch = status !== "final" && status !== "review" && cur.clinched ? `<div class="clinch${cur.clinched === "them" ? " them" : ""}"><b>${cur.clinched === "us" ? "Hartland" : esc(them)} wins ${Math.max(cur.score.us, cur.score.them)}–${Math.min(cur.score.us, cur.score.them)}</b><button class="btn" type="button" data-status="final">Mark final</button></div>` : "";
   const tools = `<div class="tools"><button class="btn btn-line" type="button" id="undo"${(undo[cur.id] || []).length ? "" : " disabled style=\"opacity:.4\""}>↶ Undo</button>
       ${cur.stream?.live ? `<a class="btn btn-line" style="flex:1;text-decoration:none" href="${esc(cur.stream.live)}" target="_blank" rel="noopener">▶ Stream</a>` : ""}</div>`;
   const top = head + seg + board + recordHTML(cur) + clinch + panel + tools;
@@ -759,6 +762,8 @@ function bindTop(){
   $("#edit").onclick = () => location.hash = "edit/" + cur.id;
   $("#undo").onclick = () => { const st = undo[cur.id] || []; if (!st.length) return; cur = st.pop(); settle(cur); buzz(); queueSave(); renderMatch(); };
   $("#scoreTop").querySelectorAll("[data-status]").forEach(b => b.onclick = () => setStatus(b.dataset.status));
+  $("#approve") && ($("#approve").onclick = () => { change(m => { m.status = "final"; m.approved = {by:user?.email || "", at:new Date().toISOString()}; }); toast(cur.result === "W" ? "Approved. Eagles win! 🦅" : "Approved. It's on the website now."); queueArchive(); });
+  $("#sendBack") && ($("#sendBack").onclick = () => { change(m => { m.status = "live"; }); toast("Sent back. It's open for editing again."); });
   $("#scoreTop").querySelectorAll("[data-pt]").forEach(b => b.onclick = () => change(m => {
     if (m.seriesOnly){ m.seriesOnly = false; m.games = []; m.current = 1; }
     const gm = gameRec(m, m.current || 1); gm[b.dataset.pt] = Math.max(0, (gm[b.dataset.pt] || 0) + (+b.dataset.d));
@@ -789,7 +794,12 @@ function bindTop(){
 function gameRec(m, n){ m.games = m.games || []; let gm = m.games.find(x => x.n === n); if (!gm){ gm = {n, us:0, them:0, winner:null}; m.games.push(gm); m.games.sort((a, b) => a.n - b.n); } return gm; }
 function change(fn, quiet){
   (undo[cur.id] = undo[cur.id] || []).push(clone(cur)); if (undo[cur.id].length > 40) undo[cur.id].shift();
-  fn(cur); cur.games = (cur.games || []).filter(x => x.winner || x.us || x.them || x.n === cur.current || (x.p && Object.keys(x.p).length)); rollup(cur, gameFor(site, cur.game)); settle(cur);
+  const before = cur.status;
+  fn(cur);
+  /* a student scorekeeper's "final" goes to a coach first: it stays off the website until approved */
+  if (role !== "coach" && cur.status === "final"){ cur.status = "review"; cur.review = {by:user?.email || "", name:user?.name || "", at:new Date().toISOString()};
+    if (before !== "review") toast("Sent to the coaches to approve. It shows on the website once they do."); }
+  cur.games = (cur.games || []).filter(x => x.winner || x.us || x.them || x.n === cur.current || (x.p && Object.keys(x.p).length)); rollup(cur, gameFor(site, cur.game)); settle(cur);
   if (!quiet) buzz();
   queueSave(); renderMatch();
 }
@@ -800,7 +810,7 @@ function setStatus(s){
   }
   const was = cur.status;
   change(m => { m.status = s; if (s === "live" && !(m.games || []).length) m.current = 1; });
-  if (s === "final" && was !== "final"){ toast(cur.result === "W" ? "Final. Eagles win! 🦅" : "Final saved."); queueArchive(); }
+  if (s === "final" && was !== "final" && cur.status === "final"){ toast(cur.result === "W" ? "Final. Eagles win! 🦅" : "Final saved."); queueArchive(); }
 }
 
 /* players, stats, links */

@@ -19,7 +19,7 @@ export const FIREBASE_CONFIG = {
 };
 /* Who can change scores. The real lock is the Firestore security rules (firestore.rules); this list only shapes the screens. */
 export const EDITORS = ["cameronmontney@hartlandschools.us", "jasonwatkins@hartlandschools.us"];
-export const STATUSES = ["upcoming", "live", "final", "postponed", "canceled"];
+export const STATUSES = ["upcoming", "live", "review", "final", "postponed", "canceled"];   // review: a student scorekeeper marked it final, waiting for a coach
 export const LEAGUES = ["MHSEL", "MiHSEF", "USAEL Open", "PlayVS Cup", "Exhibition", "Scrimmage"];
 export const STAGES = [["regular", "Regular season"], ["playoffs", "Playoffs"], ["finals", "Finals"], ["exhibition", "Exhibition"], ["scrim", "Scrimmage"]];
 const TZ = "America/Detroit";

@@ -18,7 +18,7 @@ service cloud.firestore {
 
     function validMatch() {
       let d = request.resource.data;
-      return d.status in ['upcoming', 'live', 'final', 'postponed', 'canceled']
+      return d.status in ['upcoming', 'live', 'review', 'final', 'postponed', 'canceled']
         && d.season is string && d.season.size() <= 9
         && d.startsAt is string
         && d.score.us is int && d.score.them is int
@@ -37,8 +37,11 @@ service cloud.firestore {
 
     match /matches/{matchId} {
       allow read: if true;
-      allow create: if validMatch() && (isCoach() || scoresTeam(request.resource.data.teamId));
-      allow update: if validMatch() && (isCoach() || (scoresTeam(resource.data.teamId) && scoresTeam(request.resource.data.teamId)));
+      // Students can't make a result official: "final" is for coaches; students submit it as "review".
+      // A match that's already final is coaches-only.
+      allow create: if validMatch() && (isCoach() || (scoresTeam(request.resource.data.teamId) && request.resource.data.status != 'final'));
+      allow update: if validMatch() && (isCoach() || (scoresTeam(resource.data.teamId) && scoresTeam(request.resource.data.teamId)
+        && resource.data.status != 'final' && request.resource.data.status != 'final'));
       allow delete: if isCoach();
     }
 

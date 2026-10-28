@@ -389,7 +389,31 @@ function playerStats(m, id){
   const per = {}; (g.statList || []).forEach(d => { per[d.key] = d.avg ? (avg[d.key]?.length ? avg[d.key].reduce((a, b) => a + b, 0) / avg[d.key].length : null) : (cnt[d.key] ? tot[d.key] / cnt[d.key] : null); });
   return {n:played.length, rec, per};
 }
+/* One of our players against one of theirs (scorekeeper: On stream > Player comparison). Ours: this season, per
+   game. Theirs: what the scouting report saved for that gamertag (copied onto the station), else a dash. */
+function crossCompare(m, c){
+  const g = gameFor(site, m.game), [L, R] = sides(m), us = L.us ? L : R, them = L.us ? R : L;
+  const roster = ((site.teams || []).find(t => t.id === m.teamId)?.roster || []).filter(p => p.id);
+  const list = [...(m.players || []), ...roster.filter(r => !(m.players || []).some(p => p.id === r.id))];
+  const a = list.find(p => p.id === c.a) || list[0];
+  if (!a){ empty("Add our lineup in the scorekeeper to compare players"); return; }
+  const se = m.season || seasonOf(m.startsAt), defs = (g.statList || []).filter(d => !d.avg);
+  const mine = finals.filter(x => x.game === m.game && (x.season || seasonOf(x.startsAt)) === se && (x.players || []).some(p => p.id === a.id));
+  const rows = []; mine.forEach(x => { const per = (x.games || []).filter(gm => gm.p?.[a.id]); if (per.length) per.forEach(gm => rows.push(gm.p[a.id])); else rows.push((x.players.find(p => p.id === a.id) || {}).stats || {}); });
+  const avg = k => { const v = rows.filter(r => r[k] != null && r[k] !== "").map(r => +r[k]); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; };
+  const f1 = v => v == null ? "–" : (Math.round(v * 10) / 10).toLocaleString("en-US");
+  const T = c.themStats || {}, ours = teamSeason(m).concat(m.status === "final" ? [m] : []), ourRec = record(ours), st = standingFor(m);
+  const out1 = [{k:"Team record", a:ourRec.w, b:st ? +st.w : 0, fa:ourRec.text, fb:st ? `${st.w}–${st.l}` : "–"},
+    ...defs.filter(d => avg(d.key) != null || T[d.key] != null).map(d => ({k:`${d.label} / ${(g.unit || "game").toLowerCase()}`, a:avg(d.key) || 0, b:+T[d.key] || 0, fa:f1(avg(d.key)), fb:T[d.key] != null ? f1(+T[d.key]) : "–", lower:/death|lost/i.test(d.label)}))].slice(0, 6);
+  const ch = mainChar(m, a.id), themCh = c.themChar || "";
+  const headUs = `<div class="h ${L.us ? "l" : "r"}" style="${skin(us)}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="">` : `<div class="mono">${monogram(nameOf(a))}</div>`}</div><div><b style="font-size:${fitName(tagOf(a) || nameOf(a), 76, 470)}px">${esc(tagOf(a) || nameOf(a))}</b><small>${esc([US.short, ch].filter(Boolean).join(", "))}</small></div></div>`;
+  const headThem = `<div class="h ${L.us ? "r" : "l"}" style="${skin(them)}"><div class="pic${charImg(g, themCh) ? "" : " crest"}">${charImg(g, themCh) ? `<img src="${esc(charImg(g, themCh))}" alt="">` : logoHTML(them.logo, them.name)}</div><div><b style="font-size:${fitName(c.them, 76, 470)}px">${esc(c.them)}</b><small>${esc([them.name, themCh || c.themRole].filter(Boolean).join(", "))}</small></div></div>`;
+  const rowsLR = L.us ? out1 : out1.map(r => ({...r, a:r.b, b:r.a, fa:r.fb, fb:r.fa}));
+  out.html = frame("cmp", m, g, {title:"Player", script:"Matchup", sub:eventLine(m), split:[L, R], foot:c.themGp ? `Per ${esc((g.unit || "game").toLowerCase())} · theirs from ${c.themGp} game${c.themGp === 1 ? "" : "s"} vs Hartland` : `Per ${esc((g.unit || "game").toLowerCase())}, this season`,
+    body:`<div class="heads">${L.us ? headUs : headThem}<div class="vsx"><span><b class="gold-text">VS</b></span></div>${L.us ? headThem : headUs}</div><div class="rows">${rowsHTML(rowsLR)}</div>`});
+}
 function playerCompare(m){
+  if (station.compare?.them) return crossCompare(m, station.compare);
   const g = gameFor(site, m.game), ids = [station.compare?.a, station.compare?.b].filter(Boolean);
   const roster = ((site.teams || []).find(t => t.id === m.teamId)?.roster || []).filter(p => p.id);
   const list = [...(m.players || []), ...roster.filter(r => !(m.players || []).some(p => p.id === r.id))];

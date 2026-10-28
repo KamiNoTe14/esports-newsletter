@@ -1031,11 +1031,37 @@ function rlPickHTML(st, them){
     <datalist id="rlUs">${ours.map(n => `<option value="${esc(n)}">`).join("")}</datalist><datalist id="rlThem">${theirs.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
     <p class="hint" style="margin:0">Type or pick each player's in-game name; the Player matchup graphic switches right away. Leave a box blank for that team's top scorer. <button type="button" class="linkbtn" id="rlcReset">Back to top scorers</button></p>`;
 }
+/* Player comparison picker: one of our players against one of theirs. The opponent's numbers, when the scouting
+   report has saved games for that gamertag, are copied onto the station so the graphic can show them. */
+function cmpPickHTML(g, st, them){
+  const team = (site.teams || []).find(t => t.id === cur.teamId), mine = (cur.players || []).length ? cur.players : (team?.roster || []).filter(p => p.id);
+  if (!mine.length) return "";
+  const pname = p => p.tag || p.name || "Player", c = st.compare || {};
+  const theirs = [...new Set([...listOf(st.oppLineup), ...(rlOppNames[cur.id] || [])].filter(Boolean))];
+  const charLabel = (g.charLabel || "").trim();
+  return `<div class="two"><label class="f"><span>Player comparison: Hartland</span><select data-cmp="a"><option value="">First in the lineup</option>${mine.map(p => `<option value="${esc(p.id)}"${c.a === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label>
+      <label class="f"><span>vs ${esc(them)}</span><input data-cmp="them" list="cmpThem" value="${esc(c.them || "")}" placeholder="Their gamertag" autocomplete="off"></label></div>
+    ${charLabel ? `<label class="f"><span>Their ${esc(charLabel.toLowerCase())} (optional)</span><input data-cmp="themChar" list="charList" value="${esc(c.themChar || "")}" autocomplete="off"></label>` : ""}
+    <datalist id="cmpThem">${theirs.map(x => `<option value="${esc(x)}">`).join("")}</datalist>
+    <p class="hint" style="margin:0">Pick our player and type or pick theirs (names come from their lineup and scouting report). ${c.themGp ? `Their numbers come from ${c.themGp} game${c.themGp === 1 ? "" : "s"} in scouting.` : "Their numbers show if the scouting report has saved stats for that gamertag."}</p>`;
+}
+async function cmpScout(n, name){
+  if (!be.scoutFor) return;
+  try {
+    const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || ""), k = String(name).toLowerCase().replace(/[^a-z0-9]/g, "");
+    const rows = (r?.statGames || []).flatMap(x => (x.players || []).filter(p => String(p.tag || "").toLowerCase().replace(/[^a-z0-9]/g, "") === k));
+    const role = (r?.players || []).find(p => String(p.tag || "").toLowerCase().replace(/[^a-z0-9]/g, "") === k)?.role || "";
+    const sum = {}; rows.forEach(p => Object.entries(p).forEach(([key, v]) => { if (key !== "tag" && !isNaN(+v)) sum[key] = (sum[key] || 0) + (+v); }));
+    const avg = rows.length ? Object.fromEntries(Object.entries(sum).map(([key, v]) => [key, Math.round(v / rows.length * 10) / 10])) : null;
+    const st = bc.stations[n]; if (!st || st.compare?.them !== name) return;
+    await setStation(n, {...st, compare:{...st.compare, themStats:avg, themGp:rows.length, themRole:role}});
+  } catch(e){ console.error(e); }
+}
 async function loadOppNames(){
   if (!cur || rlOppNames[cur.id] || !be.scoutFor) return;
   const id = cur.id; rlOppNames[id] = [];
   try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || ""); rlOppNames[id] = (r?.players || []).map(p => p.tag).filter(Boolean);
-    const dl = $("#rlThem"); if (dl && cur?.id === id) rlOppNames[id].forEach(n => { if (![...dl.options].some(o => o.value === n)){ const o = document.createElement("option"); o.value = n; dl.appendChild(o); } }); } catch(e){}
+    const dl = $("#rlThem") || $("#cmpThem"); if (dl && cur?.id === id) rlOppNames[id].forEach(n => { if (![...dl.options].some(o => o.value === n)){ const o = document.createElement("option"); o.value = n; dl.appendChild(o); } }); } catch(e){}
 }
 
 /* "On stream" panel for the open match: which station shows it and what the overlays need that isn't in the score. */
@@ -1054,8 +1080,7 @@ function streamHTML(g, them){
         <label class="f"><span>Their ${esc(g.charLabel.toLowerCase())}</span><input data-bc="oppChar" list="charList" value="${esc(st.oppChar || "")}" autocomplete="off"></label></div>
         <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
       <label class="f"><span>${esc(them)} logo link (optional)</span><input type="url" inputmode="url" data-bc="oppLogo" value="${esc(st.oppLogo || "")}" placeholder="https://… .png" autocomplete="off"></label>
-      ${g.liveFeed === "sos" ? rlPickHTML(st, them) : ppl.length > 1 ? `<div class="two"><label class="f"><span>Compare player</span><select data-cmp="a"><option value="">—</option>${ppl.map(p => `<option value="${esc(p.id)}"${st.compare?.a === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label>
-        <label class="f"><span>with</span><select data-cmp="b"><option value="">—</option>${ppl.map(p => `<option value="${esc(p.id)}"${st.compare?.b === p.id ? " selected" : ""}>${esc(pname(p))}</option>`).join("")}</select></label></div>` : ""}
+      ${g.liveFeed === "sos" ? rlPickHTML(st, them) : cmpPickHTML(g, st, them)}
       <details class="olk"><summary>OBS links for station ${n}</summary>${linksHTML(n)}</details>`
     : `<p class="hint" style="margin:0">Pick the streaming PC this match is on. The score bug, VS screen, lineups and comparisons on that PC switch to it.</p>`}
   </div></details>`;
@@ -1074,13 +1099,16 @@ function bindStream(){
   if (!n) return;
   const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};
     box.querySelectorAll("[data-bc]").forEach(i => st[i.dataset.bc] = i.type === "checkbox" ? i.checked : i.value.trim());
-    st.compare = {a:box.querySelector("[data-cmp=a]")?.value || "", b:box.querySelector("[data-cmp=b]")?.value || ""};
+    const was = bc.stations[n]?.compare || {}, themName = box.querySelector("[data-cmp=them]")?.value.trim() || "";
+    st.compare = {a:box.querySelector("[data-cmp=a]")?.value || "", them:themName, themChar:box.querySelector("[data-cmp=themChar]")?.value.trim() || "",
+      ...(themName && themName === was.them ? {themStats:was.themStats || null, themGp:was.themGp || 0} : {})};
+    if (themName && themName !== was.them) cmpScout(n, themName);
     if (box.querySelector("[data-rlc]")) st.rlCompare = {us:box.querySelector("[data-rlc=us]").value.trim(), them:box.querySelector("[data-rlc=them]").value.trim()};
     setStation(n, st); };
   box.querySelectorAll("[data-bc],[data-cmp]").forEach(i => i.onchange = save);
   let rlcT = null; box.querySelectorAll("[data-rlc]").forEach(i => i.oninput = () => { clearTimeout(rlcT); rlcT = setTimeout(save, 700); });   // live as you type or pick
   const rs = $("#rlcReset"); if (rs) rs.onclick = () => { box.querySelectorAll("[data-rlc]").forEach(i => i.value = ""); save(); renderMatch(); };
-  if (box.querySelector("[data-rlc]")) loadOppNames();
+  if (box.querySelector("[data-rlc]") || box.querySelector("[data-cmp=them]")) loadOppNames();
   bindCopy(box);
 }
 function bindDetails(g){

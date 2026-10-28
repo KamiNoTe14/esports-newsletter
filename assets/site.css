@@ -606,3 +606,10 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .trec b,.trank b{font-family:var(--display);font-size:26px;line-height:1.05;color:#fff}
 .trank b{color:var(--gold)}
 .trec span,.trank span{font-size:12px;color:var(--muted)}
+
+/* record cards: a duo's two names read as one line that wraps, not a stack */
+.rwho .rduo{display:block;line-height:1.3}
+.rnext .rduo{display:inline}
+.rnext li{line-height:1.45}.rnext b{white-space:nowrap}
+.rv.long{font-size:32px}
+.rduo a{white-space:nowrap}

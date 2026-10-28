@@ -496,9 +496,9 @@ function drawBoards(site, host, fin){
   const who = whoFrom(site, fin), R = buildRecords(site, fin, who), prog = programRecords(site, fin), leg = legacyRecords(site);
   const flag = w => w.kind === "player" || w.kind === "duo" ? (w.current ? `<span class="rflag cur">Current</span>` : w.kind === "player" ? `<span class="rflag alum">Alum</span>` : "") : "";
   const link = id => `<a href="${BASE}player.html?id=${encodeURIComponent(id)}">${esc(who.name(id))}</a>`;
-  const nm = w => w.kind === "player" ? `<a href="${BASE}player.html?id=${encodeURIComponent(w.id)}">${esc(w.name)}</a>` : w.kind === "duo" ? w.id.slice(4).split("+").map(link).join(" &amp; ") : esc(w.name);
+  const nm = w => w.kind === "player" ? `<a href="${BASE}player.html?id=${encodeURIComponent(w.id)}">${esc(w.name)}</a>` : w.kind === "duo" ? `<span class="rduo">${w.id.slice(4).split("+").map(link).join(" &amp; ")}</span>` : esc(w.name);
   const card = r => { const [a, ...rest] = r.rows; return `<div class="rcard"><p class="rt">${esc(r.title)}${r.since ? `<span class="since">since ${esc(r.since)}</span>` : ""}</p>
-      ${a ? `<div class="rlead"><b class="rv">${esc(a.display || a.value)}</b><span class="rwho">${nm(a.who)} ${flag(a.who)}${a.detail ? `<small>${esc(a.detail)}</small>` : ""}</span></div>
+      ${a ? `<div class="rlead"><b class="rv${String(a.display || a.value).length > 4 ? " long" : ""}">${esc(a.display || a.value)}</b><span class="rwho">${nm(a.who)} ${flag(a.who)}${a.detail ? `<small>${esc(a.detail)}</small>` : ""}</span></div>
       ${rest.length ? `<ol class="rnext" start="2">${rest.slice(0, 2).map(x => `<li>${nm(x.who)} <b>${esc(x.display || x.value)}</b></li>`).join("")}</ol>` : ""}` : `<p class="muted" style="margin:0;font-size:14px">Open. The first entry sets it.</p>`}</div>`; };
   const groups = R.groups.filter(g => g.records.some(r => r.rows.length));
   host.innerHTML = `${groups.map(g => `<div class="rgroup"><h3 class="rgh">${g.icon ? `<img src="${esc(/^https?:/.test(g.icon) ? g.icon : BASE + g.icon)}" alt="${esc(g.title)}">` : esc(g.title)}</h3><div class="rgrid">${g.records.map(card).join("")}</div></div>`).join("")}

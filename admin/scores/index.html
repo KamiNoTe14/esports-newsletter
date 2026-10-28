@@ -236,9 +236,9 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=20";
-import {watchFinals} from "../../assets/live.js?v=45";
-import {recordBreaks} from "../../assets/records.js?v=3";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=21";
+import {watchFinals} from "../../assets/live.js?v=46";
+import {recordBreaks} from "../../assets/records.js?v=4";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -253,6 +253,7 @@ let dir = {alumni:[], seasons:[], rosters:{}}, lastEntry = null;
 let tick = {messages:[]};
 let bc = {stations:{}};   // LevelUP: which match is on each streaming station
 let allFinals = null, recDismissed = new Set();   // every final match (for record checks)
+let role = null, myTeams = null;   // "coach" | "captain" (student scorekeeper, limited to myTeams)
 let view = "list", openId = null, cur = null, draft = null, undo = {}, saveTimer = null, saving = false, dirtyIds = new Set();
 const pendingSaves = new Map(); // match id -> latest local copy not yet written
 
@@ -262,16 +263,21 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
   try { site = await (await fetch(SITE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
   try { be = await backend(); }
   catch(e){ $("#app").innerHTML = `<div class="hero"><h2>Can't reach the score database</h2><p class="muted">Check the internet connection and reload.</p></div>`; return; }
-  be.onUser(u => {
-    user = u; renderWho();
+  be.onUser(async u => {
+    user = u; role = null; myTeams = null;
+    /* coaches: everything. Student scorekeepers (approved in Scouting > Members): only their teams' matches. */
+    if (u && EDITORS.includes(u.email)) role = "coach";
+    else if (u && /@hartlandschools\.us$/i.test(u.email)){ const mem = await be.getMember(u.email);
+      if (mem?.scorekeeper && (mem.teams || []).length){ role = "captain"; myTeams = new Set(mem.teams); } }
+    renderWho();
     if (unwatch){ unwatch(); unwatch = null; }
-    if (u && EDITORS.includes(u.email)){ unwatch = be.watchSeason(season, onMatches, onState);
+    if (role){ unwatch = be.watchSeason(season, onMatches, onState);
       startFinals();
       be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}};
         if (view === "list" && !document.activeElement?.closest?.("#stBox")) renderList();
         else if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
       be.watchTicker(t => { tick = {messages:Array.isArray(t.messages) ? t.messages : []}; if (view === "list" && !document.activeElement?.closest?.("#tickBox")) renderList(); });
-      be.watchDirectory(d => { dir = {...d, alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : [], rosters:d.rosters && typeof d.rosters === "object" ? d.rosters : {}}; if (view === "list") renderList(); }); }
+      if (role === "coach") be.watchDirectory(d => { dir = {...d, alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : [], rosters:d.rosters && typeof d.rosters === "object" ? d.rosters : {}}; if (view === "list") renderList(); }); }
     route();
   });
   window.addEventListener("hashchange", route);
@@ -282,7 +288,7 @@ let finalIds = new Set(); const synced = new Set();
 /* The homepage scoreboard only ever holds the current season, so it's left alone while a past season is open. */
 const sb = all => season === NOW ? scoreboardFrom(all.filter(m => m.season === NOW), site) : null;
 function seasonSum(all, id, nowFinal){ return nowFinal || finalIds.has(id) ? seasonDocFrom(all, season) : null; }
-function noteSeason(se){ if (!dir.seasons.includes(se)){ dir.seasons = [...dir.seasons, se].sort().reverse(); be.saveDirectory(dir).catch(e => console.error(e)); } }
+function noteSeason(se){ if (role === "coach" && !dir.seasons.includes(se)){ dir.seasons = [...dir.seasons, se].sort().reverse(); be.saveDirectory(dir).catch(e => console.error(e)); } }
 function setSeason(se){
   if (se === season) return;
   if (pendingSaves.size) flush();
@@ -292,7 +298,7 @@ function setSeason(se){
 }
 function onMatches(list, meta){
   finalIds = new Set(list.filter(m => m.status === "final").map(m => m.id));
-  if (!synced.has(season) && meta && !meta.fromCache && !pendingSaves.size && user && EDITORS.includes(user.email)){
+  if (!synced.has(season) && meta && !meta.fromCache && !pendingSaves.size && user && role === "coach"){
     const se = season, all = list.map(m => settle({...m})); synced.add(se);
     be.syncSummaries(sb(all), seasonDocFrom(all, se)).then(() => { if (finalIds.size) noteSeason(se); }).catch(e => { synced.delete(se); console.error(e); });
   }
@@ -320,7 +326,10 @@ function renderWho(){
 function route(){
   const h = location.hash.slice(1);
   if (!user) return renderSignIn();
-  if (!EDITORS.includes(user.email)) return renderNotAllowed();
+  if (!role) return renderNotAllowed();
+  /* a student scorekeeper can only open their own teams' matches */
+  const mineOnly = id => role === "coach" || myTeams.has((matches.find(x => x.id === id) || {}).teamId);
+  if ((h.startsWith("m/") && matches.length && !mineOnly(h.slice(2))) || (h.startsWith("edit/") && !mineOnly(h.slice(5)))){ toast("That match isn't one of your teams'."); location.hash = ""; return; }
   if (h === "new"){ view = "form"; openId = null; draft = newDraft(); return renderForm(); }
   if (h.startsWith("edit/")){ const m = matches.find(x => x.id === h.slice(5)); view = "form"; openId = h.slice(5); draft = m ? clone(m) : null; if (!m){ location.hash = ""; return; } return renderForm(); }
   if (h.startsWith("m/")){ view = "match"; if (openId !== h.slice(2) || !cur){ statTab = null; openId = h.slice(2); const m = matches.find(x => x.id === openId); cur = m ? clone(m) : null; } return renderMatch(); }
@@ -346,7 +355,7 @@ function renderSignIn(){
   $("#signin").onclick = async () => { try { await be.signIn(); } catch(e){ toast(/popup-closed|cancelled/.test(e.code || "") ? "Sign-in was closed." : "Couldn't sign in. " + (e.code || e.message || "")); } };
 }
 function renderNotAllowed(){
-  $("#app").innerHTML = `<div class="hero"><h2>Not a scorekeeper account</h2><p class="muted">${esc(user.email)} can't enter scores. Sign in with a coach account.</p>
+  $("#app").innerHTML = `<div class="hero"><h2>Not a scorekeeper account</h2><p class="muted">${esc(user.email)} can't enter scores yet. A coach can turn on <b>Scorekeeper</b> for you in Scouting → Members, with the teams you score.</p>
     <button class="btn btn-line" id="so" type="button">Sign out</button></div>`;
   $("#so").onclick = () => be.signOut();
 }
@@ -368,7 +377,8 @@ function rowHTML(m){
     <span class="st">${st}</span></button>`;
 }
 function renderList(){
-  const by = s => matches.filter(m => s.includes(m.status));
+  const coach = role === "coach", mine = m => coach || myTeams.has(m.teamId);
+  const by = s => matches.filter(m => s.includes(m.status) && mine(m));
   const live = by(["live"]), up = by(["upcoming", "postponed"]).sort((a, b) => a.startsAt < b.startsAt ? -1 : 1), done = by(["final", "canceled"]).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
   const sec = (title, list, empty) => `<h2>${title}</h2>${list.length ? `<div class="mlist">${list.map(rowHTML).join("")}</div>` : `<div class="card empty">${empty}</div>`}`;
   const gh = ghCfg();
@@ -376,18 +386,15 @@ function renderList(){
   const openAl = $("#alumniBox")?.open;
   const openRo = $("#rosterBox")?.open, openPo = $("#poBox")?.open;
   $("#app").innerHTML = `<label class="seasonbar"><span>Season</span><select id="seasonSel">${seasonList(dir.seasons).map(se => `<option value="${se}"${se === season ? " selected" : ""}>${esc(seasonLabel(se))}${se === NOW ? " (current)" : dir.seasons.includes(se) ? " ✓" : ""}</option>`).join("")}</select><b>${done.length ? rec : ""}</b></label>`
-    + pendingMergeHTML()
-    + tickerHTML()
+    + (coach ? "" : `<div class="card" style="margin-bottom:12px"><b>Student scorekeeper</b><p class="hint" style="margin:6px 0 0">You can score, edit and stream ${esc([...myTeams].map(id => teamLabel(site, (site.teams || []).find(t => t.id === id) || {})).filter(Boolean).join(", ") || "your teams")} matches. Ask a coach for anything else.</p></div>`)
+    + (coach ? pendingMergeHTML() + tickerHTML() : "")
     + stationsHTML()
     + (live.length ? sec("Live now", live, "") : "")
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
     + playoffHTML(openPo)
-    + rostersHTML(openRo)
-    + alumniHTML(openAl)
-    + mergeHTML()
-    + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div><div class="foot"><span>Old results on PlayVS?</span><a class="linkbtn" href="../import/${location.search}">Import history from PlayVS →</a></div>
-    <button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
+    + (coach ? rostersHTML(openRo) + alumniHTML(openAl) + mergeHTML() + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div><div class="foot"><span>Old results on PlayVS?</span><a class="linkbtn" href="../import/${location.search}">Import history from PlayVS →</a></div>` : "")
+    + `<button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
   $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };
   bindAlumni(); bindRosters(); bindTicker(); bindStations(); bindMerge();
@@ -944,13 +951,13 @@ function detailsHTML(g, them){
         ${others.some(p => p.alum) ? `<optgroup label="Past players">${others.filter(p => p.alum).map(opt).join("")}</optgroup>` : ""}
         <optgroup label="Current players${team ? " on other teams" : ""}">${others.filter(p => !p.alum).map(opt).join("")}</optgroup></select></label>` : ""}
       ${(g.charLabel || "").trim() ? `<datalist id="charList">${listOf(g.chars).map(c => `<option value="${esc(c)}">`).join("")}</datalist>` : ""}
-      <details class="newp"><summary>＋ New past player</summary><div class="form" style="margin-top:10px">
+      ${role !== "coach" ? "" : `<details class="newp"><summary>＋ New past player</summary><div class="form" style="margin-top:10px">
         <div class="two"><label class="f"><span>Name</span><input id="np-name" autocomplete="off" placeholder="First Last"></label><label class="f"><span>Gamertag</span><input id="np-tag" autocomplete="off"></label></div>
         <div class="two"><label class="f"><span>Class of (optional)</span><input id="np-year" inputmode="numeric" maxlength="4" placeholder="2025"></label>
           <label class="tog"><input id="np-priv" type="checkbox"> Gamertag only on the website</label></div>
         <label class="f"><span>Playing now at (optional)</span><input id="np-now" autocomplete="off" placeholder="Rocket League at Michigan State"></label>
         <button class="btn btn-line btn-block" type="button" id="np-add">Add to this match</button>
-        <p class="hint" style="margin:0">Saved to your past players list, so you only type each person once.</p></div></details>
+        <p class="hint" style="margin:0">Saved to your past players list, so you only type each person once.</p></div></details>`}
       ${stats.length ? "" : `<p class="hint" style="margin-top:10px">To track stats for this game, list them on the Games tab in the Site Manager.</p>`}
     </div></details>
     ${rlInboxHTML(g, them)}
@@ -1166,7 +1173,7 @@ function bindDetails(g){
     const onRosterTeam = (site.teams || []).some(t => t.id === cur.teamId); addPlayer(p, !p.alum && onRosterTeam ? {sub:true} : null); };
   const cp = $("#copyLineup"); if (cp) cp.onclick = () => { const from = matches.find(m => m.id === cp.dataset.from); if (!from) return;
     keep(() => change(m => { m.players = (from.players || []).map(p => ({...p, stats:{}})); }, true)); };
-  $("#np-add").onclick = async () => {
+  if ($("#np-add")) $("#np-add").onclick = async () => {
     const name = $("#np-name").value.trim(), tag = $("#np-tag").value.trim(), year = $("#np-year").value.trim(), priv = $("#np-priv").checked;
     if (!name && !tag){ toast("Type a name or a gamertag."); return; }
     if (priv && !tag){ toast("A gamertag-only player needs a gamertag."); return; }
@@ -1256,7 +1263,7 @@ document.addEventListener("visibilitychange", () => { if (document.hidden && pen
 function myLeagues(){ try { return (JSON.parse(localStorage.getItem("eagles-leagues") || "[]") || []).filter(x => typeof x === "string"); } catch(e){ return []; } }
 function renderForm(){
   if (!draft){ location.hash = ""; return; }
-  const teams = site.teams || [];
+  const teams = (site.teams || []).filter(t => role === "coach" || myTeams.has(t.id));
   const known = site.teamSchools || {};
   const schools = [...new Set([...(site.highSchools || []).map(x => x.name), ...Object.values(known), ...matches.map(m => m.opponent?.school).filter(Boolean)].filter(Boolean))].sort();
   const oppTeams = [...new Set([...Object.keys(known), ...matches.map(m => m.opponent?.team).filter(Boolean)])].sort();
@@ -1266,7 +1273,7 @@ function renderForm(){
   const isNew = !openId;
   $("#app").innerHTML = `<div class="mhead"><button class="back" type="button" id="cancel1" aria-label="Back">←</button><div class="t"><b>${isNew ? "New match" : "Edit match"}</b><span>${esc(seasonLabel(draft.season))} season</span></div></div>
     <form class="form" id="mf" autocomplete="off">
-      <label class="f"><span>Our team</span><select name="teamId" required>${teams.map(t => `<option value="${esc(t.id)}"${!past && t.id === draft.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}<option value="__past"${past ? " selected" : ""}>A past team (not on this list)…</option></select></label>
+      <label class="f"><span>Our team</span><select name="teamId" required>${teams.map(t => `<option value="${esc(t.id)}"${!past && t.id === draft.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}${role === "coach" ? `<option value="__past"${past ? " selected" : ""}>A past team (not on this list)…</option>` : ""}</select></label>
       ${past ? `<label class="f"><span>Past team name</span><input name="pastName" list="pastTeams" value="${esc(draft.teamName || "")}" placeholder="Valorant Varsity" required></label>
       <div class="two"><label class="f"><span>Game</span><select name="pastGame">${(site.games || []).map(g => `<option value="${esc(g.key)}"${g.key === draft.game ? " selected" : ""}>${esc(g.name)}</option>`).join("")}<option value=""${draft.game ? "" : " selected"}>Another game</option></select></label>
         <label class="f"><span>Level</span><select name="pastLevel">${["Varsity", "JV"].map(l => `<option${l === draft.level ? " selected" : ""}>${l}</option>`).join("")}</select></label></div>
@@ -1294,7 +1301,7 @@ function renderForm(){
       <label class="f"><span>YouTube live link</span><input type="url" name="live" inputmode="url" value="${esc(draft.stream?.live || "")}" placeholder="https://youtube.com/live/…"></label>
       <label class="f"><span>Notes</span><textarea name="notes" rows="2">${esc(draft.notes || "")}</textarea></label>
       ${isNew ? "" : `<label class="f"><span>Status</span><select name="status">${["upcoming", "live", "final", "postponed", "canceled"].map(s => `<option value="${s}"${s === draft.status ? " selected" : ""}>${s[0].toUpperCase() + s.slice(1)}</option>`).join("")}</select></label>
-        <button class="btn btn-danger" type="button" id="del">Delete this match</button>`}
+        ${role === "coach" ? `<button class="btn btn-danger" type="button" id="del">Delete this match</button>` : ""}`}
       <datalist id="schools">${schools.map(s => `<option value="${esc(s)}">`).join("")}</datalist>
       <datalist id="oppTeams">${oppTeams.map(s => `<option value="${esc(s)}">`).join("")}</datalist>
       <div class="formbar"><button class="btn btn-line" type="button" id="cancel2">Cancel</button><button class="btn btn-gold" type="submit">${isNew ? "Create match" : "Save"}</button></div>
@@ -1315,7 +1322,7 @@ function renderForm(){
   if (F.pastGame) F.pastGame.onchange = () => { const g = gameFor(site, F.pastGame.value); if (g.bestOf) F.bestOf.value = String(g.bestOf); };
   F.oppTeam.onchange = () => { const k = Object.keys(known).find(n => n.toLowerCase() === F.oppTeam.value.trim().toLowerCase()); if (k && !F.oppSchool.value){ F.oppSchool.value = known[k]; F.abbr.placeholder = shortSchool(known[k]); } };
   F.oppSchool.oninput = () => { const lib = schoolInfo(site, F.oppSchool.value); F.abbr.placeholder = lib?.short || shortSchool(F.oppSchool.value) || "Novi"; $("#libHint").hidden = !lib; };
-  if (!isNew) $("#del").onclick = async () => {
+  if (!isNew && $("#del")) $("#del").onclick = async () => {
     if (!confirm("Delete this match for good?")) return;
     try { await be.remove(openId, sb(matches.filter(m => m.id !== openId)), seasonSum(matches.filter(m => m.id !== openId), openId, false)); toast("Match deleted."); cur = null; location.hash = ""; }
     catch(e){ toast("Couldn't delete: " + (e.code || e.message)); }

@@ -198,6 +198,8 @@ async function firebaseBackend(){
       }, err => onState && onState({error:err}));
     },
     newId(){ return fb.doc(fb.collection(db, "matches")).id; },
+    /* a student scorekeeper's access: scoutMembers/{email} with scorekeeper:true and the teams they can score */
+    async getMember(email){ try { const d = await fb.getDoc(fb.doc(db, "scoutMembers", email)); return d.exists() ? d.data() : null; } catch(e){ return null; } },
     /* every match of one season, once (not live) */
     async getSeason(season){ const s = await fb.getDocs(fb.query(fb.collection(db, "matches"), fb.where("season", "==", season))); return s.docs.map(d => ({id:d.id, ...d.data()})); },
     async save(m, scoreboard, by, seasonDoc){
@@ -263,13 +265,14 @@ function mockBackend(){
   return {
     mode:"mock",
     onUser(cb){ userSubs.add(cb); setTimeout(() => cb(user), 0); return () => userSubs.delete(cb); },
-    async signIn(){ user = {email:EDITORS[0], name:"Test Coach", photo:""}; sessionStorage.setItem("eagles-mock-user", JSON.stringify(user)); userSubs.forEach(f => f(user)); },
+    async signIn(){ const as = new URLSearchParams(location.search).get("as"); user = {email:as || EDITORS[0], name:as ? as.split("@")[0] : "Test Coach", photo:""}; sessionStorage.setItem("eagles-mock-user", JSON.stringify(user)); userSubs.forEach(f => f(user)); },
     async signOut(){ user = null; sessionStorage.removeItem("eagles-mock-user"); userSubs.forEach(f => f(null)); },
     watchSeason(season, cb, onState){
       const f = () => { cb(Object.entries(read()).map(([id, m]) => ({id, ...m})).filter(m => m.season === season), {fromCache:false}); onState && onState({pending:false}); };
       subs.add(f); setTimeout(f, 0); return () => subs.delete(f);
     },
     newId(){ return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+    async getMember(email){ return mockScout().members?.[email] || null; },
     async getSeason(season){ return Object.entries(read()).map(([id, m]) => ({id, ...m})).filter(m => m.season === season); },
     async save(m, scoreboard, by, seasonDoc){ const all = read(), {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },
     async remove(id, scoreboard, seasonDoc){ const all = read(); delete all[id]; localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },

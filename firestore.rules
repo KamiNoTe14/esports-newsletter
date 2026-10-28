@@ -25,16 +25,27 @@ service cloud.firestore {
         && d.games is list && d.games.size() <= 15;
     }
 
+    // Student scorekeepers: a @hartlandschools.us member a coach marked "Scorekeeper" in Scouting > Members.
+    // They can add and score matches for their own teams only, and update the summaries the website reads.
+    function scorerDoc() { return /databases/$(database)/documents/scoutMembers/$(request.auth.token.email.lower()); }
+    function isScorer() {
+      return request.auth != null && request.auth.token.email_verified == true
+        && request.auth.token.email.lower().matches('.*@hartlandschools[.]us$')
+        && exists(scorerDoc()) && get(scorerDoc()).data.scorekeeper == true;
+    }
+    function scoresTeam(teamId) { return isScorer() && teamId in get(scorerDoc()).data.teams; }
+
     match /matches/{matchId} {
       allow read: if true;
-      allow create, update: if isCoach() && validMatch();
+      allow create: if validMatch() && (isCoach() || scoresTeam(request.resource.data.teamId));
+      allow update: if validMatch() && (isCoach() || (scoresTeam(resource.data.teamId) && scoresTeam(request.resource.data.teamId)));
       allow delete: if isCoach();
     }
 
     // Small summary documents the website reads (scores strip, etc.)
     match /public/{docId} {
       allow read: if true;
-      allow write: if isCoach();
+      allow write: if isCoach() || (isScorer() && (docId in ['scoreboard', 'broadcast'] || docId.matches('season-.*')));
     }
 
     // ---------- Team scouting (scout/) ----------
@@ -105,7 +116,7 @@ service cloud.firestore {
     }
     match /rlInbox/{boxId} {
       allow create: if validRLBox(boxId);
-      allow read, delete: if isCoach();
+      allow read, delete: if isCoach() || isScorer();
     }
 
     // Everything else is closed.

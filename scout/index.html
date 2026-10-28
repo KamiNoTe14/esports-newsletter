@@ -121,7 +121,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
    coaches and people a coach has added to a team can read it. Nothing here is ever written to the public site files.
    Coaches (EDITORS) manage members and edit everything. Captains edit reports for their games.
    Everyone on a team can read their games' reports and add notes. */
-import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=20";
+import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=21";
 const BASE = new URL("../", import.meta.url).href;
 const DOMAIN = "hartlandschools.us";
 const $ = s => document.querySelector(s);
@@ -392,16 +392,17 @@ const teamLabel = t => `${gShort(t.gameKey || t.game)} ${t.name}`;
 function drawMembers(M){
   const people = rosterPeople(), teams = (site.teams || []).filter(t => t.id);
   const list = members.slice().sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email)));
-  M.innerHTML = `<div class="card"><h2>Members</h2><p class="intro">Who can see scouting. Add a player's <b>@${DOMAIN}</b> email and the teams they're on. They only see reports for those teams' games. Captains can start and edit reports; everyone else can read them and add notes. Coaches always see everything.</p>
+  M.innerHTML = `<div class="card"><h2>Members</h2><p class="intro">Who can see scouting. Add a player's <b>@${DOMAIN}</b> email and the teams they're on. They only see reports for those teams' games. Captains can start and edit reports; everyone else can read them and add notes. Coaches always see everything. <b>Scorekeepers</b> can also use the scorekeeper, for their teams' matches only.</p>
     <div class="grid g3"><label class="f"><span>School email</span><input id="mEmail" type="email" placeholder="first.last@${DOMAIN}"></label>
       <label class="f"><span>Player on our rosters</span><select id="mPlayer"><option value="">Pick a player (fills in teams)…</option>${people.map(p => `<option value="${esc(p.id)}">${esc(p.name)}${p.tag && p.tag !== p.name ? ` · ${esc(p.tag)}` : ""}</option>`).join("")}</select></label>
       <label class="f"><span>Name to show</span><input id="mName" placeholder="Their name"></label></div>
     <div><h4 style="margin-bottom:6px">Teams</h4><div class="chips" id="mTeams">${teams.map(t => `<label class="toggle" style="margin-right:12px"><input type="checkbox" value="${esc(t.id)}"> ${esc(teamLabel(t))}</label>`).join("")}</div></div>
-    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><label class="toggle"><input type="checkbox" id="mCap"> Captain: can start and edit reports</label><button class="btn btn-gold" id="mAdd">Add member</button></div></div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><label class="toggle"><input type="checkbox" id="mCap"> Captain: can start and edit reports</label><label class="toggle"><input type="checkbox" id="mScore"> Scorekeeper: can score their teams' matches</label><button class="btn btn-gold" id="mAdd">Add member</button></div></div>
     <div class="card"><div class="card-h"><h2 style="font-size:22px">${list.length} member${list.length === 1 ? "" : "s"}</h2></div>
-    ${list.length ? `<table class="tbl"><thead><tr><th>Member</th><th>Teams</th><th>Captain</th><th></th></tr></thead><tbody>${list.map(m => `<tr><td><b>${esc(m.name || m.email)}</b><div class="muted">${esc(m.email)}</div></td>
+    ${list.length ? `<table class="tbl"><thead><tr><th>Member</th><th>Teams</th><th>Captain</th><th>Scorekeeper</th><th></th></tr></thead><tbody>${list.map(m => `<tr><td><b>${esc(m.name || m.email)}</b><div class="muted">${esc(m.email)}</div></td>
       <td>${(m.teams || []).map(id => teams.find(t => t.id === id)).filter(Boolean).map(t => `<span class="tag" style="margin:0 4px 4px 0">${esc(teamLabel(t))}</span>`).join("") || `<span class="muted">No team: sees nothing</span>`}</td>
       <td><label class="toggle"><input type="checkbox" data-cap="${esc(m.email)}"${m.captain ? " checked" : ""}></label></td>
+      <td><label class="toggle"><input type="checkbox" data-score="${esc(m.email)}"${m.scorekeeper ? " checked" : ""}></label></td>
       <td style="text-align:right;white-space:nowrap"><button class="btn btn-line btn-sm" data-medit="${esc(m.email)}">Edit</button> <button class="btn btn-line btn-sm danger" data-mdel="${esc(m.email)}">Remove</button></td></tr>`).join("")}</tbody></table>` : `<p class="empty">No members yet. Add your players above.</p>`}</div>`;
   const setTeams = ids => $("#mTeams").querySelectorAll("input").forEach(i => i.checked = ids.includes(i.value));
   $("#mPlayer").onchange = () => { const p = people.find(x => x.id === $("#mPlayer").value); if (!p) return; $("#mName").value = p.name; setTeams(p.teams.map(t => t.id)); $("#mCap").checked = p.captain; };
@@ -411,11 +412,12 @@ function drawMembers(M){
     if (!email.endsWith("@" + DOMAIN) && !confirm(`${email} isn't a @${DOMAIN} account, so they won't be able to sign in. Add anyway?`)) return;
     const ids = [...$("#mTeams").querySelectorAll("input:checked")].map(i => i.value);
     const games = [...new Set(ids.map(id => teams.find(t => t.id === id)).filter(Boolean).map(t => gameFor(site, t.gameKey || t.game).key))];
-    const m = {email, name:$("#mName").value.trim() || email.split("@")[0], playerId:$("#mPlayer").value || "", teams:ids, games, captain:$("#mCap").checked, addedBy:user.email, updatedAt:new Date().toISOString()};
+    const m = {email, name:$("#mName").value.trim() || email.split("@")[0], playerId:$("#mPlayer").value || "", teams:ids, games, captain:$("#mCap").checked, scorekeeper:$("#mScore").checked, addedBy:user.email, updatedAt:new Date().toISOString()};
     try { await db.saveMember(m); toast(`${m.name} added${ids.length ? "" : ". Pick a team so they can see something"}.`); } catch(e){ console.error(e); toast("Couldn't save. Check the Firestore rules are published."); } };
   M.querySelectorAll("[data-cap]").forEach(c => c.onchange = async () => { const m = members.find(x => x.email === c.dataset.cap); try { await db.saveMember({...strip(m), captain:c.checked, updatedAt:new Date().toISOString()}); } catch(e){ toast("Couldn't save."); } });
+  M.querySelectorAll("[data-score]").forEach(c => c.onchange = async () => { const m = members.find(x => x.email === c.dataset.score); try { await db.saveMember({...strip(m), scorekeeper:c.checked, updatedAt:new Date().toISOString()}); toast(c.checked ? `${m.name || m.email} can now score their teams' matches.` : "Scorekeeper access removed."); } catch(e){ toast("Couldn't save."); } });
   M.querySelectorAll("[data-mdel]").forEach(b => b.onclick = async () => { if (!confirm(`Remove ${b.dataset.mdel}? They'll lose access to scouting right away. Their notes stay.`)) return; try { await db.removeMember(b.dataset.mdel); } catch(e){ toast("Couldn't remove."); } });
-  M.querySelectorAll("[data-medit]").forEach(b => b.onclick = () => { const m = members.find(x => x.email === b.dataset.medit); $("#mEmail").value = m.email; $("#mName").value = m.name || ""; $("#mPlayer").value = m.playerId || ""; setTeams(m.teams || []); $("#mCap").checked = !!m.captain; $("#mEmail").focus(); window.scrollTo({top:0, behavior:"smooth"}); });
+  M.querySelectorAll("[data-medit]").forEach(b => b.onclick = () => { const m = members.find(x => x.email === b.dataset.medit); $("#mEmail").value = m.email; $("#mName").value = m.name || ""; $("#mPlayer").value = m.playerId || ""; setTeams(m.teams || []); $("#mCap").checked = !!m.captain; $("#mScore").checked = !!m.scorekeeper; $("#mEmail").focus(); window.scrollTo({top:0, behavior:"smooth"}); });
 }
 const strip = ({id, ...m}) => m;
 
@@ -423,7 +425,7 @@ const strip = ({id, ...m}) => m;
 (async function init(){
   try { site = await (await fetch(BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); } catch(e){}
   db = isMock() ? mockDB() : await firebaseDB();
-  const live = await import(BASE + "assets/live.js?v=45");
+  const live = await import(BASE + "assets/live.js?v=46");
   live.watchFinals(site, f => { finals = f; if (user && view.kind === "report" && !editing) drawMain(); });
   live.watchBoard(b => { board = b; if (user && (isCoach() || me) && !editing) layout(); });
   db.onUser(u => {

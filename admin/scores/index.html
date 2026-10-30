@@ -169,6 +169,9 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .pvs{width:42px;font:800 15px/1 var(--display);color:var(--muted)}.pvs + .pvs{border-top:1px solid var(--line-2)}
 .pvs.on{background:var(--gold);color:var(--navy)}
 .pvm.pend,.pvs.pend{animation:pendBlink .8s infinite alternate}
+.rtab{overflow-x:auto;margin:6px 0}.rtab table{border-collapse:collapse;min-width:100%}.rtab th{font:700 11px/1.2 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px}
+.rtab td{padding:3px}.rtab td small{display:block;color:var(--muted);font-size:11px;margin-top:2px}.rtab input,.rtab select{width:100%;min-width:58px;min-height:38px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg);padding:0 6px}
+.rtab td:first-child{min-width:130px}
 .seats{display:grid;gap:8px}
 .seat{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center}
 .seat b{font:800 18px/1 var(--display);color:var(--gold);text-align:center}
@@ -290,9 +293,10 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=23";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=24";
 import {watchFinals} from "../../assets/live.js?v=48";
 import {recordBreaks} from "../../assets/records.js?v=5";
+import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -583,7 +587,8 @@ function remoteHTML(n){
   return `<div class="remote"><div class="rh"><b>OBS remote · Station ${n}</b><span class="rst">${o.streaming ? `<i class="on">● Live</i>` : `<i>Not streaming</i>`}${o.recording ? `<i class="on">● Rec</i>` : ""}<i class="${o.replayBuffer ? "ok" : "warn"}">Replays ${o.replayBuffer ? "ready" : "off"}</i></span></div>
     ${+o.level < 4 ? `<p class="hint warn" style="margin:6px 0">OBS won't let it switch scenes yet. In OBS: the LevelUP Remote source &gt; Properties &gt; Page permissions &gt; <b>Advanced access to OBS</b>.</p>` : ""}
     <div class="scenes">${scenes.map(sc => `<button type="button" data-scene="${esc(sc)}" data-rn="${n}" class="${sc === o.current ? "air" : ""}"${sc === o.current ? ' aria-current="true"' : ""}>${sc === o.current ? `<small>On air</small>` : ""}${esc(sc)}</button>`).join("")}</div>
-    <button type="button" class="btn btn-gold btn-block rrep" data-rrep="${n}">⟲ Instant replay</button></div>`;
+    <button type="button" class="btn btn-gold btn-block rrep" data-rrep="${n}">⟲ Instant replay</button>
+    ${bc.stations[n]?.reader?.on ? `<button type="button" class="btn btn-line btn-block" style="margin-top:8px" data-rread="${n}">Read the scoreboard now</button>${o.reader ? `<p class="hint" style="margin:6px 0 0">${esc(o.reader)}</p>` : ""}` : ""}</div>`;
 }
 async function sendCmd(n, cmd, msg){
   const id = Math.random().toString(36).slice(2, 10);
@@ -627,6 +632,7 @@ function paintRemotes(){
       box.querySelectorAll("[data-scene]").forEach(x => x.classList.remove("air", "pend")); b.classList.add("pend");
       sendCmd(n, {type:"scene", scene:b.dataset.scene}); });
     box.querySelectorAll("[data-rrep]").forEach(b => b.onclick = () => instantReplay(n));
+    box.querySelectorAll("[data-rread]").forEach(b => b.onclick = () => sendCmd(n, {type:"read"}, "Reading the scoreboard…"));
     box.querySelectorAll("[data-pov]").forEach(b => b.onclick = () => { b.classList.add("pend"); pickPov(n, b.dataset.pov, +b.dataset.seat); });
     bindCopy(box);
   });
@@ -848,7 +854,7 @@ function renderMatch(fromSnapshot){
   if (!cur){ const m = matches.find(x => x.id === openId); if (!m){ $("#app").innerHTML = `<p class="empty">Loading match…</p>`; return; } cur = clone(m); }
   const typing = fromSnapshot && document.activeElement?.closest?.("#details");
   const g = gameFor(site, cur.game), us = "Hartland", them = oppName(cur), unit = g.unit || "Game";
-  watchInbox(g);
+  watchInbox(g); watchReads(g);
   const status = cur.status, need = Math.floor(cur.bestOf / 2) + 1;
   const n = cur.current || 1, gm = (cur.games || []).find(x => x.n === n) || {n, us:0, them:0, winner:null};
   const head = `<div class="mhead"><button class="back" type="button" id="back" aria-label="Back to matches">←</button>
@@ -1252,6 +1258,7 @@ function detailsHTML(g, them){
       ${stats.length ? "" : `<p class="hint" style="margin-top:10px">To track stats for this game, list them on the Games tab in the Site Manager.</p>`}
     </div></details>
     ${rlInboxHTML(g, them)}
+    ${readsHTML(g, them)}
     ${streamHTML(g, them)}
     <details class="sec"><summary>Stream links<span>${cur.stream?.live || cur.stream?.vod ? "Added" : "None yet"}</span></summary><div class="secb form">
       <label class="f"><span>YouTube live link</span><input type="url" inputmode="url" data-link="live" value="${esc(cur.stream?.live || "")}" placeholder="https://youtube.com/live/…"></label>
@@ -1266,6 +1273,120 @@ function detailsHTML(g, them){
    When a game ends, the stream's score bug sends both teams' box scores to rlInbox. Here a coach matches the in-game
    names to our players, picks which game it was, and saves: Hartland's lines go into the match (per-game stats),
    the opponent's go into that school's scouting report (gamertags only, never the public site). */
+/* ---------- scoreboard reader (Marvel Rivals and other games with a layout in overlay/sbread.js) ----------
+   The LevelUP Remote in OBS reads the game's scoreboard and drops it in liveStats: {matchId}_tab during a map (kills,
+   deaths, assists for everyone) and {matchId}_final from the end-of-map results screen (every stat). Mid-map reads are
+   applied to the current map on their own when "update during the map" is on: stats only go up, and a big jump has
+   to be read twice. The results screen waits here for a person to check it and save it. */
+let reads = [], readsFor = null, unReads = null, readApplied = {}, readJump = {};
+const READ_KEYS = {k:["eliminations", "kills", "elims"], d:["deaths"], a:["assists"], fh:["final_hits"], dmg:["damage"], blk:["damage_blocked"], heal:["healing"], acc:["accuracy"]};
+const readKey = (g, f) => { const keys = new Set((g.statList || []).map(d => d.key)); return (READ_KEYS[f] || []).find(k => keys.has(k)) || ""; };
+function lev(a, b){ const m = a.length, n = b.length, d = Array.from({length:m + 1}, (_, i) => [i, ...Array(n).fill(0)]); for (let j = 1; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[m][n]; }
+/* our player for a gamertag read off the screen (close enough counts: OCR can miss a letter) */
+function readWho(tag){
+  const k = tagKey(tag); if (!k) return "";
+  let best = "", bs = 0;
+  deskPeople().forEach(p => [p.tag, p.name].filter(Boolean).forEach(t => { const c = tagKey(t); if (!c) return; const sc = 1 - lev(k, c) / Math.max(k.length, c.length); if (sc > bs){ bs = sc; best = p.id; } }));
+  return bs >= .6 ? best : "";
+}
+function watchReads(g){
+  if (!cur || readsFor === cur.id) return;
+  if (unReads){ Promise.resolve(unReads).then(f => f && f()); unReads = null; }
+  readsFor = cur.id; reads = [];
+  if (!SB_LAYOUTS[g.key] || !be.watchLiveStats) return;
+  unReads = be.watchLiveStats(cur.id, list => {
+    reads = list; const tab = list.find(r => r.kind === "tab"); if (tab) applyTab(tab);
+    const box = $("#sbReads"); if (box && cur?.id === readsFor && !box.contains(document.activeElement)){ box.outerHTML = readsHTML(gameFor(site, cur.game), oppName(cur)); bindReads(); }
+  });
+}
+/* mid-map read -> the current map's kills / deaths / assists, if the station has live updates on */
+function applyTab(r){
+  const sn = stationOf(cur.id), st = sn ? bc.stations[sn] : null;
+  if (!st?.reader?.on || !st.reader.live || cur.status !== "live" || readApplied[r.id] === r.at) return;
+  readApplied[r.id] = r.at;
+  const g = gameFor(site, cur.game), n = cur.current || 1, gm = (cur.games || []).find(x => x.n === n), ups = [];
+  (r.us || []).forEach(row => { const pid = readWho(row.tag); if (!pid) return;
+    ["k", "d", "a"].forEach(f => { const key = readKey(g, f), v = row[f]; if (!key || v == null) return;
+      const old = +(gm?.p?.[pid]?.[key] ?? 0); if (v <= old) return;
+      const j = `${pid}:${key}`; if (v - old > 6 && readJump[j] !== v){ readJump[j] = v; return; }   // a big jump has to be read twice
+      delete readJump[j]; ups.push([pid, key, v]); }); });
+  if (!ups.length) return;
+  change(m => { const gm2 = gameRec(m, n); gm2.p = gm2.p || {}; ups.forEach(([pid, key, v]) => { gm2.p[pid] = {...(gm2.p[pid] || {}), [key]:v};
+    m.players = m.players || []; if (!m.players.some(p => p.id === pid)){ const p = everyone().get(pid) || deskPeople().find(x => x.id === pid); if (p) m.players.push(snap(p)); } }); }, true);
+}
+function readsHTML(g, them){
+  if (!SB_LAYOUTS[g.key]) return "";
+  const fin = reads.find(r => r.kind === "final"), unit = g.unit || "Game";
+  if (!fin) return `<div id="sbReads"></div>`;
+  const cols = Object.keys(READ_KEYS).filter(f => readKey(g, f) && (fin.us || []).some(r => r[f] != null));
+  const label = f => esc((g.statList || []).find(d => d.key === readKey(g, f))?.label || f);
+  const open = (cur.games || []).find(x => x.n === (cur.current || 1) && !x.winner), done = (cur.games || []).filter(x => x.winner).map(x => x.n);
+  const def = open && !done.length ? open.n : done.length ? Math.max(...done) : (cur.current || 1);
+  const people = deskPeople(), opts = sel => `<option value="">Not ours / skip</option>${people.map(p => `<option value="${esc(p.id)}"${p.id === sel ? " selected" : ""}>${esc(p.tag || p.name)}</option>`).join("")}`;
+  return `<details class="sec" id="sbReads" open><summary>Scoreboard read<span class="pill-live" style="font-size:12px">Check &amp; save</span></summary><div class="secb form">
+    <p class="hint" style="margin:0">Read off the results screen (${esc(fin.src || "OBS")}, ${esc(fmtTime(fin.at))}). Check the numbers against the screen, fix anything wrong, then save.</p>
+    <label class="f"><span>Save to</span><select data-rmap>${Array.from({length:+cur.bestOf || 1}, (_, i) => i + 1).map(k => `<option value="${k}"${k === def ? " selected" : ""}>${esc(unit)} ${k}</option>`).join("")}</select></label>
+    <div class="rtab"><table><tr><th>Hartland</th>${cols.map(f => `<th>${label(f)}</th>`).join("")}</tr>
+      ${(fin.us || []).map((r, i) => `<tr data-ri="${i}"><td><select data-rwho>${opts(readWho(r.tag))}</select><small>${esc(r.tag)}</small></td>${cols.map(f => `<td><input data-rf="${f}" inputmode="numeric" value="${r[f] ?? ""}"></td>`).join("")}</tr>`).join("")}</table></div>
+    ${(fin.them || []).length ? `<div class="rtab"><table><tr><th>${esc(them)}</th>${cols.map(f => `<th>${label(f)}</th>`).join("")}</tr>
+      ${(fin.them || []).map((r, i) => `<tr data-ti="${i}"><td><input data-rtag value="${esc(r.tag)}"></td>${cols.map(f => `<td><input data-rf="${f}" inputmode="numeric" value="${r[f] ?? ""}"></td>`).join("")}</tr>`).join("")}</table></div>
+      <label class="tog"><input type="checkbox" data-rscout checked> Save ${esc(them)}'s numbers to their scouting report</label>` : ""}
+    <div class="two"><button class="btn btn-gold" type="button" data-rsave>Save</button><button class="btn btn-line" type="button" data-rdrop>Throw away</button></div></div></details>`;
+}
+function bindReads(){
+  const box = $("#sbReads"); if (!box || !box.querySelector("[data-rsave]")) return;
+  const fin = reads.find(r => r.kind === "final"); if (!fin) return;
+  box.querySelector("[data-rdrop]").onclick = async () => { if (!confirm("Throw away this scoreboard read?")) return; try { await be.removeLiveStats(fin.id); } catch(e){ toast("Couldn't remove it."); } };
+  box.querySelector("[data-rsave]").onclick = async () => {
+    const g = gameFor(site, cur.game), n = +box.querySelector("[data-rmap]").value, num = v => v === "" ? null : Math.max(0, parseInt(String(v).replace(/[^0-9]/g, ""), 10) || 0);
+    const ours = [...box.querySelectorAll("[data-ri]")].map(tr => ({pid:tr.querySelector("[data-rwho]").value, vals:Object.fromEntries([...tr.querySelectorAll("[data-rf]")].map(i => [i.dataset.rf, num(i.value)]))})).filter(x => x.pid);
+    if (new Set(ours.map(x => x.pid)).size !== ours.length){ toast("Two rows are set to the same player."); return; }
+    change(m => { const gm = gameRec(m, n); gm.p = gm.p || {};
+      ours.forEach(({pid, vals}) => { const row = {...(gm.p[pid] || {})}; Object.entries(vals).forEach(([f, v]) => { const k = readKey(g, f); if (k && v != null) row[k] = v; }); gm.p[pid] = row;
+        m.players = m.players || []; if (!m.players.some(p => p.id === pid)){ const p = everyone().get(pid) || deskPeople().find(x => x.id === pid); if (p) m.players.push(snap(p)); } });
+      if (m.status === "upcoming") m.status = "live"; });
+    let note = `Saved to ${g.unit || "Game"} ${n}.`;
+    const theirs = [...box.querySelectorAll("[data-ti]")].map(tr => ({tag:tr.querySelector("[data-rtag]").value.trim(), vals:Object.fromEntries([...tr.querySelectorAll("[data-rf]")].map(i => [i.dataset.rf, num(i.value)]))})).filter(x => x.tag);
+    if (box.querySelector("[data-rscout]")?.checked && theirs.length){
+      try {
+        const school = cur.opponent?.school || cur.opponent?.team || oppName(cur), now = new Date().toISOString();
+        const r = await be.scoutFor(cur.game, school), id = r?.id || be.newScoutId();
+        const base = r ? Object.fromEntries(Object.entries(r).filter(([k]) => k !== "id"))
+          : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
+        base.players = base.players || [];
+        theirs.forEach(p => { if (base.players.length < 40 && !base.players.some(x => tagKey(x.tag) === tagKey(p.tag))) base.players.push({tag:p.tag, role:"", notes:""}); });
+        const gm = (cur.games || []).find(x => x.n === n) || {};
+        const entry = {matchId:cur.id, n, date:cur.startsAt, team:cur.teamName, result:gm.winner === "us" ? "L" : gm.winner === "them" ? "W" : "", score:"",
+          players:theirs.map(p => { const o = {tag:p.tag}; Object.entries(p.vals).forEach(([f, v]) => { const k = readKey(g, f); if (k && v != null) o[k] = v; }); return o; })};
+        base.statGames = [...(base.statGames || []).filter(x => !(x.matchId === cur.id && x.n === n)), entry].slice(-60);
+        base.updatedAt = now; base.updatedBy = user?.email || "";
+        await be.saveScout(id, base); note += ` ${oppName(cur)}'s numbers are in scouting.`;
+      } catch(e){ console.error(e); note += " Couldn't update scouting."; }
+    }
+    try { await be.removeLiveStats(fin.id); } catch(e){}
+    toast(note);
+  };
+}
+/* the reader's switches, under On stream */
+function readerSetupHTML(g, st){
+  if (!SB_LAYOUTS[g.key]) return "";
+  const R = st.reader || {}, n = stationOf(cur.id), o = obs[n];
+  return `<details class="olk" id="readBox"${R.on ? " open" : ""}><summary>Scoreboard reader${R.on ? " · on" : " · off"}</summary><div class="form" style="margin-top:10px">
+    <p class="hint" style="margin:0">The LevelUP Remote in OBS watches the players' screens for the game's scoreboard and reads it. Needs the remote and the relay running on that PC.</p>
+    <label class="tog"><input type="checkbox" data-rd="on"${R.on ? " checked" : ""}> Read the scoreboard when it's on screen</label>
+    <label class="tog"><input type="checkbox" data-rd="live"${R.live ? " checked" : ""}> Update kills, deaths and assists during the map (when a player opens the scoreboard)</label>
+    ${+st.seatsN ? `<p class="hint" style="margin:0">Watching the camera seats: ${esc(seatSrcs(st).join(", "))}.</p>` : `<label class="f"><span>OBS source with the game on it</span><input data-rd="src" value="${esc(st.readSrc || "Game")}" autocomplete="off"></label>`}
+    ${o?.reader ? `<p class="hint" style="margin:0">Last: ${esc(o.reader)}</p>` : ""}
+    <button class="btn btn-line btn-block" type="button" data-rdnow>Read the scoreboard now</button></div></details>`;
+}
+function bindReader(n){
+  const box = $("#readBox"); if (!box) return;
+  const save = () => { const st = bc.stations[n] || {}; const R = {on:box.querySelector("[data-rd=on]").checked, live:box.querySelector("[data-rd=live]").checked, game:cur.game};
+    const src = box.querySelector("[data-rd=src]"); setStation(n, {...st, reader:R, ...(src ? {readSrc:src.value.trim() || "Game"} : {})}); };
+  box.querySelectorAll("[data-rd]").forEach(i => i.onchange = save);
+  box.querySelector("[data-rdnow]").onclick = () => { const st = bc.stations[n] || {}; if (!st.reader?.game) setStation(n, {...st, reader:{...(st.reader || {}), game:cur.game}}).then(() => sendCmd(n, {type:"read"}, "Reading the scoreboard…")); else sendCmd(n, {type:"read"}, "Reading the scoreboard…"); };
+}
 let inbox = [], inboxFor = null, unInbox = null;
 function watchInbox(g){
   if (!cur || inboxFor === cur.id) return;
@@ -1422,6 +1543,7 @@ function streamHTML(g, them){
         <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
       <label class="f"><span>${esc(them)} logo link (optional)</span><input type="url" inputmode="url" data-bc="oppLogo" value="${esc(st.oppLogo || "")}" placeholder="https://… .png" autocomplete="off"></label>
       ${seatSetupHTML(g, st)}
+      ${readerSetupHTML(g, st)}
       ${g.liveFeed === "sos" ? rlPickHTML(st, them) : cmpPickHTML(g, st, them)}
       <div class="two"><label class="f"><span>Instant replay cuts to this OBS scene</span><input data-bc="replayScene" value="${esc(st.replayScene ?? RP_SCENE)}" placeholder="Blank: don't switch" autocomplete="off"></label>
         <label class="f"><span>Then back to the game</span><select data-bc="replayBack">${[["0", "Stay on the replay"], ["10", "After 10 seconds"], ["15", "After 15 seconds"], ["20", "After 20 seconds"], ["30", "After 30 seconds"]].map(([v, t]) => `<option value="${v}"${String(st.replayBack ?? "15") === v ? " selected" : ""}>${t}</option>`).join("")}</select></label></div>
@@ -1462,7 +1584,7 @@ function bindStream(){
     await setStation(k, {...freshStation(cur.id), ...rpKeep(k)}, `On station ${k}. The overlays on that PC show this match now.`); deskStation(); renderMatch(); $("#onStream").open = true;
   });
   if (!n) return;
-  bindSeats(n);
+  bindSeats(n); bindReader(n);
   const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};
     box.querySelectorAll("[data-bc]").forEach(i => st[i.dataset.bc] = i.type === "checkbox" ? i.checked : i.value.trim());
     const was = bc.stations[n]?.compare || {}, themName = box.querySelector("[data-cmp=them]")?.value.trim() || "";
@@ -1479,7 +1601,7 @@ function bindStream(){
 }
 function bindDetails(g){
   const D = $("#details");
-  bindStream(); bindInbox();
+  bindStream(); bindInbox(); bindReads();
   const keep = fn => { const o = [...D.querySelectorAll("details")].map(d => d.open); fn(); $("#details").querySelectorAll("details").forEach((d, i) => { if (o[i]) d.open = true; }); };
   const addPlayer = (p, extra) => keep(() => change(m => { m.players = m.players || []; if (!m.players.some(x => x.id === p.id)) m.players.push(snap(p, extra)); }, true));
   D.querySelectorAll("[data-player]").forEach(b => b.onclick = () => {

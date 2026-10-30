@@ -238,6 +238,8 @@ async function firebaseBackend(){
     async setStation(n, data){ await fb.setDoc(fb.doc(db, "public", "broadcast"), {stations:{[n]:strip(data)}, updated:new Date().toISOString()}, {merge:true}); },
     /* obsState/{station}: what OBS on that streaming PC reports (its scenes, which one is on, replay buffer), written
        by the LevelUP Remote browser source inside OBS. The scorekeeper's remote reads it to show scene buttons. */
+    watchLiveStats(matchId, cb){ return fb.onSnapshot(fb.query(fb.collection(db, "liveStats"), fb.where("matchId", "==", matchId)), s => cb(s.docs.map(d => ({id:d.id, ...d.data()}))), () => cb([])); },
+    async removeLiveStats(id){ await fb.deleteDoc(fb.doc(db, "liveStats", id)); },
     watchObs(n, cb){ return fb.onSnapshot(fb.doc(db, "obsState", String(n)), s => cb(s.exists() ? s.data() : null), () => cb(null)); },
     async setObs(n, data){ await fb.setDoc(fb.doc(db, "obsState", String(n)), data); },
     /* public/ticker: announcements for the stream ticker */
@@ -288,6 +290,9 @@ function mockBackend(){
     async setStation(n, data){ let b = {}; try { b = JSON.parse(localStorage.getItem("eagles-mock-broadcast")) || {}; } catch(e){}
       b.stations = b.stations || {}; b.stations[n] = {...(b.stations[n] || {}), ...JSON.parse(JSON.stringify(data))}; b.updated = new Date().toISOString();
       localStorage.setItem("eagles-mock-broadcast", JSON.stringify(b)); tickSubs.forEach(f => f()); },
+    watchLiveStats(matchId, cb){ const f = () => { let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-livestats")) || {}; } catch(e){} cb(Object.entries(all).map(([id, r]) => ({id, ...r})).filter(r => r.matchId === matchId)); };
+      f(); const h = e => { if (e.key === "eagles-mock-livestats") f(); }; window.addEventListener("storage", h); const t = setInterval(f, 1500); return () => { window.removeEventListener("storage", h); clearInterval(t); }; },
+    async removeLiveStats(id){ let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-livestats")) || {}; } catch(e){} delete all[id]; localStorage.setItem("eagles-mock-livestats", JSON.stringify(all)); },
     watchObs(n, cb){ const k = "eagles-mock-obs-" + n, f = () => { try { cb(JSON.parse(localStorage.getItem(k))); } catch(e){ cb(null); } }; f();
       const h = e => { if (e.key === k) f(); }; window.addEventListener("storage", h); const t = setInterval(f, 1500); return () => { window.removeEventListener("storage", h); clearInterval(t); }; },
     async setObs(n, data){ localStorage.setItem("eagles-mock-obs-" + n, JSON.stringify(data)); },
@@ -309,6 +314,15 @@ function mockScout(){ try { return JSON.parse(localStorage.getItem("eagles-mock-
 /* The stream's Rocket League score bug drops each finished game's box score here (it isn't signed in, so it can only
    add to rlInbox, and only for a match that's live or final). A coach applies it in the scorekeeper. */
 let _inbox = null;
+/* Scoreboard reader (LevelUP Remote in OBS, not signed in): what it read off the game's scoreboard. */
+const LSK = "eagles-mock-livestats";
+export async function sendLiveStats(read){
+  const id = `${read.matchId}_${read.kind}`;
+  if (isMock()){ let all = {}; try { all = JSON.parse(localStorage.getItem(LSK)) || {}; } catch(e){} all[id] = read; localStorage.setItem(LSK, JSON.stringify(all)); return; }
+  _inbox = _inbox || (async () => { const fb = await import(VENDOR + "firebase-full.js"); const app = fb.initializeApp(FIREBASE_CONFIG, "rl-inbox"); return {fb, db:fb.initializeFirestore(app, {localCache:fb.memoryLocalCache()})}; })();
+  const {fb, db} = await _inbox;
+  await fb.setDoc(fb.doc(db, "liveStats", id), JSON.parse(JSON.stringify(read)));
+}
 export async function sendRLBox(id, box){
   if (isMock()){ let all = {}; try { all = JSON.parse(localStorage.getItem(RLK)) || {}; } catch(e){} if (!all[id]){ all[id] = box; localStorage.setItem(RLK, JSON.stringify(all)); } return; }
   _inbox = _inbox || (async () => { const fb = await import(VENDOR + "firebase-full.js"); const app = fb.initializeApp(FIREBASE_CONFIG, "rl-inbox"); return {fb, db:fb.initializeFirestore(app, {localCache:fb.memoryLocalCache()})}; })();

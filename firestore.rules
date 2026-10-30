@@ -57,7 +57,8 @@ service cloud.firestore {
     match /obsState/{station} {
       allow read: if true;
       allow write: if station in ['1', '2', '3', '4']
-        && request.resource.data.keys().hasOnly(['scenes', 'current', 'replayBuffer', 'streaming', 'recording', 'level', 'at'])
+        && request.resource.data.keys().hasOnly(['scenes', 'current', 'replayBuffer', 'streaming', 'recording', 'level', 'at', 'reader'])
+        && (!('reader' in request.resource.data) || (request.resource.data.reader is string && request.resource.data.reader.size() <= 120))
         && request.resource.data.scenes is string && request.resource.data.scenes.size() <= 4000
         && request.resource.data.current is string && request.resource.data.current.size() <= 120
         && request.resource.data.replayBuffer is bool && request.resource.data.streaming is bool && request.resource.data.recording is bool
@@ -130,6 +131,24 @@ service cloud.firestore {
         && d.goals is list && d.goals.size() == 2
         && d.players is list && d.players.size() <= 10;
     }
+    // Scoreboard reader: the LevelUP Remote in OBS reads the game's scoreboard and drops what it read here
+    // ({matchId}_tab while a map is going, {matchId}_final from the end-of-map screen). Gamertags of both teams, so
+    // only coaches and scorekeepers can read it; the scorekeeper applies ours to the match and theirs to scouting.
+    function validRead(id) {
+      let d = request.resource.data;
+      let m = /databases/$(database)/documents/matches/$(d.matchId);
+      return d.keys().hasOnly(['matchId', 'kind', 'at', 'src', 'us', 'them'])
+        && d.matchId is string && d.matchId.size() > 0 && d.matchId.size() <= 64
+        && d.kind in ['tab', 'final'] && id == d.matchId + '_' + d.kind
+        && exists(m) && get(m).data.status == 'live'
+        && d.at is string && d.at.size() <= 40 && d.src is string && d.src.size() <= 80
+        && d.us is list && d.us.size() <= 6 && d.them is list && d.them.size() <= 6;
+    }
+    match /liveStats/{readId} {
+      allow create, update: if validRead(readId);
+      allow read, delete: if isCoach() || isScorer();
+    }
+
     match /rlInbox/{boxId} {
       allow create: if validRLBox(boxId);
       allow read, delete: if isCoach() || isScorer();

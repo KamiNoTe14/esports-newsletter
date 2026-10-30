@@ -90,7 +90,7 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
 </header>
 <nav class="toc" aria-label="Sections">
   <a href="#big-picture">Big picture</a><a href="#access">1 · Access</a><a href="#obs">2 · OBS settings</a><a href="#relay">3 · Relay</a>
-  <a href="#scenes">4 · Scenes</a><a href="#remote">5 · Remote</a><a href="#povs">6 · Cameras</a><a href="#gameday">Game day</a><a href="#games">By game</a><a href="#fix">Fix it</a><a href="#coaches">Coaches</a>
+  <a href="#scenes">4 · Scenes</a><a href="#remote">5 · Remote</a><a href="#povs">6 · Cameras</a><a href="#reader">7 · Reader</a><a href="#gameday">Game day</a><a href="#games">By game</a><a href="#fix">Fix it</a><a href="#coaches">Coaches</a>
 </nav></div>
 <main>
   <div class="hero">
@@ -252,6 +252,24 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
     </div>
   </section>
 
+  <section id="reader">
+    <h2><span>Step 7</span>Scoreboard reader <i class="who once">Marvel Rivals</i></h2>
+    <p class="lead">Reads the game's own scoreboard so nobody has to type stats. Needs the OBS remote (step 5), the relay, and the player cameras (step 6) or a game source.</p>
+    <div class="step" data-step="reader-on"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Turn it on</h3>
+      <ol><li>Scorekeeper › the match › <b>On stream</b> › <b>Scoreboard reader</b>.</li>
+        <li>Check <b>Read the scoreboard when it's on screen</b>.</li>
+        <li>For live numbers, also check <b>Update kills, deaths and assists during the map</b>.</li>
+        <li>No camera seats set up? Type the name of the OBS source that shows the game.</li></ol>
+    </div>
+    <div class="step" data-step="reader-use"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>During and after a map</h3>
+      <ul><li><b>During:</b> when a player holds <kbd>Tab</kbd> (best during a respawn), everyone's kills, deaths and assists update within a few seconds.</li>
+        <li><b>After:</b> when the results screen comes up, it's read automatically (or tap <b>Read the scoreboard now</b>). A <b>Scoreboard read</b> card appears in the match: check the numbers against the screen, pick the map, and tap <b>Save</b>. The opponent's numbers go to their scouting report.</li></ul>
+      <div class="why">The results screen is the official read: it replaces the live numbers with everything (damage, blocked, healing, accuracy). Live numbers only ever go up, and a big jump has to be seen twice, so a misread can't wreck a stat line.</div>
+    </div>
+  </section>
+
   <section id="gameday">
     <h2>Game day <i class="who every">Every stream</i></h2>
     <p class="lead">Once the PC is set up, this is all you do each time.</p>
@@ -315,6 +333,11 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
       <li>The relay window must be open and connected to OBS.</li>
       <li>Source names in OBS must match the seat names in the Scorekeeper exactly (On stream › Player cameras).</li>
       <li>The relay window prints each camera switch; a yellow line says what went wrong.</li></ul></div></details>
+    <details class="faq"><summary>The scoreboard reader isn't reading anything</summary><div><ul>
+      <li>The OBS remote shows the reader's last message under <b>Read the scoreboard now</b>; it says what went wrong.</li>
+      <li>"Can't see …": the source name doesn't match OBS, or the relay isn't running.</li>
+      <li>"No scoreboard on screen": the scoreboard must fill the player's screen (game at 1920 × 1080, normal UI scale).</li>
+      <li>A number read wrong on the results card? Fix it before saving; tell a coach so the reader can be retuned.</li></ul></div></details>
     <details class="faq"><summary>Wrong names or characters on screen</summary><div><p>Everything comes from the Scorekeeper: our players under <b>Players &amp; stats</b>, theirs under <b>On stream</b> (or the Set desk for Smash). Fix it there and the stream updates within a second.</p></div></details>
   </section>
 

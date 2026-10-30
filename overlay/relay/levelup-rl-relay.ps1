@@ -143,6 +143,23 @@ function ServeHttp($ctx){
     $clipNames.Enqueue(@{label = $label; game = $gameNo}); ObsRequest "SaveReplayBuffer" $null; Say "Instant replay: saving the last few seconds." "Cyan"
     SendText $r '{"ok":true}' "application/json"; return
   }
+  # Scoreboard reader (LevelUP Remote): one frame of an OBS source as a 1920x1080 JPEG.
+  if ($path -eq "/shot"){
+    $r.AddHeader("Cache-Control", "no-store"); $src = [string]$ctx.Request.QueryString["source"]
+    if (-not $clipsOn -or -not $obsReady -or -not $src){ $r.StatusCode = 503; SendText $r '{"ok":false,"why":"OBS is not connected"}' "application/json"; return }
+    ObsRequest "GetSourceScreenshot" @{sourceName = $src; imageFormat = "jpg"; imageWidth = 1920; imageHeight = 1080; imageCompressionQuality = 90}
+    $want = $obsLastId; $until = (Get-Date).AddSeconds(4); $img = $null; $err = ""
+    try {
+      while ((Get-Date) -lt $until){
+        $m = ObsPoll 200; if (-not $m){ continue }
+        if ($m.op -eq 7 -and $m.d.requestId -eq $want){ if ($m.d.requestStatus.result){ $img = [string]$m.d.responseData.imageData } else { $err = [string]$m.d.requestStatus.comment }; break }
+        ObsHandle $m
+      }
+    } catch { $script:obsReady = $false; $script:obsSaid = $false; $script:obsNext = (Get-Date).AddSeconds(5); $err = "lost the connection to OBS" }
+    if (-not $img){ $r.StatusCode = 404; SendText $r (ConvertTo-Json -Compress @{ok = $false; why = $(if ($err){ $err } else { "OBS didn't answer" })}) "application/json"; return }
+    $bytes = [Convert]::FromBase64String($img.Substring($img.IndexOf(",") + 1))
+    $r.ContentType = "image/jpeg"; $r.ContentLength64 = $bytes.Length; $r.OutputStream.Write($bytes, 0, $bytes.Length); return
+  }
   # POV picker from the scorekeeper: show one player's camera (an OBS source, usually an NDI source per gaming PC).
   # In every scene that has these sources, the one picked is shown and the rest are hidden. A source drawn small
   # (a split-screen window) counts as the left or right window by where it sits; a full-screen one is the main POV.
@@ -239,43 +256,45 @@ function ObsConnect {
     $script:obsNext = (Get-Date).AddSeconds(10)
   }
 }
+# One message from OBS: request results and events.
+function ObsHandle($m){
+  if ($m.op -eq 7 -and $m.d.requestType -eq "StartReplayBuffer" -and -not $m.d.requestStatus.result -and $m.d.requestStatus.code -ne 500 -and -not $rbWarned){
+    Say "OBS's Replay Buffer is off, so no clips can be saved. In OBS: Settings > Output > Replay Buffer > tick 'Enable Replay Buffer', then restart this window." "Yellow"; $script:rbWarned = $true }
+  if ($m.op -eq 7 -and $m.d.requestType -eq "GetSceneList" -and $m.d.requestId -eq $povListId -and $m.d.requestStatus.result){
+    foreach ($sc in @($m.d.responseData.scenes)){ ObsRequest "GetSceneItemList" @{sceneName = $sc.sceneName}; $povReqs[$obsLastId] = [string]$sc.sceneName } }
+  if ($m.op -eq 7 -and $m.d.requestType -eq "GetSceneItemList" -and $povWant -and $povReqs.ContainsKey([string]$m.d.requestId)){
+    $scene = $povReqs[[string]$m.d.requestId]; $povReqs.Remove([string]$m.d.requestId)
+    foreach ($it in @($m.d.responseData.sceneItems)){
+      if ($povWant.seats -notcontains [string]$it.sourceName){ continue }
+      $t = $it.sceneItemTransform; $w = [double]$t.width; if ($w -le 0){ $w = [double]$t.boundsWidth }
+      $side = if ($w -gt 0 -and $w -lt 1300){ if ([double]$t.positionX -lt 900){ "left" } else { "right" } } else { "main" }
+      $want = $povWant[$side]; if (-not $want){ continue }
+      $on = ([string]$it.sourceName -eq $want)
+      if ([bool]$it.sceneItemEnabled -ne $on){ ObsRequest "SetSceneItemEnabled" @{sceneName = $scene; sceneItemId = [int]$it.sceneItemId; sceneItemEnabled = $on} }
+    } }
+  if ($m.op -eq 7 -and $m.d.requestType -eq "SetSceneItemEnabled" -and -not $m.d.requestStatus.result){ Say "Couldn't switch a POV: $($m.d.requestStatus.comment)" "Yellow" }
+  if ($m.op -eq 7 -and $m.d.requestType -eq "GetCurrentProgramScene" -and $m.d.requestStatus.result){ $script:rpFrom = [string]$(if ($m.d.responseData.sceneName){ $m.d.responseData.sceneName } else { $m.d.responseData.currentProgramSceneName }) }
+  if ($m.op -eq 7 -and $m.d.requestType -eq "SetCurrentProgramScene" -and -not $m.d.requestStatus.result){ Say "Couldn't switch OBS scenes: $($m.d.requestStatus.comment). Check the scene name in the scorekeeper (On stream) matches OBS exactly." "Yellow" }
+  if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ $script:rpScene = "";  Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }
+  if ($m.op -eq 5 -and $m.d.eventType -eq "ReplayBufferSaved"){
+    $src = $m.d.eventData.savedReplayPath; $info = if ($clipNames.Count){ $clipNames.Dequeue() } else { @{label = "Replay"; game = $gameNo} }; $label = $info.label
+    try {
+      $day = Join-Path $ClipFolder (Get-Date).ToString("yyyy-MM-dd"); New-Item -ItemType Directory -Force -Path $day | Out-Null
+      $name = ((Get-Date).ToString("h-mm-ss tt") + " " + $label) -replace '[\\/:*?"<>|]', "_"
+      $dest = Join-Path $day ($name + [IO.Path]::GetExtension($src))
+      Start-Sleep -Milliseconds 300; Move-Item -LiteralPath $src -Destination $dest -Force
+      [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $dest; label = $label; game = $info.game; at = (Get-Date).ToString("o")})
+      Say "Saved clip: $label" "Green"
+      RpSwitch
+    } catch { Say "Clip saved by OBS at $src (couldn't move it: $($_.Exception.Message))" "Yellow"
+      if (Test-Path -LiteralPath $src){ [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $src; label = $label; game = $info.game; at = (Get-Date).ToString("o")}) }; RpSwitch }
+  }
+}
 function ObsTick {
   if (-not $clipsOn){ return }
   if (-not $obsReady){ if ((Get-Date) -ge $obsNext){ ObsConnect }; return }
   try {
-    while ($m = ObsPoll 0){
-      if ($m.op -eq 7 -and $m.d.requestType -eq "StartReplayBuffer" -and -not $m.d.requestStatus.result -and $m.d.requestStatus.code -ne 500 -and -not $rbWarned){
-        Say "OBS's Replay Buffer is off, so no clips can be saved. In OBS: Settings > Output > Replay Buffer > tick 'Enable Replay Buffer', then restart this window." "Yellow"; $script:rbWarned = $true }
-      if ($m.op -eq 7 -and $m.d.requestType -eq "GetSceneList" -and $m.d.requestId -eq $povListId -and $m.d.requestStatus.result){
-        foreach ($sc in @($m.d.responseData.scenes)){ ObsRequest "GetSceneItemList" @{sceneName = $sc.sceneName}; $povReqs[$obsLastId] = [string]$sc.sceneName } }
-      if ($m.op -eq 7 -and $m.d.requestType -eq "GetSceneItemList" -and $povWant -and $povReqs.ContainsKey([string]$m.d.requestId)){
-        $scene = $povReqs[[string]$m.d.requestId]; $povReqs.Remove([string]$m.d.requestId)
-        foreach ($it in @($m.d.responseData.sceneItems)){
-          if ($povWant.seats -notcontains [string]$it.sourceName){ continue }
-          $t = $it.sceneItemTransform; $w = [double]$t.width; if ($w -le 0){ $w = [double]$t.boundsWidth }
-          $side = if ($w -gt 0 -and $w -lt 1300){ if ([double]$t.positionX -lt 900){ "left" } else { "right" } } else { "main" }
-          $want = $povWant[$side]; if (-not $want){ continue }
-          $on = ([string]$it.sourceName -eq $want)
-          if ([bool]$it.sceneItemEnabled -ne $on){ ObsRequest "SetSceneItemEnabled" @{sceneName = $scene; sceneItemId = [int]$it.sceneItemId; sceneItemEnabled = $on} }
-        } }
-      if ($m.op -eq 7 -and $m.d.requestType -eq "SetSceneItemEnabled" -and -not $m.d.requestStatus.result){ Say "Couldn't switch a POV: $($m.d.requestStatus.comment)" "Yellow" }
-      if ($m.op -eq 7 -and $m.d.requestType -eq "GetCurrentProgramScene" -and $m.d.requestStatus.result){ $script:rpFrom = [string]$(if ($m.d.responseData.sceneName){ $m.d.responseData.sceneName } else { $m.d.responseData.currentProgramSceneName }) }
-      if ($m.op -eq 7 -and $m.d.requestType -eq "SetCurrentProgramScene" -and -not $m.d.requestStatus.result){ Say "Couldn't switch OBS scenes: $($m.d.requestStatus.comment). Check the scene name in the scorekeeper (On stream) matches OBS exactly." "Yellow" }
-      if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ $script:rpScene = "";  Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }
-      if ($m.op -eq 5 -and $m.d.eventType -eq "ReplayBufferSaved"){
-        $src = $m.d.eventData.savedReplayPath; $info = if ($clipNames.Count){ $clipNames.Dequeue() } else { @{label = "Replay"; game = $gameNo} }; $label = $info.label
-        try {
-          $day = Join-Path $ClipFolder (Get-Date).ToString("yyyy-MM-dd"); New-Item -ItemType Directory -Force -Path $day | Out-Null
-          $name = ((Get-Date).ToString("h-mm-ss tt") + " " + $label) -replace '[\\/:*?"<>|]', "_"
-          $dest = Join-Path $day ($name + [IO.Path]::GetExtension($src))
-          Start-Sleep -Milliseconds 300; Move-Item -LiteralPath $src -Destination $dest -Force
-          [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $dest; label = $label; game = $info.game; at = (Get-Date).ToString("o")})
-          Say "Saved clip: $label" "Green"
-          RpSwitch
-        } catch { Say "Clip saved by OBS at $src (couldn't move it: $($_.Exception.Message))" "Yellow"
-          if (Test-Path -LiteralPath $src){ [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $src; label = $label; game = $info.game; at = (Get-Date).ToString("o")}) }; RpSwitch }
-      }
-    }
+    while ($m = ObsPoll 0){ ObsHandle $m }
     if ($rpReturn -and (Get-Date) -ge $rpReturn.at){ ObsRequest "SetCurrentProgramScene" @{sceneName = $rpReturn.scene}; Say "Back to $($rpReturn.scene)." "Cyan"; $script:rpReturn = $null }
     if ($pendingClip -and (Get-Date) -ge $pendingClip.due){
       $clipNames.Enqueue(@{label = ($pendingClip.labels -join ", "); game = $pendingClip.game}); $script:pendingClip = $null

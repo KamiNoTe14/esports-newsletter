@@ -475,7 +475,7 @@ const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "S
   ["rl-team?scope=series", "Rocket League: team stats (whole match)"], ["rl-box?scope=series", "Rocket League: box score (whole match)"],
   ["highlights", "Highlights: last game's clips"], ["highlights?scope=series", "Highlights: every clip this session"],
   ["corner", "Corner score bug (Fortnite: covers the round tracker)"], ["pov?slot=1", "POV name plate: player 1 in the lineup"], ["pov?slot=2", "POV name plate: player 2 in the lineup"],
-  ["box-score", "Box score popup (whole match, transparent)"], ["box-score?scope=game", "Box score popup (current game only)"], ["post-game", "Post-game stats (full screen)"], ["smash-vs", "Smash VS screen (between games of a set)"]];
+  ["box-score", "Box score popup (whole match, transparent)"], ["box-score?scope=game", "Box score popup (current game only)"], ["post-game", "Post-game stats (full screen)"], ["smash-vs", "Smash VS screen (between games of a set)"], ["duo-pov", "Two POVs at once (frame for both players' screens)"]];
 const stationOf = id => STATIONS.find(n => bc.stations[n]?.matchId === id) || "";
 const overlayURL = (layer, n) => { const [page, qs] = layer.split("?"), q = [qs, n === "1" ? "" : `station=${n}`].filter(Boolean).join("&"); return `${SITE}overlay/${page}.html${q ? "?" + q : ""}`; };
 async function setStation(n, data, msg){

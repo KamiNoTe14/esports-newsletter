@@ -24,7 +24,7 @@ const out = {set html(h){
   const first = !lastHTML;
   if (!first && Date.now() < enterUntil){ clearTimeout(held); held = setTimeout(() => { held = null; app.innerHTML = h; }, enterUntil - Date.now()); lastHTML = h; return; }
   lastHTML = h; app.innerHTML = h;
-  if (first){ app.firstElementChild?.classList.add("enter"); enterUntil = Date.now() + ENTRANCE_MS; countUp(); }
+  if (first){ app.firstElementChild?.classList.add("enter"); app.querySelectorAll(".duo > .bug, .duo .full").forEach(el => el.classList.add("enter")); enterUntil = Date.now() + ENTRANCE_MS; countUp(); }
 }};
 /* Numbers on comparison rows count up from zero during the entrance. */
 function countUp(){
@@ -131,7 +131,7 @@ const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML
    logo in the middle with what's happening under it, "Set 2 | Best of 5" and pips underneath, a white result banner
    when a game is won, and player cards along the bottom for one-on-one games like Smash. */
 let lastScores = null, banner = null, bannerTimer = null;
-function scorebug(m){
+function scorebug(m, wrap = h => h){
   const g = gameFor(site, m.game), [L, R] = sides(m), need = Math.floor((+m.bestOf || 1) / 2) + 1, cur = (m.games || []).find(x => x.n === m.current);
   const unit = g.unit || "Game", live = m.status === "live", fin = m.status === "final", gl = gameLogo(g);
   const decided = (m.games || []).filter(x => x.winner).length, n = fin ? Math.max(1, decided) : Math.min(+m.bestOf || 1, m.current || decided + 1);
@@ -155,13 +155,13 @@ function scorebug(m){
     const dots = `<span class="gp">${Array.from({length:sneed}, (_, i) => `<i class="${i < w ? "on" : ""}"></i>`).join("")}</span>`;
     return `<div class="splate ${r ? "r" : "l"} ${s.us ? "us" : "them"}" style="${skin(s)}"><div class="sic">${pic ? `<img src="${esc(pic)}" alt="" onerror="this.remove()">` : ""}</div>
       <div class="sinf"><b style="font-size:${fitName(s.now.name, 34, 250)}px">${esc(s.now.name)}</b><small>${esc(s.now.char || "")}</small></div>${dots}</div>`; };
-  out.html = `<div class="bug gen${sm ? " sets" : ""}">
+  out.html = wrap(`<div class="bug gen${sm ? " sets" : ""}">
       <div class="ev">${live ? `<span class="dot"></span>` : ""}${esc(eventLine(m) || g.name)}</div>
       <div class="bar">${wing(L)}<div class="mid">${gl ? `<img src="${esc(gl)}" alt="${esc(g.name)}">` : `<span class="gname">${esc(g.short || g.name)}</span>`}${state}</div>${wing(R, true)}</div>
       <div class="sub">${pips(L)}<span>${fin ? "" : `${esc(unit)} <em>${n}</em> &nbsp;|&nbsp; `}Best of <em>${esc(m.bestOf)}</em></span>${pips(R, true)}</div>
       ${plate(L)}${plate(R, true)}
       ${banner ? `<div class="goal"><i class="${banner.us ? "us" : "them"}"></i><b>${esc(banner.title)}</b><span>${esc(banner.name)}</span><small>${esc(banner.note)}</small></div>` : ""}
-    </div>${sm ? "" : card(L) + card(R, true)}`;
+    </div>${sm ? "" : card(L) + card(R, true)}`);
   /* a score that just changed rolls in with a gold flash and claw; a newly won game lights its pip */
   if (lastScores){
     [["l", L, 0], ["r", R, 1]].forEach(([side, s, idx]) => {
@@ -698,8 +698,48 @@ function pov(m){
     <div class="pbody"><small>Now watching</small><b style="font-size:${fitName(tag, 52, 330)}px">${esc(tag)}</b>${real || m.teamName ? `<span>${esc([real, m.teamName].filter(Boolean).join(" · "))}</span>` : ""}</div></div>`;
 }
 
+/* ---------- two POVs at once (Fortnite duos) ----------
+   A full-screen frame with two see-through 16:9 windows. In OBS, put each player's NDI source under this overlay and
+   size it to its window: left window X 43, Y 214, 896 x 504; right window X 981, Y 214, 896 x 504 (?bg=1 shows the
+   numbers). Each window is labeled with that player and their stats for this game; the score bug sits on top.
+   Who's in each window: the first two players in the scorekeeper's lineup, or ?left=TRE4TY&right=Gavin (gamertag or
+   name), or ?swap=1 to switch them. ?leftName= / ?rightName= show a different in-game name. */
+const DUO_WIN = [{x:43, y:214}, {x:981, y:214}], DUO_W = 896, DUO_H = 504;
+function findPlayer(m, want, slot){
+  const ppl = m.players || [], k = String(want || "").toLowerCase();
+  return k ? ppl.find(x => [x.tag, x.name, x.id, tagOf(x), nameOf(x)].some(v => String(v || "").toLowerCase() === k)) : ppl[slot];
+}
+function duoPov(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), us = L.us ? L : R, unit = g.unit || "Game";
+  let picks = [findPlayer(m, q.get("left"), 0), findPlayer(m, q.get("right"), 1)];
+  if (q.get("swap")) picks = picks.reverse();
+  const names = [q.get(q.get("swap") ? "rightName" : "leftName"), q.get(q.get("swap") ? "leftName" : "rightName")];
+  const n = m.status === "final" ? Math.max(1, (m.games || []).filter(x => x.winner).length) : (m.current || 1);
+  const cur = (m.games || []).find(x => x.n === n) || {}, defs = (g.statList || []).filter(d => !d.avg);
+  const val = (st, k) => st && st[k] != null && st[k] !== "" ? +st[k] : null;
+  const plate = (p, i) => { const tag = names[i] || (p ? tagOf(p) || nameOf(p) : `Player ${i + 1}`), real = p && tagOf(p) && nameOf(p) !== tag ? nameOf(p) : "";
+    const gs = p ? cur.p?.[p.id] : null, ms = p?.stats || {};
+    const stats = defs.slice(0, 3).map(d => `<span><em>${val(gs, d.key) ?? 0}</em>${esc(d.label)}<small>${val(ms, d.key) ?? 0} in match</small></span>`).join("");
+    return `<div class="dpl d${i}" style="left:${DUO_WIN[i].x}px;top:${DUO_WIN[i].y + DUO_H + 18}px;width:${DUO_W}px">
+      <div class="dplate" style="${skin(us)}"><div class="dlg">${logoHTML(US.logo, US.short)}</div><div class="dnm"><b style="font-size:${fitName(tag, 56, 420)}px">${esc(tag)}</b>${real ? `<small>${esc(real)}</small>` : ""}</div>
+      ${stats ? `<div class="dst"><i>${esc(unit)} ${n}</i>${stats}</div>` : ""}</div></div>`; };
+  const win = i => `<div class="dwin d${i}" style="left:${DUO_WIN[i].x}px;top:${DUO_WIN[i].y}px;width:${DUO_W}px;height:${DUO_H}px">${q.get("bg") ? `<span class="dguide">${i ? "Right" : "Left"} POV · X ${DUO_WIN[i].x}, Y ${DUO_WIN[i].y} · ${DUO_W} × ${DUO_H}</span>` : ""}</div>`;
+  const games = (m.games || []).filter(x => x.winner || x.us || x.them).sort((a, b) => a.n - b.n);
+  const chip = x => `<span class="dgc${x.winner ? " " + (x.winner === "us" ? "w" : "l") : " live"}"><small>${esc(unit[0])}${x.n}</small>${L.us ? `${x.us || 0}–${x.them || 0}` : `${x.them || 0}–${x.us || 0}`}</span>`;
+  const firstTo = +g.firstTo || 0;
+  const foot = `<div class="dfoot"><span class="tape">${games.map(chip).join("")}${firstTo ? `First to <em>${firstTo}</em> · ` : ""}Best of <em>${esc(m.bestOf)}</em></span></div>`;
+  /* the frame is cut out where the two windows are, so the NDI sources underneath show through */
+  const holes = DUO_WIN.map(w => `linear-gradient(#000,#000) ${w.x}px ${w.y}px/${DUO_W}px ${DUO_H}px no-repeat`).join(",");
+  const art = artFor(m, g);
+  scorebug(m, bug => `<div class="duo">
+    <div class="dbg" style="-webkit-mask:linear-gradient(#000,#000),${holes};-webkit-mask-composite:xor;mask-composite:exclude">
+      <div class="full"><div class="half solo" style="${skin(OUR_COLORS)}"></div><div class="fab"></div>${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="vig"></div>
+      <div class="scrap br"><i></i></div>${claw("stk")}</div></div>
+    ${win(0)}${win(1)}${plate(picks[0], 0)}${plate(picks[1], 1)}${foot}${bug}</div>`);
+}
+
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame, "smash-vs":smashVs};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame, "smash-vs":smashVs, "duo-pov":duoPov};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */

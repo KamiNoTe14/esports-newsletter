@@ -400,16 +400,17 @@ function mainChar(m, id){
   return best || (site.profiles?.[id]?.chars || "").split(",")[0].trim() || "";
 }
 function mainRole(m, id){ const c = {}; (m.games || []).forEach(x => { const r = x.p?.[id]?.role; if (r) c[r] = (c[r] || 0) + 1; }); return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] || ""; }
-/* Who starts: the camera seats set on the station, else players marked Starter on the team roster, else who's in the
+/* Who starts: the match's Starting boxes (scorekeeper), else the camera seats set on the station, else Starter on the team roster, else who's in the
    current map, else the first few in the lineup. Never more than the game's team size. ?all=1 shows everyone. */
 function starters(m){
   const g = gameFor(site, m.game), ppl = m.players || [], size = Math.max(1, +g.teamSize || ppl.length || 1);
   if (q.get("all")) return ppl;
   const pick = ids => ids.map(id => ppl.find(p => p.id === id)).filter(Boolean);
+  if (ppl.some(p => p.starter !== undefined)){ const set = ppl.filter(p => p.starter ?? /^starter$/i.test(String(people.get(p.id)?.role || ""))); if (set.length) return set.slice(0, size); }
   const seats = +station.seatsN ? pick(Array.from({length:+station.seatsN}, (_, i) => station.seatPid?.[i] ?? ppl[i]?.id).filter(Boolean)) : [];
   if (seats.length) return seats.slice(0, size);
   const roster = (site.teams || []).find(t => t.id === m.teamId)?.roster || [];
-  const marked = ppl.filter(p => /^starter$/i.test(String(roster.find(r => r.id === p.id)?.role || people.get(p.id)?.role || "")));
+  const marked = ppl.filter(p => p.starter ?? /^starter$/i.test(String(roster.find(r => r.id === p.id)?.role || people.get(p.id)?.role || "")));
   if (marked.length) return marked.slice(0, size);
   const cur = (m.games || []).find(x => x.n === m.current && x.p && Object.keys(x.p).length);
   if (cur) return pick(Object.keys(cur.p)).slice(0, size);

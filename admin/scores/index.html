@@ -208,7 +208,10 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .secb{padding:0 14px 14px}
 .plist{display:grid;gap:8px}
 .prow{border:1px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden}
-.prow>button{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:8px 12px;text-align:left}
+.phead{display:flex;align-items:center}.phead>button[data-player]{flex:1;min-width:0}
+.stb{flex:none;margin-right:10px;min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);color:var(--muted);font:700 13px/1 var(--body)}
+.stb.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.prow>button,.phead>button[data-player]{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:8px 12px;text-align:left}
 .prow .ck{width:26px;height:26px;border-radius:7px;border:2px solid var(--line-2);display:grid;place-items:center;font-weight:800;color:var(--navy);flex:none}
 .prow.on .ck{background:var(--gold);border-color:var(--gold)}
 .prow .pn{flex:1;min-width:0}
@@ -1098,6 +1101,9 @@ function everyone(){ /* id -> person, for current rosters and past players */
   [...(site.alumni || []), ...(dir.alumni || [])].forEach(p => { if (p.id && !map.has(p.id)) map.set(p.id, {id:p.id, name:p.name || "", tag:p.tag || "", private:!!p.private, alum:true, gradYear:p.gradYear || ""}); });
   return map;
 }
+/* Starting this match: the box on each player, else the roster's Starter label (Site Manager). */
+const rosterRole = id => String((site.teams || []).find(t => t.id === cur?.teamId)?.roster?.find(r => (r.id || r.name) === id)?.role || "");
+const isStarter = p => p.starter ?? /^starter$/i.test(rosterRole(p.id));
 function snap(p, extra){ return {id:p.id, name:p.private ? "" : (p.name || ""), tag:p.tag || "", private:!!p.private, ...(p.alum ? {alum:true} : {}), stats:{}, ...(extra || {})}; }
 /* Stats are typed in per game/map/set; the Total tab adds them up. A match with only typed totals (older entries) stays editable on Total. */
 let statTab = null;
@@ -1241,8 +1247,9 @@ function detailsHTML(g, them){
     <details class="sec"><summary>Players & stats<span>${count ? `${count} played` : "Who played?"}</span></summary><div class="secb">
       ${prev ? `<button class="btn btn-line btn-block" type="button" id="copyLineup" data-from="${esc(prev.id)}" style="margin-bottom:10px;font-size:16px">Same lineup as ${esc(fmtDay(prev.startsAt))} vs ${esc(oppName(prev))}</button>` : ""}
       ${statTabs(g, unit)}
-      <div class="plist">${people.map(p => { const on = inMatch.find(x => x.id === p.id); return `<div class="prow${on ? " on" : ""}">
-        <button type="button" data-player="${esc(p.id)}"><span class="ck">${on ? "✓" : ""}</span><span class="pn"><b>${esc(p.name || p.tag)}</b>${p.name && p.tag ? `<small>${esc(p.tag)}</small>` : ""}${p.alum ? `<small> · alum</small>` : ""}</span></button>
+      <div class="plist">${people.map(p => { const on = inMatch.find(x => x.id === p.id), st = on && isStarter(on); return `<div class="prow${on ? " on" : ""}">
+        <div class="phead"><button type="button" data-player="${esc(p.id)}"><span class="ck">${on ? "✓" : ""}</span><span class="pn"><b>${esc(p.name || p.tag)}</b>${p.name && p.tag ? `<small>${esc(p.tag)}</small>` : ""}${p.alum ? `<small> · alum</small>` : ""}</span></button>
+        ${on ? `<button type="button" class="stb${st ? " on" : ""}" data-starter="${esc(p.id)}" aria-pressed="${st}" title="Shows on the Starting Lineups screen">${st ? "✓ " : ""}Starting</button>` : ""}</div>
         ${on ? statInputs(g, p, on, unit) : ""}</div>`; }).join("") || `<p class="hint" style="margin:0">No roster for this team. Add the players who played below.</p>`}</div>
       ${others.length ? `<label class="f" style="margin-top:12px"><span>Add a player</span><select id="addsub"><option value="">Choose a player…</option>
         ${others.some(p => p.alum) ? `<optgroup label="Past players">${others.filter(p => p.alum).map(opt).join("")}</optgroup>` : ""}
@@ -1604,6 +1611,8 @@ function bindDetails(g){
   bindStream(); bindInbox(); bindReads();
   const keep = fn => { const o = [...D.querySelectorAll("details")].map(d => d.open); fn(); $("#details").querySelectorAll("details").forEach((d, i) => { if (o[i]) d.open = true; }); };
   const addPlayer = (p, extra) => keep(() => change(m => { m.players = m.players || []; if (!m.players.some(x => x.id === p.id)) m.players.push(snap(p, extra)); }, true));
+  D.querySelectorAll("[data-starter]").forEach(b => b.onclick = () => { const id = b.dataset.starter;
+    keep(() => change(m => { const p = (m.players || []).find(x => x.id === id); if (p) p.starter = !isStarter(p); }, true)); });
   D.querySelectorAll("[data-player]").forEach(b => b.onclick = () => {
     const id = b.dataset.player, r = everyone().get(id) || (cur.players || []).find(p => p.id === id) || {id};
     keep(() => change(m => { m.players = m.players || []; const i = m.players.findIndex(p => p.id === id); if (i >= 0) m.players.splice(i, 1); else m.players.push(snap(r)); }, true));

@@ -531,13 +531,15 @@ function bindShow(box){
   });
 }
 function bindCopy(root){ root.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast("Link copied."); } catch(e){ prompt("Copy this link:", b.dataset.copy); } }); }
+/* a station's OBS settings stay put when it switches matches */
+const RP_SCENE = "Replay + Live", rpKeep = n => { const o = bc.stations[n] || {}; return {replayScene:o.replayScene ?? RP_SCENE, replayBack:o.replayBack ?? "15"}; };
 function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppSets:{}, oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}}; }
 function bindStations(){
   const box = $("#stBox"); if (!box) return;
   box.querySelectorAll("[data-st]").forEach(sel => sel.onchange = async () => {
     const n = sel.dataset.st, id = sel.value;
     if (id){ const old = stationOf(id); if (old && old !== n) await setStation(old, {matchId:""}); }
-    await setStation(n, id ? freshStation(id) : {matchId:""}, id ? `On station ${n}.` : `Station ${n} cleared.`); renderList(); $("#stBox").open = true;
+    await setStation(n, id ? {...freshStation(id), ...rpKeep(n)} : {matchId:"", ...rpKeep(n)}, id ? `On station ${n}.` : `Station ${n} cleared.`); renderList(); $("#stBox").open = true;
   });
   bindCopy(box); bindShow(box);
 }
@@ -927,7 +929,8 @@ function bindTop(){
   $("#back").onclick = () => location.hash = "";
   $("#edit").onclick = () => location.hash = "edit/" + cur.id;
   $("#instRep") && ($("#instRep").onclick = async () => { const sn = stationOf(cur.id); if (!sn) return;
-    await setStation(sn, {...bc.stations[sn], replay:{id:Math.random().toString(36).slice(2, 10), at:new Date().toISOString(), label:"Replay"}}, "Replay saving on the streaming PC. Cut to the Replay + live scene.");
+    await setStation(sn, {...bc.stations[sn], replay:{id:Math.random().toString(36).slice(2, 10), at:new Date().toISOString(), label:"Replay", scene:bc.stations[sn].replayScene ?? RP_SCENE, back:+(bc.stations[sn].replayBack ?? 15)}},
+      (bc.stations[sn].replayScene ?? RP_SCENE) ? `Saving the replay. The stream cuts to ${bc.stations[sn].replayScene ?? RP_SCENE} in a moment.` : "Saving the replay on the streaming PC.");
     buzz(); });
   $("#undo").onclick = () => { const st = undo[cur.id] || []; if (!st.length) return; cur = st.pop(); settle(cur); buzz(); queueSave(); renderMatch(); };
   $("#scoreTop").querySelectorAll("[data-status]").forEach(b => b.onclick = () => setStatus(b.dataset.status));
@@ -1318,6 +1321,9 @@ function streamHTML(g, them){
         <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
       <label class="f"><span>${esc(them)} logo link (optional)</span><input type="url" inputmode="url" data-bc="oppLogo" value="${esc(st.oppLogo || "")}" placeholder="https://… .png" autocomplete="off"></label>
       ${g.liveFeed === "sos" ? rlPickHTML(st, them) : cmpPickHTML(g, st, them)}
+      <div class="two"><label class="f"><span>Instant replay cuts to this OBS scene</span><input data-bc="replayScene" value="${esc(st.replayScene ?? RP_SCENE)}" placeholder="Blank: don't switch" autocomplete="off"></label>
+        <label class="f"><span>Then back to the game</span><select data-bc="replayBack">${[["0", "Stay on the replay"], ["10", "After 10 seconds"], ["15", "After 15 seconds"], ["20", "After 20 seconds"], ["30", "After 30 seconds"]].map(([v, t]) => `<option value="${v}"${String(st.replayBack ?? "15") === v ? " selected" : ""}>${t}</option>`).join("")}</select></label></div>
+      <p class="hint" style="margin:0">The scene name has to match OBS exactly. "Back to the game" returns to whatever scene was on when you tapped Instant replay.</p>
       <details class="olk"><summary>OBS links for station ${n}</summary>${linksHTML(n)}</details>`
     : `<p class="hint" style="margin:0">Pick the streaming PC this match is on. The score bug, VS screen, lineups and comparisons on that PC switch to it.</p>`}
   </div></details>`;
@@ -1331,7 +1337,7 @@ function bindStream(){
     const other = bc.stations[k]?.matchId;
     if (other && !confirm(`Station ${k} is showing another match. Switch it to this one?`)) return;
     if (n) await setStation(n, {matchId:""});
-    await setStation(k, freshStation(cur.id), `On station ${k}. The overlays on that PC show this match now.`); deskStation(); renderMatch(); $("#onStream").open = true;
+    await setStation(k, {...freshStation(cur.id), ...rpKeep(k)}, `On station ${k}. The overlays on that PC show this match now.`); deskStation(); renderMatch(); $("#onStream").open = true;
   });
   if (!n) return;
   const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};

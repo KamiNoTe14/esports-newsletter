@@ -791,7 +791,7 @@ const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compa
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */
-let finalsReady = LAYER === "scorebug";
+let finalsReady = ["scorebug", "replay-live", "duo-pov"].includes(LAYER);   // these don't use season results, so they draw right away
 setTimeout(() => { if (!finalsReady){ finalsReady = true; draw(); } }, 2500);
 function draw(){
   if (!finalsReady || offAir) return;
@@ -865,7 +865,7 @@ function showMatch(st){
 let replayAsked = "";
 function askReplay(r){
   if (!r?.id || r.id === replayAsked || Date.now() - new Date(r.at).getTime() > 20000) return; replayAsked = r.id;
-  fetch(`${HL_BASE}/save?id=${encodeURIComponent(r.id)}&label=${encodeURIComponent(r.label || "Replay")}`, {cache:"no-store"}).catch(() => {});
+  fetch(`${HL_BASE}/save?id=${encodeURIComponent(r.id)}&label=${encodeURIComponent(r.label || "Replay")}${r.scene ? `&scene=${encodeURIComponent(r.scene)}&back=${+r.back || 0}` : ""}`, {cache:"no-store"}).catch(() => {});
 }
 watchBroadcast(b => {
   const next = (b.stations || {})[STATION] || {};

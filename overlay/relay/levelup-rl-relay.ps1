@@ -136,6 +136,10 @@ function ServeHttp($ctx){
     if (-not $clipsOn -or -not $obsReady){ SendText $r '{"ok":false,"why":"OBS clips are not set up or OBS is not connected"}' "application/json"; return }
     if ($id -and $id -eq $script:lastSaveId){ SendText $r '{"ok":true,"repeat":true}' "application/json"; return }
     $script:lastSaveId = $id
+    # optional: cut to the replay scene once the clip is saved, and back to the game after a few seconds
+    $script:rpScene = [string]$ctx.Request.QueryString["scene"]; $script:rpBack = 0; [void][int]::TryParse([string]$ctx.Request.QueryString["back"], [ref]$script:rpBack)
+    $script:rpFrom = ""; $script:rpReturn = $null
+    if ($script:rpScene){ ObsRequest "GetCurrentProgramScene" $null }
     $clipNames.Enqueue(@{label = $label; game = $gameNo}); ObsRequest "SaveReplayBuffer" $null; Say "Instant replay: saving the last few seconds." "Cyan"
     SendText $r '{"ok":true}' "application/json"; return
   }
@@ -175,7 +179,7 @@ try {
 if (-not $ClipFolder){ $desk = [Environment]::GetFolderPath("Desktop"); if (-not $desk){ $desk = Join-Path ([string]$env:USERPROFILE + [string]$env:HOME) "Desktop" }; $ClipFolder = Join-Path $desk "LevelUP Highlights" }
 $clipKinds = @($ClipEvents -split "," | ForEach-Object { $_.Trim().ToLower() } | Where-Object { $_ })
 $obs = $null; $obsReady = $false; $obsNext = [datetime]::MinValue; $obsRecv = $null; $obsBuf = New-Object byte[] 65536; $obsMsg = New-Object System.Text.StringBuilder
-$clips = New-Object System.Collections.ArrayList; $lastSaveId = ""; $gameNo = 1; $lastEnd = [datetime]::MinValue   # clips saved this session, by game (for the Highlights scene)
+$clips = New-Object System.Collections.ArrayList; $lastSaveId = ""; $rpScene = ""; $rpBack = 0; $rpFrom = ""; $rpReturn = $null; $gameNo = 1; $lastEnd = [datetime]::MinValue   # clips saved this session, by game (for the Highlights scene)
 $obsReq = 0; $pendingClip = $null; $clipNames = New-Object System.Collections.Queue; $obsSaid = $false; $rbWarned = $false
 function ObsSend($obj){
   $b = [System.Text.Encoding]::UTF8.GetBytes(($obj | ConvertTo-Json -Compress -Depth 6))
@@ -229,7 +233,9 @@ function ObsTick {
     while ($m = ObsPoll 0){
       if ($m.op -eq 7 -and $m.d.requestType -eq "StartReplayBuffer" -and -not $m.d.requestStatus.result -and $m.d.requestStatus.code -ne 500 -and -not $rbWarned){
         Say "OBS's Replay Buffer is off, so no clips can be saved. In OBS: Settings > Output > Replay Buffer > tick 'Enable Replay Buffer', then restart this window." "Yellow"; $script:rbWarned = $true }
-      if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }
+      if ($m.op -eq 7 -and $m.d.requestType -eq "GetCurrentProgramScene" -and $m.d.requestStatus.result){ $script:rpFrom = [string]$(if ($m.d.responseData.sceneName){ $m.d.responseData.sceneName } else { $m.d.responseData.currentProgramSceneName }) }
+      if ($m.op -eq 7 -and $m.d.requestType -eq "SetCurrentProgramScene" -and -not $m.d.requestStatus.result){ Say "Couldn't switch OBS scenes: $($m.d.requestStatus.comment). Check the scene name in the scorekeeper (On stream) matches OBS exactly." "Yellow" }
+      if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ $script:rpScene = "";  Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }
       if ($m.op -eq 5 -and $m.d.eventType -eq "ReplayBufferSaved"){
         $src = $m.d.eventData.savedReplayPath; $info = if ($clipNames.Count){ $clipNames.Dequeue() } else { @{label = "Replay"; game = $gameNo} }; $label = $info.label
         try {
@@ -239,15 +245,24 @@ function ObsTick {
           Start-Sleep -Milliseconds 300; Move-Item -LiteralPath $src -Destination $dest -Force
           [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $dest; label = $label; game = $info.game; at = (Get-Date).ToString("o")})
           Say "Saved clip: $label" "Green"
+          RpSwitch
         } catch { Say "Clip saved by OBS at $src (couldn't move it: $($_.Exception.Message))" "Yellow"
-          if (Test-Path -LiteralPath $src){ [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $src; label = $label; game = $info.game; at = (Get-Date).ToString("o")}) } }
+          if (Test-Path -LiteralPath $src){ [void]$clips.Add(@{id = [guid]::NewGuid().ToString("N").Substring(0, 12); path = $src; label = $label; game = $info.game; at = (Get-Date).ToString("o")}) }; RpSwitch }
       }
     }
+    if ($rpReturn -and (Get-Date) -ge $rpReturn.at){ ObsRequest "SetCurrentProgramScene" @{sceneName = $rpReturn.scene}; Say "Back to $($rpReturn.scene)." "Cyan"; $script:rpReturn = $null }
     if ($pendingClip -and (Get-Date) -ge $pendingClip.due){
       $clipNames.Enqueue(@{label = ($pendingClip.labels -join ", "); game = $pendingClip.game}); $script:pendingClip = $null
       ObsRequest "SaveReplayBuffer" $null
     }
   } catch { Say "Lost the connection to OBS. Retrying..." "Yellow"; $script:obsReady = $false; $script:obsSaid = $false; $script:obsNext = (Get-Date).AddSeconds(5) }
+}
+# Instant replay asked for a scene: cut to it now that the clip exists, and come back after rpBack seconds.
+function RpSwitch {
+  if (-not $rpScene){ return }
+  ObsRequest "SetCurrentProgramScene" @{sceneName = $rpScene}; Say "Cut to $rpScene." "Cyan"
+  if ($rpBack -gt 0 -and $rpFrom -and $rpFrom -ne $rpScene){ $script:rpReturn = @{at = (Get-Date).AddSeconds($rpBack); scene = $rpFrom} }
+  $script:rpScene = ""
 }
 # A play worth clipping. Plays within a few seconds of each other share one clip ("Goal - TRE4TY, Epic Save - Nova").
 function QueueClip([string]$label){

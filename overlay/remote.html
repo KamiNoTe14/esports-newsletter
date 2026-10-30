@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LevelUP Remote</title>
+<!-- OBS Browser Source that lets the scorekeeper run OBS from a phone. It shows nothing on stream.
+     In its properties: Page permissions = "Advanced access to OBS", and turn OFF "Shutdown source when not visible".
+     Add ?station=2 for the second streaming PC, ?debug=1 to see its status. -->
+<style>html,body{margin:0;background:transparent;font:600 22px/1.4 Arial,sans-serif;color:#fff}#log{padding:12px 16px;background:rgba(0,10,25,.85)}#log:empty{display:none}</style>
+</head>
+<body>
+<div id="log"></div>
+<script type="module" src="remote.js?v=1"></script>
+</body>
+</html>

@@ -143,6 +143,21 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .pk-grid button{display:grid;gap:4px;justify-items:center;padding:6px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font:700 12.5px/1.15 var(--body);text-align:center}
 .pk-grid button.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}.pk-grid img{width:72px;height:72px;border-radius:8px;object-fit:cover;background:var(--navy)}
 .pk-usual{border-bottom:1px solid var(--line);background:var(--surface-2)}.pk-usual>small{display:block;padding:10px 12px 0;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}.pk-usual .pk-grid{overflow:visible}
+/* OBS remote */
+.remote{margin-top:10px;padding:12px;border-radius:14px;background:var(--bg);border:1px solid var(--line-2)}
+.remote.off{opacity:.85}
+.remote .rh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.remote .rh b{font:800 15px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.remote .rst{display:flex;gap:8px;font:600 12px/1 var(--body);color:var(--muted)}.remote .rst i{font-style:normal}
+.remote .rst .on{color:var(--live)}.remote .rst .ok{color:var(--ok)}.remote .rst .warn{color:#FFB35C}
+.remote .hint.warn{color:#FFB35C}
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0}
+.scenes button{position:relative;min-height:64px;padding:8px 10px;border-radius:12px;border:2px solid var(--line-2);background:var(--surface);font:800 16px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;text-align:left;display:grid;align-content:center;gap:3px}
+.scenes button small{font:700 10px/1 var(--body);letter-spacing:.14em;color:#fff}
+.scenes button.air{background:var(--live);border-color:var(--live);color:#fff}
+.scenes button.pend{border-color:var(--gold);animation:pendBlink .8s infinite alternate}
+@keyframes pendBlink{to{background:rgba(255,188,5,.25)}}
+.rrep{min-height:60px;font-size:20px}
 /* Set desk */
 .dpl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .dside{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0}
@@ -259,7 +274,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=22";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=23";
 import {watchFinals} from "../../assets/live.js?v=48";
 import {recordBreaks} from "../../assets/records.js?v=5";
 
@@ -299,6 +314,7 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
       be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}};
         if (view === "list" && !document.activeElement?.closest?.("#stBox")) renderList();
         else if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
+      if (!obsWatching && be.watchObs){ obsWatching = true; STATIONS.forEach(n => be.watchObs(n, d => { obs[n] = d; paintRemotes(); })); setInterval(paintRemotes, 15000); }
       be.watchTicker(t => { tick = {messages:Array.isArray(t.messages) ? t.messages : []}; if (view === "list" && !document.activeElement?.closest?.("#tickBox")) renderList(); });
       if (role === "coach") be.watchDirectory(d => { dir = {...d, alumni:Array.isArray(d.alumni) ? d.alumni : [], seasons:Array.isArray(d.seasons) ? d.seasons : [], rosters:d.rosters && typeof d.rosters === "object" ? d.rosters : {}}; if (view === "list") renderList(); }); }
     route();
@@ -439,7 +455,7 @@ function renderList(){
     + `<button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
   $("#new").onclick = () => location.hash = "new";
   $("#seasonSel").onchange = e => { setSeason(e.target.value); renderList(); };
-  bindAlumni(); bindRosters(); bindTicker(); bindStations(); bindMerge();
+  bindAlumni(); bindRosters(); bindTicker(); bindStations(); bindMerge(); paintRemotes();
   $("#app").querySelectorAll("[data-open]").forEach(b => b.onclick = () => location.hash = "m/" + b.dataset.open);
   $("#backup") && ($("#backup").onclick = () => archive(true));
 }
@@ -475,7 +491,7 @@ const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "S
   ["rl-team?scope=series", "Rocket League: team stats (whole match)"], ["rl-box?scope=series", "Rocket League: box score (whole match)"],
   ["highlights", "Highlights: last game's clips"], ["highlights?scope=series", "Highlights: every clip this session"],
   ["corner", "Corner score bug (Fortnite: covers the round tracker)"], ["pov?slot=1", "POV name plate: player 1 in the lineup"], ["pov?slot=2", "POV name plate: player 2 in the lineup"],
-  ["box-score", "Box score popup (whole match, transparent)"], ["box-score?scope=game", "Box score popup (current game only)"], ["post-game", "Post-game stats (full screen)"], ["smash-vs", "Smash VS screen (between games of a set)"], ["duo-pov", "Two POVs at once (frame for both players' screens)"], ["replay-live", "Instant replay + live (split screen)"]];
+  ["box-score", "Box score popup (whole match, transparent)"], ["box-score?scope=game", "Box score popup (current game only)"], ["post-game", "Post-game stats (full screen)"], ["smash-vs", "Smash VS screen (between games of a set)"], ["duo-pov", "Two POVs at once (frame for both players' screens)"], ["replay-live", "Instant replay + live (split screen)"], ["remote", "LevelUP Remote: lets this page run OBS (Page permissions: Advanced; Shutdown when not visible: off)"]];
 const stationOf = id => STATIONS.find(n => bc.stations[n]?.matchId === id) || "";
 const overlayURL = (layer, n) => { const [page, qs] = layer.split("?"), q = [qs, n === "1" ? "" : `station=${n}`].filter(Boolean).join("&"); return `${SITE}overlay/${page}.html${q ? "?" + q : ""}`; };
 async function setStation(n, data, msg){
@@ -493,6 +509,7 @@ function stationsHTML(){
     ${STATIONS.map(n => { const id = bc.stations[n]?.matchId, m = all.find(x => x.id === id);
       return `<div class="strow"><b>Station ${n}</b><select data-st="${n}" aria-label="Match on station ${n}"><option value="">Nothing on this station</option>${all.filter(x => x.status !== "canceled").sort((a, b) => a.startsAt > b.startsAt ? -1 : 1).slice(0, 40).map(x => `<option value="${esc(x.id)}"${x.id === id ? " selected" : ""}>${esc(x.teamName)} vs ${esc(oppName(x))} · ${esc(fmtDay(x.startsAt))}${x.status === "live" ? " (live)" : ""}</option>`).join("")}${id && !m ? `<option value="${esc(id)}" selected>A match from another season</option>` : ""}</select>
         ${showHTML(n)}
+        ${id || bc.stations[n]?.show?.on || obsLive(n) ? `<div class="remoteBox" data-rn="${n}"></div>` : ""}
         ${id || bc.stations[n]?.show?.on ? `<details class="olk"><summary>OBS links</summary>${linksHTML(n)}</details>` : ""}</div>`; }).join("")}
     <p class="hint" style="margin:10px 0 0">In OBS add each link as a Browser Source, 1920 × 1080. Add <code>?bg=1</code> to a link to preview it on a grey background.</p>
   </div></details>`;
@@ -531,6 +548,45 @@ function bindShow(box){
   });
 }
 function bindCopy(root){ root.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast("Link copied."); } catch(e){ prompt("Copy this link:", b.dataset.copy); } }); }
+/* ---------- LevelUP Remote: run OBS on a streaming PC from here ----------
+   The LevelUP Remote browser source inside OBS (overlay/remote.html) reports that PC's scenes to obsState/{station}
+   and carries out commands put on the station: switch scene, instant replay. */
+let obs = {}, obsWatching = false;
+const obsLive = n => { const o = obs[n]; return !!o && Date.now() - new Date(o.at).getTime() < 60000; };
+function remoteHTML(n){
+  const o = obs[n];
+  if (!obsLive(n)) return `<div class="remote off"><div class="rh"><b>OBS remote · Station ${n}</b><span class="rst">Not connected</span></div>
+    <p class="hint" style="margin:6px 0 0">To switch scenes from here, add the <b>LevelUP Remote</b> Browser Source in OBS on that PC (Page permissions: <i>Advanced access to OBS</i>; <i>Shutdown source when not visible</i> off).
+    <button type="button" class="linkbtn" data-copy="${esc(overlayURL("remote", n))}">Copy its link</button></p></div>`;
+  const scenes = String(o.scenes || "").split("\n").filter(Boolean);
+  return `<div class="remote"><div class="rh"><b>OBS remote · Station ${n}</b><span class="rst">${o.streaming ? `<i class="on">● Live</i>` : `<i>Not streaming</i>`}${o.recording ? `<i class="on">● Rec</i>` : ""}<i class="${o.replayBuffer ? "ok" : "warn"}">Replays ${o.replayBuffer ? "ready" : "off"}</i></span></div>
+    ${+o.level < 4 ? `<p class="hint warn" style="margin:6px 0">OBS won't let it switch scenes yet. In OBS: the LevelUP Remote source &gt; Properties &gt; Page permissions &gt; <b>Advanced access to OBS</b>.</p>` : ""}
+    <div class="scenes">${scenes.map(sc => `<button type="button" data-scene="${esc(sc)}" data-rn="${n}" class="${sc === o.current ? "air" : ""}"${sc === o.current ? ' aria-current="true"' : ""}>${sc === o.current ? `<small>On air</small>` : ""}${esc(sc)}</button>`).join("")}</div>
+    <button type="button" class="btn btn-gold btn-block rrep" data-rrep="${n}">⟲ Instant replay</button></div>`;
+}
+async function sendCmd(n, cmd, msg){
+  const id = Math.random().toString(36).slice(2, 10);
+  await setStation(n, {...bc.stations[n], cmd:{id, at:new Date().toISOString(), ...cmd}}, msg); buzz();
+}
+/* Instant replay: through the remote in OBS when it's running, otherwise through the overlays and the relay. */
+async function instantReplay(n){
+  const st = bc.stations[n] || {}, scene = st.replayScene ?? RP_SCENE, back = +(st.replayBack ?? 15);
+  if (obsLive(n)) return sendCmd(n, {type:"replay", scene, back}, scene ? `Replay saved. Cutting to ${scene}.` : "Replay saved.");
+  await setStation(n, {...st, replay:{id:Math.random().toString(36).slice(2, 10), at:new Date().toISOString(), label:"Replay", scene, back}},
+    scene ? `Saving the replay. The stream cuts to ${scene} in a moment.` : "Saving the replay on the streaming PC."); buzz();
+}
+function paintRemotes(){
+  const sum = $("#remoteSec > summary > span"), sn = cur && stationOf(cur.id);
+  if (sum && sn) sum.textContent = obsLive(sn) ? `On air: ${obs[sn].current || ""}` : "Not connected";
+  document.querySelectorAll(".remoteBox[data-rn]").forEach(box => {
+    const n = box.dataset.rn, h = remoteHTML(n); if (box._h === h) return; box._h = h; box.innerHTML = h;
+    box.querySelectorAll("[data-scene]").forEach(b => b.onclick = () => { if (b.classList.contains("air")) return;
+      box.querySelectorAll("[data-scene]").forEach(x => x.classList.remove("air", "pend")); b.classList.add("pend");
+      sendCmd(n, {type:"scene", scene:b.dataset.scene}); });
+    box.querySelectorAll("[data-rrep]").forEach(b => b.onclick = () => instantReplay(n));
+    bindCopy(box);
+  });
+}
 /* a station's OBS settings stay put when it switches matches */
 const RP_SCENE = "Replay + Live", rpKeep = n => { const o = bc.stations[n] || {}; return {replayScene:o.replayScene ?? RP_SCENE, replayBack:o.replayBack ?? "15"}; };
 function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppSets:{}, oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}}; }
@@ -787,12 +843,15 @@ function renderMatch(fromSnapshot){
   const tools = `<div class="tools"><button class="btn btn-line" type="button" id="undo"${(undo[cur.id] || []).length ? "" : " disabled style=\"opacity:.4\""}>↶ Undo</button>
       ${stationOf(cur.id) ? `<button class="btn btn-line" type="button" id="instRep" style="flex:1" title="Saves the last few seconds through OBS's replay buffer on the streaming PC">⟲ Instant replay</button>` : ""}
       ${cur.stream?.live ? `<a class="btn btn-line" style="flex:1;text-decoration:none" href="${esc(cur.stream.live)}" target="_blank" rel="noopener">▶ Stream</a>` : ""}</div>`;
-  const top = head + seg + board + recordHTML(cur) + clinch + panel + tools;
-  if (typing && $("#scoreTop")){ $("#scoreTop").innerHTML = top; bindTop(); bindDesk(g); return; }
+  const remote = stationOf(cur.id) ? `<details class="sec" id="remoteSec"${obsLive(stationOf(cur.id)) ? " open" : ""}><summary>OBS remote<span>${obsLive(stationOf(cur.id)) ? `On air: ${esc(obs[stationOf(cur.id)].current || "")}` : "Not connected"}</span></summary><div class="secb"><div class="remoteBox" data-rn="${stationOf(cur.id)}"></div></div></details>` : "";
+  const top = head + seg + board + recordHTML(cur) + clinch + panel + tools + remote;
+  const remOpen = $("#remoteSec")?.open;
+  if (typing && $("#scoreTop")){ $("#scoreTop").innerHTML = top; if (remOpen != null && $("#remoteSec")) $("#remoteSec").open = remOpen; bindTop(); bindDesk(g); paintRemotes(); return; }
   const wasOpen = [...document.querySelectorAll("#details details")].map(d => d.open);
   $("#app").innerHTML = `<div id="scoreTop">${top}</div><div id="details">${detailsHTML(g, them)}</div>`;
   document.querySelectorAll("#details details").forEach((d, i) => { if (wasOpen[i]) d.open = true; });
-  bindTop(); bindDesk(g); bindDetails(g);
+  if (remOpen != null && $("#remoteSec")) $("#remoteSec").open = remOpen;
+  bindTop(); bindDesk(g); bindDetails(g); paintRemotes();
 }
 /* ---------- Set desk (Smash: 1v1 sets, each a best of 3 games) ----------
    One panel runs the set on stream: tap our player and theirs, and each game's characters start on that player's
@@ -928,10 +987,7 @@ function chips(g, them){
 function bindTop(){
   $("#back").onclick = () => location.hash = "";
   $("#edit").onclick = () => location.hash = "edit/" + cur.id;
-  $("#instRep") && ($("#instRep").onclick = async () => { const sn = stationOf(cur.id); if (!sn) return;
-    await setStation(sn, {...bc.stations[sn], replay:{id:Math.random().toString(36).slice(2, 10), at:new Date().toISOString(), label:"Replay", scene:bc.stations[sn].replayScene ?? RP_SCENE, back:+(bc.stations[sn].replayBack ?? 15)}},
-      (bc.stations[sn].replayScene ?? RP_SCENE) ? `Saving the replay. The stream cuts to ${bc.stations[sn].replayScene ?? RP_SCENE} in a moment.` : "Saving the replay on the streaming PC.");
-    buzz(); });
+  $("#instRep") && ($("#instRep").onclick = () => { const sn = stationOf(cur.id); if (sn) instantReplay(sn); });
   $("#undo").onclick = () => { const st = undo[cur.id] || []; if (!st.length) return; cur = st.pop(); settle(cur); buzz(); queueSave(); renderMatch(); };
   $("#scoreTop").querySelectorAll("[data-status]").forEach(b => b.onclick = () => setStatus(b.dataset.status));
   $("#approve") && ($("#approve").onclick = () => { change(m => { m.status = "final"; m.approved = {by:user?.email || "", at:new Date().toISOString()}; }); toast(cur.result === "W" ? "Approved. Eagles win! 🦅" : "Approved. It's on the website now."); queueArchive(); });

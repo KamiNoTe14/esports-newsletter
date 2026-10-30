@@ -236,6 +236,10 @@ async function firebaseBackend(){
     /* public/broadcast: LevelUP stations (which match each streaming PC shows, plus overlay options) */
     watchBroadcast(cb){ return fb.onSnapshot(fb.doc(db, "public", "broadcast"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
     async setStation(n, data){ await fb.setDoc(fb.doc(db, "public", "broadcast"), {stations:{[n]:strip(data)}, updated:new Date().toISOString()}, {merge:true}); },
+    /* obsState/{station}: what OBS on that streaming PC reports (its scenes, which one is on, replay buffer), written
+       by the LevelUP Remote browser source inside OBS. The scorekeeper's remote reads it to show scene buttons. */
+    watchObs(n, cb){ return fb.onSnapshot(fb.doc(db, "obsState", String(n)), s => cb(s.exists() ? s.data() : null), () => cb(null)); },
+    async setObs(n, data){ await fb.setDoc(fb.doc(db, "obsState", String(n)), data); },
     /* public/ticker: announcements for the stream ticker */
     watchTicker(cb){ return fb.onSnapshot(fb.doc(db, "public", "ticker"), s => cb(s.exists() ? s.data() : {}), () => cb({})); },
     async saveTicker(t){ await fb.setDoc(fb.doc(db, "public", "ticker"), strip(t)); },
@@ -284,6 +288,9 @@ function mockBackend(){
     async setStation(n, data){ let b = {}; try { b = JSON.parse(localStorage.getItem("eagles-mock-broadcast")) || {}; } catch(e){}
       b.stations = b.stations || {}; b.stations[n] = {...(b.stations[n] || {}), ...JSON.parse(JSON.stringify(data))}; b.updated = new Date().toISOString();
       localStorage.setItem("eagles-mock-broadcast", JSON.stringify(b)); tickSubs.forEach(f => f()); },
+    watchObs(n, cb){ const k = "eagles-mock-obs-" + n, f = () => { try { cb(JSON.parse(localStorage.getItem(k))); } catch(e){ cb(null); } }; f();
+      const h = e => { if (e.key === k) f(); }; window.addEventListener("storage", h); const t = setInterval(f, 1500); return () => { window.removeEventListener("storage", h); clearInterval(t); }; },
+    async setObs(n, data){ localStorage.setItem("eagles-mock-obs-" + n, JSON.stringify(data)); },
     watchTicker(cb){ const f = () => { try { cb(JSON.parse(localStorage.getItem("eagles-mock-ticker")) || {}); } catch(e){ cb({}); } }; f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-ticker") f(); }); tickSubs.add(f); return () => tickSubs.delete(f); },
     async saveTicker(t){ localStorage.setItem("eagles-mock-ticker", JSON.stringify(t)); tickSubs.forEach(f => f()); },
     watchRLInbox(matchId, cb){ const f = () => { let all = {}; try { all = JSON.parse(localStorage.getItem(RLK)) || {}; } catch(e){} cb(Object.entries(all).map(([id, b]) => ({id, ...b})).filter(b => b.matchId === matchId)); };

@@ -51,6 +51,19 @@ service cloud.firestore {
       allow write: if isCoach() || (isScorer() && (docId in ['scoreboard', 'broadcast'] || docId.matches('season-.*')));
     }
 
+    // LevelUP Remote: OBS on each streaming PC reports its scene names, the scene on air and replay buffer state here,
+    // so the scorekeeper can show scene buttons. Written by a browser source inside OBS (not signed in), so it only
+    // accepts that small, fixed shape. Commands to OBS go through public/broadcast, which only coaches/scorers can write.
+    match /obsState/{station} {
+      allow read: if true;
+      allow write: if station in ['1', '2', '3', '4']
+        && request.resource.data.keys().hasOnly(['scenes', 'current', 'replayBuffer', 'streaming', 'recording', 'level', 'at'])
+        && request.resource.data.scenes is string && request.resource.data.scenes.size() <= 4000
+        && request.resource.data.current is string && request.resource.data.current.size() <= 120
+        && request.resource.data.replayBuffer is bool && request.resource.data.streaming is bool && request.resource.data.recording is bool
+        && request.resource.data.level is int && request.resource.data.at is string && request.resource.data.at.size() <= 40;
+    }
+
     // ---------- Team scouting (scout/) ----------
     // PRIVATE. Coaches see and edit everything. A player sees nothing until a coach adds their
     // @hartlandschools.us email to scoutMembers with at least one team; then they can read reports for

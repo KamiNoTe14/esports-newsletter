@@ -400,15 +400,30 @@ function mainChar(m, id){
   return best || (site.profiles?.[id]?.chars || "").split(",")[0].trim() || "";
 }
 function mainRole(m, id){ const c = {}; (m.games || []).forEach(x => { const r = x.p?.[id]?.role; if (r) c[r] = (c[r] || 0) + 1; }); return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] || ""; }
+/* Who starts: the camera seats set on the station, else players marked Starter on the team roster, else who's in the
+   current map, else the first few in the lineup. Never more than the game's team size. ?all=1 shows everyone. */
+function starters(m){
+  const g = gameFor(site, m.game), ppl = m.players || [], size = Math.max(1, +g.teamSize || ppl.length || 1);
+  if (q.get("all")) return ppl;
+  const pick = ids => ids.map(id => ppl.find(p => p.id === id)).filter(Boolean);
+  const seats = +station.seatsN ? pick(Array.from({length:+station.seatsN}, (_, i) => station.seatPid?.[i] ?? ppl[i]?.id).filter(Boolean)) : [];
+  if (seats.length) return seats.slice(0, size);
+  const roster = (site.teams || []).find(t => t.id === m.teamId)?.roster || [];
+  const marked = ppl.filter(p => /^starter$/i.test(String(roster.find(r => r.id === p.id)?.role || people.get(p.id)?.role || "")));
+  if (marked.length) return marked.slice(0, size);
+  const cur = (m.games || []).find(x => x.n === m.current && x.p && Object.keys(x.p).length);
+  if (cur) return pick(Object.keys(cur.p)).slice(0, size);
+  return ppl.slice(0, size);
+}
 function lineups(m){
   const g = gameFor(site, m.game), [L, R] = sides(m);
-  const ours = (m.players || []).map((p, i) => { const ch = mainChar(m, p.id), role = mainRole(m, p.id), yr = site.profiles?.[p.id]?.gradYear;
+  const ours = starters(m).map((p, i) => { const ch = mainChar(m, p.id), role = mainRole(m, p.id), yr = site.profiles?.[p.id]?.gradYear;
     const strip = [role && g.roleIcons?.[role] ? `<img src="${esc(src(g.roleIcons[role]))}" alt="">` : "", esc([role, ch].filter(Boolean).join(" · ") || g.short || g.name)].join("");
     return `<div class="p" style="--i:${i}"><div class="pic">${charImg(g, ch) ? `<img src="${esc(charImg(g, ch))}" alt="" onerror="this.remove()">` : `<span>${monogram(nameOf(p))}</span>`}</div>
       <div class="body"><div class="strip">${strip}</div><div class="main"><b>${esc(tagOf(p) || nameOf(p))}</b><small>${esc([tagOf(p) ? nameOf(p) : "", yr ? `Class of ${yr}` : ""].filter(Boolean).join(", "))}</small></div></div></div>`; }).join("");
   const theirs = oppList(m).map((n, i) => `<div class="p" style="--i:${i}"><div class="body"><div class="strip"></div><div class="main"><b>${esc(n)}</b></div></div></div>`).join("");
   const col = (s, html, c) => `<div class="col ${c}" style="${skin(s)}"><h2 style="font-size:${fitName(s.name, 66, 640)}px">${logoHTML(s.logo, s.name)}<span>${esc(s.name)}</span></h2>${html ? `<div class="plates">${html}</div>` : `<div class="empty-note">Lineup to come!</div>`}</div>`;
-  const n = Math.max(1, (m.players || []).length, oppList(m).length), h = Math.min(100, Math.floor(620 / n) - 14);
+  const n = Math.max(1, starters(m).length, oppList(m).length), h = Math.min(100, Math.floor(545 / n) - 14);
   out.html = frame("lu", m, g, {title:"Starting", script:"Lineups", sub:eventLine(m), split:[L, R],
     body:`<div class="cols" style="--h:${h}px">${L.us ? col(L, ours, "l") + col(R, theirs, "r") : col(L, theirs, "l") + col(R, ours, "r")}</div>`});
 }

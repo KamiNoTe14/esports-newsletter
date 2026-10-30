@@ -146,9 +146,9 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 /* OBS remote */
 .remote{margin-top:10px;padding:12px;border-radius:14px;background:var(--bg);border:1px solid var(--line-2)}
 .remote.off{opacity:.85}
-.remote .rh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.remote .rh b{font:800 15px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
-.remote .rst{display:flex;gap:8px;font:600 12px/1 var(--body);color:var(--muted)}.remote .rst i{font-style:normal}
+.remote .rh,.povpick .rh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.remote .rh b,.povpick .rh b{font:800 15px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.remote .rst,.povpick .rst{display:flex;gap:8px;font:600 12px/1 var(--body);color:var(--muted)}.remote .rst i{font-style:normal}
 .remote .rst .on{color:var(--live)}.remote .rst .ok{color:var(--ok)}.remote .rst .warn{color:#FFB35C}
 .remote .hint.warn{color:#FFB35C}
 .scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0}
@@ -158,6 +158,21 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .scenes button.pend{border-color:var(--gold);animation:pendBlink .8s infinite alternate}
 @keyframes pendBlink{to{background:rgba(255,188,5,.25)}}
 .rrep{min-height:60px;font-size:20px}
+.povpick{margin-top:12px;padding:12px;border-radius:14px;background:var(--bg);border:1px solid var(--line-2)}
+.povs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+.pv{display:grid;grid-template-columns:1fr auto;border-radius:12px;border:2px solid var(--line-2);background:var(--surface);overflow:hidden}
+.pv.air{border-color:var(--live)}
+.pvm{min-height:62px;padding:6px 10px;text-align:left;display:grid;align-content:center;gap:3px;font:800 17px/1.05 var(--display);letter-spacing:.02em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
+.pvm small{font:700 10px/1 var(--body);letter-spacing:.12em;color:var(--muted)}
+.pv.air .pvm{background:var(--live);color:#fff}.pv.air .pvm small{color:#fff}
+.pv > span{display:grid;grid-template-rows:1fr 1fr;border-left:1px solid var(--line-2)}
+.pvs{width:42px;font:800 15px/1 var(--display);color:var(--muted)}.pvs + .pvs{border-top:1px solid var(--line-2)}
+.pvs.on{background:var(--gold);color:var(--navy)}
+.pvm.pend,.pvs.pend{animation:pendBlink .8s infinite alternate}
+.seats{display:grid;gap:8px}
+.seat{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center}
+.seat b{font:800 18px/1 var(--display);color:var(--gold);text-align:center}
+.seat input,.seat select{min-height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--bg);padding:0 10px;min-width:0}
 .guide{margin-top:12px;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:17px}
 /* Set desk */
 .dpl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -312,7 +327,7 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
     if (unwatch){ unwatch(); unwatch = null; }
     if (role){ unwatch = be.watchSeason(season, onMatches, onState);
       startFinals();
-      be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}};
+      be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}}; paintRemotes();
         if (view === "list" && !document.activeElement?.closest?.("#stBox")) renderList();
         else if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
       if (!obsWatching && be.watchObs){ obsWatching = true; STATIONS.forEach(n => be.watchObs(n, d => { obs[n] = d; paintRemotes(); })); setInterval(paintRemotes, 15000); }
@@ -491,7 +506,7 @@ const OVERLAYS = [["scorebug", "Score bug"], ["vs", "VS screen"], ["lineups", "S
   ["rl-team", "Rocket League: team stats (this game)"], ["rl-players", "Rocket League: player matchup (this game)"], ["rl-box", "Rocket League: box score (this game)"],
   ["rl-team?scope=series", "Rocket League: team stats (whole match)"], ["rl-box?scope=series", "Rocket League: box score (whole match)"],
   ["highlights", "Highlights: last game's clips"], ["highlights?scope=series", "Highlights: every clip this session"],
-  ["corner", "Corner score bug (Fortnite: covers the round tracker)"], ["pov?slot=1", "POV name plate: player 1 in the lineup"], ["pov?slot=2", "POV name plate: player 2 in the lineup"],
+  ["corner", "Corner score bug (Fortnite: covers the round tracker)"], ["pov", "POV name plate: follows the camera picker"], ["pov?slot=1", "POV name plate: player 1 in the lineup"], ["pov?slot=2", "POV name plate: player 2 in the lineup"],
   ["box-score", "Box score popup (whole match, transparent)"], ["box-score?scope=game", "Box score popup (current game only)"], ["post-game", "Post-game stats (full screen)"], ["smash-vs", "Smash VS screen (between games of a set)"], ["duo-pov", "Two POVs at once (frame for both players' screens)"], ["replay-live", "Instant replay + live (split screen)"], ["remote", "LevelUP Remote: lets this page run OBS (Page permissions: Advanced; Shutdown when not visible: off)"]];
 const stationOf = id => STATIONS.find(n => bc.stations[n]?.matchId === id) || "";
 const overlayURL = (layer, n) => { const [page, qs] = layer.split("?"), q = [qs, n === "1" ? "" : `station=${n}`].filter(Boolean).join("&"); return `${SITE}overlay/${page}.html${q ? "?" + q : ""}`; };
@@ -581,21 +596,44 @@ async function instantReplay(n){
   await setStation(n, {...st, replay:{id:Math.random().toString(36).slice(2, 10), at:new Date().toISOString(), label:"Replay", scene, back}},
     scene ? `Saving the replay. The stream cuts to ${scene} in a moment.` : "Saving the replay on the streaming PC."); buzz();
 }
+/* ---------- POV picker: whose camera is on stream ----------
+   Each gaming PC is a "seat" with its own OBS source (usually NDI), named "POV 1", "POV 2"… by default. On stream it's set
+   which player sits at which seat (lineup order to start). Tapping a player shows their seat's source full screen (or
+   in the left / right window of the Two POVs and Replay + Live scenes), and the POV name plates follow. */
+const seatSrcs = st => { const n = Math.max(1, Math.min(6, +st.seatsN || 0)); return Array.from({length:n}, (_, i) => String(st.seatSrc?.[i] || `POV ${i + 1}`)); };
+function seatsOf(n){
+  const st = bc.stations[n] || {}, m = matches.find(x => x.id === st.matchId), ppl = m?.players || [];
+  if (!+st.seatsN) return [];
+  return seatSrcs(st).map((src, i) => { const pid = st.seatPid?.[i] ?? ppl[i]?.id ?? ""; const p = ppl.find(x => x.id === pid) || everyone().get(pid); return {i, src, pid, name:p ? (p.tag || p.name || "Player") : ""}; });
+}
+function povHTML(n){
+  const seats = seatsOf(n).filter(x => x.pid); if (!seats.length) return "";
+  const pv = bc.stations[n]?.pov || {};
+  return `<div class="povpick"><div class="rh"><b>Cameras (POV)</b><span class="rst"><i>Tap a name for full screen · L / R for split screens</i></span></div>
+    <div class="povs">${seats.map(x => `<div class="pv${pv.main === x.pid ? " air" : ""}"><button type="button" class="pvm" data-pov="main" data-seat="${x.i}" data-rn="${n}">${pv.main === x.pid ? `<small>On screen</small>` : `<small>${esc(x.src)}</small>`}${esc(x.name)}</button>
+      <span><button type="button" class="pvs${pv.left === x.pid ? " on" : ""}" data-pov="left" data-seat="${x.i}" data-rn="${n}" aria-label="${esc(x.name)} in the left window">L</button><button type="button" class="pvs${pv.right === x.pid ? " on" : ""}" data-pov="right" data-seat="${x.i}" data-rn="${n}" aria-label="${esc(x.name)} in the right window">R</button></span></div>`).join("")}</div></div>`;
+}
+async function pickPov(n, side, i){
+  const st = bc.stations[n] || {}, seats = seatsOf(n), x = seats[i]; if (!x) return;
+  const id = Math.random().toString(36).slice(2, 10);
+  await setStation(n, {...st, pov:{...(st.pov || {}), [side]:x.pid}, cmd:{id, at:new Date().toISOString(), type:"pov", [side]:x.src, seats:seats.map(y => y.src)}}); buzz();
+}
 function paintRemotes(){
   const sum = $("#remoteSec > summary > span"), sn = cur && stationOf(cur.id);
   if (sum && sn) sum.textContent = obsLive(sn) ? `On air: ${obs[sn].current || ""}` : "Not connected";
   document.querySelectorAll(".remoteBox[data-rn]").forEach(box => {
-    const n = box.dataset.rn, h = stationMine(n) ? remoteHTML(n) : `<p class="hint" style="margin:8px 0 0">Station ${n} is streaming another team's match, so its remote is for coaches.</p>`; if (box._h === h) return; box._h = h; box.innerHTML = h;
+    const n = box.dataset.rn, h = stationMine(n) ? remoteHTML(n) + povHTML(n) : `<p class="hint" style="margin:8px 0 0">Station ${n} is streaming another team's match, so its remote is for coaches.</p>`; if (box._h === h) return; box._h = h; box.innerHTML = h;
     box.querySelectorAll("[data-scene]").forEach(b => b.onclick = () => { if (b.classList.contains("air")) return;
       box.querySelectorAll("[data-scene]").forEach(x => x.classList.remove("air", "pend")); b.classList.add("pend");
       sendCmd(n, {type:"scene", scene:b.dataset.scene}); });
     box.querySelectorAll("[data-rrep]").forEach(b => b.onclick = () => instantReplay(n));
+    box.querySelectorAll("[data-pov]").forEach(b => b.onclick = () => { b.classList.add("pend"); pickPov(n, b.dataset.pov, +b.dataset.seat); });
     bindCopy(box);
   });
 }
 /* a station's OBS settings stay put when it switches matches */
-const RP_SCENE = "Replay + Live", rpKeep = n => { const o = bc.stations[n] || {}; return {replayScene:o.replayScene ?? RP_SCENE, replayBack:o.replayBack ?? "15"}; };
-function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppSets:{}, oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}}; }
+const RP_SCENE = "Replay + Live", rpKeep = n => { const o = bc.stations[n] || {}; return {replayScene:o.replayScene ?? RP_SCENE, replayBack:o.replayBack ?? "15", ...(o.seatSrc ? {seatSrc:o.seatSrc} : {}), ...(o.seatsN ? {seatsN:o.seatsN} : {})}; };
+function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppSets:{}, oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}, seatPid:[], pov:{main:"", left:"", right:""}}; }
 function bindStations(){
   const box = $("#stBox"); if (!box) return;
   box.querySelectorAll("[data-st]").forEach(sel => sel.onchange = async () => {
@@ -1383,6 +1421,7 @@ function streamHTML(g, them){
         <label class="f"><span>Their ${esc(g.charLabel.toLowerCase())}</span><input data-bc="oppChar" list="charList" value="${esc(st.oppChar || "")}" autocomplete="off"></label></div>
         <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
       <label class="f"><span>${esc(them)} logo link (optional)</span><input type="url" inputmode="url" data-bc="oppLogo" value="${esc(st.oppLogo || "")}" placeholder="https://… .png" autocomplete="off"></label>
+      ${seatSetupHTML(g, st)}
       ${g.liveFeed === "sos" ? rlPickHTML(st, them) : cmpPickHTML(g, st, them)}
       <div class="two"><label class="f"><span>Instant replay cuts to this OBS scene</span><input data-bc="replayScene" value="${esc(st.replayScene ?? RP_SCENE)}" placeholder="Blank: don't switch" autocomplete="off"></label>
         <label class="f"><span>Then back to the game</span><select data-bc="replayBack">${[["0", "Stay on the replay"], ["10", "After 10 seconds"], ["15", "After 15 seconds"], ["20", "After 20 seconds"], ["30", "After 30 seconds"]].map(([v, t]) => `<option value="${v}"${String(st.replayBack ?? "15") === v ? " selected" : ""}>${t}</option>`).join("")}</select></label></div>
@@ -1391,6 +1430,25 @@ function streamHTML(g, them){
       <a class="linkbtn" href="stream-guide.html">📖 Stream setup guide</a>`
     : `<p class="hint" style="margin:0">Pick the streaming PC this match is on. The score bug, VS screen, lineups and comparisons on that PC switch to it.</p>`}
   </div></details>`;
+}
+function seatSetupHTML(g, st){
+  const N = +st.seatsN || 0, ppl = cur.players || [], srcs = seatSrcs({...st, seatsN:N || 1});
+  return `<details class="olk" id="seatBox"${N ? " open" : ""}><summary>Player cameras (POV picker)${N ? ` · ${N} seats` : " · off"}</summary><div class="form" style="margin-top:10px">
+    <p class="hint" style="margin:0">One OBS source per gaming PC (usually NDI). Name them in OBS exactly as below, put them all in each scene that shows players, and the remote's camera buttons show one and hide the rest.</p>
+    <label class="f"><span>How many seats</span><select data-seats="n"><option value="0">Off</option>${[1, 2, 3, 4, 5, 6].map(k => `<option value="${k}"${N === k ? " selected" : ""}>${k}</option>`).join("")}</select></label>
+    ${N ? `<div class="seats">${Array.from({length:N}, (_, i) => `<div class="seat"><b>${i + 1}</b><input data-seats="src" data-i="${i}" value="${esc(st.seatSrc?.[i] || srcs[i] || `POV ${i + 1}`)}" aria-label="OBS source for seat ${i + 1}" autocomplete="off">
+      <select data-seats="pid" data-i="${i}" aria-label="Who sits at seat ${i + 1}"><option value="">Nobody</option>${ppl.map(p => `<option value="${esc(p.id)}"${(st.seatPid?.[i] ?? ppl[i]?.id) === p.id ? " selected" : ""}>${esc(p.tag || p.name || "Player")}</option>`).join("")}</select></div>`).join("")}</div>
+      ${ppl.length ? "" : `<p class="hint" style="margin:0">Add who's playing under Players &amp; stats to fill the seats.</p>`}` : ""}
+    <p class="hint" style="margin:0"><a class="linkbtn" href="stream-guide.html#povs">How to set up player cameras</a></p></div></details>`;
+}
+function bindSeats(n){
+  const box = $("#seatBox"); if (!box) return;
+  const save = () => { const st = bc.stations[n] || {}, N = +box.querySelector("[data-seats=n]").value || 0, ppl = cur.players || [];
+    const seatSrc = [...(st.seatSrc || [])], seatPid = Array.from({length:6}, (_, i) => st.seatPid?.[i] ?? ppl[i]?.id ?? "");
+    box.querySelectorAll("[data-seats=src]").forEach(i => seatSrc[+i.dataset.i] = i.value.trim() || `POV ${+i.dataset.i + 1}`);
+    box.querySelectorAll("[data-seats=pid]").forEach(i => seatPid[+i.dataset.i] = i.value);
+    setStation(n, {...st, seatsN:N, seatSrc, seatPid}).then(() => { renderMatch(); $("#onStream") && ($("#onStream").open = true); $("#seatBox") && ($("#seatBox").open = true); }); };
+  box.querySelectorAll("[data-seats]").forEach(i => i.onchange = save);
 }
 function bindStream(){
   const box = $("#onStream"); if (!box) return;
@@ -1404,6 +1462,7 @@ function bindStream(){
     await setStation(k, {...freshStation(cur.id), ...rpKeep(k)}, `On station ${k}. The overlays on that PC show this match now.`); deskStation(); renderMatch(); $("#onStream").open = true;
   });
   if (!n) return;
+  bindSeats(n);
   const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};
     box.querySelectorAll("[data-bc]").forEach(i => st[i.dataset.bc] = i.type === "checkbox" ? i.checked : i.value.trim());
     const was = bc.stations[n]?.compare || {}, themName = box.querySelector("[data-cmp=them]")?.value.trim() || "";

@@ -90,7 +90,7 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
 </header>
 <nav class="toc" aria-label="Sections">
   <a href="#big-picture">Big picture</a><a href="#access">1 · Access</a><a href="#obs">2 · OBS settings</a><a href="#relay">3 · Relay</a>
-  <a href="#scenes">4 · Scenes</a><a href="#remote">5 · Remote</a><a href="#gameday">Game day</a><a href="#games">By game</a><a href="#fix">Fix it</a><a href="#coaches">Coaches</a>
+  <a href="#scenes">4 · Scenes</a><a href="#remote">5 · Remote</a><a href="#povs">6 · Cameras</a><a href="#gameday">Game day</a><a href="#games">By game</a><a href="#fix">Fix it</a><a href="#coaches">Coaches</a>
 </nav></div>
 <main>
   <div class="hero">
@@ -227,6 +227,31 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
     </div>
   </section>
 
+  <section id="povs">
+    <h2><span>Step 6</span>Player cameras <i class="who once">Once per PC</i></h2>
+    <p class="lead">For games where you cycle through players' screens (Marvel Rivals' six players, Fortnite duos). Each gaming PC sends its screen to OBS (usually with NDI), and the Scorekeeper's camera buttons pick whose screen is on stream.</p>
+    <div class="step" data-step="pov-sources"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Name a source for each gaming PC</h3>
+      <ol><li>Add one <b>NDI Source</b> (or capture) per gaming PC. Name them exactly <b>POV 1</b>, <b>POV 2</b>, … <b>POV 6</b>, one per seat. (Different names are fine; type them into the Scorekeeper in the last step.)</li>
+        <li>Open each source's properties and set <b>Behavior</b> to <b>Keep active</b>, so switching is instant instead of flashing black.</li></ol>
+      <div class="warn"><b>Network:</b> six full-quality NDI feeds is a lot of traffic. If the stream stutters, set each NDI source's <b>Bandwidth</b> to <b>Lowest</b> except while testing quality, or use NDI HX on the gaming PCs.</div>
+    </div>
+    <div class="step" data-step="pov-scenes"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Put the sources in your scenes</h3>
+      <ol><li><b>Gameplay:</b> add <b>all</b> the POV sources, each full screen (1920 × 1080), stacked on top of each other. Add the <b>POV name plate: follows the camera picker</b> overlay above them, then the score bug.</li>
+        <li><b>Two POVs:</b> add every POV source in the <b>left</b> window (X 43, Y 214, 896 × 504), then use <b>+ › Add Existing</b> to add every one again in the <b>right</b> window (X 981, Y 214, 896 × 504). That's 12 items; the overlay goes on top.</li>
+        <li><b>Replay + Live:</b> add every POV source in the right window (X 981, Y 214, 896 × 504).</li></ol>
+      <div class="why">The camera buttons show one source and hide the others in every scene. Sources drawn full screen follow the main pick; small ones follow the L or R pick, depending on which side they're on.</div>
+    </div>
+    <div class="step" data-step="pov-scorekeeper"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Turn on the camera buttons</h3>
+      <ol><li>In the Scorekeeper, open the match › <b>On stream</b> › <b>Player cameras (POV picker)</b>.</li>
+        <li>Set <b>How many seats</b> (6 for Marvel Rivals). Check each seat's source name matches OBS, and pick who sits there (it starts in lineup order).</li>
+        <li>The <b>OBS remote</b> now shows a <b>Cameras</b> panel: tap a name for full screen, <b>L</b> or <b>R</b> for the split-screen windows.</li></ol>
+      <div class="why">Switching cameras goes through the LevelUP Relay, so keep it running. The seat source names are remembered for that PC; who sits where is set for each match.</div>
+    </div>
+  </section>
+
   <section id="gameday">
     <h2>Game day <i class="who every">Every stream</i></h2>
     <p class="lead">Once the PC is set up, this is all you do each time.</p>
@@ -286,6 +311,10 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
       <li>Start the relay <b>on the PC running Rocket League</b>.</li>
       <li>If the relay says the Stats API is off, let it turn it on, then restart Rocket League.</li>
       <li>Preview the score bug link with <code>?bg=1</code>; the box at the top says exactly what's wrong.</li></ul></div></details>
+    <details class="faq"><summary>Camera buttons don't change the screen</summary><div><ul>
+      <li>The relay window must be open and connected to OBS.</li>
+      <li>Source names in OBS must match the seat names in the Scorekeeper exactly (On stream › Player cameras).</li>
+      <li>The relay window prints each camera switch; a yellow line says what went wrong.</li></ul></div></details>
     <details class="faq"><summary>Wrong names or characters on screen</summary><div><p>Everything comes from the Scorekeeper: our players under <b>Players &amp; stats</b>, theirs under <b>On stream</b> (or the Set desk for Smash). Fix it there and the stream updates within a second.</p></div></details>
   </section>
 
@@ -311,7 +340,8 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
     ["remote", "LevelUP Remote", "Invisible. Lets the Scorekeeper run OBS. Shutdown when not visible: OFF; Page permissions: Advanced."],
     ["scorebug", "Score bug", "Top of the screen over gameplay. Every game."],
     ["corner", "Corner score bug", "Fortnite: top-right, over the round counter."],
-    ["pov?slot=1", "POV name plate: player 1", "Fortnite: whose screen is showing."],
+    ["pov", "POV name plate: follows the camera picker", "Gameplay scene: names whoever the camera buttons put on screen."],
+    ["pov?slot=1", "POV name plate: player 1", "Always player 1 in the lineup."],
     ["pov?slot=2", "POV name plate: player 2", ""],
     ["vs", "VS screen", "Before the match."],
     ["lineups", "Starting lineups", "Before the match."],

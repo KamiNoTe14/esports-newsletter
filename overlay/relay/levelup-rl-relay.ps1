@@ -143,6 +143,19 @@ function ServeHttp($ctx){
     $clipNames.Enqueue(@{label = $label; game = $gameNo}); ObsRequest "SaveReplayBuffer" $null; Say "Instant replay: saving the last few seconds." "Cyan"
     SendText $r '{"ok":true}' "application/json"; return
   }
+  # POV picker from the scorekeeper: show one player's camera (an OBS source, usually an NDI source per gaming PC).
+  # In every scene that has these sources, the one picked is shown and the rest are hidden. A source drawn small
+  # (a split-screen window) counts as the left or right window by where it sits; a full-screen one is the main POV.
+  if ($path -eq "/pov"){
+    $r.AddHeader("Cache-Control", "no-store"); $qs = $ctx.Request.QueryString; $id = [string]$qs["id"]
+    if (-not $clipsOn -or -not $obsReady){ SendText $r '{"ok":false,"why":"OBS is not connected (set up highlight clips first)"}' "application/json"; return }
+    if ($id -and $id -eq $script:lastPovId){ SendText $r '{"ok":true,"repeat":true}' "application/json"; return }
+    $script:lastPovId = $id
+    $script:povWant = @{main = [string]$qs["main"]; left = [string]$qs["left"]; right = [string]$qs["right"]; seats = @(([string]$qs["seats"]).Split(",") | Where-Object { $_ })}
+    $script:povReqs = @{}; ObsRequest "GetSceneList" $null; $script:povListId = $obsLastId
+    Say ("POV: " + ((@("main", "left", "right") | Where-Object { $povWant[$_] } | ForEach-Object { "$_ = $($povWant[$_])" }) -join ", ")) "Cyan"
+    SendText $r '{"ok":true}' "application/json"; return
+  }
   SendText $r "LevelUP relay is running." "text/plain"
 }
 function Broadcast([string]$text){
@@ -179,13 +192,13 @@ try {
 if (-not $ClipFolder){ $desk = [Environment]::GetFolderPath("Desktop"); if (-not $desk){ $desk = Join-Path ([string]$env:USERPROFILE + [string]$env:HOME) "Desktop" }; $ClipFolder = Join-Path $desk "LevelUP Highlights" }
 $clipKinds = @($ClipEvents -split "," | ForEach-Object { $_.Trim().ToLower() } | Where-Object { $_ })
 $obs = $null; $obsReady = $false; $obsNext = [datetime]::MinValue; $obsRecv = $null; $obsBuf = New-Object byte[] 65536; $obsMsg = New-Object System.Text.StringBuilder
-$clips = New-Object System.Collections.ArrayList; $lastSaveId = ""; $rpScene = ""; $rpBack = 0; $rpFrom = ""; $rpReturn = $null; $gameNo = 1; $lastEnd = [datetime]::MinValue   # clips saved this session, by game (for the Highlights scene)
+$clips = New-Object System.Collections.ArrayList; $lastSaveId = ""; $lastPovId = ""; $povWant = $null; $povReqs = @{}; $povListId = ""; $obsLastId = ""; $rpScene = ""; $rpBack = 0; $rpFrom = ""; $rpReturn = $null; $gameNo = 1; $lastEnd = [datetime]::MinValue   # clips saved this session, by game (for the Highlights scene)
 $obsReq = 0; $pendingClip = $null; $clipNames = New-Object System.Collections.Queue; $obsSaid = $false; $rbWarned = $false
 function ObsSend($obj){
   $b = [System.Text.Encoding]::UTF8.GetBytes(($obj | ConvertTo-Json -Compress -Depth 6))
   $obs.SendAsync((New-Object System.ArraySegment[byte] -ArgumentList (,$b)), [System.Net.WebSockets.WebSocketMessageType]::Text, $true, [System.Threading.CancellationToken]::None).Wait(3000) | Out-Null
 }
-function ObsRequest($type, $data){ $script:obsReq++; $m = @{op = 6; d = @{requestType = $type; requestId = "lu$($script:obsReq)"}}; if ($data){ $m.d.requestData = $data }; ObsSend $m }
+function ObsRequest($type, $data){ $script:obsReq++; $script:obsLastId = "lu$($script:obsReq)"; $m = @{op = 6; d = @{requestType = $type; requestId = $script:obsLastId}}; if ($data){ $m.d.requestData = $data }; ObsSend $m }
 # one whole message, or $null if none has arrived yet (never waits unless $wait is set)
 function ObsPoll([int]$wait = 0){
   $until = (Get-Date).AddMilliseconds($wait)
@@ -233,6 +246,19 @@ function ObsTick {
     while ($m = ObsPoll 0){
       if ($m.op -eq 7 -and $m.d.requestType -eq "StartReplayBuffer" -and -not $m.d.requestStatus.result -and $m.d.requestStatus.code -ne 500 -and -not $rbWarned){
         Say "OBS's Replay Buffer is off, so no clips can be saved. In OBS: Settings > Output > Replay Buffer > tick 'Enable Replay Buffer', then restart this window." "Yellow"; $script:rbWarned = $true }
+      if ($m.op -eq 7 -and $m.d.requestType -eq "GetSceneList" -and $m.d.requestId -eq $povListId -and $m.d.requestStatus.result){
+        foreach ($sc in @($m.d.responseData.scenes)){ ObsRequest "GetSceneItemList" @{sceneName = $sc.sceneName}; $povReqs[$obsLastId] = [string]$sc.sceneName } }
+      if ($m.op -eq 7 -and $m.d.requestType -eq "GetSceneItemList" -and $povWant -and $povReqs.ContainsKey([string]$m.d.requestId)){
+        $scene = $povReqs[[string]$m.d.requestId]; $povReqs.Remove([string]$m.d.requestId)
+        foreach ($it in @($m.d.responseData.sceneItems)){
+          if ($povWant.seats -notcontains [string]$it.sourceName){ continue }
+          $t = $it.sceneItemTransform; $w = [double]$t.width; if ($w -le 0){ $w = [double]$t.boundsWidth }
+          $side = if ($w -gt 0 -and $w -lt 1300){ if ([double]$t.positionX -lt 900){ "left" } else { "right" } } else { "main" }
+          $want = $povWant[$side]; if (-not $want){ continue }
+          $on = ([string]$it.sourceName -eq $want)
+          if ([bool]$it.sceneItemEnabled -ne $on){ ObsRequest "SetSceneItemEnabled" @{sceneName = $scene; sceneItemId = [int]$it.sceneItemId; sceneItemEnabled = $on} }
+        } }
+      if ($m.op -eq 7 -and $m.d.requestType -eq "SetSceneItemEnabled" -and -not $m.d.requestStatus.result){ Say "Couldn't switch a POV: $($m.d.requestStatus.comment)" "Yellow" }
       if ($m.op -eq 7 -and $m.d.requestType -eq "GetCurrentProgramScene" -and $m.d.requestStatus.result){ $script:rpFrom = [string]$(if ($m.d.responseData.sceneName){ $m.d.responseData.sceneName } else { $m.d.responseData.currentProgramSceneName }) }
       if ($m.op -eq 7 -and $m.d.requestType -eq "SetCurrentProgramScene" -and -not $m.d.requestStatus.result){ Say "Couldn't switch OBS scenes: $($m.d.requestStatus.comment). Check the scene name in the scorekeeper (On stream) matches OBS exactly." "Yellow" }
       if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ $script:rpScene = "";  Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }

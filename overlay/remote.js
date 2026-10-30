@@ -57,11 +57,18 @@ function instantReplay(c){
   setTimeout(go, 2500);   // older OBS doesn't send the saved event
   OBS.saveReplayBuffer();
 }
+/* POV picker: hiding and showing sources needs OBS's WebSocket, which the LevelUP Relay on this PC has. */
+const RELAY = "http://localhost:" + (q.get("relay") || "49124");
+function pov(c){
+  const qs = new URLSearchParams({id:c.id, seats:(c.seats || []).join(",")}); ["main", "left", "right"].forEach(k => { if (c[k]) qs.set(k, c[k]); });
+  fetch(`${RELAY}/pov?${qs}`, {cache:"no-store"}).then(r => r.json()).then(j => { if (!j.ok) say("POV: " + (j.why || "the relay couldn't switch it")); }).catch(() => say("POV: start the LevelUP Relay on this PC to switch cameras."));
+}
 function run(c){
   if (!c?.id || seen.has(c.id) || Date.now() - new Date(c.at).getTime() > 15000) return;
   seen.add(c.id);
   if (c.type === "scene") setScene(c.scene);
   else if (c.type === "replay") instantReplay(c);
+  else if (c.type === "pov") pov(c);
 }
 
 (async () => {

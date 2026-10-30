@@ -690,8 +690,9 @@ function postGame(m){
    from the top-left corner to the bottom middle. */
 function pov(m){
   const ppl = m.players || [], want = String(q.get("player") || "").toLowerCase();
+  const follow = !want && !q.get("slot") && station.pov?.[q.get("side") || "main"];   // no ?slot / ?player: follow the scorekeeper's POV picker
   const p = want ? ppl.find(x => [x.tag, x.name, x.id, tagOf(x), nameOf(x)].some(v => String(v || "").toLowerCase() === want))
-    : ppl[Math.max(0, (+q.get("slot") || 1) - 1)];
+    : follow ? ppl.find(x => x.id === follow) || everyoneById(follow) : ppl[Math.max(0, (+q.get("slot") || 1) - 1)];
   if (!p && !q.get("name")){ empty(`No player ${want ? `"${q.get("player")}"` : `in slot ${q.get("slot") || 1}`} in this match's lineup. Add the lineup in the scorekeeper (Players & stats).`); return; }
   const tag = q.get("name") || (p ? tagOf(p) || nameOf(p) : ""), real = p && tagOf(p) && nameOf(p) !== tag ? nameOf(p) : "";
   const us = sides(m).find(s => s.us);
@@ -706,13 +707,16 @@ function pov(m){
    Who's in each window: the first two players in the scorekeeper's lineup, or ?left=TRE4TY&right=Gavin (gamertag or
    name), or ?swap=1 to switch them. ?leftName= / ?rightName= show a different in-game name. */
 const DUO_WIN = [{x:43, y:214}, {x:981, y:214}], DUO_W = 896, DUO_H = 504;
+const everyoneById = id => { const r = people.get(id); return r ? {...r, id} : null; };
 function findPlayer(m, want, slot){
   const ppl = m.players || [], k = String(want || "").toLowerCase();
   return k ? ppl.find(x => [x.tag, x.name, x.id, tagOf(x), nameOf(x)].some(v => String(v || "").toLowerCase() === k)) : ppl[slot];
 }
 function duoPov(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), us = L.us ? L : R, unit = g.unit || "Game";
-  let picks = [findPlayer(m, q.get("left"), 0), findPlayer(m, q.get("right"), 1)];
+  /* who's in each window: ?left= / ?right=, else the scorekeeper's POV picker, else the first two in the lineup */
+  const picked = side => { const id = station.pov?.[side]; return id ? (m.players || []).find(x => x.id === id) || everyoneById(id) : null; };
+  let picks = [q.get("left") ? findPlayer(m, q.get("left"), 0) : picked("left") || findPlayer(m, "", 0), q.get("right") ? findPlayer(m, q.get("right"), 1) : picked("right") || findPlayer(m, "", 1)];
   if (q.get("swap")) picks = picks.reverse();
   const names = [q.get(q.get("swap") ? "rightName" : "leftName"), q.get(q.get("swap") ? "leftName" : "rightName")];
   const n = m.status === "final" ? Math.max(1, (m.games || []).filter(x => x.winner).length) : (m.current || 1);
@@ -867,10 +871,18 @@ function askReplay(r){
   if (!r?.id || r.id === replayAsked || Date.now() - new Date(r.at).getTime() > 20000) return; replayAsked = r.id;
   fetch(`${HL_BASE}/save?id=${encodeURIComponent(r.id)}&label=${encodeURIComponent(r.label || "Replay")}${r.scene ? `&scene=${encodeURIComponent(r.scene)}&back=${+r.back || 0}` : ""}`, {cache:"no-store"}).catch(() => {});
 }
+/* POV picker in the scorekeeper: ask the relay to show that player's camera source in OBS (the LevelUP Remote asks too;
+   the relay ignores repeats). */
+let povAsked = "";
+function askPov(c){
+  if (c?.type !== "pov" || !c.id || c.id === povAsked || Date.now() - new Date(c.at).getTime() > 15000) return; povAsked = c.id;
+  const qs = new URLSearchParams({id:c.id, seats:(c.seats || []).join(",")}); ["main", "left", "right"].forEach(k => { if (c[k]) qs.set(k, c[k]); });
+  fetch(`${HL_BASE}/pov?${qs}`, {cache:"no-store"}).catch(() => {});
+}
 watchBroadcast(b => {
   const next = (b.stations || {})[STATION] || {};
   if (next.splash) splash(next.splash);
-  askReplay(next.replay);
+  askReplay(next.replay); askPov(next.cmd);
   if (next.show?.on){
     if (stopMatch){ Promise.resolve(stopMatch).then(f => f && f()); stopMatch = null; }
     const was = station.show?.on; station = next; match = showMatch(next);

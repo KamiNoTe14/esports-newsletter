@@ -211,6 +211,8 @@ details.sec>summary span{font:600 13px var(--body);letter-spacing:0;text-transfo
 .phead{display:flex;align-items:center}.phead>button[data-player]{flex:1;min-width:0}
 .stb{flex:none;margin-right:10px;min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);color:var(--muted);font:700 13px/1 var(--body)}
 .stb.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.ochips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.ochips .stb{margin:0;display:grid;justify-items:start;align-content:center;padding:6px 12px;text-align:left}.ochips .stb small{font-weight:500;font-size:11px;opacity:.8}
+.ochips .stb:not(.on){background:var(--surface)}
 .prow>button,.phead>button[data-player]{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:8px 12px;text-align:left}
 .prow .ck{width:26px;height:26px;border-radius:7px;border:2px solid var(--line-2);display:grid;place-items:center;font-weight:800;color:var(--navy);flex:none}
 .prow.on .ck{background:var(--gold);border-color:var(--gold)}
@@ -642,7 +644,7 @@ function paintRemotes(){
 }
 /* a station's OBS settings stay put when it switches matches */
 const RP_SCENE = "Replay + Live", rpKeep = n => { const o = bc.stations[n] || {}; return {replayScene:o.replayScene ?? RP_SCENE, replayBack:o.replayBack ?? "15", ...(o.seatSrc ? {seatSrc:o.seatSrc} : {}), ...(o.seatsN ? {seatsN:o.seatsN} : {})}; };
-function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppSets:{}, oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}, seatPid:[], pov:{main:"", left:"", right:""}}; }
+function freshStation(id){ return {matchId:id, swap:false, rlSide:"", oppLineup:"", oppNow:"", oppChar:"", oppSets:{}, oppLogo:"", compare:{a:"", b:""}, rlCompare:{us:"", them:""}, seatPid:[], pov:{main:"", left:"", right:""}, oppPicked:false}; }
 function bindStations(){
   const box = $("#stBox"); if (!box) return;
   box.querySelectorAll("[data-st]").forEach(sel => sel.onchange = async () => {
@@ -1525,10 +1527,30 @@ async function cmpScout(n, name){
     await setStation(n, {...st, compare:{...st.compare, themStats:avg, themGp:rows.length, themRole:role, themMain:main}});
   } catch(e){ console.error(e); }
 }
+/* The opponent's roster comes from their scouting report. On stream, tap who's starting; usual starters (ticked in
+   scouting) are picked automatically when the match goes on a station with no lineup yet. */
+let oppRoster = {};
+function oppDefault(id){
+  const n = stationOf(id), st = n ? bc.stations[n] : null, ros = oppRoster[id] || [];
+  if (!st || st.oppLineup || st.oppPicked || !ros.length) return;
+  const size = Math.max(1, +gameFor(site, cur.game).teamSize || 1), starters = ros.filter(p => p.starter);
+  const pick = (starters.length ? starters : ros).slice(0, size).map(p => p.tag);
+  setStation(n, {...st, oppLineup:pick.join(", ")});
+}
+function oppRosterHTML(st, them){
+  const ros = oppRoster[cur.id], on = new Set(listOf(st.oppLineup).map(t => t.toLowerCase()));
+  if (!ros) return "";
+  if (!ros.length) return `<p class="hint" style="margin:0">No roster for ${esc(them)} in scouting yet. Add it there (Roster, with usual starters ticked) and it shows up here.</p>`;
+  return `<div id="oppRoster"><div class="ochips">${ros.map(p => { const sel = on.has(String(p.tag).toLowerCase());
+      return `<button type="button" class="stb${sel ? " on" : ""}" data-opst="${esc(p.tag)}" aria-pressed="${sel}">${sel ? "✓ " : ""}${esc(p.tag)}${p.role ? `<small>${esc(p.role)}</small>` : ""}</button>`; }).join("")}</div>
+    <p class="hint" style="margin:6px 0 0">From ${esc(them)}'s scouting roster: tap who's starting (${on.size} picked). <a class="linkbtn" href="../../scout/" target="_blank" rel="noopener">Edit roster</a></p></div>`;
+}
 async function loadOppNames(){
   if (!cur || rlOppNames[cur.id] || !be.scoutFor) return;
   const id = cur.id; rlOppNames[id] = [];
   try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || ""); rlOppNames[id] = (r?.players || []).map(p => p.tag).filter(Boolean);
+    oppRoster[id] = (r?.players || []).filter(p => p.tag); oppDefault(id);
+    if (cur?.id === id && $("#oppRoster") && !document.activeElement?.closest?.("#details")) renderMatch(true);
     const dl = $("#rlThem") || $("#cmpThem"); if (dl && cur?.id === id) rlOppNames[id].forEach(n => { if (![...dl.options].some(o => o.value === n)){ const o = document.createElement("option"); o.value = n; dl.appendChild(o); } }); } catch(e){}
 }
 
@@ -1544,7 +1566,8 @@ function streamHTML(g, them){
     ${n ? `${g.liveFeed === "sos" ? `<label class="f"><span>Hartland's color in the Rocket League lobby</span><select data-bc="rlSide"><option value="">Work it out from player names</option><option value="blue"${st.rlSide === "blue" ? " selected" : ""}>Blue (left side of the score bug)</option><option value="orange"${st.rlSide === "orange" ? " selected" : ""}>Orange (right side)</option></select></label>
       <p class="hint" style="margin:0">The score bug reads the clock and goals straight from Rocket League on the PC running the game (through the LevelUP Relay). When a game ends, its stats and winner show up under Stats from the stream to save.</p>`
       : `<label class="tog"><input type="checkbox" data-bc="swap"${st.swap ? " checked" : ""}> Hartland on the right side (we're the away team)</label>`}
-      <label class="f"><span>${esc(them)} lineup (gamertags, commas between)</span><input data-bc="oppLineup" value="${esc(st.oppLineup || "")}" placeholder="Shown on the VS screen and starting lineups" autocomplete="off"></label>
+      <div class="f"><span>${esc(them)} starting lineup</span>${oppRosterHTML(st, them)}
+        <input data-bc="oppLineup" value="${esc(st.oppLineup || "")}" placeholder="Gamertags, commas between (VS screen and starting lineups)" autocomplete="off" aria-label="${esc(them)} starting lineup"></div>
       ${oneVone && deskOn(g) ? `<p class="hint" style="margin:0">Who's playing and their ${esc(g.charLabel.toLowerCase())}s come from the ${esc(g.unit || "Set")} desk at the top.</p>` : oneVone ? `<div class="two"><label class="f"><span>${esc(them)} player on now</span><input data-bc="oppNow" value="${esc(st.oppNow || "")}" autocomplete="off"></label>
         <label class="f"><span>Their ${esc(g.charLabel.toLowerCase())}</span><input data-bc="oppChar" list="charList" value="${esc(st.oppChar || "")}" autocomplete="off"></label></div>
         <p class="hint" style="margin:0">Our player and ${esc(g.charLabel.toLowerCase())} on the score bug come from the current ${esc((g.unit || "game").toLowerCase())}'s tab in Players & stats.</p>` : ""}
@@ -1591,8 +1614,15 @@ function bindStream(){
     await setStation(k, {...freshStation(cur.id), ...rpKeep(k)}, `On station ${k}. The overlays on that PC show this match now.`); deskStation(); renderMatch(); $("#onStream").open = true;
   });
   if (!n) return;
-  bindSeats(n); bindReader(n);
+  bindSeats(n); bindReader(n); loadOppNames(); if (oppRoster[cur.id]) oppDefault(cur.id);
+  box.querySelectorAll("[data-opst]").forEach(b => b.onclick = () => { const st = bc.stations[n] || {}, tag = b.dataset.opst, ros = oppRoster[cur.id] || [];
+    const cur0 = listOf(st.oppLineup), has = cur0.some(t => t.toLowerCase() === tag.toLowerCase());
+    const next = has ? cur0.filter(t => t.toLowerCase() !== tag.toLowerCase()) : [...cur0, tag];
+    /* keep roster order, then anything typed by hand */
+    const order = [...ros.map(p => p.tag).filter(t => next.some(x => x.toLowerCase() === t.toLowerCase())), ...next.filter(t => !ros.some(p => p.tag.toLowerCase() === t.toLowerCase()))];
+    setStation(n, {...st, oppLineup:order.join(", "), oppPicked:true}).then(() => { renderMatch(); $("#onStream") && ($("#onStream").open = true); }); buzz(); });
   const save = () => { const st = {...freshStation(cur.id), ...bc.stations[n]};
+    const ol = box.querySelector("[data-bc=oppLineup]"); if (ol && ol.value.trim() !== String(bc.stations[n]?.oppLineup || "")) st.oppPicked = true;
     box.querySelectorAll("[data-bc]").forEach(i => st[i.dataset.bc] = i.type === "checkbox" ? i.checked : i.value.trim());
     const was = bc.stations[n]?.compare || {}, themName = box.querySelector("[data-cmp=them]")?.value.trim() || "";
     st.compare = {a:box.querySelector("[data-cmp=a]")?.value || "", them:themName, themChar:box.querySelector("[data-cmp=themChar]")?.value.trim() || "",

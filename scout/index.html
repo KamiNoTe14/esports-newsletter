@@ -91,6 +91,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .pcard b{font-family:ui-monospace,Consolas,Menlo,monospace}
 .pcard .r{color:var(--muted);font-size:13px;margin-left:6px}
 .pcard p{margin:4px 0 0;white-space:pre-wrap}
+.pst{display:grid;gap:6px;justify-items:start}.stk{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.sbadge{margin-left:8px;padding:2px 7px;border-radius:5px;background:var(--gold, #FFBC05);color:#00274C;font:700 11px/1.4 sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.paste{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;margin:10px 0}
 .vods{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
 .note{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
 .note-h{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
@@ -334,9 +337,11 @@ function drawReport(M){
     ${txt("plan", "Game plan", "How we beat them: draft, roles, what to focus on.")}
     ${txt("tendencies", "How they play", "Their habits, strengths, what they fall back on under pressure.")}
     ${txt("picks", "Picks, maps, stages and bans", "What they pick and ban, favorite maps or stages, counters that worked.")}
-    <div class="sec"><div class="sec-h"><h4>Players to watch</h4>${ed ? `<button class="btn btn-line btn-sm" id="addP">+ Player</button>` : ""}</div>
-      ${ed ? `<div class="plist">${players.map((p, i) => `<div class="prow"><input data-p="${i}" data-pk="tag" value="${esc(p.tag || "")}" placeholder="Gamertag"><input data-p="${i}" data-pk="role" value="${esc(p.role || "")}" placeholder="Main / role"><textarea data-p="${i}" data-pk="notes" rows="2" placeholder="What to expect">${esc(p.notes || "")}</textarea><button class="btn btn-line btn-sm danger" data-delp="${i}">Remove</button></div>`).join("")}</div><p class="muted" style="margin:0">Gamertags only, no real names. Opponent info stays in scouting and never appears on the public site.</p>`
-        : players.length ? `<div class="plist">${players.map(p => `<div class="pcard"><b>${esc(p.tag)}</b>${p.role ? `<span class="r">${esc(p.role)}</span>` : ""}${p.notes ? `<p>${esc(p.notes)}</p>` : ""}</div>`).join("")}</div>` : `<p class="empty">Nothing yet.</p>`}</div>
+    <div class="sec"><div class="sec-h"><h4>Roster</h4>${ed ? `<button class="btn btn-line btn-sm" id="addP">+ Player</button>` : `<span class="muted">${players.length} player${players.length === 1 ? "" : "s"}${players.some(p => p.starter) ? ` · ${players.filter(p => p.starter).length} usual starters` : ""}</span>`}</div>
+      ${ed ? `<div class="plist">${players.map((p, i) => `<div class="prow"><input data-p="${i}" data-pk="tag" value="${esc(p.tag || "")}" placeholder="Gamertag"><input data-p="${i}" data-pk="role" value="${esc(p.role || "")}" placeholder="Main / role"><textarea data-p="${i}" data-pk="notes" rows="2" placeholder="What to expect">${esc(p.notes || "")}</textarea><span class="pst"><label class="stk"><input type="checkbox" data-pst="${i}"${p.starter ? " checked" : ""}> Usual starter</label><button class="btn btn-line btn-sm danger" data-delp="${i}">Remove</button></span></div>`).join("")}</div>
+        <div class="paste"><textarea id="pasteP" rows="2" placeholder="Paste a roster: gamertags separated by commas or new lines"></textarea><button class="btn btn-line btn-sm" id="pasteAdd">Add these</button></div>
+        <p class="muted" style="margin:0">Gamertags only, no real names. The roster shows up in the scorekeeper for matches against this school, where you tick who's starting; usual starters are ticked for you. Opponent info stays in scouting and never appears on the public site.</p>`
+        : players.length ? `<div class="plist">${players.map(p => `<div class="pcard"><b>${esc(p.tag)}</b>${p.starter ? `<span class="sbadge">Starter</span>` : ""}${p.role ? `<span class="r">${esc(p.role)}</span>` : ""}${p.notes ? `<p>${esc(p.notes)}</p>` : ""}</div>`).join("")}</div>` : `<p class="empty">No roster yet. Edit the report to add their players.</p>`}</div>
     ${statsHTML(r)}
     <div class="sec"><div class="sec-h"><h4>VODs and replays</h4>${ed ? `<button class="btn btn-line btn-sm" id="addV">+ Link</button>` : ""}</div>
       ${ed ? `<div class="plist">${vods.map((v, i) => `<div class="prow" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto"><input data-v="${i}" data-vk="label" value="${esc(v.label || "")}" placeholder="What it shows (Game 2, 4:10)"><input data-v="${i}" data-vk="url" value="${esc(v.url || "")}" placeholder="https://youtu.be/…"><button class="btn btn-line btn-sm danger" data-delv="${i}">Remove</button></div>`).join("")}</div>`
@@ -358,15 +363,19 @@ function bindReport(r){
   q("#cancel") && (q("#cancel").onclick = () => { editing = null; drawMain(); });
   const pull = () => { M.querySelectorAll("[data-k]").forEach(t => editDraft[t.dataset.k] = t.value);
     M.querySelectorAll("[data-p]").forEach(t => editDraft.players[+t.dataset.p][t.dataset.pk] = t.value);
+    M.querySelectorAll("[data-pst]").forEach(t => editDraft.players[+t.dataset.pst].starter = t.checked);
     M.querySelectorAll("[data-v]").forEach(t => editDraft.vods[+t.dataset.v][t.dataset.vk] = t.value); };
   q("#addP") && (q("#addP").onclick = () => { pull(); editDraft.players.push({tag:"", role:"", notes:""}); drawMain(); });
+  q("#pasteAdd") && (q("#pasteAdd").onclick = () => { const names = q("#pasteP").value.split(/[,\n]+/).map(x => x.trim()).filter(Boolean); pull();
+    const have = new Set(editDraft.players.map(p => String(p.tag || "").toLowerCase()));
+    names.forEach(n => { if (!have.has(n.toLowerCase()) && editDraft.players.length < 40){ editDraft.players.push({tag:n, role:"", notes:""}); have.add(n.toLowerCase()); } }); drawMain(); });
   q("#addV") && (q("#addV").onclick = () => { pull(); editDraft.vods.push({label:"", url:""}); drawMain(); });
   M.querySelectorAll("[data-delp]").forEach(b => b.onclick = () => { pull(); editDraft.players.splice(+b.dataset.delp, 1); drawMain(); });
   M.querySelectorAll("[data-delv]").forEach(b => b.onclick = () => { pull(); editDraft.vods.splice(+b.dataset.delv, 1); drawMain(); });
   q("#save") && (q("#save").onclick = async () => { pull();
     const data = {school:r.school, schoolKey:r.schoolKey, game:r.game, createdAt:r.createdAt || "", createdBy:r.createdBy || "",
       plan:editDraft.plan.trim(), tendencies:editDraft.tendencies.trim(), picks:editDraft.picks.trim(),
-      players:editDraft.players.map(p => ({tag:String(p.tag || "").trim(), role:String(p.role || "").trim(), notes:String(p.notes || "").trim()})).filter(p => p.tag || p.notes).slice(0, 40),
+      players:editDraft.players.map(p => ({tag:String(p.tag || "").trim(), role:String(p.role || "").trim(), notes:String(p.notes || "").trim(), ...(p.starter ? {starter:true} : {})})).filter(p => p.tag || p.notes).slice(0, 40),
       vods:editDraft.vods.map(v => ({label:String(v.label || "").trim(), url:String(v.url || "").trim()})).filter(v => v.url).slice(0, 40),
       ...(r.statGames ? {statGames:r.statGames} : {}),
       updatedAt:new Date().toISOString(), updatedBy:user.email};

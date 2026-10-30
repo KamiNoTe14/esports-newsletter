@@ -258,7 +258,7 @@ function seriesGames(m){
   return seen.length > entered.length ? [...entered, ...seen.slice(entered.length)] : entered;
 }
 let rlStatic = "", rlLive = null;
-function rlbug(m){
+function rlbug(m, wrap = h => h){
   const g = gameFor(site, m.game), need = Math.floor((+m.bestOf || 1) / 2) + 1, us = ourTeamNum(m);
   const played = m.status === "final" ? (m.games || []).filter(x => x.winner) : seriesGames(m);
   const usSide = {name:US.short, logo:US.logo, won:played.filter(x => x.winner === "us").length, ...OUR_COLORS};
@@ -277,7 +277,8 @@ function rlbug(m){
       <div class="sub">${pips(sides[0])}<span>${m.status === "final" ? "" : `Game <em>${gameNo}</em> &nbsp;|&nbsp; `}Best of <em>${esc(m.bestOf)}</em></span>${pips(sides[1], true)}</div>
       <div class="goal" hidden></div>
     </div>${q.get("card") === "0" ? "" : `<div class="pcard" hidden></div>`}`;
-  if (html !== rlStatic){ rlStatic = html; out.html = html; rlLive = null; }
+  const full = wrap(html);
+  if (full !== rlStatic){ rlStatic = full; out.html = full; rlLive = null; }
   rlUpdate(us); diag();
 }
 /* Clock, live score, replay and goal banner change many times a second, so they're patched in place
@@ -723,23 +724,70 @@ function duoPov(m){
     return `<div class="dpl d${i}" style="left:${DUO_WIN[i].x}px;top:${DUO_WIN[i].y + DUO_H + 18}px;width:${DUO_W}px">
       <div class="dplate" style="${skin(us)}"><div class="dlg">${logoHTML(US.logo, US.short)}</div><div class="dnm"><b style="font-size:${fitName(tag, 56, 420)}px">${esc(tag)}</b>${real ? `<small>${esc(real)}</small>` : ""}</div>
       ${stats ? `<div class="dst"><i>${esc(unit)} ${n}</i>${stats}</div>` : ""}</div></div>`; };
-  const win = i => `<div class="dwin d${i}" style="left:${DUO_WIN[i].x}px;top:${DUO_WIN[i].y}px;width:${DUO_W}px;height:${DUO_H}px">${q.get("bg") ? `<span class="dguide">${i ? "Right" : "Left"} POV · X ${DUO_WIN[i].x}, Y ${DUO_WIN[i].y} · ${DUO_W} × ${DUO_H}</span>` : ""}</div>`;
+  splitShell(m, [plate(picks[0], 0), plate(picks[1], 1)], ["Left POV", "Right POV"]);
+}
+/* The split-screen frame: background cut out where the two windows are, the plates under them, the game chips, and
+   the score bug on top (Rocket League's live one when the game feeds it). */
+function splitShell(m, plates, guides, cls = ""){
+  const g = gameFor(site, m.game), [L] = sides(m), unit = g.unit || "Game";
+  const win = i => `<div class="dwin d${i}" style="left:${DUO_WIN[i].x}px;top:${DUO_WIN[i].y}px;width:${DUO_W}px;height:${DUO_H}px">${q.get("bg") ? `<span class="dguide">${esc(guides[i])} · X ${DUO_WIN[i].x}, Y ${DUO_WIN[i].y} · ${DUO_W} × ${DUO_H}</span>` : ""}</div>`;
   const games = (m.games || []).filter(x => x.winner || x.us || x.them).sort((a, b) => a.n - b.n);
-  const chip = x => `<span class="dgc${x.winner ? " " + (x.winner === "us" ? "w" : "l") : " live"}"><small>${esc(unit[0])}${x.n}</small>${L.us ? `${x.us || 0}–${x.them || 0}` : `${x.them || 0}–${x.us || 0}`}</span>`;
+  const chip = x => `<span class="dgc${x.winner ? " " + (x.winner === "us" ? "w" : "l") : " live"}"><small>${esc(unit[0])}${x.n}</small>${g.points ? (L.us ? `${x.us || 0}–${x.them || 0}` : `${x.them || 0}–${x.us || 0}`) : x.winner === "us" ? "W" : x.winner ? "L" : "Live"}</span>`;
   const firstTo = +g.firstTo || 0;
   const foot = `<div class="dfoot"><span class="tape">${games.map(chip).join("")}${firstTo ? `First to <em>${firstTo}</em> · ` : ""}Best of <em>${esc(m.bestOf)}</em></span></div>`;
-  /* the frame is cut out where the two windows are, so the NDI sources underneath show through */
+  /* the frame is cut out where the two windows are, so what's underneath shows through */
   const holes = DUO_WIN.map(w => `linear-gradient(#000,#000) ${w.x}px ${w.y}px/${DUO_W}px ${DUO_H}px no-repeat`).join(",");
   const art = artFor(m, g);
-  scorebug(m, bug => `<div class="duo">
+  const wrap = bug => `<div class="duo ${cls}">
     <div class="dbg" style="-webkit-mask:linear-gradient(#000,#000),${holes};-webkit-mask-composite:xor;mask-composite:exclude">
       <div class="full"><div class="half solo" style="${skin(OUR_COLORS)}"></div><div class="fab"></div>${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="vig"></div>
       <div class="scrap br"><i></i></div>${claw("stk")}</div></div>
-    ${win(0)}${win(1)}${plate(picks[0], 0)}${plate(picks[1], 1)}${foot}${bug}</div>`);
+    ${win(0)}${win(1)}${plates.join("")}${foot}${bug}</div>`;
+  if (g.liveFeed === "sos"){ startSOS(); rlbug(m, wrap); } else scorebug(m, wrap);
+}
+
+/* ---------- instant replay + live (every game) ----------
+   Same frame: the left window plays the newest clip and loops it, the right window is see-through for the live game.
+   Clips come from OBS's replay buffer through the LevelUP Relay: press OBS's "Save Replay" hotkey, or tap Instant
+   replay in the scorekeeper (it asks the relay on the streaming PC to save one). Save the clip while the full-screen
+   gameplay scene is on, then cut to this scene. ?slow=0.5 plays it at half speed, ?last=8 plays only the last 8 seconds,
+   ?sound=1 keeps the clip's audio (muted by default so it doesn't fight the live game). */
+const RP = {cur:null, label:"", at:"", poll:null, slow:Math.min(1, Math.max(.1, +q.get("slow") || 1)), last:+q.get("last") || 0, note:""};
+function rpVideo(){
+  let box = document.getElementById("rpbox");
+  if (!box){ box = document.createElement("div"); box.id = "rpbox"; box.innerHTML = `<video id="rpv" playsinline loop${q.get("sound") ? "" : " muted"}></video>`;
+    Object.assign(box.style, {left:DUO_WIN[0].x + "px", top:DUO_WIN[0].y + "px", width:DUO_W + "px", height:DUO_H + "px"}); document.body.insertBefore(box, app);
+    const v = box.firstChild;
+    v.onloadedmetadata = () => { v.playbackRate = RP.slow; if (RP.last && v.duration > RP.last) v.currentTime = v.duration - RP.last; v.play().catch(() => {}); };
+    v.ontimeupdate = () => { if (RP.last && v.duration > RP.last && v.currentTime < v.duration - RP.last - .5) v.currentTime = v.duration - RP.last; };
+    v.onended = () => { v.currentTime = RP.last && v.duration > RP.last ? v.duration - RP.last : 0; v.play().catch(() => {}); };
+    v.onerror = () => { RP.note = /\.mkv/i.test(v.src) ? "Clips are MKV, which can't play here. OBS: Settings > Output > Recording Format > MP4." : "That replay couldn't play."; draw(); };
+  }
+  return box.firstChild;
+}
+async function rpPoll(){
+  clearTimeout(RP.poll); RP.poll = setTimeout(rpPoll, 1500);
+  if (offAir || LAYER !== "replay-live") return;
+  let list = null; try { list = (await (await fetch(HL_BASE + "/clips", {cache:"no-store"})).json()).clips || []; } catch(e){}
+  const note = list === null ? "Replays come from the LevelUP Relay on this PC. Start it, then show this scene again." : !list.length ? "No replay yet. Save one with OBS's Save Replay hotkey or Instant replay in the scorekeeper." : "";
+  const c = (list || []).slice().sort((a, b) => String(a.at).localeCompare(String(b.at))).pop();
+  if (c && c.id !== RP.cur){ RP.cur = c.id; RP.label = c.label || "Replay"; RP.at = c.at; RP.note = ""; const v = rpVideo(); v.src = HL_BASE + c.url; draw(); }
+  else if (note !== RP.note && !(RP.cur && note)){ RP.note = note; draw(); }
+}
+function replayLive(m){
+  const g = gameFor(site, m.game), [L, R] = sides(m), unit = g.unit || "Game";
+  rpVideo(); if (!RP.poll) rpPoll();
+  const n = m.status === "final" ? Math.max(1, (m.games || []).filter(x => x.winner).length) : (m.current || 1), cur = (m.games || []).find(x => x.n === n) || {};
+  const pts = g.points && (cur.us || cur.them) ? ` · ${esc(g.points)} ${L.us ? `${cur.us || 0}–${cur.them || 0}` : `${cur.them || 0}–${cur.us || 0}`}` : "";
+  const left = `<div class="dpl d0" style="left:${DUO_WIN[0].x}px;top:${DUO_WIN[0].y + DUO_H + 18}px;width:${DUO_W}px"><div class="dplate rp" style="${skin(OUR_COLORS)}"><i class="rptag">Replay</i>
+      <div class="dnm"><b style="font-size:${fitName(RP.label || "Instant replay", 50, 520)}px">${esc(RP.note ? "Instant replay" : RP.label || "Instant replay")}</b><small>${RP.note ? esc(RP.note) : RP.slow < 1 ? `Slow motion · ${RP.slow}x` : "Instant replay"}</small></div></div></div>`;
+  const right = `<div class="dpl d1" style="left:${DUO_WIN[1].x}px;top:${DUO_WIN[1].y + DUO_H + 18}px;width:${DUO_W}px"><div class="dplate lv" style="${skin(OUR_COLORS)}"><i class="lvtag"><span class="dot"></span>Live</i>
+      <div class="dnm"><b style="font-size:${fitName(m.teamName || g.name, 50, 520)}px">${esc(m.status === "final" ? "Final" : `${unit} ${n}`)}</b><small>${esc(m.teamName || g.name)}${pts}</small></div></div></div>`;
+  splitShell(m, [left, right], ["Replay plays here (no source needed)", "Live game source"], "rplive");
 }
 
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame, "smash-vs":smashVs, "duo-pov":duoPov};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame, "smash-vs":smashVs, "duo-pov":duoPov, "replay-live":replayLive};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */
@@ -770,8 +818,8 @@ let obsVisible = true, obsActive = true, offAir = false;
 function obsState(){
   const off = !obsVisible || !obsActive;
   if (off === offAir) return; offAir = off;
-  if (off){ clearTimeout(held); held = null; clearTimeout(rlDrawTimer); rlDrawTimer = null; enterUntil = 0; lastHTML = ""; lastScores = null; rlStatic = ""; app.innerHTML = ""; document.querySelectorAll(".splash").forEach(el => el.remove()); }
-  else replay();
+  if (off){ const rv = document.getElementById("rpv"); if (rv){ rv.pause(); } clearTimeout(held); held = null; clearTimeout(rlDrawTimer); rlDrawTimer = null; enterUntil = 0; lastHTML = ""; lastScores = null; rlStatic = ""; app.innerHTML = ""; document.querySelectorAll(".splash").forEach(el => el.remove()); }
+  else { const rv = document.getElementById("rpv"); if (rv && rv.src) rv.play().catch(() => {}); replay(); }
 }
 window.addEventListener("obsSourceActiveChanged", e => { obsActive = !!e.detail?.active; obsState(); });
 window.addEventListener("obsSourceVisibleChanged", e => { obsVisible = !!e.detail?.visible; obsState(); });
@@ -813,9 +861,16 @@ function showMatch(st){
     teamName:sh.title || "Showmatch", event:sh.title || "Showmatch", league:"", stage:"regular",
     opponent:{school:"", team:showLabel(R, sh.nameStyle), short:showLabel(R, sh.nameStyle)}, players:[L], showSides:[showLabel(L, sh.nameStyle), showLabel(R, sh.nameStyle)], showR:R};
 }
+/* Instant replay tapped in the scorekeeper: every overlay on the streaming PC asks the relay to save one (it ignores repeats). */
+let replayAsked = "";
+function askReplay(r){
+  if (!r?.id || r.id === replayAsked || Date.now() - new Date(r.at).getTime() > 20000) return; replayAsked = r.id;
+  fetch(`${HL_BASE}/save?id=${encodeURIComponent(r.id)}&label=${encodeURIComponent(r.label || "Replay")}`, {cache:"no-store"}).catch(() => {});
+}
 watchBroadcast(b => {
   const next = (b.stations || {})[STATION] || {};
   if (next.splash) splash(next.splash);
+  askReplay(next.replay);
   if (next.show?.on){
     if (stopMatch){ Promise.resolve(stopMatch).then(f => f && f()); stopMatch = null; }
     const was = station.show?.on; station = next; match = showMatch(next);

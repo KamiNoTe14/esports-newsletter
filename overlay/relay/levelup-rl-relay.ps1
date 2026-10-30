@@ -129,7 +129,17 @@ function ServeHttp($ctx){
     } finally { $fs.Close() }
     return
   }
-  SendText $r "LevelUP Rocket League relay is running." "text/plain"
+  # Instant replay from the scorekeeper (through the overlays on this PC): save OBS's replay buffer now.
+  if ($path -eq "/save"){
+    $r.AddHeader("Cache-Control", "no-store"); $id = [string]$ctx.Request.QueryString["id"]; $label = [string]$ctx.Request.QueryString["label"]
+    if (-not $label){ $label = "Replay" }; $label = $label.Substring(0, [Math]::Min(60, $label.Length))
+    if (-not $clipsOn -or -not $obsReady){ SendText $r '{"ok":false,"why":"OBS clips are not set up or OBS is not connected"}' "application/json"; return }
+    if ($id -and $id -eq $script:lastSaveId){ SendText $r '{"ok":true,"repeat":true}' "application/json"; return }
+    $script:lastSaveId = $id
+    $clipNames.Enqueue(@{label = $label; game = $gameNo}); ObsRequest "SaveReplayBuffer" $null; Say "Instant replay: saving the last few seconds." "Cyan"
+    SendText $r '{"ok":true}' "application/json"; return
+  }
+  SendText $r "LevelUP relay is running." "text/plain"
 }
 function Broadcast([string]$text){
   $bytes = [System.Text.Encoding]::UTF8.GetBytes($text)
@@ -165,7 +175,7 @@ try {
 if (-not $ClipFolder){ $desk = [Environment]::GetFolderPath("Desktop"); if (-not $desk){ $desk = Join-Path ([string]$env:USERPROFILE + [string]$env:HOME) "Desktop" }; $ClipFolder = Join-Path $desk "LevelUP Highlights" }
 $clipKinds = @($ClipEvents -split "," | ForEach-Object { $_.Trim().ToLower() } | Where-Object { $_ })
 $obs = $null; $obsReady = $false; $obsNext = [datetime]::MinValue; $obsRecv = $null; $obsBuf = New-Object byte[] 65536; $obsMsg = New-Object System.Text.StringBuilder
-$clips = New-Object System.Collections.ArrayList; $gameNo = 1; $lastEnd = [datetime]::MinValue   # clips saved this session, by game (for the Highlights scene)
+$clips = New-Object System.Collections.ArrayList; $lastSaveId = ""; $gameNo = 1; $lastEnd = [datetime]::MinValue   # clips saved this session, by game (for the Highlights scene)
 $obsReq = 0; $pendingClip = $null; $clipNames = New-Object System.Collections.Queue; $obsSaid = $false; $rbWarned = $false
 function ObsSend($obj){
   $b = [System.Text.Encoding]::UTF8.GetBytes(($obj | ConvertTo-Json -Compress -Depth 6))
@@ -221,7 +231,7 @@ function ObsTick {
         Say "OBS's Replay Buffer is off, so no clips can be saved. In OBS: Settings > Output > Replay Buffer > tick 'Enable Replay Buffer', then restart this window." "Yellow"; $script:rbWarned = $true }
       if ($m.op -eq 7 -and $m.d.requestType -eq "SaveReplayBuffer" -and -not $m.d.requestStatus.result){ Say "OBS couldn't save the clip: $($m.d.requestStatus.comment)" "Yellow"; if ($clipNames.Count){ [void]$clipNames.Dequeue() } }
       if ($m.op -eq 5 -and $m.d.eventType -eq "ReplayBufferSaved"){
-        $src = $m.d.eventData.savedReplayPath; $info = if ($clipNames.Count){ $clipNames.Dequeue() } else { @{label = "Clip"; game = $gameNo} }; $label = $info.label
+        $src = $m.d.eventData.savedReplayPath; $info = if ($clipNames.Count){ $clipNames.Dequeue() } else { @{label = "Replay"; game = $gameNo} }; $label = $info.label
         try {
           $day = Join-Path $ClipFolder (Get-Date).ToString("yyyy-MM-dd"); New-Item -ItemType Directory -Force -Path $day | Out-Null
           $name = ((Get-Date).ToString("h-mm-ss tt") + " " + $label) -replace '[\\/:*?"<>|]', "_"

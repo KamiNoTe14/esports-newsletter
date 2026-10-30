@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#00274C">
+<title>Stream Setup Guide · Hartland Esports</title>
+<link rel="icon" href="../../assets/eagle.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --navy:#00274C; --navy-2:#003466; --bg:#061423; --surface:#0D2238; --surface-2:#13304D; --line:#1E3D5E; --line-2:#2C5279;
+  --text:#F2F6FA; --muted:#9DB0C6; --gold:#FFBC05; --gold-2:#FFD35C; --live:#FF3B3B; --ok:#3DDC84; --warn:#FFB35C;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif; --body:"Barlow",Arial,Helvetica,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:140px}
+html,body{margin:0;background:var(--bg);color:var(--text);font:17px/1.55 var(--body)}
+a{color:var(--gold)}
+.stick{position:sticky;top:0;z-index:20}
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px;background:linear-gradient(180deg,var(--navy),#00203F);border-bottom:3px solid var(--gold)}
+.top img{width:34px;height:34px}
+.top h1{margin:0;flex:1;min-width:0;font:800 22px/1 var(--display);letter-spacing:.04em;text-transform:uppercase}
+.top h1 small{display:block;font:600 11px/1.3 var(--body);letter-spacing:.12em;color:var(--gold)}
+.top a.back{flex:none;padding:8px 14px;border:1px solid var(--line-2);border-radius:10px;text-decoration:none;color:var(--text);font:700 15px/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.toc{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;background:rgba(6,20,35,.96);border-bottom:1px solid var(--line);scrollbar-width:none}
+.toc::-webkit-scrollbar{display:none}
+.toc a{flex:none;padding:7px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);text-decoration:none;font:700 14px/1 var(--body);white-space:nowrap}
+main{max-width:860px;margin:0 auto;padding:18px 16px 80px}
+.hero{padding:20px;border-radius:18px;background:radial-gradient(120% 140% at 0% 0%,var(--navy-2),var(--navy) 60%);border:1px solid var(--line-2)}
+.hero h2{margin:0 0 6px;font:800 34px/1.05 var(--display);text-transform:uppercase;letter-spacing:.02em}
+.hero p{margin:0;color:#D6E2EE}
+.prog{display:flex;align-items:center;gap:12px;margin-top:14px;font:600 14px/1 var(--body);color:var(--muted)}
+.prog .bar{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.prog .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.prog button{padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:none;color:var(--muted);font:600 13px/1 var(--body);cursor:pointer}
+section{margin-top:34px}
+section > h2{display:flex;align-items:baseline;gap:12px;margin:0 0 6px;font:800 28px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase}
+section > h2 span{font:700 13px/1 var(--body);letter-spacing:.12em;color:var(--gold)}
+section > p.lead{margin:0 0 14px;color:var(--muted)}
+.who{display:inline-block;margin-left:auto;padding:4px 9px;border-radius:6px;font:700 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase}
+.who.once{background:rgba(255,188,5,.15);color:var(--gold)}.who.every{background:rgba(61,220,132,.15);color:var(--ok)}.who.coach{background:rgba(255,59,59,.15);color:#FF8A8A}
+.step{position:relative;margin:10px 0;padding:14px 16px 14px 58px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.step.done{border-color:rgba(61,220,132,.45);background:linear-gradient(90deg,rgba(61,220,132,.07),var(--surface) 40%)}
+.step .ck{position:absolute;left:14px;top:14px;width:30px;height:30px;border-radius:8px;border:2px solid var(--line-2);background:var(--bg);display:grid;place-items:center;cursor:pointer;color:transparent;font:800 18px/1 var(--body);padding:0}
+.step.done .ck{background:var(--ok);border-color:var(--ok);color:#06210F}
+.step h3{margin:0 0 6px;font:800 20px/1.15 var(--display);letter-spacing:.03em;text-transform:uppercase}
+.step p,.step li{color:#D9E3EE}.step p{margin:6px 0}
+.step ol,.step ul{margin:6px 0;padding-left:22px}.step li{margin:4px 0}
+.path{display:inline;padding:1px 7px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line-2);font-weight:700;white-space:normal;color:#fff}
+kbd{padding:1px 6px;border-radius:5px;border:1px solid var(--line-2);border-bottom-width:2px;background:var(--bg);font:700 14px/1.4 var(--body)}
+code{padding:1px 5px;border-radius:5px;background:var(--bg);font:600 15px/1.4 ui-monospace,Consolas,monospace;color:var(--gold-2)}
+.tip,.warn,.why{margin:10px 0 2px;padding:10px 12px;border-radius:10px;font-size:15.5px}
+.tip{background:rgba(255,188,5,.09);border-left:4px solid var(--gold)}
+.warn{background:rgba(255,59,59,.1);border-left:4px solid var(--live)}
+.why{background:rgba(255,255,255,.04);border-left:4px solid var(--line-2);color:var(--muted)}
+.tip b,.warn b{color:#fff}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15.5px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font:700 12px/1.2 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+td b{color:#fff}
+.links{display:grid;gap:6px;margin:10px 0}
+.lrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.lrow b{display:block;font-size:15.5px}.lrow small{display:block;color:var(--muted);font-size:13px;word-break:break-all}
+.lrow button,.dl{padding:9px 14px;border-radius:9px;border:1px solid var(--gold);background:none;color:var(--gold);font:700 14px/1 var(--body);cursor:pointer;text-decoration:none;white-space:nowrap}
+.lrow button.ok{background:var(--ok);border-color:var(--ok);color:#06210F}
+.stsel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.stsel button{min-width:56px;padding:9px 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);font:800 17px/1 var(--display);cursor:pointer}
+.stsel button[aria-pressed="true"]{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+.dls{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.scene{margin:8px 0;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.scene > b{font:800 18px/1.2 var(--display);letter-spacing:.03em;text-transform:uppercase;color:var(--gold)}
+.scene ol{margin:4px 0 0}
+.box{margin:6px 0 0;padding:8px 12px;border-radius:10px;background:var(--surface);border:1px dashed var(--line-2);font:700 15px/1.6 var(--body)}
+.box span{color:var(--muted);font-weight:600}
+details.faq{margin:8px 0;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+details.faq summary{cursor:pointer;padding:12px 14px;font:700 16.5px/1.3 var(--body)}
+details.faq > div{padding:0 14px 12px;color:#D9E3EE}
+footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
+@media (max-width:560px){ .top h1{font-size:18px} .top a.back{padding:7px 10px;font-size:13px} .step{padding-left:50px} .step .ck{left:10px} }
+</style>
+</head>
+<body>
+<div class="stick"><header class="top">
+  <img src="../../assets/eagle.png" alt="">
+  <h1>Stream Setup Guide<small>HARTLAND ESPORTS · LEVELUP</small></h1>
+  <a class="back" href="./">← Scorekeeper</a>
+</header>
+<nav class="toc" aria-label="Sections">
+  <a href="#big-picture">Big picture</a><a href="#access">1 · Access</a><a href="#obs">2 · OBS settings</a><a href="#relay">3 · Relay</a>
+  <a href="#scenes">4 · Scenes</a><a href="#remote">5 · Remote</a><a href="#gameday">Game day</a><a href="#games">By game</a><a href="#fix">Fix it</a><a href="#coaches">Coaches</a>
+</nav></div>
+<main>
+  <div class="hero">
+    <h2>Set up a Hartland stream</h2>
+    <p>Follow this top to bottom the first time you set up a streaming PC (about 45 minutes). After that, game day is the short checklist in <a href="#gameday">Game day</a>. Tap the box on each step when it's done; this device remembers your progress.</p>
+    <div class="prog"><span id="progTxt">0 of 0 done</span><div class="bar"><i id="progBar"></i></div><button type="button" id="reset">Start over</button></div>
+  </div>
+
+  <section id="big-picture">
+    <h2>The big picture</h2>
+    <p class="lead">Four pieces work together. Knowing what each one does makes fixing problems much easier.</p>
+    <table>
+      <tr><th>Piece</th><th>Where it runs</th><th>What it does</th></tr>
+      <tr><td><b>Scorekeeper</b></td><td>Any phone or computer (this site)</td><td>You tap scores, pick players and characters, switch scenes and call instant replays. Everything on stream updates from here.</td></tr>
+      <tr><td><b>OBS</b></td><td>The streaming PC</td><td>Puts the game, cameras and our graphics together and sends it to YouTube.</td></tr>
+      <tr><td><b>Overlays</b></td><td>Inside OBS (Browser Sources)</td><td>Our graphics: score bug, VS screens, stats, replays. They're web pages that follow whatever match is on their <b>station</b>.</td></tr>
+      <tr><td><b>LevelUP Relay</b></td><td>The streaming PC (a black window)</td><td>Saves replay clips and plays them back, and feeds Rocket League's live stats to the score bug. Keep it open while streaming.</td></tr>
+    </table>
+    <div class="tip"><b>Stations:</b> each streaming PC is a station (1, 2, 3 or 4). Station 1 is the main PC. A second PC streaming a different match at the same time is Station 2, and so on. Every link for a PC must use that PC's station number. The link maker in <a href="#scenes">step 4</a> does this for you.</div>
+  </section>
+
+  <section id="access">
+    <h2><span>Step 1</span>Get access <i class="who once">Once</i></h2>
+    <div class="step" data-step="access-1"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Sign in to the Scorekeeper</h3>
+      <ol><li>Open the <a href="./">Scorekeeper</a> and sign in with your <b>@hartlandschools.us</b> Google account.</li>
+        <li>If it says you don't have access, ask a coach to add you as a <b>scorekeeper</b> for your team. Once they do, refresh the page.</li></ol>
+      <div class="why">Students can score, stream and run the OBS remote for their own team's matches. Final scores you submit go to a coach to approve before they show on the website.</div>
+    </div>
+  </section>
+
+  <section id="obs">
+    <h2><span>Step 2</span>OBS settings <i class="who once">Once per PC</i></h2>
+    <p class="lead">Do these on the streaming PC. Use OBS 30 or newer (<span class="path">Help › Check for Updates</span>).</p>
+    <div class="step" data-step="obs-video"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Video size: 1920 × 1080</h3>
+      <ol><li>Open <span class="path">Settings › Video</span> (Settings is at the bottom right of OBS).</li>
+        <li>Set <b>Base (Canvas) Resolution</b> and <b>Output (Scaled) Resolution</b> both to <b>1920x1080</b>.</li>
+        <li>Set <b>Common FPS Values</b> to <b>60</b> (or 30 if the PC struggles). Click <b>Apply</b>.</li></ol>
+      <div class="why">All our graphics are drawn for exactly 1920 × 1080. Any other size and things land in the wrong spots.</div>
+    </div>
+    <div class="step" data-step="obs-replay"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Turn on the Replay Buffer</h3>
+      <ol><li>Open <span class="path">Settings › Output</span>.</li>
+        <li>Find the <b>Replay Buffer</b> section (if <b>Output Mode</b> at the top says <i>Advanced</i>, it's on the <b>Replay Buffer</b> tab).</li>
+        <li>Check <b>Enable Replay Buffer</b> and set <b>Maximum Replay Time</b> to <b>20</b> seconds.</li>
+        <li>Under <b>Recording</b>, set <b>Recording Format</b> to <b>MP4</b> (or <b>Hybrid MP4</b>). Click <b>Apply</b>.</li></ol>
+      <div class="why">The replay buffer quietly keeps the last 20 seconds of the stream. Instant replay saves it as a clip. Clips have to be MP4 to play back on the replay screen; MKV won't play.</div>
+    </div>
+    <div class="step" data-step="obs-ws"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Turn on the WebSocket server</h3>
+      <ol><li>Open <span class="path">Tools › WebSocket Server Settings</span>.</li>
+        <li>Check <b>Enable WebSocket server</b> and <b>Enable Authentication</b>. Leave the port at <b>4455</b>.</li>
+        <li>Click <b>Show Connect Info</b> and keep that window open. You'll copy the <b>Server Password</b> in step 3.</li></ol>
+      <div class="why">This is how the LevelUP Relay asks OBS to save clips. The password keeps other computers from controlling OBS.</div>
+    </div>
+    <div class="step" data-step="obs-hotkey"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Optional: a Save Replay hotkey</h3>
+      <p><span class="path">Settings › Hotkeys</span>, search <b>Replay Buffer</b>, click the box next to <b>Save Replay</b>, and press a key you won't hit by accident (like <kbd>F9</kbd>). Now whoever sits at the PC can save a replay without a phone.</p>
+    </div>
+  </section>
+
+  <section id="relay">
+    <h2><span>Step 3</span>The LevelUP Relay <i class="who once">Once per PC</i></h2>
+    <div class="step" data-step="relay-get"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Download the relay</h3>
+      <ol><li>On the streaming PC, make a folder on the Desktop called <b>LevelUP Relay</b>.</li>
+        <li>Download all three files below and put them <b>in that same folder</b>:</li></ol>
+      <div class="dls"><a class="dl" href="../../overlay/relay/levelup-rl-relay.ps1" download>levelup-rl-relay.ps1</a><a class="dl" href="../../overlay/relay/Start%20LevelUP%20Relay.bat" download>Start LevelUP Relay.bat</a><a class="dl" href="../../overlay/relay/Set%20up%20highlight%20clips.bat" download>Set up highlight clips.bat</a></div>
+      <div class="tip"><b>Updating:</b> when a coach says the relay changed, download all three again and replace the old ones. Don't delete <code>levelup-obs.dat</code>; it holds the saved OBS password.</div>
+    </div>
+    <div class="step" data-step="relay-run"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>First run</h3>
+      <ol><li>Open OBS first. Then double-click <b>Start LevelUP Relay.bat</b>.</li>
+        <li>If Windows shows <b>"Windows protected your PC"</b>, click <b>More info › Run anyway</b>. (It's our own script; Windows says this about anything downloaded.)</li>
+        <li>When it asks for the <b>OBS WebSocket password</b>, copy the Server Password from step 2, right-click in the black window to paste, and press <kbd>Enter</kbd>. It's saved, so it only asks once.</li>
+        <li>On a Rocket League PC, if it asks to turn on the Stats API, type <kbd>Y</kbd> and press <kbd>Enter</kbd>, then restart Rocket League.</li>
+        <li>You should see green lines like <i>Connected to OBS</i>. <b>Leave this window open</b> the whole stream. Minimize it, don't close it.</li></ol>
+      <div class="why">On a PC that doesn't play Rocket League, the relay will say it couldn't find Rocket League. That's normal; replays still work.</div>
+    </div>
+  </section>
+
+  <section id="scenes">
+    <h2><span>Step 4</span>Build the scenes <i class="who once">Once per PC</i></h2>
+    <p class="lead">A scene is one "screen" of the stream. You build them once; on game day you just switch between them.</p>
+    <div class="step" data-step="scenes-how"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>How to add one of our overlays</h3>
+      <ol><li>In the <b>Scenes</b> box (bottom left), click <b>+</b> and name the scene.</li>
+        <li>In the <b>Sources</b> box, add your game first (Game Capture, Video Capture Device for a console capture card, or NDI Source).</li>
+        <li>Click <b>+ › Browser</b>, name it after the overlay (like <i>Score bug</i>), and click OK.</li>
+        <li>Paste the overlay's link from the list below in <b>URL</b>. Set <b>Width 1920</b> and <b>Height 1080</b>.</li>
+        <li>Check <b>Shutdown source when not visible</b> and <b>Refresh browser when scene becomes active</b>. Click OK.</li>
+        <li>Make sure the overlay is <b>above</b> the game in the Sources list (drag it to the top).</li></ol>
+      <div class="warn"><b>Exception:</b> the <b>LevelUP Remote</b> source is the only one with "Shutdown source when not visible" <b>unchecked</b>. See step 5.</div>
+    </div>
+    <div class="step" data-step="scenes-links"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Overlay links for this PC</h3>
+      <p>Pick this PC's station, then copy links from here.</p>
+      <div class="stsel" role="group" aria-label="Station"><span>Station:</span><button type="button" data-st="1" aria-pressed="true">1</button><button type="button" data-st="2">2</button><button type="button" data-st="3">3</button><button type="button" data-st="4">4</button></div>
+      <div class="links" id="links"></div>
+      <div class="tip"><b>Preview:</b> paste any link into Chrome and add <code>&amp;bg=1</code> (or <code>?bg=1</code> if it has no <code>?</code>) to see it on a grey background, with labels showing where game windows go.</div>
+    </div>
+    <div class="step" data-step="scenes-list"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Scenes to build</h3>
+      <p>Names matter for one of them: the replay scene must be called exactly <b>Replay + Live</b> (or change the name in the Scorekeeper under <b>On stream</b>).</p>
+      <div class="scene"><b>Starting Soon</b><ol><li>A background image or the VS screen overlay.</li><li>The <b>LevelUP Remote</b> source (step 5) lives here.</li></ol></div>
+      <div class="scene"><b>Gameplay</b><ol><li>The game, full screen.</li><li><b>Score bug</b> on top. For Fortnite use the <b>Corner score bug</b> instead, plus a <b>POV name plate</b>.</li></ol></div>
+      <div class="scene"><b>VS / Lineups</b><ol><li><b>VS screen</b> or <b>Starting lineups</b> before the match. For Smash, the <b>Smash VS screen</b> between games.</li></ol></div>
+      <div class="scene"><b>Replay + Live</b><ol><li>The game source, resized to the right window (numbers below).</li><li>The <b>Instant replay + live</b> overlay on top. The replay plays by itself on the left.</li></ol>
+        <div class="box"><span>Game source:</span> Position X 981, Y 214 · Size 896 × 504</div></div>
+      <div class="scene"><b>Two POVs</b> (Fortnite duos)<ol><li>Two NDI Sources, one per player, resized to the two windows.</li><li>The <b>Two POVs</b> overlay on top.</li></ol>
+        <div class="box"><span>Left player:</span> Position X 43, Y 214 · Size 896 × 504<br><span>Right player:</span> Position X 981, Y 214 · Size 896 × 504</div></div>
+      <div class="scene"><b>Highlights</b> · <b>Post Game</b> · <b>Be Right Back</b><ol><li>Highlights overlay between games, Post-game stats after the match, and a still image for breaks.</li></ol></div>
+      <div class="tip"><b>Resizing a source to exact numbers:</b> right-click the source › <span class="path">Transform › Edit Transform</span>. Type the <b>Position</b> (X, Y), set <b>Bounding Box Type</b> to <b>Scale to inner bounds</b>, and type the size into <b>Bounding Box Size</b>.</div>
+    </div>
+  </section>
+
+  <section id="remote">
+    <h2><span>Step 5</span>The OBS remote <i class="who once">Once per PC</i></h2>
+    <p class="lead">Lets the Scorekeeper switch scenes and call instant replays from any phone, anywhere in the lab.</p>
+    <div class="step" data-step="remote-add"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Add the LevelUP Remote source</h3>
+      <ol><li>In the <b>Starting Soon</b> scene, add a <b>Browser</b> source named <b>LevelUP Remote</b> with the <b>LevelUP Remote</b> link from step 4. Size doesn't matter; it's invisible.</li>
+        <li><b>Uncheck</b> <b>Shutdown source when not visible</b>. (It has to keep listening when that scene isn't on.)</li>
+        <li>Set <b>Page permissions</b> to <b>Advanced access to OBS</b>. Click OK.</li></ol>
+      <div class="why">Page permissions is how OBS lets a web page switch scenes. "Advanced" allows switching scenes and saving replays, but not starting or stopping the stream.</div>
+    </div>
+    <div class="step" data-step="remote-test"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Test it</h3>
+      <ol><li>In the Scorekeeper, open your match and put it on this PC's station (<b>On stream</b>).</li>
+        <li>Open the <b>OBS remote</b> section. It should say which scene is <b>on air</b> and show a button for every scene.</li>
+        <li>Tap a different scene. OBS should switch within a second.</li>
+        <li>Tap <b>⟲ Instant replay</b>. OBS should save a clip and cut to Replay + Live, then come back after 15 seconds.</li></ol>
+    </div>
+  </section>
+
+  <section id="gameday">
+    <h2>Game day <i class="who every">Every stream</i></h2>
+    <p class="lead">Once the PC is set up, this is all you do each time.</p>
+    <div class="step" data-step="gd-1"><button class="ck" type="button" aria-label="Mark done">✓</button><h3>Before the match</h3>
+      <ol><li>Open <b>OBS</b>, then double-click <b>Start LevelUP Relay.bat</b>.</li>
+        <li>In the Scorekeeper, open the match. Under <b>On stream</b>, tap this PC's <b>station</b>.</li>
+        <li>Fill in the opponent's lineup (gamertags) under <b>On stream</b>, and check our players under <b>Players &amp; stats</b>.</li>
+        <li>Check the <b>OBS remote</b> says it's connected.</li>
+        <li>Click through each scene in OBS and make sure the graphics show the right teams.</li></ol></div>
+    <div class="step" data-step="gd-2"><button class="ck" type="button" aria-label="Mark done">✓</button><h3>Go live</h3>
+      <ol><li>In OBS, click <b>Start Streaming</b>.</li>
+        <li>Copy the YouTube live link into the match's <b>Stream links</b> so it shows on the website.</li>
+        <li>Tap <b>● Live</b> at the top of the match.</li></ol></div>
+    <div class="step" data-step="gd-3"><button class="ck" type="button" aria-label="Mark done">✓</button><h3>During the match</h3>
+      <ul><li><b>Score:</b> tap who won each game (Smash: the Set desk; Fortnite: +1 rounds).</li>
+        <li><b>Replays:</b> right after a great play, tap <b>⟲ Instant replay</b>.</li>
+        <li><b>Scenes:</b> use the OBS remote buttons (VS between games, Highlights, Be Right Back).</li></ul></div>
+    <div class="step" data-step="gd-4"><button class="ck" type="button" aria-label="Mark done">✓</button><h3>After the match</h3>
+      <ol><li>Switch to <b>Post Game</b>, then tap <b>Final</b> (students: <b>Submit final</b>; a coach approves it).</li>
+        <li>Stop the stream in OBS. Paste the replay link under <b>Stream links › Replay (VOD)</b> if it's different.</li>
+        <li>Close the relay window. Clips are saved in <b>Desktop › LevelUP Highlights</b>.</li></ol></div>
+  </section>
+
+  <section id="games">
+    <h2>Notes by game</h2>
+    <details class="faq"><summary>Rocket League</summary><div>
+      <p>The score bug reads the clock and goals straight from the game, so the <b>relay must be running on the PC that runs Rocket League</b>, with the Stats API on (the relay offers to turn it on). Under <b>On stream</b>, pick whether Hartland is <b>blue or orange</b>, or leave it on "work it out from player names". Goals and epic saves are clipped automatically for Highlights.</p></div></details>
+    <details class="faq"><summary>Super Smash Bros. Ultimate</summary><div>
+      <p>Use the <b>Set desk</b> at the top of the match: tap our player and theirs; characters fill in from who they usually play. Tap a character to change it. Tap who won each game; two wins takes the set. Use the <b>Smash VS screen</b> between games.</p></div></details>
+    <details class="faq"><summary>Fortnite</summary><div>
+      <p>Use the <b>Corner score bug</b> (it covers the island's own round counter) and a <b>POV name plate</b> for whoever's screen is showing. Rounds are tapped with <b>+1</b>; reaching 10 wins the game. For both players at once, use the <b>Two POVs</b> scene with two NDI sources.</p></div></details>
+    <details class="faq"><summary>Marvel Rivals and others</summary><div>
+      <p>The standard <b>Score bug</b> and full-screen graphics work for every game. Tap who won each map; enter stats under <b>Players &amp; stats</b> for the box score and post-game screens.</p></div></details>
+  </section>
+
+  <section id="fix">
+    <h2>Fix it</h2>
+    <p class="lead">Most problems are one of these.</p>
+    <details class="faq"><summary>An overlay is blank</summary><div><ul>
+      <li>Is the match on this PC's <b>station</b>? (Scorekeeper › match › On stream.)</li>
+      <li>Does the link's station number match this PC? Station 1 links have no <code>station=</code>; station 2 links end in <code>station=2</code>.</li>
+      <li>Right-click the source › <b>Refresh</b>.</li></ul></div></details>
+    <details class="faq"><summary>An old graphic flashes when I switch scenes</summary><div><p>That source needs <b>Shutdown source when not visible</b> checked (double-click the source to open its settings).</p></div></details>
+    <details class="faq"><summary>OBS remote says "Not connected"</summary><div><ul>
+      <li>Is OBS open, with the <b>LevelUP Remote</b> source in a scene?</li>
+      <li>Its <b>Shutdown source when not visible</b> must be <b>unchecked</b>.</li>
+      <li>Wrong station? Its link must match this PC's station.</li>
+      <li>Still nothing: right-click the source › <b>Refresh</b>, then wait 20 seconds.</li></ul></div></details>
+    <details class="faq"><summary>Scene buttons show, but tapping does nothing</summary><div><p>Set the LevelUP Remote source's <b>Page permissions</b> to <b>Advanced access to OBS</b>. The remote shows a yellow warning when this is the problem.</p></div></details>
+    <details class="faq"><summary>Replay screen says "No replay yet" or the replay never saves</summary><div><ul>
+      <li>Is the <b>relay window</b> open, and does it say <i>Connected to OBS</i>?</li>
+      <li>Is the <b>Replay Buffer</b> on? OBS shows a replay buffer button under Controls; the remote shows "Replays ready".</li>
+      <li>If the relay says the password is wrong, double-click <b>Set up highlight clips.bat</b> and paste the OBS password again.</li></ul></div></details>
+    <details class="faq"><summary>"These clips are MKV files, which can't play here"</summary><div><p><span class="path">Settings › Output › Recording › Recording Format</span> › <b>MP4</b>. New clips will play; old MKV ones won't.</p></div></details>
+    <details class="faq"><summary>Instant replay saves, but OBS doesn't switch scenes</summary><div><p>The scene name in the Scorekeeper (<b>On stream › Instant replay cuts to this OBS scene</b>) must match the OBS scene name exactly, including capital letters and spaces.</p></div></details>
+    <details class="faq"><summary>Rocket League score bug says it can't connect</summary><div><ul>
+      <li>Start the relay <b>on the PC running Rocket League</b>.</li>
+      <li>If the relay says the Stats API is off, let it turn it on, then restart Rocket League.</li>
+      <li>Preview the score bug link with <code>?bg=1</code>; the box at the top says exactly what's wrong.</li></ul></div></details>
+    <details class="faq"><summary>Wrong names or characters on screen</summary><div><p>Everything comes from the Scorekeeper: our players under <b>Players &amp; stats</b>, theirs under <b>On stream</b> (or the Set desk for Smash). Fix it there and the stream updates within a second.</p></div></details>
+  </section>
+
+  <section id="coaches">
+    <h2>For coaches <i class="who coach">Coach only</i></h2>
+    <div class="step" data-step="coach-rules"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Publish the database rules (after updates)</h3>
+      <ol><li>Open the <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase console</a> › the Hartland Esports project › <span class="path">Firestore Database › Rules</span>.</li>
+        <li>Copy everything from <code>firestore.rules</code> in the website repo on GitHub, paste it over the old rules, and click <b>Publish</b>.</li></ol>
+      <div class="why">Needed whenever a new feature stores something new. The OBS remote needs it to report its scene list.</div>
+    </div>
+    <div class="step" data-step="coach-students"><button class="ck" type="button" aria-label="Mark done">✓</button>
+      <h3>Give a student scorekeeper access</h3>
+      <p>Scouting site › <b>Members</b> › add their @hartlandschools.us email, pick their team(s), check <b>Scorekeeper</b>. They can then score and run the stream for those teams only, and their finals wait for your approval.</p>
+    </div>
+  </section>
+  <footer>Hartland Eagles Esports · LevelUP</footer>
+</main>
+<script>
+(() => {
+  const SITE = new URL("../../", location.href).href;
+  const OVERLAYS = [
+    ["remote", "LevelUP Remote", "Invisible. Lets the Scorekeeper run OBS. Shutdown when not visible: OFF; Page permissions: Advanced."],
+    ["scorebug", "Score bug", "Top of the screen over gameplay. Every game."],
+    ["corner", "Corner score bug", "Fortnite: top-right, over the round counter."],
+    ["pov?slot=1", "POV name plate: player 1", "Fortnite: whose screen is showing."],
+    ["pov?slot=2", "POV name plate: player 2", ""],
+    ["vs", "VS screen", "Before the match."],
+    ["lineups", "Starting lineups", "Before the match."],
+    ["smash-vs", "Smash VS screen", "Between games of a Smash set."],
+    ["team-compare", "Team comparison", ""],
+    ["player-compare", "Player comparison", ""],
+    ["replay-live", "Instant replay + live", "Replay + Live scene. Game source at X 981, Y 214, 896 × 504."],
+    ["duo-pov", "Two POVs", "Fortnite duos. Two NDI sources in the windows."],
+    ["highlights", "Highlights", "Between games: the last game's clips."],
+    ["box-score", "Box score popup", "Transparent card over gameplay."],
+    ["post-game", "Post-game stats", "After the match."],
+    ["rl-team", "Rocket League: team stats", "From the game's own data."],
+    ["rl-players", "Rocket League: player matchup", ""],
+    ["rl-box", "Rocket League: box score", ""]
+  ];
+  let station = "1";
+  try { station = localStorage.getItem("eagles-guide-station") || "1"; } catch(e){}
+  const url = (layer, n) => { const [page, qs] = layer.split("?"), q = [qs, n === "1" ? "" : `station=${n}`].filter(Boolean).join("&"); return `${SITE}overlay/${page}.html${q ? "?" + q : ""}`; };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;"}[c]));
+  function drawLinks(){
+    document.querySelectorAll("[data-st]").forEach(b => b.setAttribute("aria-pressed", b.dataset.st === station));
+    document.getElementById("links").innerHTML = OVERLAYS.map(([k, t, d]) => { const u = url(k, station);
+      return `<div class="lrow"><div><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ""}<small>${esc(u)}</small></div><button type="button" data-copy="${esc(u)}">Copy</button></div>`; }).join("");
+    document.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => {
+      try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Copied"; b.classList.add("ok"); setTimeout(() => { b.textContent = "Copy"; b.classList.remove("ok"); }, 1600); }
+      catch(e){ prompt("Copy this link:", b.dataset.copy); } });
+  }
+  document.querySelectorAll("[data-st]").forEach(b => b.onclick = () => { station = b.dataset.st; try { localStorage.setItem("eagles-guide-station", station); } catch(e){} drawLinks(); });
+  drawLinks();
+  /* progress: per device */
+  let done = {}; try { done = JSON.parse(localStorage.getItem("eagles-guide-done") || "{}") || {}; } catch(e){}
+  const steps = [...document.querySelectorAll(".step[data-step]")];
+  function paint(){
+    steps.forEach(s => s.classList.toggle("done", !!done[s.dataset.step]));
+    const n = steps.filter(s => done[s.dataset.step]).length;
+    document.getElementById("progTxt").textContent = `${n} of ${steps.length} done`;
+    document.getElementById("progBar").style.width = (n / steps.length * 100) + "%";
+  }
+  const save = () => { try { localStorage.setItem("eagles-guide-done", JSON.stringify(done)); } catch(e){} };
+  steps.forEach(s => s.querySelector(".ck").onclick = () => { done[s.dataset.step] = !done[s.dataset.step]; save(); paint(); });
+  document.getElementById("reset").onclick = () => { if (confirm("Clear all the checkmarks on this device?")){ done = {}; save(); paint(); } };
+  paint();
+})();
+</script>
+</body>
+</html>

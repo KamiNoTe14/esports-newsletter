@@ -95,9 +95,34 @@ try {
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$WebPort/")
 $listener.Prefixes.Add("http://127.0.0.1:$WebPort/")
-try { $listener.Start() } catch {
-  Say "Couldn't open port $WebPort. Is another copy of this relay (or the old SOS relay) already running? $($_.Exception.Message)" "Red"
-  Read-Host "Press Enter to close"; exit 1
+# Port taken? Usually an earlier relay window still open (sometimes minimized or hidden), or the old SOS relay.
+# Find what has it and offer to close it, then try again.
+function PortHolders {
+  $found = @()
+  try { $found += @(Get-CimInstance Win32_Process -ErrorAction Stop | Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -match 'levelup-rl-relay' } |
+    ForEach-Object { [pscustomobject]@{Id = [int]$_.ProcessId; What = "an earlier LevelUP relay window"} }) } catch {}
+  try { $found += @(Get-NetTCPConnection -LocalPort $WebPort -State Listen -ErrorAction Stop | Select-Object -ExpandProperty OwningProcess -Unique |
+    Where-Object { $_ -gt 4 -and $_ -ne $PID } | ForEach-Object { $p = Get-Process -Id $_ -ErrorAction SilentlyContinue; if ($p){ [pscustomobject]@{Id = [int]$_; What = "$($p.ProcessName) (process $_)"} } }) } catch {}
+  $found | Group-Object Id | ForEach-Object { $_.Group[0] }
+}
+$started = $false
+for ($try = 0; $try -lt 2 -and -not $started; $try++){
+  try { $listener.Start(); $started = $true } catch {
+    $why = $_.Exception.Message
+    $holders = @(PortHolders)
+    if ($try -eq 0 -and $holders.Count){
+      Say "Port $WebPort is already in use by: $(($holders | ForEach-Object { $_.What }) -join ', ')." "Yellow"
+      $a = Read-Host "Close it and start this relay? (Y/N)"
+      if ($a -match '^[Yy]'){
+        $holders | ForEach-Object { Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue }
+        Start-Sleep -Seconds 2
+        $listener = New-Object System.Net.HttpListener; $listener.Prefixes.Add("http://localhost:$WebPort/"); $listener.Prefixes.Add("http://127.0.0.1:$WebPort/")
+        continue
+      }
+    }
+    Say "Couldn't open port $WebPort. Something else is using it: close any other relay windows (check the taskbar), or restart the PC. ($why)" "Red"
+    Read-Host "Press Enter to close"; exit 1
+  }
 }
 Say "Score bug can connect at ws://localhost:$WebPort" "Cyan"
 $clients = New-Object System.Collections.ArrayList

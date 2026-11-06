@@ -104,6 +104,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .hist{width:100%;border-collapse:collapse;font-size:14px}
 .hist td{padding:6px 8px;border-top:1px solid var(--line)}
 .hist th{padding:6px 8px;font-size:12px;font-weight:600;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.seg button{border:0;background:none;padding:5px 10px;font:600 12px/1 inherit;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy, #00274C);color:#fff}
 .sgame{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;display:grid;gap:8px}
 .sgh{display:grid;grid-template-columns:minmax(150px,1.3fr) 76px repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end}
 @media (max-width:760px){.sgh{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -286,6 +288,9 @@ function drawNew(M){
 }
 /* Rocket League box scores saved from our streamed games (the scorekeeper's "Stats from the stream"). Per gamertag:
    games played and per-game averages, best first; then each game. */
+/* totals or per-game averages: remembered on this device */
+let statMode = "total"; try { statMode = localStorage.getItem("eagles-scout-statmode") || "total"; } catch(e){}
+document.addEventListener("click", e => { const b = e.target.closest?.("[data-smode]"); if (!b) return; statMode = b.dataset.smode; try { localStorage.setItem("eagles-scout-statmode", statMode); } catch(err){} drawMain(); });
 function statsHTML(r){
   const list = (r.statGames || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.n - a.n);
   if (!list.length) return "";
@@ -296,11 +301,12 @@ function statsHTML(r){
   const unitOf = gm => /smash/.test(r.game) ? "Set" : "Game";
   const by = new Map();
   list.forEach(gm => (gm.players || []).forEach(p => { const k = String(p.tag || "").toLowerCase(); const t = by.get(k) || {tag:p.tag, gp:0}; t.gp++; F.forEach(([, f]) => t[f] = (t[f] || 0) + (+p[f] || 0)); by.set(k, t); }));
-  const avg = (t, f) => (Math.round(t[f] / t.gp * 10) / 10).toLocaleString("en-US");
+  const per = statMode === "avg", avg = (t, f) => (per ? Math.round(t[f] / t.gp * 10) / 10 : Math.round(t[f] * 10) / 10).toLocaleString("en-US");
   const chars = {}; list.forEach(gm => (gm.players || []).forEach(p => { const k = String(p.tag || "").toLowerCase(); (p.chars?.length ? p.chars : [p.char]).filter(Boolean).forEach(c => { (chars[k] = chars[k] || {})[c] = (chars[k][c] || 0) + 1; }); }));
   const mainOf = t => Object.entries(chars[String(t.tag || "").toLowerCase()] || {}).sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 2).join(", ");
-  const sortKey = F[0]?.[1] || "score", rows = [...by.values()].sort((a, b) => (b[sortKey] || 0) / b.gp - (a[sortKey] || 0) / a.gp);
-  return `<div class="sec"><div class="sec-h"><h4>Stats against us</h4><span class="muted">${list.length} game${list.length === 1 ? "" : "s"}, averages per game</span></div>
+  const sortKey = F[0]?.[1] || "score", rows = [...by.values()].sort((a, b) => per ? (b[sortKey] || 0) / b.gp - (a[sortKey] || 0) / a.gp : (b[sortKey] || 0) - (a[sortKey] || 0));
+  return `<div class="sec"><div class="sec-h"><h4>Stats against us</h4><span class="muted" style="display:flex;gap:8px;align-items:center">${list.length} game${list.length === 1 ? "" : "s"}
+      <span class="seg" role="group" aria-label="Show"><button type="button" data-smode="total" aria-pressed="${!per}">Totals</button><button type="button" data-smode="avg" aria-pressed="${per}">Per game</button></span></span></div>
     <div style="overflow-x:auto"><table class="hist"><tr><th style="text-align:left">Gamertag</th>${Object.keys(chars).length ? "<th style=\"text-align:left\">Plays</th>" : ""}<th>GP</th>${F.map(([l]) => `<th>${l}</th>`).join("")}</tr>
       ${rows.map(t => `<tr><td><b>${esc(t.tag)}</b></td>${Object.keys(chars).length ? `<td class="muted">${esc(mainOf(t))}</td>` : ""}<td>${t.gp}</td>${F.map(([, f]) => `<td>${avg(t, f)}</td>`).join("")}</tr>`).join("")}</table></div>
     <details><summary class="muted" style="cursor:pointer">Each game</summary><table class="hist">${list.map(gm => `<tr><td>${esc(fmtDay(gm.date))}, ${unitOf(gm)} ${esc(gm.n)}</td><td>${esc(gm.team || "")}</td><td class="${gm.result === "W" ? "L" : gm.result === "L" ? "W" : ""}">${gm.result === "W" ? "They won" : gm.result === "L" ? "We won" : ""} ${esc(gm.score || "")}</td><td class="muted">${(gm.players || []).map(p => `${esc(p.tag)}${p.chars?.length ? ` (${esc(p.chars.join(" / "))})` : p.char ? ` (${esc(p.char)})` : ""} ${F.slice(0, 2).map(([l, f]) => `${+p[f] || 0} ${esc(l.toLowerCase())}`).join(", ")}`).join(" · ")}</td></tr>`).join("")}</table></details></div>`;

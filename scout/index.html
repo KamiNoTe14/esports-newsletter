@@ -104,6 +104,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .hist{width:100%;border-collapse:collapse;font-size:14px}
 .hist td{padding:6px 8px;border-top:1px solid var(--line)}
 .hist th{padding:6px 8px;font-size:12px;font-weight:600;color:var(--muted)}
+.sgame{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;display:grid;gap:8px}
+.sgh{display:grid;grid-template-columns:minmax(150px,1.3fr) 76px repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end}
+@media (max-width:760px){.sgh{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sedit td{padding:3px 4px}.sedit input{min-width:62px;width:100%}.sedit td:first-child input{min-width:130px}
 .hist .W{color:var(--ok);font-weight:700}.hist .L{color:var(--danger);font-weight:700}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{text-align:left;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 8px}
@@ -301,6 +305,38 @@ function statsHTML(r){
       ${rows.map(t => `<tr><td><b>${esc(t.tag)}</b></td>${Object.keys(chars).length ? `<td class="muted">${esc(mainOf(t))}</td>` : ""}<td>${t.gp}</td>${F.map(([, f]) => `<td>${avg(t, f)}</td>`).join("")}</tr>`).join("")}</table></div>
     <details><summary class="muted" style="cursor:pointer">Each game</summary><table class="hist">${list.map(gm => `<tr><td>${esc(fmtDay(gm.date))}, ${unitOf(gm)} ${esc(gm.n)}</td><td>${esc(gm.team || "")}</td><td class="${gm.result === "W" ? "L" : gm.result === "L" ? "W" : ""}">${gm.result === "W" ? "They won" : gm.result === "L" ? "We won" : ""} ${esc(gm.score || "")}</td><td class="muted">${(gm.players || []).map(p => `${esc(p.tag)}${p.chars?.length ? ` (${esc(p.chars.join(" / "))})` : p.char ? ` (${esc(p.char)})` : ""} ${F.slice(0, 2).map(([l, f]) => `${+p[f] || 0} ${esc(l.toLowerCase())}`).join(", ")}`).join(" · ")}</td></tr>`).join("")}</table></details></div>`;
 }
+/* ---------- editing "Stats against us" (edit mode) ----------
+   Every saved game as a card: date, which game/set, our team, who won, the score, and a row per player of theirs with
+   every stat. Add games by hand (scrims, matches before the scorekeeper), fix numbers, remove games. Columns are the
+   game's stat list plus anything already saved. */
+const S_LABEL = {score:"Score", goals:"Goals", assists:"Assists", saves:"Saves", shots:"Shots", demos:"Demos", touches:"Touches", stocks_taken:"Stocks taken", stocks_lost:"Stocks lost", elims:"Elims", deaths:"Deaths"};
+function statCols(game, list){
+  const g = gameFor(site, game), defs = (g.statList || []).map(d => [d.label, d.key]);
+  const have = [...new Set((list || []).flatMap(gm => (gm.players || []).flatMap(p => Object.keys(p).filter(k => !["tag", "char", "chars"].includes(k) && !isNaN(+p[k])))))];
+  const keys = [...defs.map(d => d[1]), ...have.filter(k => !defs.some(d => d[1] === k))];
+  return keys.map(k => [defs.find(d => d[1] === k)?.[0] || S_LABEL[k] || k.replace(/_/g, " "), k]);
+}
+const hasChars = game => !!(gameFor(site, game).charLabel || "").trim();
+function statsEditHTML(d, game){
+  const list = d.statGames || [], F = statCols(game, list), unit = /smash/.test(game) ? "Set" : "Game", ch = hasChars(game);
+  const tags = (d.players || []).map(p => p.tag).filter(Boolean);
+  return `<div class="sec"><div class="sec-h"><h4>Stats against us</h4><button class="btn btn-line btn-sm" id="addG">+ Game</button></div>
+    <datalist id="oppTags">${tags.map(t => `<option value="${esc(t)}">`).join("")}</datalist>
+    ${list.length ? "" : `<p class="empty">No games yet. Add one, or they fill in from the scorekeeper.</p>`}
+    ${list.map((gm, gi) => `<div class="sgame"><div class="sgh">
+        <label class="f"><span>Date</span><input type="date" data-sg="${gi}" data-sk="date" value="${esc(String(gm.date || "").slice(0, 10))}"></label>
+        <label class="f"><span>${unit}</span><input type="number" min="1" data-sg="${gi}" data-sk="n" value="${esc(gm.n ?? "")}"></label>
+        <label class="f"><span>Our team</span><input data-sg="${gi}" data-sk="team" value="${esc(gm.team || "")}" placeholder="Varsity"></label>
+        <label class="f"><span>Result</span><select data-sg="${gi}" data-sk="result"><option value="">–</option><option value="L"${gm.result === "L" ? " selected" : ""}>We won</option><option value="W"${gm.result === "W" ? " selected" : ""}>They won</option></select></label>
+        <label class="f"><span>Score</span><input data-sg="${gi}" data-sk="score" value="${esc(gm.score || "")}" placeholder="3–1"></label>
+        <button class="btn btn-line btn-sm danger" data-delg="${gi}">Remove game</button></div>
+      <div style="overflow-x:auto"><table class="hist sedit"><tr><th style="text-align:left">Gamertag</th>${ch ? `<th style="text-align:left">Played</th>` : ""}${F.map(([l]) => `<th>${esc(l)}</th>`).join("")}<th></th></tr>
+        ${(gm.players || []).map((p, pi) => `<tr><td><input list="oppTags" data-sg="${gi}" data-sp="${pi}" data-sf="tag" value="${esc(p.tag || "")}" placeholder="Gamertag"></td>
+          ${ch ? `<td><input data-sg="${gi}" data-sp="${pi}" data-sf="chars" value="${esc((p.chars?.length ? p.chars : [p.char]).filter(Boolean).join(" / "))}" placeholder="Char / char"></td>` : ""}
+          ${F.map(([l, k]) => `<td><input inputmode="decimal" data-sg="${gi}" data-sp="${pi}" data-sf="${esc(k)}" value="${esc(p[k] ?? "")}" aria-label="${esc(l)}"></td>`).join("")}
+          <td><button class="btn btn-line btn-sm danger" data-delsp="${gi}:${pi}" aria-label="Remove this player from the game">×</button></td></tr>`).join("")}</table></div>
+      <button class="btn btn-line btn-sm" data-addsp="${gi}">+ Player</button></div>`).join("")}</div>`;
+}
 async function startReport(school, game){
   const id = db.newReportId();
   const r = {school, schoolKey:key(school), game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:new Date().toISOString(), createdBy:user.email, updatedAt:new Date().toISOString(), updatedBy:user.email};
@@ -342,7 +378,7 @@ function drawReport(M){
         <div class="paste"><textarea id="pasteP" rows="2" placeholder="Paste a roster: gamertags separated by commas or new lines"></textarea><button class="btn btn-line btn-sm" id="pasteAdd">Add these</button></div>
         <p class="muted" style="margin:0">Gamertags only, no real names. The roster shows up in the scorekeeper for matches against this school, where you tick who's starting; usual starters are ticked for you. Opponent info stays in scouting and never appears on the public site.</p>`
         : players.length ? `<div class="plist">${players.map(p => `<div class="pcard"><b>${esc(p.tag)}</b>${p.starter ? `<span class="sbadge">Starter</span>` : ""}${p.role ? `<span class="r">${esc(p.role)}</span>` : ""}${p.notes ? `<p>${esc(p.notes)}</p>` : ""}</div>`).join("")}</div>` : `<p class="empty">No roster yet. Edit the report to add their players.</p>`}</div>
-    ${statsHTML(r)}
+    ${ed ? statsEditHTML(d, game) : statsHTML(r)}
     <div class="sec"><div class="sec-h"><h4>VODs and replays</h4>${ed ? `<button class="btn btn-line btn-sm" id="addV">+ Link</button>` : ""}</div>
       ${ed ? `<div class="plist">${vods.map((v, i) => `<div class="prow" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto"><input data-v="${i}" data-vk="label" value="${esc(v.label || "")}" placeholder="What it shows (Game 2, 4:10)"><input data-v="${i}" data-vk="url" value="${esc(v.url || "")}" placeholder="https://youtu.be/…"><button class="btn btn-line btn-sm danger" data-delv="${i}">Remove</button></div>`).join("")}</div>`
         : vods.filter(v => safe(v.url)).length ? `<ul class="vods">${vods.filter(v => safe(v.url)).map(v => `<li>▶ <a href="${esc(safe(v.url))}" target="_blank" rel="noopener">${esc(v.label || v.url)}</a></li>`).join("")}</ul>` : `<p class="empty">Nothing yet.</p>`}</div>
@@ -359,12 +395,23 @@ let editDraft = null;
 const nameOf = email => { const m = members.find(x => x.email === email); return m?.name || (email === user?.email ? user.name : email.split("@")[0]); };
 function bindReport(r){
   const M = $("#main"), q = s => M.querySelector(s);
-  q("#edit") && (q("#edit").onclick = () => { editing = r.id; editDraft = JSON.parse(JSON.stringify({plan:r.plan, tendencies:r.tendencies, picks:r.picks, players:r.players || [], vods:r.vods || []})); drawMain(); });
+  q("#edit") && (q("#edit").onclick = () => { editing = r.id; editDraft = JSON.parse(JSON.stringify({plan:r.plan, tendencies:r.tendencies, picks:r.picks, players:r.players || [], vods:r.vods || [], statGames:r.statGames || []})); editDraft.players.forEach(p => p._orig = p.tag || ""); drawMain(); });
   q("#cancel") && (q("#cancel").onclick = () => { editing = null; drawMain(); });
   const pull = () => { M.querySelectorAll("[data-k]").forEach(t => editDraft[t.dataset.k] = t.value);
     M.querySelectorAll("[data-p]").forEach(t => editDraft.players[+t.dataset.p][t.dataset.pk] = t.value);
     M.querySelectorAll("[data-pst]").forEach(t => editDraft.players[+t.dataset.pst].starter = t.checked);
-    M.querySelectorAll("[data-v]").forEach(t => editDraft.vods[+t.dataset.v][t.dataset.vk] = t.value); };
+    M.querySelectorAll("[data-v]").forEach(t => editDraft.vods[+t.dataset.v][t.dataset.vk] = t.value);
+    M.querySelectorAll("[data-sg]").forEach(t => { const gm = editDraft.statGames[+t.dataset.sg];
+      if (t.dataset.sk) gm[t.dataset.sk] = t.dataset.sk === "n" ? (+t.value || "") : t.value;
+      else { const p = gm.players[+t.dataset.sp], f = t.dataset.sf;
+        if (f === "tag") p.tag = t.value;
+        else if (f === "chars"){ const c = t.value.split("/").map(x => x.trim()).filter(Boolean); delete p.char; delete p.chars; if (c.length) p.char = c[0]; if (c.length > 1) p.chars = c; }
+        else if (t.value.trim() === "") delete p[f]; else { const v = parseFloat(t.value.replace(/[^0-9.\-]/g, "")); if (!isNaN(v)) p[f] = v; } } }); };
+  q("#addG") && (q("#addG").onclick = () => { pull(); const size = Math.max(1, +gameFor(site, r.game).teamSize || 1), ros = editDraft.players.filter(p => p.tag), st = ros.filter(p => p.starter);
+    editDraft.statGames.unshift({matchId:"manual-" + Math.random().toString(36).slice(2, 9), n:1, date:new Date().toISOString().slice(0, 10), team:"", result:"", score:"", players:(st.length ? st : ros).slice(0, size).map(p => ({tag:p.tag}))}); drawMain(); });
+  M.querySelectorAll("[data-delg]").forEach(b => b.onclick = () => { pull(); if (!confirm("Remove this game's stats?")) return; editDraft.statGames.splice(+b.dataset.delg, 1); drawMain(); });
+  M.querySelectorAll("[data-addsp]").forEach(b => b.onclick = () => { pull(); editDraft.statGames[+b.dataset.addsp].players.push({tag:""}); drawMain(); });
+  M.querySelectorAll("[data-delsp]").forEach(b => b.onclick = () => { pull(); const [g, p] = b.dataset.delsp.split(":").map(Number); editDraft.statGames[g].players.splice(p, 1); drawMain(); });
   q("#addP") && (q("#addP").onclick = () => { pull(); editDraft.players.push({tag:"", role:"", notes:""}); drawMain(); });
   q("#pasteAdd") && (q("#pasteAdd").onclick = () => { const names = q("#pasteP").value.split(/[,\n]+/).map(x => x.trim()).filter(Boolean); pull();
     const have = new Set(editDraft.players.map(p => String(p.tag || "").toLowerCase()));
@@ -377,7 +424,12 @@ function bindReport(r){
       plan:editDraft.plan.trim(), tendencies:editDraft.tendencies.trim(), picks:editDraft.picks.trim(),
       players:editDraft.players.map(p => ({tag:String(p.tag || "").trim(), role:String(p.role || "").trim(), notes:String(p.notes || "").trim(), ...(p.starter ? {starter:true} : {})})).filter(p => p.tag || p.notes).slice(0, 40),
       vods:editDraft.vods.map(v => ({label:String(v.label || "").trim(), url:String(v.url || "").trim()})).filter(v => v.url).slice(0, 40),
-      ...(r.statGames ? {statGames:r.statGames} : {}),
+      statGames:(() => {
+        /* a gamertag renamed in the roster is renamed in every saved game too */
+        const ren = new Map(editDraft.players.filter(p => p._orig && p.tag && p._orig.trim() !== String(p.tag).trim()).map(p => [p._orig.trim().toLowerCase(), String(p.tag).trim()]));
+        return editDraft.statGames.map(gm => ({...gm, n:+gm.n || 1, players:(gm.players || []).map(p => { const t = String(p.tag || "").trim(); return {...p, tag:ren.get(t.toLowerCase()) || t}; }).filter(p => p.tag)}))
+          .filter(gm => gm.players.length || gm.score || gm.result).slice(0, 60);
+      })(),
       updatedAt:new Date().toISOString(), updatedBy:user.email};
     try { await db.saveReport(r.id, data); editing = null; layout(); toast("Report saved."); } catch(e){ console.error(e); toast("Couldn't save. You may not have permission to edit this report."); } });
   q("#delR") && (q("#delR").onclick = async () => { if (!confirm(`Delete the ${gName(r.game)} report on ${r.school} and all its notes?`)) return; try { await db.removeReport(r.id); toast("Report deleted."); go({kind:"home"}); } catch(e){ toast("Couldn't delete it."); } });

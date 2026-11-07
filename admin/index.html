@@ -123,6 +123,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 </div>
 <input type="file" id="imgInput" accept="image/*" hidden>
 <input type="file" id="standInput" accept=".csv,.json,text/csv,application/json" hidden>
+<input type="file" id="clipInput" accept=".json,application/json" hidden>
 <input type="file" id="schoolCsv" accept=".csv,.txt,text/csv" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -178,6 +179,7 @@ const TABS = [
   {id:"legacyRecords", label:"Pre-tracking records"},
   {id:"news", label:"News articles", toggle:"news", toggleLabel:"Show news articles"},
   {id:"gallery", label:"Photo gallery", toggle:"gallery", toggleLabel:"Show the photo gallery"},
+  {id:"highlights", label:"Highlight videos"},
   {id:"sponsors", label:"Sponsors", toggle:"sponsors", toggleLabel:"Show sponsors"},
   {id:"roadmap", label:"Future updates"}
 ];
@@ -198,6 +200,9 @@ const LISTS = {
     fields:[["title","Title","text","State Champions"],["type","Type (decides where it shows)","select",[["milestone","Milestone (timeline only)"],["championship","State or league championship (gold banner)"],["tournament","Tournament or invitational win (white banner)"],["finish","Runner-up or top finish (silver banner)"],["honor","Honor, one per player (listed under its title)"],["record","Statistical record (records table)"]]],["org","League or event","text","MHSEL"],["year","Season, with the year","text","Fall 2024"],["game","Game","select",() => [["", "All games / program-wide"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["value","The number (statistical records only)","text","27–2"],["detail","Details (the story; for an honor, the player's name)","textarea"]]},
   news:{title:"Article", add:"Add article", intro:"News coverage of the program. Newest shows first.", name:i => i.title || "Article",
     fields:[["title","Headline"],["source","Source","text","Livingston Daily"],["date","Date","date"],["link","Link","url"],["image","Image (optional)","image"],["summary","Summary","textarea"]]},
+  highlights:{title:"Highlight video", add:"Add highlight video", intro:"YouTube highlight videos, tagged play by play. Each play you tag shows on that player's profile under Highlights and plays right there from its start to its end time, so a recruiter sees just that player. Paste the YouTube link, then either import the plays file that came with the video or add plays by hand (times like 1:41). Gamertag-only players are never shown.", name:i => [i.title || "Highlight video", i.date].filter(Boolean).join(" · "),
+    fields:[["title","Title","text","Week 7 Top 10 Plays"],["url","YouTube link","url","https://youtu.be/…"],["date","Date","date"]],
+    sub:{key:"clips", title:"Plays", add:"Add play", cols:"1.4fr .55fr .55fr 2.2fr", clipImport:"Import plays file (.json)", fields:[["player","Player","select",() => playerOptions()],["start","Starts at","text","1:41"],["end","Ends at","text","1:53"],["label","What happened","text","Buzzer-beater hat trick"]]}},
   gallery:{title:"Photo", add:"Add photo", intro:"Photos appear in the Media page gallery. Use albums to group them (for example \"Fall 2026 States\").", name:i => i.caption || "Photo",
     fields:[["image","Photo","image"],["caption","Caption"],["album","Album (optional)"]]},
   sponsors:{title:"Sponsor", add:"Add sponsor", intro:"Logos show on the Home and About pages. Transparent PNG logos look best.", name:i => i.name || "Sponsor",
@@ -275,11 +280,18 @@ function listEditor(key, spec){
     </div>`;
   }).join("")}<button class="add" type="button" data-add="${key}">+ ${esc(spec.add)}</button></div>`;
 }
+/* Everyone on a roster, for the Highlight videos player picker */
+function playerOptions(){
+  fillIds(); const seen = new Map();
+  (site.teams || []).forEach(t => (t.roster || []).forEach(r => { if (r.id && !seen.has(r.id)) seen.set(r.id, r); }));
+  return [["", "Choose a player"], ...[...seen.entries()].sort((a, b) => String(a[1].name || a[1].tag).localeCompare(String(b[1].name || b[1].tag)))
+    .map(([id, r]) => [id, `${r.name || r.tag}${r.name && r.tag ? ` (${r.tag})` : ""}${r.private ? " · gamertag only" : ""}`])];
+}
 function subEditor(path, spec, arr){
-  return `<div class="sub"><p class="sub-h">${esc(spec.title)}${arr.length ? ` (${arr.length})` : ""}</p>${arr.map((r, j) => `<div class="sub-row" style="--n:${spec.fields.length}">
+  return `<div class="sub"><p class="sub-h">${esc(spec.title)}${arr.length ? ` (${arr.length})` : ""}</p>${arr.map((r, j) => `<div class="sub-row" style="--n:${spec.fields.length}${spec.cols ? `;grid-template-columns:${spec.cols} auto` : ""}">
       ${spec.fields.map(f => f[2] === "check" ? `<div style="padding-bottom:8px">${field(`${path}.${j}.${f[0]}`, f, r[f[0]] ?? false)}</div>` : field(`${path}.${j}.${f[0]}`, f, r[f[0]] ?? "")).join("")}
       <div class="tools" style="padding-bottom:4px"><button type="button" data-move="${path}" data-i="${j}" data-d="-1" aria-label="Move up"${j === 0 ? " disabled" : ""}>▲</button><button type="button" data-move="${path}" data-i="${j}" data-d="1" aria-label="Move down"${j === arr.length - 1 ? " disabled" : ""}>▼</button><button type="button" class="x" data-del="${path}" data-i="${j}" aria-label="Remove row">×</button></div>
-    </div>`).join("")}<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" type="button" data-add="${path}" style="padding:5px 10px;font-size:13.5px">+ ${esc(spec.add)}</button>${spec.importBtn ? `<button class="add" type="button" data-import="${path}" style="padding:5px 10px;font-size:13.5px">⇪ ${esc(spec.importBtn)}</button>` : ""}</div></div>`;
+    </div>`).join("")}<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="add" type="button" data-add="${path}" style="padding:5px 10px;font-size:13.5px">+ ${esc(spec.add)}</button>${spec.importBtn ? `<button class="add" type="button" data-import="${path}" style="padding:5px 10px;font-size:13.5px">⇪ ${esc(spec.importBtn)}</button>` : ""}${spec.clipImport ? `<button class="add" type="button" data-clipimport="${path}" style="padding:5px 10px;font-size:13.5px">⇪ ${esc(spec.clipImport)}</button>` : ""}</div></div>`;
 }
 function sectionSwitch(t){
   const v = site.sections?.[t.toggle] !== false;
@@ -792,7 +804,7 @@ $("#standInput").addEventListener("change", async e => {
 let finalsP = null;
 function loadFinals(){
   return finalsP = finalsP || (async () => {
-    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=48");
+    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=49");
     return new Promise(res => { let latest = null, t = null;
       live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
       setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });
@@ -900,12 +912,31 @@ $("#panel").addEventListener("click", async e => {
     return;
   }
   if (b.dataset.import){ importPath = b.dataset.import; $("#standInput").click(); return; }
+  if (b.dataset.clipimport){ clipPath = b.dataset.clipimport; $("#clipInput").click(); return; }
   if (b.dataset.csv){ csvKey = b.dataset.csv; $("#schoolCsv").value = ""; $("#schoolCsv").click(); return; }
   if (b.dataset.seed){ b.disabled = true; b.textContent = "Reading every match…"; const n = await seedSchools(); setDirty(true); setStatus(); renderPanel(); toast(n ? `Added ${n} school${n === 1 ? "" : "s"} from our match history. Add logos and colors, then publish.` : "Every school we've played is already in the library."); return; }
   if (b.dataset.upload){ uploadPath = b.dataset.upload; $("#imgInput").click(); return; }
   if (b.dataset.clearimg){ setP(b.dataset.clearimg, ""); setDirty(true); setStatus(); renderPanel(); return; }
 });
 $("#publish").addEventListener("click", publish);
+/* Plays file from a highlight edit: {"video": "<YouTube id or link>", "clips": [{"player": "<profile id>", "start": 4.5, "end": 14, "label": "…"}]} */
+let clipPath = null;
+$("#clipInput").addEventListener("change", async e => {
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f || !clipPath) return;
+  let j; try { j = JSON.parse(await f.text()); } catch(err){ toast("Couldn't read that file. It should be the .json plays file that came with the video."); return; }
+  const list = Array.isArray(j) ? j : j.clips;
+  if (!Array.isArray(list) || !list.length){ toast("That file doesn't have any plays in it."); return; }
+  const known = new Set(playerOptions().map(o => o[0]).filter(Boolean));
+  const t = n => { const x = Math.round(+n || 0); return `${Math.floor(x / 60)}:${String(x % 60).padStart(2, "0")}`; };
+  const rows = list.map(c => ({player:String(c.player || ""), start:typeof c.start === "number" ? t(c.start) : String(c.start || ""), end:c.end == null || c.end === "" ? "" : typeof c.end === "number" ? t(c.end) : String(c.end), label:String(c.label || "")}));
+  const missing = rows.filter(r => !known.has(r.player)).length;
+  const arr = getP(clipPath); arr.splice(0, arr.length, ...rows);
+  const parent = getP(clipPath.replace(/\.clips$/, ""));
+  if (parent && !parent.url && j.video && !/YOUTUBE_VIDEO_ID/.test(j.video)) parent.url = /^[\w-]{11}$/.test(j.video) ? `https://youtu.be/${j.video}` : j.video;
+  if (parent && !parent.title && j.title) parent.title = j.title;
+  setDirty(true); setStatus(); renderPanel();
+  toast(`Imported ${rows.length} play${rows.length === 1 ? "" : "s"}.${missing ? ` ${missing} didn't match a rostered player; pick them from the list.` : ""} It goes live when you publish.`);
+});
 let csvKey = null;
 $("#panel").addEventListener("input", e => { const el = e.target.closest("[data-filter]"); if (!el) return;
   const q = (listFilter[el.dataset.filter] = el.value).trim().toLowerCase();

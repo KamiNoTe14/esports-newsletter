@@ -392,7 +392,15 @@ function drawPlayer(site, host, all, dir){
   const src = p => /^https?:/.test(p) ? p : BASE + p;
   const clip = (String(prof.heroClipId || "").match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([\w-]{11})/) || [])[1] || (/^[\w-]{11}$/.test(String(prof.heroClipId || "").trim()) ? prof.heroClipId.trim() : "");
   const playlist = safe(prof.playlistUrl) || safe(prof.highlights);
-  const playing = host.querySelector(".clip.on");
+  /* Tagged plays from the Highlight videos tab: every play this player is tagged in, newest video first.
+     Each one plays inline from its own start to end time. Gamertag-only players are left out (labels may name them). */
+  const ytId = u => (String(u || "").match(/(?:v=|youtu\.be\/|embed\/|shorts\/|live\/)([\w-]{11})/) || [])[1] || (/^[\w-]{11}$/.test(String(u || "").trim()) ? String(u).trim() : "");
+  const secs = v => { const t = String(v ?? "").trim(); if (!t) return null; if (/^\d+(\.\d+)?$/.test(t)) return Math.floor(+t); const p = t.split(":").map(Number); return p.some(isNaN) ? null : p.reduce((a, b) => a * 60 + b, 0); };
+  const mmss = n => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
+  const myIds = new Set([id, alum?.id].filter(Boolean));
+  const myClips = priv ? [] : (site.highlights || []).filter(h => ytId(h.url)).sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))
+    .flatMap(h => (h.clips || []).filter(c => myIds.has(c.player)).map(c => ({v:ytId(h.url), s:secs(c.start) || 0, e:secs(c.end), label:String(c.label || h.title || "Highlight"), from:String(h.title || "")})));
+  const playing = host.querySelector(".clip.on"), hlPlaying = host.querySelector(".hl-player.on");
   const mainRoles = o => Object.entries(o).sort((a, b) => b[1] - a[1]).map(x => x[0]);
   const W = played.filter(m => m.result === "W").length, L = played.filter(m => m.result === "L").length;
   /* Recruiting: commitment re-skins the page in that school's colors; otherwise seniors (still on a roster) get gold. */
@@ -428,11 +436,12 @@ function drawPlayer(site, host, all, dir){
       ${links.length ? `<div><h2 class="res-h">Verify the stats</h2><p class="muted" style="margin:0 0 10px;font-size:15px">Outside trackers, for checking our numbers independently.</p><div class="vlinks">${links.map(l => `<a class="btn btn-line" href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")}</div></div>` : ""}
       ${interest.length ? `<div><h2 class="res-h">Schools of interest</h2><ul class="schools">${interest.map(x => `<li>${safe(x.link || x.website) ? `<a href="${esc(safe(x.link || x.website))}" target="_blank" rel="noopener">` : ""}${logo(x) || `<span class="ph">${esc((x.short || x.name)[0])}</span>`}<span>${esc(x.short || x.name)}</span>${safe(x.link || x.website) ? "</a>" : ""}</li>`).join("")}</ul></div>` : ""}
     </div></div></section>` : ""}
-    ${bio || clip || playlist ? `<section class="section"><div class="wrap grid g2" style="align-items:start">
+    ${bio || clip || playlist || myClips.length ? `<section class="section"><div class="wrap grid g2" style="align-items:start">
       ${bio ? `<div><h2 class="res-h">Career</h2><p class="lead playbill" style="margin:0">${esc(bio)}</p></div>` : ""}
-      ${clip || playlist ? `<div><h2 class="res-h">Highlights</h2>
+      ${clip || playlist || myClips.length ? `<div><h2 class="res-h">Highlights</h2>
         ${clip ? `<button class="clip" type="button" data-yt="${esc(clip)}" aria-label="Play ${esc(display)}'s highlight"><img src="https://i.ytimg.com/vi/${esc(clip)}/hqdefault.jpg" alt="" loading="lazy"><span aria-hidden="true">▶</span></button>` : ""}
         ${playlist ? `<p style="margin:14px 0 0"><a ${clip ? "" : 'class="btn btn-gold" '}href="${esc(playlist)}" target="_blank" rel="noopener">${clip ? "See all highlights →" : "▶ Watch highlights"}</a></p>` : ""}
+        ${myClips.length ? `<div class="clip hl-player" hidden></div><ul class="hl-clips">${myClips.map(c => `<li><button class="hlclip" type="button" data-yt="${esc(c.v)}" data-s="${c.s}" data-e="${c.e ?? ""}" aria-label="Play: ${esc(c.label)}"><span class="th"><img src="https://i.ytimg.com/vi/${esc(c.v)}/mqdefault.jpg" alt="" loading="lazy"><i aria-hidden="true">▶</i><em>${mmss(c.s)}</em></span><span class="tx"><b>${esc(c.label)}</b>${c.from ? `<small>${esc(c.from)}</small>` : ""}</span></button></li>`).join("")}</ul>` : ""}
         ${prof.recruit ? `<p class="muted" style="margin:14px 0 0">College coaches: detailed stats and full match film are available on request. Reach out to ${(site.coaches || []).filter(c => c.email).map(c => `<a href="mailto:${esc(c.email)}">Coach ${esc(c.name.split(" ").pop())}</a>`).join(" or ") || `<a href="${BASE}about.html#join">our coaches</a>`}.</p>` : ""}</div>` : ""}
     </div></section>` : ""}
     ${charGames.length ? `<section class="section ${bio || clip || playlist ? "alt" : ""}"><div class="wrap"><h2 class="res-h">Characters</h2><div class="grid g2">${charGames.map(c => `<div class="card mains2">
@@ -450,7 +459,16 @@ function drawPlayer(site, host, all, dir){
         const yr = new Date(m.startsAt).getFullYear();
         return `<tr><td>${esc(fmtDay(m.startsAt))}${yr !== new Date().getFullYear() ? `, ${yr}` : ""}</td><td>${esc(m.teamName)}${postseason(m) ? ` <span class="chip post${postseason(m).finals ? " finals" : ""}">🏆 ${esc(postseason(m).label)}</span>` : ""}</td><td class="res-vs"><a href="${BASE}results.html?season=${encodeURIComponent(m.season || seasonOf(m.startsAt))}&m=${encodeURIComponent(m.id)}">${oppLogo(m)}${esc(oppFull(m))}</a></td><td class="n"><b class="${m.result}">${esc(m.result || "")}</b> ${m.score?.us}–${m.score?.them}</td><td class="muted">${(g.statList || []).filter(x => x.key in st).map(x => x.avg ? `${fmtStat(x, st[x.key])} ${esc(x.label.replace(/\s*%\s*$/, ""))}` : `${st[x.key]} ${esc(x.label)}`).join(" · ")}</td><td>${watchLink(m) ? `<a href="${esc(watchLink(m))}" target="_blank" rel="noopener" aria-label="Watch the stream of this match">▶ Watch</a>` : ""}</td></tr>`; }).join("")}</tbody></table></div>` : ""}
     </div></section>`;
-  const btn = host.querySelector(".clip");
+  const hp = host.querySelector(".hl-player");
+  if (hp && hlPlaying) hp.replaceWith(hlPlaying);
+  host.querySelectorAll(".hlclip").forEach(b => b.onclick = () => {
+    const p = host.querySelector(".hl-player"); if (!p) return;
+    const q = new URLSearchParams({autoplay:"1", rel:"0", start:b.dataset.s}); if (b.dataset.e) q.set("end", b.dataset.e);
+    p.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(b.dataset.yt)}?${q}" title="Highlight" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+    p.hidden = false; p.classList.add("on");
+    host.querySelectorAll(".hlclip.cur").forEach(x => x.classList.remove("cur")); b.classList.add("cur");
+    p.scrollIntoView({block:"nearest", behavior:"smooth"}); });
+  const btn = host.querySelector(".clip:not(.hl-player)");
   if (btn && playing && playing.dataset.yt === btn.dataset.yt) btn.replaceWith(playing);
   else if (btn) btn.onclick = () => { const f = document.createElement("div"); f.className = "clip on"; f.dataset.yt = btn.dataset.yt;
     f.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(btn.dataset.yt)}?autoplay=1&rel=0" title="Highlight video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`; btn.replaceWith(f); };

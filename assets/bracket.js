@@ -27,7 +27,7 @@ export function buildBracket(b, finals = []){
   const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:sd, school:String(t.school).trim(), label:String(t.label || "").trim(), us:isHartland(t.school)} : null; };
   const order = seedOrder(n), rounds = [];
   /* our playoff results from the scorekeeper: final playoff/finals matches of this team against that school */
-  const ours = finals.filter(m => (m.stage === "playoffs" || m.stage === "finals") && m.status === "final" && (!b.teamId || m.teamId === b.teamId) && (!b.game || m.game === b.game))
+  const ours = finals.filter(m => (m.stage === "playoffs" || m.stage === "finals") && m.status === "final" && (m.result === "W" || m.result === "L") && (!b.teamId || m.teamId === b.teamId) && (!b.game || m.game === b.game))
     .sort((x, y) => String(x.startsAt).localeCompare(String(y.startsAt)));
   const used = new Set();
   const auto = (a, c) => { const opp = a?.us ? c : c?.us ? a : null; if (!opp) return null;

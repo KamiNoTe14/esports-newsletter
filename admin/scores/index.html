@@ -199,6 +199,29 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .dwin button.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}.dwin button.on.them{background:var(--white);border-color:var(--white)}
 .dwin button:disabled{opacity:.4}
 .drow.done .dchar{min-height:72px}.drow.done .dchar img{width:40px;height:40px}
+/* playoff brackets */
+details.bkset{margin:12px 0 0;border:1px solid var(--line);border-radius:12px;padding:0 12px}
+details.bkset>summary{min-height:48px;display:flex;align-items:center;font:800 14px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);cursor:pointer}
+details.bkset[open]{padding-bottom:12px}
+.bkf{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.bkx>summary .bkt{font:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bkx>summary span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.bk-seeds{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.bk-seeds label{display:flex;align-items:center;gap:6px}.bk-seeds b{width:24px;text-align:right;font-size:13px;color:var(--muted)}
+.bk-seeds input{flex:1;min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:6px 10px;font:inherit}
+.bk-admin{overflow-x:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;-webkit-overflow-scrolling:touch}
+.bk{display:grid;grid-template-columns:repeat(calc(var(--rounds) + 1),minmax(190px,1fr));gap:14px;min-width:calc((var(--rounds) + 1) * 204px)}
+.bk-r{display:flex;flex-direction:column}.bk-r h4{margin:0 0 8px;font:800 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.bk-ms{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+.bk-m{position:relative;border-radius:10px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line-2)}
+.bk-admin.can .bk-m{cursor:pointer}.bk-m.bye{opacity:.55}.bk-m.us{border-color:var(--gold)}.bk-m.auto{box-shadow:inset 3px 0 0 var(--ok)}
+.bk-t{display:grid;grid-template-columns:20px 22px 1fr auto;gap:6px;align-items:center;min-height:40px;padding:4px 30px 4px 8px;font-size:14px}
+.bk-t + .bk-t{border-top:1px solid var(--line-2)}
+.bk-t i{font-style:normal;font-size:11px;color:var(--muted);text-align:right}.bk-t img{width:20px;height:20px;object-fit:contain}.bk-t em{font-style:normal;text-align:center;color:var(--muted);font-weight:700}
+.bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk-t b{font-weight:800;min-width:12px;text-align:right}
+.bk-t.win{background:#1E4470;font-weight:700}.bk-t.out{opacity:.5}.bk-t.us span{color:var(--gold)}.bk-t.none{color:var(--muted)}
+.bk-edit{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:var(--bg);color:var(--gold);border-radius:8px;width:26px;height:30px;font-size:13px;cursor:pointer}
+.bk-champ .bk-m{border-color:var(--gold)}
 details.sec{margin-top:12px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
 details.sec>summary{list-style:none;min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font:800 18px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -298,8 +321,9 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=24";
-import {watchFinals} from "../../assets/live.js?v=49";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=25";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=52";
+import * as BK from "../../assets/bracket.js?v=2";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
 
@@ -314,6 +338,7 @@ const NOW = seasonOf();  // the current season; "season" below is the one being 
 let site = {teams:[], games:[]}, be = null, user = null, season = NOW, matches = [], unwatch = null;
 let dir = {alumni:[], seasons:[], rosters:{}}, lastEntry = null;
 let tick = {messages:[]};
+let brackets = [], bkOpen = new Set(), bkSaveT = {};   // playoff brackets (brackets/{id})
 let bc = {stations:{}};   // LevelUP: which match is on each streaming station
 let allFinals = null, recDismissed = new Set();   // every final match (for record checks)
 let role = null, myTeams = null;   // "coach" | "captain" (student scorekeeper, limited to myTeams)
@@ -336,6 +361,9 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
     if (unwatch){ unwatch(); unwatch = null; }
     if (role){ unwatch = be.watchSeason(season, onMatches, onState);
       startFinals();
+      if (!bkWatching){ bkWatching = true; be.watchBrackets(l => { brackets = l.map(b => bkLocal[b.id] || b);
+        if (view === "brackets" && !document.activeElement?.closest?.("#bkPage input, #bkPage textarea, #bkPage select")) renderBrackets();
+        else if (view === "list" && $("#bkLink")) $("#bkLink").outerHTML = bkLinkHTML(); }); }
       be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}}; paintRemotes();
         if (view === "list" && !document.activeElement?.closest?.("#stBox")) renderList();
         else if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
@@ -414,6 +442,7 @@ function route(){
   if (h === "new"){ view = "form"; openId = null; draft = newDraft(); return renderForm(); }
   if (h.startsWith("edit/")){ const m = matches.find(x => x.id === h.slice(5)); view = "form"; openId = h.slice(5); draft = m ? clone(m) : null; if (!m){ location.hash = ""; return; } return renderForm(); }
   if (h.startsWith("m/")){ view = "match"; if (openId !== h.slice(2) || !cur){ statTab = null; openId = h.slice(2); const m = matches.find(x => x.id === openId); cur = m ? clone(m) : null; } return renderMatch(); }
+  if (h === "brackets"){ if (pendingSaves.size) flush(); view = "brackets"; openId = null; cur = null; return renderBrackets(); }
   if (pendingSaves.size) flush();
   view = "list"; openId = null; cur = null; renderList();
 }
@@ -475,6 +504,7 @@ function renderList(){
     + (live.length ? sec("Live now", live, "") : "")
     + (season === NOW || up.length ? sec(season === NOW ? "Upcoming" : "Not scored yet", up, "No upcoming matches. Tap <b>New match</b> to add one.") : "")
     + sec(`Final · ${esc(seasonLabel(season))}`, done, season === NOW ? "No finished matches yet this season." : "No matches entered for this season yet. Tap <b>New match</b> to start.")
+    + bkLinkHTML()
     + playoffHTML(openPo)
     + (coach ? rostersHTML(openRo) + alumniHTML(openAl) + mergeHTML() + `<div class="foot"><span>Finished matches are backed up to the website repo ${gh?.token ? "from this device ✓" : "only from a device connected in the Site Manager"}.</span>${gh?.token ? `<button class="linkbtn" id="backup" type="button">Back up now</button>` : ""}</div><div class="foot"><span>Old results on PlayVS?</span><a class="linkbtn" href="../import/${location.search}">Import history from PlayVS →</a></div>` : "")
     + `<button class="btn btn-gold fab" type="button" id="new">+ New match</button>`;
@@ -710,6 +740,112 @@ function bindRosters(){
 /* Playoff eligibility (league rules: 8-week regular season with one mandatory rest week, so 7 matches at most;
    5 played to make playoffs, so a team can forfeit twice). A bye week counts as a played match (it's an automatic win);
    a match Hartland forfeited does not. Numbers can be changed in site.json under leagueRules. */
+/* ---------- playoff brackets ----------
+   Saved live (brackets/{id}): the website's Teams page and the stream's Bracket overlay update within seconds of a
+   change here. Seeds in seed order, then tap a team to make it the winner, ✎ for the score. Changing a winner clears
+   what it fed later. Hartland's own playoff matches fill in by themselves once they're final.
+   Coaches edit every bracket; student scorekeepers edit (and add) brackets for their own teams. */
+let bkWatching = false; const bkLocal = {};   // copies with saves still on the way, so an echo doesn't undo a fast tap
+/* final matches for filling in our results: this device's live list first (instant), then every season */
+const bkFinals = () => { const seen = new Set(), out = []; [...matches.filter(m => m.status === "final"), ...(allFinals || [])].forEach(m => { if (!seen.has(m.id)){ seen.add(m.id); out.push(m); } }); return out; };
+const bkMine = b => role === "coach" || (b.teamId && myTeams?.has(b.teamId));
+const bkTeams = () => (site.teams || []).filter(t => t.id && (role === "coach" || myTeams.has(t.id)));
+function bkLinkHTML(){
+  const live = brackets.filter(b => +b.size && b.status === "In progress").length;
+  return `<a id="bkLink" class="btn btn-line btn-block guide" href="#brackets">🏆 Playoff brackets${brackets.length ? ` · ${brackets.length}${live ? ` (${live} in progress)` : ""}` : ""}</a>`;
+}
+const bkLogo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : SITE + x.logo) : ""; };
+function bkSave(b, wait = 0){
+  bkLocal[b.id] = b; b.updated = new Date().toISOString(); b.by = user?.email || "";
+  clearTimeout(bkSaveT[b.id]);
+  bkSaveT[b.id] = setTimeout(async () => {
+    try { await be.saveBracket(b.id, b); } catch(e){ console.error(e); toast("Couldn't save the bracket. Check the connection."); }
+    setTimeout(() => { if (bkLocal[b.id] === b) delete bkLocal[b.id]; }, 1500);
+  }, wait);
+}
+function renderBrackets(){
+  const list = sortBrackets(brackets), canAdd = role === "coach" || bkTeams().length;
+  const finals = bkFinals();
+  $("#app").innerHTML = `<div id="bkPage"><div class="mhead"><button class="back" type="button" id="bkBack" aria-label="Back to matches">←</button>
+      <div class="t"><b>Playoff brackets</b><span>Live on the website and the stream's Bracket overlay</span></div>
+      ${canAdd ? `<button class="btn btn-gold" type="button" id="bkNew" style="min-height:48px;padding:0 14px;font-size:16px">+ New</button>` : ""}</div>
+    <datalist id="bkSchools">${(site.highSchools || []).map(h => `<option value="${esc(h.name)}">`).join("")}<option value="Hartland High School"></datalist>
+    ${list.length ? "" : `<div class="card empty">No brackets yet. Tap <b>+ New</b> when the seeds come out.</div>`}
+    ${list.map(b => { const mine = bkMine(b), team = (site.teams || []).find(t => t.id === b.teamId), model = BK.buildBracket(b, finals);
+      const champ = model.champ ? `Champion: ${model.champ.school}` : b.status || "";
+      return `<details class="sec bkx" data-bid="${esc(b.id)}"${bkOpen.has(b.id) ? " open" : ""}><summary><b class="bkt">${esc(b.title || "Untitled bracket")}</b><span>${esc([team ? teamLabel(site, team) : "", champ].filter(Boolean).join(" · "))}</span></summary><div class="secb">
+        ${mine ? `<p class="hint" style="margin:0 2px 8px">Tap a team to make it the winner (tap again to undo). ✎ adds the score. Hartland's matches fill in from the scorekeeper when they're final.</p>` : `<p class="hint" style="margin:0 2px 8px">View only: this is another team's bracket.</p>`}
+        <div class="bk-admin${mine ? " can" : ""}">${BK.bracketHTML(model, {esc, logo:bkLogo, edit:mine, short:sc => shortSchool(sc)})}</div>
+        ${mine ? `<details class="bkset"${(b.seeds || []).some(x => x.school) ? "" : " open"}><summary>Setup and seeds</summary><div class="bkf">
+          <label class="f"><span>Title</span><input data-bf="title" value="${esc(b.title || "")}" placeholder="Fall 2026 MHSEL Playoffs · Smash"></label>
+          <label class="f"><span>Our team in it</span><select data-bf="teamId"><option value="">—</option>${bkTeams().map(t => `<option value="${esc(t.id)}"${t.id === b.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select></label>
+          <label class="f"><span>Status</span><select data-bf="status">${["Upcoming", "In progress", "Final"].map(x => `<option${x === b.status ? " selected" : ""}>${x}</option>`).join("")}</select></label>
+          <label class="f"><span>Teams</span><select data-bf="size">${BK.SIZES.map(n => `<option value="${n}"${n === +b.size ? " selected" : ""}>${n} teams</option>`).join("")}</select></label>
+          <label class="f"><span>League</span><input data-bf="league" value="${esc(b.league || "")}" placeholder="MHSEL"></label>
+          <label class="f"><span>League bracket link (optional)</span><input data-bf="link" type="url" value="${esc(b.link || "")}" placeholder="https://"></label>
+        </div>
+        <label class="tog" style="margin:10px 2px"><input type="checkbox" data-bf="on"${b.on !== false ? " checked" : ""}> Show on the website</label>
+        <h2>Seeds</h2>
+        <div class="bk-seeds">${Array.from({length:+b.size}, (_, k) => `<label><b>${k + 1}</b><input list="bkSchools" data-seed="${k}" value="${esc(b.seeds?.[k]?.school || "")}" placeholder="${k ? "School (blank = bye)" : "School"}" autocomplete="off"></label>`).join("")}</div>
+        <details style="margin:8px 2px"><summary class="hint" style="cursor:pointer;margin:0">Paste seeds instead</summary><textarea data-bkpaste rows="5" style="width:100%;margin-top:6px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:10px;font:inherit" placeholder="One school per line, seed 1 first. A blank line is a bye."></textarea><button type="button" class="btn btn-line" data-bkpasteok style="margin-top:6px">Fill in the seeds</button></details></details>` : ""}
+        ${mine ? `<div class="tools" style="flex-wrap:wrap;margin-top:10px"><button type="button" class="btn btn-line" data-bkclear>Clear results</button>${role === "coach" ? `<button type="button" class="btn btn-line" data-bkdel style="color:var(--live)">Delete bracket</button>` : ""}</div>` : ""}
+        <p class="hint" style="margin:10px 2px 0">Stream: the Bracket overlay shows this automatically during ${esc(team ? teamLabel(site, team) : "this team's")} matches. To pin this one: <button type="button" class="linkbtn" data-copy="${esc(SITE)}overlay/bracket.html?b=${esc(b.id)}">Copy its overlay link</button></p>
+      </div></details>`; }).join("")}</div>`;
+  $("#bkBack").onclick = () => location.hash = "";
+  $("#bkNew") && ($("#bkNew").onclick = () => {
+    const t = bkTeams()[0], id = be.newBracketId(), b = {id, title:"", league:"MHSEL", status:"Upcoming", teamId:role === "coach" ? "" : t?.id || "", game:role === "coach" ? "" : t?.gameKey || "", size:8, seeds:[], res:{}, on:true, created:new Date().toISOString()};
+    brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); renderBrackets();
+    setTimeout(() => document.querySelector(`[data-bid="${id}"] [data-bf="title"]`)?.focus(), 50); });
+  document.querySelectorAll("#bkPage details.bkx").forEach(d => d.ontoggle = () => d.open ? bkOpen.add(d.dataset.bid) : bkOpen.delete(d.dataset.bid));
+  document.querySelectorAll("#bkPage [data-copy]").forEach(x => x.onclick = () => { navigator.clipboard?.writeText(x.dataset.copy).then(() => toast("Overlay link copied.")).catch(() => prompt("Copy this link:", x.dataset.copy)); });
+}
+const bkOf = el => { const id = el.closest("[data-bid]")?.dataset.bid; return brackets.find(b => b.id === id); };
+document.addEventListener("input", e => {
+  if (view !== "brackets") return;
+  const el = e.target, b = bkOf(el); if (!b || !bkMine(b)) return;
+  if (el.dataset.seed != null){ b.seeds = Array.from({length:+b.size}, (_, k) => b.seeds?.[k] || {school:""}); b.seeds[+el.dataset.seed] = {school:el.value.trim()}; bkSave(b, 900);
+    clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => { if (document.activeElement === el) bkRedraw(b); }, 900); return; }
+  const f = el.dataset.bf; if (!f) return;
+  if (f === "title" || f === "league" || f === "link"){ b[f] = el.value; bkSave(b, 700); const t = el.closest("details").querySelector(".bkt"); if (f === "title" && t) t.textContent = el.value || "Untitled bracket"; }
+});
+document.addEventListener("change", e => {
+  if (view !== "brackets") return;
+  const el = e.target, b = bkOf(el); if (!b || !bkMine(b)) return;
+  const f = el.dataset.bf; if (!f || f === "title" || f === "league" || f === "link") { if (el.dataset.seed != null) renderBrackets(); return; }
+  if (f === "on") b.on = el.checked;
+  else if (f === "size"){ if (Object.keys(b.res || {}).length && !confirm("Changing the size clears the results. Go ahead?")){ el.value = b.size; return; } b.size = +el.value; b.res = {}; }
+  else if (f === "teamId"){ b.teamId = el.value; b.game = (site.teams || []).find(t => t.id === el.value)?.gameKey || ""; }
+  else b[f] = el.value;
+  bkSave(b); renderBrackets();
+});
+/* redraw just one bracket's picture (keeps the cursor in a seed box) */
+function bkRedraw(b){ const box = document.querySelector(`[data-bid="${b.id}"] .bk-admin`); if (box) box.innerHTML = BK.bracketHTML(BK.buildBracket(b, bkFinals()), {esc, logo:bkLogo, edit:true, short:sc => shortSchool(sc)}); }
+document.addEventListener("click", e => {
+  if (view !== "brackets") return;
+  const b = bkOf(e.target); if (!b || !bkMine(b)) return;
+  b.res = b.res || {};
+  if (e.target.closest("[data-bkpasteok]")){ const lines = e.target.closest(".secb").querySelector("[data-bkpaste]").value.split(/\r?\n/).map(x => x.trim());
+    while (lines.length && !lines[lines.length - 1]) lines.pop();
+    const n = BK.SIZES.find(x => x >= lines.length) || 32; if (n !== +b.size && (!Object.keys(b.res).length || confirm(`That's ${lines.length} teams: make this a ${n}-team bracket? Results are cleared.`))){ b.size = n; b.res = {}; }
+    b.seeds = Array.from({length:+b.size}, (_, k) => ({school:lines[k] || ""})); bkSave(b); renderBrackets(); toast("Seeds filled in."); return; }
+  if (e.target.closest("[data-bkclear]")){ if (confirm("Clear every result in this bracket?")){ b.res = {}; bkSave(b); renderBrackets(); } return; }
+  if (e.target.closest("[data-bkdel]")){ if (confirm(`Delete "${b.title || "this bracket"}" from the website and stream?`)){ brackets = brackets.filter(x => x !== b); be.deleteBracket(b.id).catch(() => toast("Couldn't delete it. Check the connection.")); renderBrackets(); } return; }
+  const mEl = e.target.closest(".bk-m[data-k]"); if (!mEl || !mEl.closest(".bk-admin.can")) return;
+  const k = mEl.dataset.k, [r, mi] = k.split("-").map(Number), model = BK.buildBracket(b, bkFinals()), m = model.rounds[r]?.[mi]; if (!m || m.bye) return;
+  const clearAfter = () => { for (let rr = r + 1, ii = mi >> 1; rr < model.R; rr++, ii >>= 1) delete b.res[`${rr}-${ii}`]; };
+  if (e.target.closest(".bk-edit")){ if (!m.a || !m.b) return;
+    const v = prompt(`Score, ${shortSchool(m.a.school)} first (like 3-1). Leave blank to clear.`, b.res[k]?.s || m.s || ""); if (v === null) return;
+    const p = v.trim().replace(/\s+/g, "").match(/^(\d+)[-–](\d+)$/);
+    b.res[k] = {...(b.res[k] || {}), s:p ? `${p[1]}-${p[2]}` : ""};
+    if (p && +p[1] !== +p[2]){ const w = +p[1] > +p[2] ? "a" : "b"; if (b.res[k].w !== w){ b.res[k].w = w; clearAfter(); } }
+    if (!b.res[k].w && !b.res[k].s) delete b.res[k]; buzz(); bkSave(b); renderBrackets(); return; }
+  const tEl = e.target.closest(".bk-t"); if (!tEl || tEl.classList.contains("none")) return;
+  const which = [...mEl.querySelectorAll(".bk-t")].indexOf(tEl) === 0 ? "a" : "b";
+  if (m.auto && !b.res[k]){ toast("This one came from our scorekeeper result. Change it on the match itself."); return; }
+  if (b.res[k]?.w === which) delete b.res[k]; else b.res[k] = {w:which, s:b.res[k]?.w === which ? b.res[k].s : ""};
+  clearAfter(); buzz(); bkSave(b); renderBrackets();
+});
+
 function playoffHTML(open){
   if (season !== NOW) return "";
   const R = {league:"MHSEL", minPlayed:5, maxPlayed:7, ...(site.leagueRules || {})}, term = termOf(new Date().toISOString());
@@ -822,7 +958,8 @@ function bindAlumni(){
    record book itself only changes when the match is marked final. */
 function startFinals(){
   if (allFinals !== null) return; allFinals = [];
-  watchFinals(site, f => { allFinals = f; if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true); });
+  watchFinals(site, f => { allFinals = f; if (view === "match" && !document.activeElement?.closest?.("#details")) renderMatch(true);
+    else if (view === "brackets" && !document.activeElement?.closest?.("#bkPage input, #bkPage textarea, #bkPage select")) renderBrackets(); });
 }
 function recWho(){
   const all = everyone(), seen = {}, cur = new Set((site.teams || []).flatMap(t => (t.roster || []).map(r => r.id)).filter(Boolean));

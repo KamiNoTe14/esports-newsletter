@@ -6,7 +6,7 @@
    on the station (public/broadcast): {cmd:{id, at, type:"scene"|"replay"|"pov"|"read", …}}. It also runs the scoreboard
    reader (sbread.js) when the scorekeeper turns it on.
    ?station=2 for the second streaming PC. ?debug=1 shows its status on screen. */
-import {backend, sendLiveStats} from "../assets/matches.js?v=24";
+import {backend, sendLiveStats} from "../assets/matches.js?v=25";
 
 const q = new URLSearchParams(location.search), STATION = q.get("station") || "1", OBS = window.obsstudio;
 const log = document.getElementById("log"), say = msg => { if (log && q.get("debug")) log.textContent = msg; console.log("[LevelUP Remote] " + msg); };

@@ -45,6 +45,23 @@ service cloud.firestore {
       allow delete: if isCoach();
     }
 
+    // Playoff brackets, built in the scorekeeper and read live by the website and the stream's Bracket overlay.
+    // Coaches edit any; a student scorekeeper adds and edits brackets for their own teams. Only coaches delete.
+    function validBracket() {
+      let d = request.resource.data;
+      return d.size in [4, 8, 16, 32]
+        && d.title is string && d.title.size() <= 120
+        && d.teamId is string && d.teamId.size() <= 40
+        && d.seeds is list && d.seeds.size() <= 32
+        && d.res is map && d.res.size() <= 40;
+    }
+    match /brackets/{bracketId} {
+      allow read: if true;
+      allow create: if validBracket() && (isCoach() || scoresTeam(request.resource.data.teamId));
+      allow update: if validBracket() && (isCoach() || (scoresTeam(resource.data.teamId) && scoresTeam(request.resource.data.teamId)));
+      allow delete: if isCoach();
+    }
+
     // Small summary documents the website reads (scores strip, etc.)
     match /public/{docId} {
       allow read: if true;

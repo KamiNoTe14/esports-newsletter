@@ -254,6 +254,11 @@ async function firebaseBackend(){
       const d = s.docs.find(x => x.data().schoolKey === scoutKey(school) || scoutKey(x.data().school) === scoutKey(school));
       return d ? {id:d.id, ...d.data()} : null;
     },
+    /* Playoff brackets (brackets/{id}): built and updated in the scorekeeper, read live by the website and stream. */
+    watchBrackets(cb){ return fb.onSnapshot(fb.collection(db, "brackets"), s => cb(s.docs.map(d => ({id:d.id, ...d.data()}))), e => { console.error(e); cb([]); }); },
+    newBracketId(){ return fb.doc(fb.collection(db, "brackets")).id; },
+    async saveBracket(id, b){ const {id:_, ...d} = b; await fb.setDoc(fb.doc(db, "brackets", id), strip(d)); },
+    async deleteBracket(id){ await fb.deleteDoc(fb.doc(db, "brackets", id)); },
     newScoutId(){ return fb.doc(fb.collection(db, "scoutReports")).id; },
     async saveScout(id, r){ await fb.setDoc(fb.doc(db, "scoutReports", id), strip(r)); }
   };
@@ -263,7 +268,7 @@ async function firebaseBackend(){
 function mockBackend(){
   const K = "eagles-mock-matches", SB = "eagles-mock-scoreboard";
   const read = () => { try { return JSON.parse(localStorage.getItem(K)) || {}; } catch(e){ return {}; } };
-  const subs = new Set(), dirSubs = new Set(), tickSubs = new Set();
+  const subs = new Set(), dirSubs = new Set(), tickSubs = new Set(), bkSubs = new Set();
   const emit = () => subs.forEach(f => f());
   window.addEventListener("storage", e => { if (e.key === K) emit(); });
   let user = null; const userSubs = new Set();
@@ -278,6 +283,11 @@ function mockBackend(){
       subs.add(f); setTimeout(f, 0); return () => subs.delete(f);
     },
     newId(){ return "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+    watchBrackets(cb){ const f = () => { let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-brackets")) || {}; } catch(e){} cb(Object.entries(all).map(([id, b]) => ({id, ...b}))); };
+      f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-brackets") f(); }); bkSubs.add(f); return () => bkSubs.delete(f); },
+    newBracketId(){ return "b" + Date.now().toString(36); },
+    async saveBracket(id, b){ let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-brackets")) || {}; } catch(e){} const {id:_, ...d} = b; all[id] = JSON.parse(JSON.stringify(d)); localStorage.setItem("eagles-mock-brackets", JSON.stringify(all)); bkSubs.forEach(f => f()); },
+    async deleteBracket(id){ let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-brackets")) || {}; } catch(e){} delete all[id]; localStorage.setItem("eagles-mock-brackets", JSON.stringify(all)); bkSubs.forEach(f => f()); },
     async getMember(email){ return mockScout().members?.[email] || null; },
     async getSeason(season){ return Object.entries(read()).map(([id, m]) => ({id, ...m})).filter(m => m.season === season); },
     async save(m, scoreboard, by, seasonDoc){ const all = read(), {id, ...data} = m; all[id] = JSON.parse(JSON.stringify({...data, updatedAt:new Date().toISOString(), updatedBy:by || ""})); localStorage.setItem(K, JSON.stringify(all)); this.syncSummaries(scoreboard, seasonDoc); emit(); },

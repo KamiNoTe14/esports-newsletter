@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo, shortSchool} from "./matches.js?v=24";
+import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo, shortSchool} from "./matches.js?v=25";
 import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=5";
 
 const BASE = new URL("../", import.meta.url).href;
@@ -343,13 +343,38 @@ export function startNextLevel(site){
 
 /* ---------- player profile ---------- */
 /* ---------- playoff brackets on the Teams page: built in the Site Manager; our results fill in live ---------- */
+/* Playoff brackets (brackets/{id} in the score database), built in the scorekeeper. Live: a winner clicked there shows here in seconds. */
+export async function watchBrackets(cb){
+  if (isMock()){ const f = () => { let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-brackets")) || {}; } catch(e){} cb(Object.entries(all).map(([id, b]) => ({id, ...b}))); };
+    f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-brackets") f(); }); setInterval(f, 2000); return; }
+  const rest = () => { const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/brackets?pageSize=50&key=${FIREBASE_CONFIG.apiKey}`;
+    const tick = async () => { try { const r = await fetch(url, {cache:"no-store"}); if (r.ok) cb(((await r.json()).documents || []).map(d => ({id:d.name.split("/").pop(), ...fromRest(d.fields || {})}))); } catch(e){} };
+    tick(); setInterval(tick, 30000); };
+  try { const {fb, db:d} = await db(); fb.onSnapshot(fb.collection(d, "brackets"), s => cb(s.docs.map(x => ({id:x.id, ...x.data()}))), () => rest()); }
+  catch(e){ rest(); }
+}
+/* Built brackets in a steady order: in progress first, then upcoming, then finished; newest first within each. */
+export function sortBrackets(list){
+  const rank = b => b.status === "In progress" ? 0 : b.status === "Final" ? 2 : 1;
+  return [...list].filter(b => +b.size).sort((a, b) => rank(a) - rank(b) || String(b.created || "").localeCompare(String(a.created || "")));
+}
 export async function startBrackets(site){
-  const boxes = [...document.querySelectorAll("[data-bk-site]")]; if (!boxes.length) return;
-  const BK = await import(BASE + "assets/bracket.js?v=1");
+  const box = document.querySelector("[data-bk-live]"); if (!box) return;
+  const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=2");
   const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };
-  const draw = finals => boxes.forEach(box => { const b = site.brackets?.[+box.dataset.bkSite]; if (!b) return;
-    box.innerHTML = BK.bracketHTML(BK.buildBracket(b, finals), {esc, logo, short:sc => shortSchool(sc)}); });
-  draw([]); watchFinals(site, draw);
+  let finals = [], list = [];
+  const draw = () => {
+    const show = sortBrackets(list).filter(b => b.on !== false);
+    box.innerHTML = show.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px;grid-column:1/-1">
+      <div class="chips">${b.status ? `<span class="chip gold">${esc(b.status)}</span>` : ""}${b.league ? `<span class="chip">${esc(b.league)}</span>` : ""}</div>
+      <h3>${esc(b.title || "Playoffs")}</h3>
+      <div class="bk-wrap">${BK.bracketHTML(BK.buildBracket(b, finals), {esc, logo, short:sc => shortSchool(sc)})}</div>
+      ${b.text ? `<p class="muted" style="margin:0">${esc(b.text)}</p>` : ""}${safe(b.link) ? `<a class="btn btn-line" style="align-self:flex-start" href="${esc(safe(b.link))}" target="_blank" rel="noopener">View on the league site</a>` : ""}</article>`).join("");
+    box.style.display = show.length ? "contents" : "none";
+    if (sec) sec.hidden = !show.length && !sec.querySelector("article:not([data-bk-live] article)");
+  };
+  watchBrackets(l => { list = l; draw(); });
+  watchFinals(site, f => { finals = f; draw(); });
 }
 /* ---------- coach profiles (coach.html?c=cameron-montney) ----------
    Career numbers over the seasons they coached (First season … Last season in the Site Manager, every game or one):

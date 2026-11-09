@@ -2,8 +2,8 @@
    ?station=1 (default). The scorekeeper decides which match is on each station; every overlay updates itself live.
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
-import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=24";
-import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=51";
+import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=25";
+import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=52";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -767,17 +767,18 @@ function splitShell(m, plates, guides, cls = ""){
 }
 
 /* ---------- playoff bracket (full screen) ----------
-   The bracket built in the Site Manager (Playoff brackets) for this match's team, or ?b=2 for the second built bracket.
-   Our results fill in from the scorekeeper the moment a playoff match is final; others from the Site Manager.
+   The bracket built in the scorekeeper (Playoff brackets) for this match's team, or ?b=2 for the second one listed there.
+   Live: a winner clicked in the scorekeeper shows here in seconds, and our results fill in when a playoff match is final.
    Shows up to four rounds (a 32-team bracket starts at the Round of 16); ?from=0 shows every round. */
 let BKM = null;
-import("../assets/bracket.js?v=1").then(x => { BKM = x; if (LAYER === "bracket") draw(); }).catch(e => console.error(e));
+let bkList = [];
+if (LAYER === "bracket"){ import("../assets/bracket.js?v=2").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
 function bracketLayer(m){
   const g = gameFor(site, m.game);
   if (!BKM) return;
-  const built = (site.brackets || []).filter(b => +b.size && b.on !== false);
-  const pick = q.get("b") ? built[+q.get("b") - 1] : built.find(b => b.teamId && b.teamId === m.teamId && b.status !== "Final") || built.find(b => b.teamId === m.teamId) || built.find(b => b.game === m.game && b.status === "In progress") || built.find(b => b.game === m.game);
-  if (!pick){ empty("No bracket built for this team yet: Site Manager > Playoff brackets."); return; }
+  const built = sortBrackets(bkList);
+  const pick = q.get("b") ? built.find(b => b.id === q.get("b")) || built[+q.get("b") - 1] : built.find(b => b.teamId && b.teamId === m.teamId && b.status !== "Final") || built.find(b => b.teamId === m.teamId) || built.find(b => b.game === m.game && b.status === "In progress") || built.find(b => b.game === m.game);
+  if (!pick){ empty("No bracket built for this team yet: Scorekeeper > Playoff brackets."); return; }
   const live = m.status === "final" && !finals.some(f => f.id === m.id) ? [...finals, m] : finals;
   const model = BKM.buildBracket(pick, live), from = q.get("from") != null ? Math.max(0, +q.get("from") || 0) : Math.max(0, model.R - 4);
   const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };

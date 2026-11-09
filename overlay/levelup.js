@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=25";
-import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=53";
+import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=54";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -782,7 +782,7 @@ function bracketLayer(m){
   if (!pick){ empty("No bracket built for this team yet: Scorekeeper > Playoff brackets."); return; }
   const live = m.status === "final" && !finals.some(f => f.id === m.id) ? [...finals, m] : finals;
   const model = BKM.buildBracket(pick, live), from = q.get("from") != null ? Math.max(0, +q.get("from") || 0) : Math.max(0, model.R - 4);
-  const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };
+  const logo = sc => { const x = schoolInfo(site, sc), l = x?.logo || (BKM.isHartland(sc) ? "assets/eagle.png" : ""); return l ? (/^(https?:|data:)/.test(l) ? l : BASE + l) : ""; };
   const us = model.rounds.flat().filter(x => x.us && !x.bye), last = us[us.length - 1];
   let foot = "";
   if (model.champ) foot = model.champ.us ? `<em>${esc(model.champ.label || "Hartland")}</em> are champions` : `Champion: <em>${esc(model.champ.label || shortSchool(model.champ.school))}</em>`;

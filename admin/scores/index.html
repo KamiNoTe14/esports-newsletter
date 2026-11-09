@@ -324,7 +324,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=25";
-import {watchFinals, sortBrackets} from "../../assets/live.js?v=53";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=54";
 import * as BK from "../../assets/bracket.js?v=3";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
@@ -759,7 +759,7 @@ function bkLinkHTML(){
   const live = brackets.filter(b => +b.size && b.status === "In progress").length;
   return `<a id="bkLink" class="btn btn-line btn-block guide" href="#brackets">🏆 Playoff brackets${brackets.length ? ` · ${brackets.length}${live ? ` (${live} in progress)` : ""}` : ""}</a>`;
 }
-const bkLogo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : SITE + x.logo) : ""; };
+const bkLogo = sc => { const x = schoolInfo(site, sc), l = x?.logo || (BK.isHartland(sc) ? "assets/eagle.png" : ""); return l ? (/^(https?:|data:)/.test(l) ? l : SITE + l) : ""; };
 /* Saves are kept on this device until the database takes them (survives a refresh), and retried every 15 seconds. */
 const BK_UNSAVED = "eagles-bk-unsaved";
 const bkKeep = () => { try { localStorage.setItem(BK_UNSAVED, JSON.stringify(bkLocal)); } catch(e){} };

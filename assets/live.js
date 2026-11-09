@@ -361,7 +361,7 @@ export function sortBrackets(list){
 export async function startBrackets(site){
   const box = document.querySelector("[data-bk-live]"); if (!box) return;
   const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=3");
-  const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };
+  const logo = sc => { const x = schoolInfo(site, sc), l = x?.logo || (BK.isHartland(sc) ? "assets/eagle.png" : ""); return l ? (/^(https?:|data:)/.test(l) ? l : BASE + l) : ""; };
   let finals = [], list = [];
   const draw = () => {
     const show = sortBrackets(list).filter(b => b.on !== false);

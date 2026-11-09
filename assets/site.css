@@ -624,3 +624,9 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .rnext li{line-height:1.45}.rnext b{white-space:nowrap}
 .rv.long{font-size:32px}
 .rduo a{white-space:nowrap}
+
+/* ---------- coach profiles ---------- */
+.stat-row.coach-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px 18px}
+.coach-card{display:flex;gap:16px;align-items:center;text-decoration:none;color:inherit}
+.coach-card .player-photo{width:76px;height:76px;font-size:36px;flex:none}
+.coach-card b{display:block;font:700 24px/1.1 var(--display);text-transform:uppercase}.coach-card small{color:var(--muted)}

@@ -342,6 +342,89 @@ export function startNextLevel(site){
 }
 
 /* ---------- player profile ---------- */
+/* ---------- coach profiles (coach.html?c=cameron-montney) ----------
+   Career numbers over the seasons they coached (First season … Last season in the Site Manager, every game or one):
+   match and game record, playoff runs from the match history, deep runs and titles from the record book, players
+   coached, All-State players and college signings, plus their own awards and nominations. */
+const coachSlug = n => String(n || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function recSeasonOf(t){ const y = +(String(t || "").match(/\b(20\d\d)\b/) || [])[1]; if (!y) return ""; const m = /spring|winter|jan|feb|mar|apr|may|jun/i.test(t) ? y - 1 : y; return `${m}-${String((m + 1) % 100).padStart(2, "0")}`; }
+const seasonKey = t => { const m = String(t || "").match(/(20\d\d)/); return m ? +m[1] : 0; };
+export async function startCoach(site){
+  const host = $("#coach"); if (!host) return;
+  const NOW = seasonOf(), full = {}, watching = new Set();
+  let arch = [];
+  learnPeople(site, null);
+  const draw = () => drawCoach(site, host, merge([...arch, ...Object.values(full).flat()], null));
+  const watch = se => { if (watching.has(se)) return; watching.add(se); watchSeason(se, d => { full[se] = d.matches || []; draw(); }); };
+  watch(NOW);
+  watchDirectory(d => { learnPeople(site, d); d.seasons.forEach(watch); draw(); });
+  archiveSeasons().then(async seasons => { arch = (await Promise.all(seasons.map(archive))).flat(); draw(); });
+}
+function drawCoach(site, host, all){
+  const want = new URLSearchParams(location.search).get("c") || "", coaches = (site.coaches || []).filter(c => c.name && !c.hidden);
+  const c = coaches.find(x => coachSlug(x.name) === want);
+  const src = p => /^https?:/.test(p) ? p : BASE + p;
+  if (!c){
+    host.innerHTML = `<section class="page-h"><div class="wrap"><p class="eyebrow">Hartland Esports</p><h1>Coaches</h1></div></section><section class="section"><div class="wrap grid g3">${coaches.map(x => `<a class="card coach-card" href="${BASE}coach.html?c=${coachSlug(x.name)}">${x.photo ? `<img class="player-photo" src="${esc(src(x.photo))}" alt="">` : `<div class="player-photo ph">${esc(x.name[0])}</div>`}<div><b>Coach ${esc(x.name)}</b><small>${esc(x.title || x.role || "Coach")}</small></div></a>`).join("") || `<div class="empty">No coaches listed yet.</div>`}</div></section>`;
+    document.title = "Coaches · Hartland Esports"; return;
+  }
+  document.title = `Coach ${c.name} · Hartland Esports`;
+  const allSeasons = [...new Set(all.map(m => m.season).filter(Boolean))].sort();
+  const from = /^\d{4}-\d{2}$/.test(String(c.since || "").trim()) ? c.since.trim() : allSeasons[0] || "", to = /^\d{4}-\d{2}$/.test(String(c.until || "").trim()) ? c.until.trim() : "9999";
+  const inRange = se => !!se && se >= from && se <= to, gameOk = k => !c.game || k === c.game;
+  const ms = all.filter(m => m.status === "final" && !["scrim", "exhibition"].includes(m.stage) && inRange(m.season) && gameOk(m.game) && (m.result === "W" || m.result === "L"));
+  const W = ms.filter(m => m.result === "W").length, L = ms.length - W;
+  const gw = ms.reduce((a, m) => { (m.games || []).forEach(x => { if (x.winner === "us") a[0]++; else if (x.winner === "them") a[1]++; }); return a; }, [0, 0]);
+  const post = ms.filter(m => m.stage === "playoffs" || m.stage === "finals"), PW = post.filter(m => m.result === "W").length;
+  const runs = new Set(post.map(m => [m.season, m.term, m.teamId || m.teamName, m.league].join("|")));
+  const seasons = [...new Set(ms.map(m => m.season))].sort();
+  const players = new Set(ms.flatMap(m => (m.players || []).map(p => p.id)).filter(Boolean));
+  const teams = new Set(ms.map(m => [m.season, m.teamId || m.teamName].join("|")));
+  /* record book: titles and deep runs while they coached */
+  const deep = /champion|runner[- ]?up|finalist|final four|elite eight|top \d/i;
+  const book = (site.records || []).filter(r => (["championship", "tournament", "finish"].includes(r.type) || (r.type === "milestone" && deep.test(r.title || ""))) && inRange(recSeasonOf(r.year)) && (!c.game || r.game === c.game));
+  const has = (r, re) => re.test(String(r.title || ""));
+  const champs = book.filter(r => r.type === "championship" && !has(r, /runner/i)), tourn = book.filter(r => r.type === "tournament");
+  const finals = champs.length + book.filter(r => has(r, /runner[- ]?up|finalist/i)).length;
+  const ff = finals + book.filter(r => has(r, /final four/i)).length, e8 = ff + book.filter(r => has(r, /elite eight/i)).length;
+  const aw = (site.awards || []).filter(a => /all[- ]?state/i.test(a.title) && a.status !== "Nominated" && a.status !== "Finalist" && !String(a.who).startsWith("coach:") && a.who !== "program" && inRange(recSeasonOf(a.season)) && gameOk(a.game || (c.game ? "" : a.game)) && (!c.game || !a.game || a.game === c.game));
+  const signings = (site.records || []).filter(r => /signing/i.test(r.title)).length;
+  const myAwards = awardsFor(site, ["coach:" + coachSlug(c.name)]), extra = String(c.accolades || "").split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+  const accolades = [...new Set([...myAwards, ...extra])];
+  const pct = n => ms.length ? Math.round(100 * n / ms.length) + "%" : "–";
+  const tile = (v, l) => `<div><b>${v}</b><small>${esc(l)}</small></div>`;
+  const span = seasons.length ? `${(seasons[0] || "").replace("-", "–")} to ${to === "9999" ? "today" : to.replace("-", "–")}` : "";
+  const g = c.game ? gameFor(site, c.game) : null;
+  const bySeason = seasons.slice().reverse().map(se => { const l = ms.filter(m => m.season === se), w = l.filter(m => m.result === "W").length, p = l.filter(m => m.stage === "playoffs" || m.stage === "finals");
+    const best = book.filter(r => recSeasonOf(r.year) === se).map(r => [r.org, r.title, r.game ? `(${gameFor(site, r.game).short || gameFor(site, r.game).name})` : ""].filter(Boolean).join(" "));
+    return `<tr><td>${esc(se.replace("-", "–"))}</td><td>${w}–${l.length - w}</td><td>${new Set(p.map(m => [m.term, m.teamId || m.teamName, m.league].join("|"))).size || "–"}</td><td>${p.length ? `${p.filter(m => m.result === "W").length}–${p.filter(m => m.result === "L").length}` : "–"}</td><td>${best.map(esc).join("<br>") || `<span class="muted">–</span>`}</td></tr>`; }).join("");
+  host.innerHTML = `<section class="page-h player-h"><div class="wrap player-top">
+      ${c.photo ? `<img class="player-photo" src="${esc(src(c.photo))}" alt="">` : `<div class="player-photo ph">${esc(c.name[0])}</div>`}
+      <div><p class="eyebrow">Hartland Esports${g ? ` · ${esc(g.name)}` : ""}</p><h1 style="font-size:clamp(36px,5.6vw,64px)">Coach ${esc(c.name)}</h1>
+        <div class="chips"><span class="chip gold">${esc(c.title || c.role || "Coach")}</span>${span ? `<span class="chip">${esc(span)}</span>` : ""}${c.email ? `<a class="chip" href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ""}</div></div>
+      <div class="player-rec"><small>Career record</small><b>${W}–${L}</b><span>${pct(W)} · ${ms.length} matches</span></div>
+    </div></section>
+    ${accolades.length ? `<section class="acc-bar"><div class="wrap"><ul class="acc">${accolades.map(a => `<li><span aria-hidden="true">★</span>${esc(a)}</li>`).join("")}</ul></div></section>` : ""}
+    <section class="section"><div class="wrap">
+      <h2 class="res-h">Career</h2>
+      <div class="card stat-card"><div class="stat-row coach-stats">
+        ${tile(`${W}–${L}`, "Match record")}${tile(pct(W), "Win rate")}${gw[0] + gw[1] ? tile(`${gw[0]}–${gw[1]}`, "Games / sets") : ""}${tile(seasons.length, seasons.length === 1 ? "Season" : "Seasons")}
+        ${tile(runs.size, "Playoff appearances")}${tile(`${PW}–${post.length - PW}`, "Playoff record")}
+        ${tile(e8, "Elite Eight or better")}${tile(ff, "Final Four or better")}${tile(finals, "Championship finals")}${tile(champs.length, "State titles")}
+        ${tourn.length ? tile(tourn.length, "Tournament titles") : ""}${tile(players.size, "Players coached")}${tile(aw.length, "All-State players")}${signings ? tile(signings, "College signings") : ""}
+      </div></div>
+      ${c.bio ? `<h2 class="res-h" style="margin-top:34px">About</h2><p class="lead playbill" style="margin:0">${esc(c.bio)}</p>` : ""}
+      ${book.length ? `<h2 class="res-h" style="margin-top:34px">Titles and deep runs</h2><div class="tbl-wrap"><table class="tbl"><tbody>${book.sort((a, b) => seasonKey(b.year) - seasonKey(a.year)).map(r => `<tr><td style="white-space:nowrap">${esc(r.year || "")}</td><td><b>${esc([r.org, r.title].filter(Boolean).join(" "))}</b>${r.game ? ` <span class="muted">· ${esc(gameFor(site, r.game).name)}</span>` : ""}</td></tr>`).join("")}</tbody></table></div>` : ""}
+      ${bySeason ? `<h2 class="res-h" style="margin-top:34px">Season by season</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Season</th><th>Record</th><th>Playoff trips</th><th>Playoff record</th><th>Best finish</th></tr></thead><tbody>${bySeason}</tbody></table></div>` : ""}
+      <p class="muted" style="margin-top:18px;font-size:14px">${c.game ? `${esc(g.name)} matches` : "Every team in the program"}${span ? `, ${esc(span)}` : ""}. Scrimmages and exhibitions aren't counted.</p>
+    </div></section>`;
+}
+/* Awards & nominations (Site Manager) for these ids ("p-…", "coach:name", "program"): badge text, won first. */
+export function awardsFor(site, ids){
+  const set = new Set(ids), g = k => { const x = (site.games || []).find(y => y.key === k); return x ? (x.short || x.name) : ""; };
+  return (site.awards || []).filter(a => a.title && set.has(a.who)).sort((a, b) => (a.status === "Won" || !a.status ? 0 : 1) - (b.status === "Won" || !b.status ? 0 : 1) || String(b.season).localeCompare(String(a.season)))
+    .map(a => `${a.title}${a.status === "Nominated" ? " nominee" : a.status === "Finalist" ? " finalist" : ""}${a.season ? ` ${a.season}` : ""}${a.game && g(a.game) ? ` · ${g(a.game)}` : ""}`);
+}
 export async function startPlayer(site){
   const host = $("#player"); if (!host) return;
   const NOW = seasonOf(), full = {}, watching = new Set();
@@ -414,7 +497,8 @@ function drawPlayer(site, host, all, dir){
   const logo = x => x?.logo ? `<img src="${esc(src(x.logo))}" alt="" loading="lazy">` : "";
   const nameKey = String(me.name || "").toLowerCase();
   const honors = priv || !nameKey ? [] : (site.records || []).filter(r => r.type === "honor" && String(r.detail || "").toLowerCase().includes(nameKey)).filter(r => !/signing/i.test(r.title)).map(r => `${r.title}${r.year ? ` ${r.year}` : ""}`);
-  const accolades = [...new Set([...(entries.some(e => e.captain) ? ["Team captain"] : []), ...honors, ...String(prof.accolades || "").split(/\r?\n/).map(x => x.trim()).filter(Boolean)])];
+  const awards = priv ? [] : awardsFor(site, [...myIds]);
+  const accolades = [...new Set([...(entries.some(e => e.captain) ? ["Team captain"] : []), ...awards, ...honors, ...String(prof.accolades || "").split(/\r?\n/).map(x => x.trim()).filter(Boolean)])];
   const ranks = Object.entries(prof.ranks || {}).filter(([, v]) => String(v || "").trim()).map(([k, v]) => ({g:gameFor(site, k), v:String(v).trim()}));
   const links = String(prof.links || "").split(/\r?\n/).map(line => { const i = line.lastIndexOf("|"), u = safe((i < 0 ? line : line.slice(i + 1)).trim()); if (!u) return null; const label = (i < 0 ? "" : line.slice(0, i).trim()) || new URL(u).hostname.replace(/^www\./, ""); return {label, u}; }).filter(Boolean);
   const interest = Object.entries(prof.interest || {}).filter(([k, v]) => v && k !== prof.committed).map(([k]) => schoolOf(k)).filter(Boolean);

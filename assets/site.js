@@ -148,7 +148,19 @@ function bracketsHTML(site){
 }
 /* ---------- Record book. Each entry in site.records has a type that decides where it shows:
    championship / finish -> banners · record -> records table · honor -> lists grouped by title · everything -> timeline ---------- */
-function recs(site){ return on(site, "records") ? (site.records || []).filter(r => r.title) : []; }
+/* Awards & nominations (Site Manager) join the record book as honors: "All-State", or "All-State nominees". */
+const coachSlug = n => String(n || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function whoLabel(site, w){
+  if (w === "program") return "Hartland Esports";
+  if (String(w).startsWith("coach:")){ const c = (site.coaches || []).find(x => "coach:" + coachSlug(x.name) === w); return c ? `Coach ${c.name}` : ""; }
+  const r = (site.teams || []).flatMap(t => t.roster || []).find(x => x.id === w) || (site.alumni || []).find(x => x.id === w);
+  return r ? (r.private ? r.tag : r.name || r.tag) || "" : "";
+}
+const awardTitle = a => a.status === "Nominated" ? `${a.title} nominees` : a.status === "Finalist" ? `${a.title} finalists` : a.title;
+function awardRecs(site){
+  return (site.awards || []).filter(a => a.title && a.who).map(a => { const n = whoLabel(site, a.who); return n ? {type:"honor", title:awardTitle(a), year:a.season || "", game:a.game || "", org:a.org || "", detail:n + (a.note ? ` (${a.note})` : "")} : null; }).filter(Boolean);
+}
+function recs(site){ return on(site, "records") ? [...(site.records || []).filter(r => r.title), ...awardRecs(site)] : []; }
 const recType = r => r.type || "milestone";
 const recGame = (site, r) => (site.games || []).find(g => g.key === r.game);
 /* "Fall 2024" -> 2024-25, "Spring 2026" / "March 2026" -> 2025-26. School years start in July. */
@@ -276,6 +288,7 @@ function results(site){
   + `<section class="section"><div class="wrap" id="results"><div class="loading">Loading results…</div></div></section>`;
 }
 function player(){ return `<div id="player"><div class="loading" style="padding:80px 0">Loading player…</div></div>`; }
+function coach(){ return `<div id="coach"><div class="loading" style="padding:80px 0">Loading coach…</div></div>`; }
 function seasonText(){ const d = new Date(), y = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; return `${y}–${String((y + 1) % 100).padStart(2, "0")}`; }
 function timeline(site){
   return `<ol class="timeline">${(site.seasons || []).map((s, i) => `<li class="${i === 0 || i === 3 ? "big" : ""}"><h3>${esc(s.name)}</h3><p class="when">${esc(s.when)}</p><p>${esc(s.text)}</p></li>`).join("")}</ol>`;
@@ -307,7 +320,7 @@ function about(site){
     <div class="grid g2">
       ${T.on !== false ? `<div class="card join-card${joinArt ? " has-art" : ""}">${joinArt}<p class="eyebrow">${esc(T.title || "Tryouts")}</p><h3 style="font-size:30px;margin:8px 0">${esc(longDate(T.date))}</h3><p style="margin:0 0 6px"><b>${esc(T.time || "")}</b></p><p class="muted" style="margin:0 0 12px">${esc(T.location || "")}</p><p style="margin:0">${esc(T.text || "")}</p>${safe(L.register) ? `<p style="margin:16px 0 0"><a class="btn btn-gold" href="${esc(safe(L.register))}" target="_blank" rel="noopener">Register for esports</a></p>` : ""}</div>` : (safe(L.register) ? `<div class="card join-card${joinArt ? " has-art" : ""}">${joinArt}<p class="eyebrow">Sign up</p><h3 style="font-size:30px;margin:8px 0">Register for esports</h3><p class="muted" style="margin:0 0 14px">Fill out the registration form to join the program.</p><a class="btn btn-gold" href="${esc(safe(L.register))}" target="_blank" rel="noopener">Open the registration form</a></div>` : "")}
       <div class="card"><p class="eyebrow">Questions?</p><h3 style="font-size:30px;margin:8px 0">Talk to the coaches</h3>
-        <ul class="roster" style="border:0;padding:0">${(site.coaches || []).map(c => `<li><span><b>Coach ${esc(c.name)}</b>${c.role && c.role !== "Coach" ? ` · ${esc(c.role)}` : ""}</span>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ""}</li>`).join("")}</ul>
+        <ul class="roster" style="border:0;padding:0">${(site.coaches || []).map(c => `<li><span>${c.hidden ? `<b>Coach ${esc(c.name)}</b>` : `<a href="${BASE}coach.html?c=${coachSlug(c.name)}"><b>Coach ${esc(c.name)}</b></a>`}${c.role && c.role !== "Coach" ? ` · ${esc(c.role)}` : ""}</span>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ""}</li>`).join("")}</ul>
         ${P.lab ? `<p class="muted" style="margin:12px 0 0;font-size:15px">We practice in the ${esc(P.lab)}.</p>` : ""}
       </div>
     </div>
@@ -422,13 +435,13 @@ async function boot(){
   try { site = await getJSON("data/site.json"); } catch(e){ app.innerHTML = `<div class="loading">Couldn't load the site. Please refresh.</div>`; return; }
   try { issues = (await getJSON("data/issues.json")).issues || []; } catch(e){}
   document.body.insertAdjacentHTML("afterbegin", header(site));
-  const render = {home, teams, schedule, results, player, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
+  const render = {home, teams, schedule, results, player, coach, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=49").then(L => {
+  if (["home", "schedule", "results", "player", "coach", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=50").then(L => {
     if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams") L.startTeamRecords(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
-    if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site);
-  }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#rival") || $("#opponent") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
+    if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site); if (PAGE === "coach") L.startCoach(site);
+  }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#coach") || $("#rival") || $("#opponent") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });
   document.body.insertAdjacentHTML("beforeend", footer(site));
   heroSetup();
   const stories = $("#stories") ? JSON.parse($("#stories").textContent) : [];

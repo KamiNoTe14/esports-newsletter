@@ -748,6 +748,8 @@ function bindRosters(){
 let bkWatching = false; const bkLocal = {};   // copies with saves still on the way, so an echo doesn't undo a fast tap
 /* final matches for filling in our results: this device's live list first (instant), then every season */
 const bkFinals = () => { const seen = new Set(), out = []; [...matches.filter(m => m.status === "final"), ...(allFinals || [])].forEach(m => { if (!seen.has(m.id)){ seen.add(m.id); out.push(m); } }); return out; };
+/* brackets built in the Site Manager before they moved here (site.json brackets with a size), not yet moved */
+const bkLegacy = () => role !== "coach" ? [] : (site.brackets || []).map((x, i) => [i, x]).filter(([i, x]) => +x.size && !brackets.some(b => b.src === "site-" + i));
 const bkMine = b => role === "coach" || (b.teamId && myTeams?.has(b.teamId));
 const bkTeams = () => (site.teams || []).filter(t => t.id && (role === "coach" || myTeams.has(t.id)));
 function bkLinkHTML(){
@@ -770,6 +772,7 @@ function renderBrackets(){
       <div class="t"><b>Playoff brackets</b><span>Live on the website and the stream's Bracket overlay</span></div>
       ${canAdd ? `<button class="btn btn-gold" type="button" id="bkNew" style="min-height:48px;padding:0 14px;font-size:16px">+ New</button>` : ""}</div>
     <datalist id="bkSchools">${(site.highSchools || []).map(h => `<option value="${esc(h.name)}">`).join("")}<option value="Hartland High School"></datalist>
+    ${bkLegacy().length ? `<div class="card" style="padding:14px;margin-bottom:12px"><b>${bkLegacy().length === 1 ? "A bracket was" : `${bkLegacy().length} brackets were`} started in the Site Manager</b><p class="hint" style="margin:6px 0 10px">Brackets live here now, so they update on the website and stream right away. Move ${bkLegacy().length === 1 ? "it" : "them"} over with the seeds and results kept.</p><button type="button" class="btn btn-gold" id="bkMove">Move to the scorekeeper</button></div>` : ""}
     ${list.length ? "" : `<div class="card empty">No brackets yet. Tap <b>+ New</b> when the seeds come out.</div>`}
     ${list.map(b => { const mine = bkMine(b), team = (site.teams || []).find(t => t.id === b.teamId), model = BK.buildBracket(b, finals);
       const champ = model.champ ? `Champion: ${model.champ.school}` : b.status || "";
@@ -792,6 +795,9 @@ function renderBrackets(){
         <p class="hint" style="margin:10px 2px 0">Stream: the Bracket overlay shows this automatically during ${esc(team ? teamLabel(site, team) : "this team's")} matches. To pin this one: <button type="button" class="linkbtn" data-copy="${esc(SITE)}overlay/bracket.html?b=${esc(b.id)}">Copy its overlay link</button></p>
       </div></details>`; }).join("")}</div>`;
   $("#bkBack").onclick = () => location.hash = "";
+  $("#bkMove") && ($("#bkMove").onclick = () => { bkLegacy().forEach(([i, x]) => { const id = be.newBracketId(), g = (site.games || []).find(g => g.key === x.game);
+    const b = {id, title:x.title || `${g?.name || "Playoff"} bracket`, league:x.league || "MHSEL", status:x.status || "Upcoming", teamId:x.teamId || "", game:x.game || "", size:+x.size, seeds:(x.seeds || []).slice(0, +x.size).map(sd => ({school:sd.school || ""})), res:x.res || {}, on:x.on !== false, link:x.link || "", text:x.text || "", src:"site-" + i, created:new Date().toISOString()};
+    brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); }); toast("Moved. Give it a title under Setup and seeds."); renderBrackets(); });
   $("#bkNew") && ($("#bkNew").onclick = () => {
     const t = bkTeams()[0], id = be.newBracketId(), b = {id, title:"", league:"MHSEL", status:"Upcoming", teamId:role === "coach" ? "" : t?.id || "", game:role === "coach" ? "" : t?.gameKey || "", size:8, seeds:[], res:{}, on:true, created:new Date().toISOString()};
     brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); renderBrackets();

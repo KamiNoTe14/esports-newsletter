@@ -371,7 +371,8 @@ export async function startBrackets(site){
       <div class="bk-wrap">${BK.bracketHTML(BK.buildBracket(b, finals), {esc, logo, short:sc => shortSchool(sc)})}</div>
       ${b.text ? `<p class="muted" style="margin:0">${esc(b.text)}</p>` : ""}${safe(b.link) ? `<a class="btn btn-line" style="align-self:flex-start" href="${esc(safe(b.link))}" target="_blank" rel="noopener">View on the league site</a>` : ""}</article>`).join("");
     box.style.display = show.length ? "contents" : "none";
-    if (sec) sec.hidden = !show.length && !sec.querySelector("article:not([data-bk-live] article)");
+    const none = sec?.querySelector("[data-bk-none]"); if (none) none.hidden = !!show.length;
+    if (sec && !box.hasAttribute("data-bk-page")) sec.hidden = !show.length && !sec.querySelector("article:not([data-bk-live] article)");
   };
   watchBrackets(l => { list = l; draw(); });
   watchFinals(site, f => { finals = f; draw(); });

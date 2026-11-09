@@ -20,6 +20,8 @@ const on = (site, key) => site.sections?.[key] !== false;
 const NAV = [
   ["home", "", "Home"],
   ["teams", "teams.html", "Teams"],
+  ["standings", "standings.html", "Standings"],
+  ["playoffs", "playoffs.html", "Playoffs"],
   ["schedule", "schedule.html", "Schedule"],
   ["results", "results.html", "Results"],
   ["legacy", "legacy.html", "Legacy"],
@@ -30,7 +32,7 @@ const NAV = [
 function hasMedia(site){ return (on(site, "gallery") && (site.gallery || []).length) || (on(site, "news") && (site.news || []).length); }
 
 function header(site){
-  const items = NAV.filter(([k]) => k !== "media" || hasMedia(site));
+  const items = NAV.filter(([k]) => (k !== "media" || hasMedia(site)) && (k !== "standings" || on(site, "standings")) && (k !== "playoffs" || on(site, "brackets")));
   return `<a class="skip" href="#main">Skip to content</a>
   <header class="site-h"><div class="wrap">
     <a class="brand" href="${BASE}"><img src="${BASE}assets/eagle.png" alt="" width="62" height="28"><b>Hartland <span>Esports</span></b></a>
@@ -124,28 +126,30 @@ function teamCards(site){
       ${showRoster && roster.length ? `<ul class="roster">${roster.map(p => `<li><span>${p.id ? `<a class="pl" href="${BASE}player.html?id=${encodeURIComponent(p.id)}">` : ""}${p.private || !p.name ? `<span class="tag">${esc(p.tag)}</span>` : esc(p.name)}${p.id ? "</a>" : ""}${p.captain ? ` <span class="cap" title="Team captain" aria-label="Team captain">C</span>` : ""}${p.role ? ` <span class="muted">· ${esc(p.role)}</span>` : ""}</span>${!p.private && p.name && p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}</li>`).join("")}</ul>` : ""}
     </article>`; }).join("")}</div>`;
 }
-function standingsHTML(site){
+function standingsHTML(site, page = false){
   const list = (site.standings || []).filter(s => s.on !== false);
-  if (!on(site, "standings") || !list.length) return "";
-  return `<section class="section alt"><div class="wrap">${secH("League standings")}
+  if (!on(site, "standings")) return "";
+  if (!list.length) return page ? `<section class="section"><div class="wrap"><div class="card"><h3>Standings are on the way</h3><p class="muted" style="margin:0">League standings show up here once the season gets going. Our <a href="${BASE}results.html">results</a> are always up to date.</p></div></div></section>` : "";
+  return `<section class="section${page ? "" : " alt"}"><div class="wrap">${page ? "" : secH("League standings", `<a class="more" href="${BASE}standings.html">Standings page →</a>`)}
     <div class="grid" style="gap:28px">${list.map(s => `<div>
       <div class="sec-h" style="margin-bottom:12px"><h3>${esc(s.title)}</h3>${s.updated ? `<span class="muted" style="font-size:14px">Updated ${esc(shortDate(s.updated) || s.updated)}</span>` : ""}</div>
       ${(s.rows || []).length ? (() => { const rows = s.rows || [], hasR = rows.some(r => String(r.rating || "").trim()); const cut = rows.length > 15; return `<div class="tbl-wrap"><table class="tbl${cut ? " cut" : ""}"><thead><tr><th>#</th><th>Team</th><th class="n">W</th><th class="n">L</th>${hasR ? '<th class="n">Rating</th>' : ""}</tr></thead><tbody>${rows.map((r, i) => `<tr${r.us ? ' class="us"' : cut && i >= 10 ? ' class="extra"' : ""}><td>${esc(r.rank || i + 1)}</td><td>${esc(r.team)}${r.school ? `<span class="sub">${esc(r.school)}</span>` : ""}</td><td class="n">${esc(r.w)}</td><td class="n">${esc(r.l)}</td>${hasR ? `<td class="n">${esc(r.rating || "")}</td>` : ""}</tr>`).join("")}</tbody></table></div>${cut ? `<button type="button" class="tbl-more" onclick="const t=this.previousElementSibling.querySelector('table');t.classList.toggle('cut');this.textContent=t.classList.contains('cut')?'Show all ${rows.length} teams':'Show fewer'">Show all ${rows.length} teams</button>` : ""}`; })() : ""}
       ${safe(s.link) ? `<p style="margin:10px 0 0"><a href="${esc(safe(s.link))}" target="_blank" rel="noopener">Full standings →</a></p>` : ""}
     </div>`).join("")}</div></div></section>`;
 }
-function bracketsHTML(site){
-  /* Built brackets come live from the scorekeeper (into [data-bk-live]); site.json brackets are link/image cards. */
+function bracketsHTML(site, page = false){
+  /* Built brackets come live from the scorekeeper (into [data-bk-live]); site.json brackets are link/image cards.
+     On the Teams page the section stays hidden until there's a bracket; the Playoffs page always shows (with a note when empty). */
   const list = (site.brackets || []).filter(s => s.on !== false && !+s.size);
   if (!on(site, "brackets")) return "";
-  return `<section class="section"${list.length ? "" : " hidden"}><div class="wrap">${secH("Playoff brackets")}
-    <div class="grid g2"><div data-bk-live style="display:none"></div>${list.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px">
+  return `<section class="section"${list.length || page ? "" : " hidden"}><div class="wrap">${page ? "" : secH("Playoff brackets", `<a class="more" href="${BASE}playoffs.html">Playoffs page →</a>`)}
+    <div class="grid g2"><div data-bk-live${page ? " data-bk-page" : ""} style="display:none"></div>${list.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px">
       <div class="chips">${b.status ? `<span class="chip gold">${esc(b.status)}</span>` : ""}${b.league ? `<span class="chip">${esc(b.league)}</span>` : ""}</div>
       <h3>${esc(b.title)}</h3>
       ${b.image ? `<a href="${esc(url(b.image))}" target="_blank" rel="noopener"><img src="${esc(url(b.image))}" alt="${esc(b.title)} bracket" loading="lazy" style="border-radius:6px;background:#fff"></a>` : ""}
       ${b.text ? `<p class="muted" style="margin:0">${esc(b.text)}</p>` : ""}
       ${safe(b.link) ? `<a class="btn btn-line" style="align-self:flex-start" href="${esc(safe(b.link))}" target="_blank" rel="noopener">View bracket</a>` : ""}
-    </article>`).join("")}</div></div></section>`;
+    </article>`).join("")}${page && !list.length ? `<article class="card" data-bk-none style="grid-column:1/-1"><h3>No playoff brackets right now</h3><p class="muted" style="margin:0">When the postseason starts, brackets show up here and update live as matches finish. Until then, see where we stand in the <a href="${BASE}standings.html">league standings</a>.</p></article>` : ""}</div></div></section>`;
 }
 /* ---------- Record book. Each entry in site.records has a type that decides where it shows:
    championship / finish -> banners · record -> records table · honor -> lists grouped by title · everything -> timeline ---------- */
@@ -269,6 +273,14 @@ function teams(site){
   return pageH(`${y}–${String((y + 1) % 100).padStart(2, "0")} season`, "Teams & leagues", esc(site.program?.teamsIntro || ""), site.art?.teams)
   + `<section class="section"><div class="wrap">${teamCards(site)}${safe(site.links?.league) ? `<p style="margin:20px 0 0"><a href="${esc(safe(site.links.league))}" target="_blank" rel="noopener">MHSEL on RallyCry →</a></p>` : ""}</div></section>`
   + standingsHTML(site) + bracketsHTML(site);
+}
+function standings(site){
+  return pageH("League tables", "Standings", "Where every Hartland team stands in its league, updated through the season.")
+  + standingsHTML(site, true);
+}
+function playoffs(site){
+  return pageH("Postseason", "Playoffs", "Playoff brackets for our teams. They update live as matches finish, with Hartland's path in gold.")
+  + bracketsHTML(site, true);
 }
 function schedule(site, issues){
   const c = site.calendar?.on !== false ? calLinks(site) : null, up = upcoming(issues);
@@ -436,10 +448,10 @@ async function boot(){
   try { site = await getJSON("data/site.json"); } catch(e){ app.innerHTML = `<div class="loading">Couldn't load the site. Please refresh.</div>`; return; }
   try { issues = (await getJSON("data/issues.json")).issues || []; } catch(e){}
   document.body.insertAdjacentHTML("afterbegin", header(site));
-  const render = {home, teams, schedule, results, player, coach, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
+  const render = {home, teams, standings, playoffs, schedule, results, player, coach, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "coach", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=54").then(L => {
-    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams"){ L.startTeamRecords(site); L.startBrackets(site); }
+  if (["home", "schedule", "results", "player", "coach", "legacy", "rival", "opponent", "teams", "playoffs"].includes(PAGE)) import(BASE + "assets/live.js?v=55").then(L => {
+    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams"){ L.startTeamRecords(site); L.startBrackets(site); } if (PAGE === "playoffs") L.startBrackets(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site); if (PAGE === "coach") L.startCoach(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#coach") || $("#rival") || $("#opponent") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });

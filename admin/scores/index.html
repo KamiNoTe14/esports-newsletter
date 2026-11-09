@@ -361,7 +361,8 @@ const pendingSaves = new Map(); // match id -> latest local copy not yet written
     if (unwatch){ unwatch(); unwatch = null; }
     if (role){ unwatch = be.watchSeason(season, onMatches, onState);
       startFinals();
-      if (!bkWatching){ bkWatching = true; be.watchBrackets(l => { brackets = l.map(b => bkLocal[b.id] || b);
+      if (!bkWatching){ bkWatching = true; be.watchBrackets(l => { brackets = [...l.map(b => bkLocal[b.id] || b), ...Object.values(bkLocal).filter(b => !l.some(x => x.id === b.id))];
+        if (!bkRetried){ bkRetried = true; Object.values(bkLocal).forEach(b => bkSave(b, 2000)); }
         if (view === "brackets" && !document.activeElement?.closest?.("#bkPage input, #bkPage textarea, #bkPage select")) renderBrackets();
         else if (view === "list" && $("#bkLink")) $("#bkLink").outerHTML = bkLinkHTML(); }); }
       be.watchBroadcast(b => { bc = {stations:b.stations && typeof b.stations === "object" ? b.stations : {}}; paintRemotes();
@@ -745,7 +746,7 @@ function bindRosters(){
    change here. Seeds in seed order, then tap a team to make it the winner, ✎ for the score. Changing a winner clears
    what it fed later. Hartland's own playoff matches fill in by themselves once they're final.
    Coaches edit every bracket; student scorekeepers edit (and add) brackets for their own teams. */
-let bkWatching = false; const bkLocal = {};   // copies with saves still on the way, so an echo doesn't undo a fast tap
+let bkWatching = false, bkRetried = false; const bkLocal = {};   // copies with saves still on the way, so an echo doesn't undo a fast tap
 /* final matches for filling in our results: this device's live list first (instant), then every season */
 const bkFinals = () => { const seen = new Set(), out = []; [...matches.filter(m => m.status === "final"), ...(allFinals || [])].forEach(m => { if (!seen.has(m.id)){ seen.add(m.id); out.push(m); } }); return out; };
 /* brackets built in the Site Manager before they moved here (site.json brackets with a size), not yet moved */
@@ -757,12 +758,21 @@ function bkLinkHTML(){
   return `<a id="bkLink" class="btn btn-line btn-block guide" href="#brackets">🏆 Playoff brackets${brackets.length ? ` · ${brackets.length}${live ? ` (${live} in progress)` : ""}` : ""}</a>`;
 }
 const bkLogo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : SITE + x.logo) : ""; };
+/* Saves are kept on this device until the database takes them (survives a refresh), and retried every 15 seconds. */
+const BK_UNSAVED = "eagles-bk-unsaved";
+const bkKeep = () => { try { localStorage.setItem(BK_UNSAVED, JSON.stringify(bkLocal)); } catch(e){} };
+try { Object.assign(bkLocal, JSON.parse(localStorage.getItem(BK_UNSAVED)) || {}); } catch(e){}
+let bkWarned = 0;
 function bkSave(b, wait = 0){
-  bkLocal[b.id] = b; b.updated = new Date().toISOString(); b.by = user?.email || "";
+  bkLocal[b.id] = b; b.updated = new Date().toISOString(); b.by = user?.email || ""; bkKeep();
   clearTimeout(bkSaveT[b.id]);
   bkSaveT[b.id] = setTimeout(async () => {
-    try { await be.saveBracket(b.id, b); } catch(e){ console.error(e); toast("Couldn't save the bracket. Check the connection."); }
-    setTimeout(() => { if (bkLocal[b.id] === b) delete bkLocal[b.id]; }, 1500);
+    try { await be.saveBracket(b.id, b); }
+    catch(e){ console.error(e);
+      if (Date.now() - bkWarned > 20000){ bkWarned = Date.now();
+        toast(/permission/i.test(e.code || e.message || "") ? "Not saved yet: the database isn't allowing brackets. Publish the updated Firebase rules (firestore.rules). Your changes are kept on this device." : "Not saved yet (no connection?). Your changes are kept on this device and will retry."); }
+      clearTimeout(bkSaveT[b.id]); bkSaveT[b.id] = setTimeout(() => bkLocal[b.id] === b && bkSave(b), 15000); return; }
+    setTimeout(() => { if (bkLocal[b.id] === b){ delete bkLocal[b.id]; bkKeep(); } }, 1500);
   }, wait);
 }
 function renderBrackets(){
@@ -835,7 +845,7 @@ document.addEventListener("click", e => {
     const n = BK.SIZES.find(x => x >= lines.length) || 32; if (n !== +b.size && (!Object.keys(b.res).length || confirm(`That's ${lines.length} teams: make this a ${n}-team bracket? Results are cleared.`))){ b.size = n; b.res = {}; }
     b.seeds = Array.from({length:+b.size}, (_, k) => ({school:lines[k] || ""})); bkSave(b); renderBrackets(); toast("Seeds filled in."); return; }
   if (e.target.closest("[data-bkclear]")){ if (confirm("Clear every result in this bracket?")){ b.res = {}; bkSave(b); renderBrackets(); } return; }
-  if (e.target.closest("[data-bkdel]")){ if (confirm(`Delete "${b.title || "this bracket"}" from the website and stream?`)){ brackets = brackets.filter(x => x !== b); be.deleteBracket(b.id).catch(() => toast("Couldn't delete it. Check the connection.")); renderBrackets(); } return; }
+  if (e.target.closest("[data-bkdel]")){ if (confirm(`Delete "${b.title || "this bracket"}" from the website and stream?`)){ brackets = brackets.filter(x => x !== b); clearTimeout(bkSaveT[b.id]); delete bkLocal[b.id]; bkKeep(); be.deleteBracket(b.id).catch(() => toast("Couldn't delete it. Check the connection.")); renderBrackets(); } return; }
   const mEl = e.target.closest(".bk-m[data-k]"); if (!mEl || !mEl.closest(".bk-admin.can")) return;
   const k = mEl.dataset.k, [r, mi] = k.split("-").map(Number), model = BK.buildBracket(b, bkFinals()), m = model.rounds[r]?.[mi]; if (!m || m.bye) return;
   const clearAfter = () => { for (let rr = r + 1, ii = mi >> 1; rr < model.R; rr++, ii >>= 1) delete b.res[`${rr}-${ii}`]; };

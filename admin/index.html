@@ -369,7 +369,13 @@ function renderPanel(){
     ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
     ${tab === "highSchools" ? needsInfoCard() : ""}
     ${spec.csv ? csvBar(tab, spec) : ""}
-    ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}`;
+    ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}${tab === "brackets" ? sceneCard() : ""}`;
+}
+/* The stream's Bracket scene: title, a badge beside it and a background photo (overlay/bracket.html). */
+function sceneCard(){
+  site.bracketScene = site.bracketScene || {};
+  return `<div class="card"><div class="card-h"><h2>Stream scene</h2></div><p class="intro">How the Bracket overlay on stream looks. "Road to MSU" shows as a script "Road to" over a big MSU banner. A bracket can use its own title (Scorekeeper > Playoff brackets > Setup). Use a logo with a see-through background (PNG). The photo is tinted into our colors automatically.</p>
+    ${objFields("bracketScene", [["title","Scene title","text","Road to MSU"],["logo","Badge beside the title","image"],["bg","Background photo","image"]])}</div>`;
 }
 /* One player's profile editor: used for current players (Player profiles) and graduates (Alumni) */
 function profileCard(id, e, open){
@@ -821,7 +827,7 @@ $("#standInput").addEventListener("change", async e => {
 let finalsP = null;
 function loadFinals(){
   return finalsP = finalsP || (async () => {
-    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=55");
+    const live = liveMod = await import(SITE_BASE + "assets/live.js?v=56");
     return new Promise(res => { let latest = null, t = null;
       live.watchFinals(site, (fin, dir) => { latest = {fin, dir}; clearTimeout(t); t = setTimeout(() => res(latest), 2500); });
       setTimeout(() => res(latest || {fin:[], dir:{alumni:[]}}), 15000); });

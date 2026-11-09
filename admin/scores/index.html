@@ -200,6 +200,12 @@ h2{font:800 15px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;
 .dwin button:disabled{opacity:.4}
 .drow.done .dchar{min-height:72px}.drow.done .dchar img{width:40px;height:40px}
 /* playoff brackets */
+.bkst{margin-top:12px;border:1px solid var(--gold);border-radius:12px;padding:10px 12px;background:rgba(255,188,5,.06)}
+.bkst-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.bkst-h b{font:800 14px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.bkst-h select{min-height:40px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:4px 8px;font:inherit}
+.bkviews{display:flex;flex-wrap:wrap;gap:6px}
+.chipbtn{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);font:600 14px/1 inherit;cursor:pointer}
+.chipbtn.on{background:var(--gold);border-color:var(--gold);color:#0B1420;font-weight:800}
 details.bkset{margin:12px 0 0;border:1px solid var(--line);border-radius:12px;padding:0 12px}
 details.bkset>summary{min-height:48px;display:flex;align-items:center;font:800 14px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);cursor:pointer}
 details.bkset[open]{padding-bottom:12px}
@@ -217,9 +223,9 @@ details.bkset[open]{padding-bottom:12px}
 .bk-ms{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
 .bk-m{position:relative;border-radius:10px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line-2)}
 .bk-admin.can .bk-m{cursor:pointer}.bk-m.bye{opacity:.55}.bk-m.us{border-color:var(--gold)}.bk-m.auto{box-shadow:inset 3px 0 0 var(--ok)}
-.bk-t{display:grid;grid-template-columns:20px 22px 1fr auto;gap:6px;align-items:center;min-height:40px;padding:4px 30px 4px 8px;font-size:14px}
+.bk-t{display:grid;grid-template-columns:20px 26px minmax(0,1fr) auto;gap:6px;align-items:center;min-height:40px;padding:4px 30px 4px 8px;font-size:14px}
 .bk-t + .bk-t{border-top:1px solid var(--line-2)}
-.bk-t i{font-style:normal;font-size:11px;color:var(--muted);text-align:right}.bk-t img{width:20px;height:20px;object-fit:contain}.bk-t em{font-style:normal;text-align:center;color:var(--muted);font-weight:700}
+.bk-t i{font-style:normal;font-size:11px;color:var(--muted);text-align:right}.bk-lg{width:26px;height:26px;border-radius:6px;background:#fff;display:grid;place-items:center;overflow:hidden;font-weight:800;font-size:13px;color:#00274C}.bk-lg img{width:100%;height:100%;object-fit:contain;padding:2px;box-sizing:border-box}.bk-lg.no{background:none}
 .bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk-t b{font-weight:800;min-width:12px;text-align:right}
 .bk-t.win{background:#1E4470;font-weight:700}.bk-t.out{opacity:.5}.bk-t.us span{color:var(--gold)}.bk-t.none{color:var(--muted)}
 .bk-edit{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:var(--bg);color:var(--gold);border-radius:8px;width:26px;height:30px;font-size:13px;cursor:pointer}
@@ -324,8 +330,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=25";
-import {watchFinals, sortBrackets} from "../../assets/live.js?v=55";
-import * as BK from "../../assets/bracket.js?v=3";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=56";
+import * as BK from "../../assets/bracket.js?v=4";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
 
@@ -777,6 +783,24 @@ function bkSave(b, wait = 0){
     setTimeout(() => { if (bkLocal[b.id] === b){ delete bkLocal[b.id]; bkKeep(); } }, 1500);
   }, wait);
 }
+/* On stream: which part of this bracket the Bracket overlay shows on a station. Smaller slices draw bigger. */
+let bkStation = "";
+function bkStreamHTML(b, model){
+  const mine = STATIONS.filter(n => stationMine(n)); if (!mine.length) return "";
+  const n = mine.includes(bkStation) ? bkStation : mine.find(k => { const id = bc.stations[k]?.matchId, m = matches.find(x => x.id === id); return m && (m.teamId === b.teamId || (b.seeds || []).some(x => x?.teamId === m.teamId)); }) || mine.find(k => bc.stations[k]?.bk?.id === b.id) || mine[0];
+  const cur = bc.stations[n]?.bk, on = cur?.id === b.id ? cur.view || "auto" : "";
+  return `<div class="bkst"><div class="bkst-h"><b>On stream</b><select data-bkst aria-label="Station">${mine.map(k => `<option value="${k}"${k === n ? " selected" : ""}>Station ${k}${bc.stations[k]?.bk?.id === b.id ? " · showing" : ""}</option>`).join("")}</select></div>
+    <div class="bkviews">${BK.bracketViews(model).map(([v, t]) => `<button type="button" class="chipbtn${on === v ? " on" : ""}" data-bkview="${v}" data-st="${n}">${esc(t)}</button>`).join("")}</div>
+    <p class="hint" style="margin:6px 2px 0">${on ? `Station ${n}'s Bracket overlay is showing this bracket. ` : `Tap a view to put this bracket on station ${n}'s Bracket overlay. `}${cur?.id ? `<button type="button" class="linkbtn" data-bkfree="${n}">Let it follow the match instead</button>` : "With nothing picked, it shows the bracket for the team on that station."}</p></div>`;
+}
+document.addEventListener("change", e => { if (view === "brackets" && e.target.matches("[data-bkst]")){ bkStation = e.target.value; renderBrackets(); } });
+document.addEventListener("click", e => {
+  if (view !== "brackets") return;
+  const vb = e.target.closest("[data-bkview]"), fr = e.target.closest("[data-bkfree]");
+  if (vb){ const b = bkOf(vb), n = vb.dataset.st; if (!b) return; bkStation = n; buzz();
+    setStation(n, {...(bc.stations[n] || {}), bk:{id:b.id, view:vb.dataset.bkview}}, `Station ${n}: ${vb.textContent}.`).then(renderBrackets); renderBrackets(); }
+  if (fr){ const n = fr.dataset.bkfree; setStation(n, {...(bc.stations[n] || {}), bk:null}, `Station ${n} follows its match again.`).then(renderBrackets); }
+});
 function renderBrackets(){
   const list = sortBrackets(brackets), canAdd = role === "coach" || bkTeams().length;
   const finals = bkFinals();
@@ -791,12 +815,14 @@ function renderBrackets(){
       return `<details class="sec bkx" data-bid="${esc(b.id)}"${bkOpen.has(b.id) ? " open" : ""}><summary><b class="bkt">${esc(b.title || "Untitled bracket")}</b><span>${esc([team ? teamLabel(site, team) : "", champ].filter(Boolean).join(" · "))}</span></summary><div class="secb">
         ${mine ? `<p class="hint" style="margin:0 2px 8px">Tap a team to make it the winner (tap again to undo). ✎ adds the score. Hartland's matches fill in from the scorekeeper when they're final.</p>` : `<p class="hint" style="margin:0 2px 8px">View only: this is another team's bracket.</p>`}
         <div class="bk-admin${mine ? " can" : ""}">${BK.bracketHTML(model, {esc, logo:bkLogo, edit:mine, short:sc => shortSchool(sc)})}</div>
+        ${bkStreamHTML(b, model)}
         ${mine ? `<details class="bkset"${bkSetOpen.has(b.id) || !(b.seeds || []).some(x => x.school) ? " open" : ""}><summary>Setup and seeds</summary><div class="bkf">
           <label class="f"><span>Title</span><input data-bf="title" value="${esc(b.title || "")}" placeholder="Fall 2026 MHSEL Playoffs · Smash"></label>
           <label class="f"><span>Our team in it</span><select data-bf="teamId"><option value="">—</option>${bkTeams().map(t => `<option value="${esc(t.id)}"${t.id === b.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select></label>
           <label class="f"><span>Status</span><select data-bf="status">${["Upcoming", "In progress", "Final"].map(x => `<option${x === b.status ? " selected" : ""}>${x}</option>`).join("")}</select></label>
           <label class="f"><span>Teams</span><select data-bf="size">${BK.SIZES.map(n => `<option value="${n}"${n === +b.size ? " selected" : ""}>${n} teams</option>`).join("")}</select></label>
           <label class="f"><span>League</span><input data-bf="league" value="${esc(b.league || "")}" placeholder="MHSEL"></label>
+          <label class="f"><span>Stream scene title</span><input data-bf="scene" value="${esc(b.scene || "")}" placeholder="${esc(site.bracketScene?.title || "Road to MSU")}"></label>
           <label class="f"><span>League bracket link (optional)</span><input data-bf="link" type="url" value="${esc(b.link || "")}" placeholder="https://"></label>
         </div>
         <label class="tog" style="margin:10px 2px"><input type="checkbox" data-bf="on"${b.on !== false ? " checked" : ""}> Show on the website</label>
@@ -833,7 +859,7 @@ document.addEventListener("input", e => {
   if (el.dataset.seed != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seed]; sd.school = el.value.trim(); if (!BK.isHartland(sd.school)) delete sd.teamId; bkSave(b, 900);
     clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => { if (document.activeElement === el) bkRedraw(b); }, 900); return; }
   const f = el.dataset.bf; if (!f) return;
-  if (f === "title" || f === "league" || f === "link"){ b[f] = el.value; bkSave(b, 700); const t = el.closest("details").querySelector(".bkt"); if (f === "title" && t) t.textContent = el.value || "Untitled bracket"; }
+  if (f === "title" || f === "league" || f === "link" || f === "scene"){ b[f] = el.value; bkSave(b, 700); const t = el.closest("details").querySelector(".bkt"); if (f === "title" && t) t.textContent = el.value || "Untitled bracket"; }
 });
 document.addEventListener("change", e => {
   if (view !== "brackets") return;
@@ -841,7 +867,7 @@ document.addEventListener("change", e => {
   if (el.dataset.seedteam != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seedteam], t = (site.teams || []).find(t => t.id === el.value);
     sd.teamId = el.value; sd.label = t && (site.teams || []).filter(x => x.gameKey === t.gameKey).length > 1 ? `Hartland ${t.name}` : "";
     if (t && !b.teamId){ b.teamId = t.id; b.game = t.gameKey; } bkSave(b); renderBrackets(); return; }
-  const f = el.dataset.bf; if (!f || f === "title" || f === "league" || f === "link") { if (el.dataset.seed != null || el.dataset.seedlab != null) renderBrackets(); return; }
+  const f = el.dataset.bf; if (!f || f === "title" || f === "league" || f === "link" || f === "scene") { if (el.dataset.seed != null || el.dataset.seedlab != null) renderBrackets(); return; }
   if (f === "on") b.on = el.checked;
   else if (f === "size"){ if (Object.keys(b.res || {}).length && !confirm("Changing the size clears the results. Go ahead?")){ el.value = b.size; return; } b.size = +el.value; b.res = {}; }
   else if (f === "teamId"){ b.teamId = el.value; b.game = (site.teams || []).find(t => t.id === el.value)?.gameKey || ""; }

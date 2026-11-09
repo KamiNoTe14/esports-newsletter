@@ -840,26 +840,42 @@ img{display:block}
 .rplive .dwin.d0 .dguide{background:rgba(5,8,13,.55)}
 
 /* =============== playoff bracket =============== */
-.bkf .bkbox{position:absolute;left:90px;right:90px;top:300px;bottom:118px;padding:26px 30px;filter:var(--rim);
+/* sizes follow how many matches are in the first column shown (--rows / data-rows): a half or quarter reads big */
+.bkf .bkbox{--fs:18px;--lg:24px;--pad:3px;--sc:24px;position:absolute;left:90px;right:90px;top:300px;bottom:118px;padding:26px 30px;filter:var(--rim);
   background:var(--tex-s) center/cover,linear-gradient(var(--cream),var(--cream));background-blend-mode:overlay;color:var(--ink);
   -webkit-mask:var(--tear-t) top left/300px 14px repeat-x,var(--tear-b) bottom left/300px 14px repeat-x,linear-gradient(#000,#000) center/100% calc(100% - 26px) no-repeat}
-.bkf .bk{display:grid;grid-template-columns:repeat(calc(var(--rounds) + 1),minmax(0,1fr));gap:26px;height:100%}
+.bkf .bkbox[data-rows="16"]{--fs:13px;--lg:16px;--pad:1px;--sc:15px}
+.bkf .bkbox[data-rows="4"]{--fs:30px;--lg:46px;--pad:9px;--sc:40px}
+.bkf .bkbox[data-rows="2"],.bkf .bkbox[data-rows="1"]{--fs:40px;--lg:64px;--pad:16px;--sc:54px}
+.bkf .bk{display:grid;grid-template-columns:repeat(calc(var(--rounds) + 1),minmax(0,620px));justify-content:center;gap:34px;height:100%}
 .bkf .bk-r{display:flex;flex-direction:column;min-width:0}
-.bkf .bk-r h4{margin:0 0 12px;font:400 26px/1 var(--d);letter-spacing:.04em;text-transform:uppercase;color:var(--navy)}
-.bkf .bk-ms{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:10px}
-.bkf .bk-m{background:#fff;border:2px solid rgba(11,20,32,.18);border-radius:6px;overflow:hidden;box-shadow:0 3px 0 rgba(11,20,32,.12)}
+.bkf .bk-r h4{margin:0 0 12px;font:400 28px/1 var(--d);letter-spacing:.04em;text-transform:uppercase;color:var(--navy)}
+.bkf .bk-ms{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+.bkf .bk-m{background:#fff;border:2px solid rgba(11,20,32,.18);border-radius:8px;overflow:hidden;box-shadow:0 3px 0 rgba(11,20,32,.12)}
 .bkf .bk-m.us{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,188,5,.45),0 3px 0 rgba(11,20,32,.12)}
 .bkf .bk-m.bye{opacity:.55}
-.bkf .bk-t{display:grid;grid-template-columns:26px 30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 10px;font:600 20px/1.1 var(--t);color:var(--ink)}
+.bkf .bk-t{display:grid;grid-template-columns:calc(var(--fs) * 1.2) var(--lg) minmax(0,1fr) auto;gap:calc(var(--fs) * .5);align-items:center;padding:var(--pad) 12px;font:600 var(--fs)/1.1 var(--t);color:var(--ink)}
 .bkf .bk-t + .bk-t{border-top:1px solid rgba(11,20,32,.12)}
-.bkf .bk-t i{font:600 14px/1 var(--t);font-style:normal;color:#6B7F96;text-align:right}
-.bkf .bk-t img{width:28px;height:28px;object-fit:contain}.bkf .bk-t em{font:400 22px/1 var(--d);font-style:normal;color:#6B7F96;text-align:center}
+.bkf .bk-t i{font:600 calc(var(--fs) * .7)/1 var(--t);font-style:normal;color:#6B7F96;text-align:right}
+.bkf .bk-lg{width:var(--lg);height:var(--lg);border-radius:22%;background:#fff;display:grid;place-items:center;overflow:hidden;box-shadow:0 0 0 1.5px rgba(11,20,32,.16);font:400 calc(var(--lg) * .6)/1 var(--d);color:var(--navy)}
+.bkf .bk-lg img{width:100%;height:100%;object-fit:contain;padding:8%;box-sizing:border-box}
+.bkf .bk-lg.no{background:none;box-shadow:none}
 .bkf .bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.02em}
-.bkf .bk-t b{font:400 26px/1 var(--d);color:#B3261E;min-width:16px;text-align:right}
+.bkf .bk-t b{font:400 var(--sc)/1 var(--d);color:#B3261E;min-width:16px;text-align:right}
 .bkf .bk-t.win{background:rgba(0,39,76,.08)}.bkf .bk-t.win span{font-weight:700}.bkf .bk-t.out{opacity:.45}
 .bkf .bk-t.us{background:linear-gradient(90deg,rgba(255,188,5,.35),rgba(255,188,5,.08))}.bkf .bk-t.us span{color:var(--navy);font-weight:800}
 .bkf .bk-t.none{color:#8A9BB0;font-weight:500}.bkf .bk-m.bye .bk-t.none span{font-style:italic}
-.bkf .bkbox.r5 .bk-t,.bkf .bkbox.r4 .bk-t{font-size:17px;padding:3px 8px}.bkf .bkbox.r4 .bk-t img{width:22px;height:22px}
-.bkf .bk-champ .bk-m{border-color:var(--gold);transform:scale(1.08)}
+.bkf .bk-champ .bk-m{border-color:var(--gold);transform:scale(1.06)}
 .bkf .foot .tape em{font-style:normal;color:#B3261E}
 .bkf.enter .bkbox{animation:rise .6s .7s var(--ease) both}
+/* the scene's own look (Site Manager > Playoff brackets > Stream scene): a photo behind, a badge beside the title */
+.full .art.photo{inset:0;opacity:.5;filter:saturate(.9) contrast(1.05);mix-blend-mode:luminosity;animation:drift 40s ease-in-out infinite alternate}
+.full .top .ttlrow{display:flex;align-items:center;gap:30px}
+.full .top .ttlrow + .tape-w,.full .top .ttl.pre + .tape-w{margin-top:16px}
+/* "Road to MSU": the script word leads, above the banner's left end */
+.full .top .ttl.pre{margin-top:30px}
+.full .top .ttl.pre i,.full .top .ttl.pre i.long{top:-50px;left:-64px;right:auto;bottom:auto;font-size:72px;transform:rotate(-8deg)}
+.full .top .ttlrow .ttl.pre i{left:-36px}
+.full .top .badge{height:150px;max-width:220px;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,8,20,.6)) drop-shadow(0 10px 18px rgba(0,0,0,.5))}
+.full.enter .top .badge{animation:popIn .6s .35s var(--snap) both}
+.bkf.has-badge .top .glogo{display:none}

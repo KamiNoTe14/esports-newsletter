@@ -62,17 +62,51 @@ export function buildBracket(b, finals = []){
   const champ = rounds[R - 1][0]?.winner || null;
   /* how far we got: our last match */
   const ourMatches = rounds.flat().filter(m => m.us && !m.bye);
-  return {n, R, rounds, champ, names:rounds.map((_, r) => roundName(r, R)), ourLast:ourMatches[ourMatches.length - 1] || null};
+  const first = rounds[0].findIndex(m => m.a?.us || m.b?.us);
+  return {n, R, rounds, champ, names:rounds.map((_, r) => roundName(r, R)), ourLast:ourMatches[ourMatches.length - 1] || null, ourSlot:first < 0 ? null : first};
+}
+
+/* Views for the stream (picked in the scorekeeper): which rounds, and which slice of the bracket.
+   part [lo, hi] is a slice of the first round shown (0-.5 = top half); later rounds follow until that slice is one match. */
+export function bracketViews(model){
+  const R = model.R, n = model.n, out = [["auto", "Auto"], ["full", "Whole bracket"]];
+  if (n >= 8) out.push(["top", "Top half"], ["bottom", "Bottom half"]);
+  if (model.ourSlot != null && n >= 8) out.push(["ourhalf", "Our half"]);
+  if (model.ourSlot != null && n >= 16) out.push(["ourq", "Our quarter"]);
+  if (R >= 4) out.push(["qf", "Quarterfinals on"]);
+  if (R >= 3) out.push(["f4", "Final Four"]);
+  return out;
+}
+export function bracketView(model, view = "auto"){
+  const R = model.R, half = model.ourSlot != null ? (model.ourSlot < model.n / 4 ? 0 : 1) : 0, q = model.ourSlot != null ? Math.floor(model.ourSlot / (model.n / 8)) : 0;
+  switch (view){
+    case "full": return {from:0, part:[0, 1], label:""};
+    case "top": return {from:0, part:[0, .5], label:"Top half"};
+    case "bottom": return {from:0, part:[.5, 1], label:"Bottom half"};
+    case "ourhalf": return {from:0, part:[half / 2, half / 2 + .5], label:half ? "Bottom half" : "Top half"};
+    case "ourq": return {from:0, part:[q / 4, q / 4 + .25], label:"Our quarter"};
+    case "qf": return {from:Math.max(0, R - 3), part:[0, 1], label:""};
+    case "f4": return {from:Math.max(0, R - 2), part:[0, 1], label:"Final Four"};
+    default: return {from:Math.max(0, R - 4), part:[0, 1], label:""};
+  }
 }
 
 /* HTML for a bracket (website + overlay style it). from = first round to show; logo(school) -> image url or "". */
-export function bracketHTML(model, {from = 0, logo = () => "", short = s => s, esc = s => String(s ?? ""), edit = false} = {}){
-  const rounds = model.rounds.slice(from);
+export function bracketHTML(model, {from = 0, part = [0, 1], logo = () => "", short = s => s, esc = s => String(s ?? ""), edit = false} = {}){
+  const [lo, hi] = part, whole = lo <= 0 && hi >= 1, rounds = [];
+  model.rounds.slice(from).forEach((list, ri) => {
+    const cnt = list.length; if (ri && cnt * (hi - lo) < 1) return;
+    if (rounds.length < ri) return;   // stopped earlier
+    const a = Math.round(lo * cnt), b = Math.max(a + 1, Math.round(hi * cnt));
+    rounds.push([ri + from, list.slice(a, b)]);
+  });
+  const tile = (inner, cls = "") => `<span class="bk-lg${cls}">${inner}</span>`;
   const side = (m, t, which) => {
-    if (!t) return `<div class="bk-t none"><i></i><em></em><span>${m.r === 0 ? (m.bye ? "Bye" : "TBD") : "TBD"}</span><b></b></div>`;
+    if (!t) return `<div class="bk-t none"><i></i>${tile("", " no")}<span>${m.r === 0 ? (m.bye ? "Bye" : "TBD") : "TBD"}</span><b></b></div>`;
     const sc = m.s ? m.s.split(/[-–]/)[which === "a" ? 0 : 1] : "", lg = logo(t.school);
-    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}"><i>${t.seed}</i>${lg ? `<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : `<em>${esc((short(t.school) || "?")[0])}</em>`}<span>${esc(t.label || short(t.school))}</span><b>${esc(sc)}</b></div>`; };
-  return `<div class="bk" style="--rounds:${rounds.length}">${rounds.map((list, ri) => `<div class="bk-r"><h4>${esc(model.names[ri + from])}</h4><div class="bk-ms">${list.map(m =>
+    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}"><i>${t.seed}</i>${lg ? tile(`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('txt');this.replaceWith(document.createTextNode('${esc((short(t.school) || "?")[0]).replace(/'/g, "")}'))">`) : tile(esc((short(t.school) || "?")[0]), " txt")}<span>${esc(t.label || short(t.school))}</span><b>${esc(sc)}</b></div>`; };
+  /* --rounds is the column count minus one (the champion column), so a slice without a champion still fills the width */
+  return `<div class="bk" style="--rounds:${whole ? rounds.length : rounds.length - 1};--rows:${rounds[0]?.[1].length || 1}">${rounds.map(([r, list]) => `<div class="bk-r"><h4>${esc(model.names[r])}</h4><div class="bk-ms">${list.map(m =>
     `<div class="bk-m${m.us ? " us" : ""}${m.bye ? " bye" : ""}${m.auto ? " auto" : ""}" data-k="${m.key}">${side(m, m.a, "a")}${side(m, m.b, "b")}${edit && m.a && m.b ? `<button type="button" class="bk-edit" aria-label="Score">✎</button>` : ""}</div>`).join("")}</div></div>`).join("")}
-    <div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none"><i></i><em></em><span>TBD</span><b></b></div>`}</div></div></div></div>`;
+    ${whole ? `<div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none"><i></i>${tile("", " no")}<span>TBD</span><b></b></div>`}</div></div></div>` : ""}</div>`;
 }

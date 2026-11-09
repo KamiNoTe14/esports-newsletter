@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=25";
-import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=55";
+import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=56";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -115,13 +115,13 @@ const artFor = (m, g) => src((site.teams || []).find(t => t.id === m.teamId)?.ar
 /* The paper package: a wavy fabric backdrop (split into both schools' colors when the layer has two sides), the game
    art faintly behind it, torn paper scraps in the corners, the claw as a die-cut sticker, the title on a torn,
    crumpled paper banner with a script word stuck over it, and notes on strips of tape. */
-function frame(cls, m, g, {script = "", title = "", sub = "", body = "", foot = "", split = null} = {}){
-  const art = artFor(m, g), gl = gameLogo(g);
+function frame(cls, m, g, {script = "", title = "", sub = "", body = "", foot = "", split = null, bg = "", badge = "", pre = false} = {}){
+  const art = bg || artFor(m, g), gl = gameLogo(g);
   const halves = split ? `<div class="half l" style="${skin(split[0])}"></div><div class="seam"><div class="half r" style="${skin(split[1])}"></div></div>` : `<div class="half solo" style="${skin(OUR_COLORS)}"></div>`;
-  return `<div class="full ${cls}">${halves}<div class="fab"></div>${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="vig"></div>
+  return `<div class="full ${cls}">${halves}<div class="fab"></div>${art ? `<div class="art${bg ? " photo" : ""}" style="background-image:url('${esc(art)}')"></div>` : ""}<div class="vig"></div>
     <div class="scrap tl"><i></i></div><div class="scrap br"><i></i></div>${claw("stk")}
     <header class="top">${gl ? `<img class="glogo" src="${esc(gl)}" alt="${esc(g.name)}">` : ""}
-      ${title ? `<div class="ttl${script ? " has-script" : ""}"><div class="ban-w"><div class="ban"><b>${esc(title)}</b></div></div>${script ? `<i${script.length > 6 ? ' class="long"' : ""}>${esc(script)}</i>` : ""}</div>` : ""}${sub ? `<div class="tape-w"><small class="tape">${esc(sub)}</small></div>` : ""}</header>
+      ${badge ? `<div class="ttlrow"><img class="badge" src="${esc(badge)}" alt="">` : ""}${title ? `<div class="ttl${script ? " has-script" : ""}${pre ? " pre" : ""}"><div class="ban-w"><div class="ban"><b>${esc(title)}</b></div></div>${script ? `<i${script.length > 6 ? ' class="long"' : ""}>${esc(script)}</i>` : ""}</div>` : ""}${badge ? `</div>` : ""}${sub ? `<div class="tape-w"><small class="tape">${esc(sub)}</small></div>` : ""}</header>
     ${body}${foot ? `<div class="foot"><span class="tape">${foot}</span></div>` : ""}<div class="flash"></div></div>`;
 }
 const empty = msg => { clearTimeout(held); held = null; enterUntil = 0; lastHTML = ""; rlStatic = ""; app.innerHTML = q.get("bg") ? `<div class="empty">${esc(msg)}</div>` : ""; };
@@ -772,23 +772,33 @@ function splitShell(m, plates, guides, cls = ""){
    Shows up to four rounds (a 32-team bracket starts at the Round of 16); ?from=0 shows every round. */
 let BKM = null;
 let bkList = [];
-if (LAYER === "bracket"){ import("../assets/bracket.js?v=3").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
+if (LAYER === "bracket"){ import("../assets/bracket.js?v=4").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
 const bkHas = (b, id) => !!id && (b.teamId === id || (b.seeds || []).some(x => x?.teamId === id));
 function bracketLayer(m){
-  const g = gameFor(site, m.game);
   if (!BKM) return;
-  const built = sortBrackets(bkList);
-  const pick = q.get("b") ? built.find(b => b.id === q.get("b")) || built[+q.get("b") - 1] : built.find(b => bkHas(b, m.teamId) && b.status !== "Final") || built.find(b => bkHas(b, m.teamId)) || built.find(b => b.game === m.game && b.status === "In progress") || built.find(b => b.game === m.game);
-  if (!pick){ empty("No bracket built for this team yet: Scorekeeper > Playoff brackets."); return; }
-  const live = m.status === "final" && !finals.some(f => f.id === m.id) ? [...finals, m] : finals;
-  const model = BKM.buildBracket(pick, live), from = q.get("from") != null ? Math.max(0, +q.get("from") || 0) : Math.max(0, model.R - 4);
+  const built = sortBrackets(bkList), want = station.bk?.id || q.get("b");
+  const pick = want ? built.find(b => b.id === want) || built[+want - 1] : m && (built.find(b => bkHas(b, m.teamId) && b.status !== "Final") || built.find(b => bkHas(b, m.teamId)) || built.find(b => b.game === m.game && b.status === "In progress") || built.find(b => b.game === m.game));
+  if (!pick){ empty(m ? "No bracket built for this team yet: Scorekeeper > Playoff brackets." : "Pick a bracket to show: Scorekeeper > Playoff brackets > On stream."); return; }
+  m = m || {game:pick.game, teamId:pick.teamId};
+  const g = gameFor(site, pick.game || m.game);
+  const live = m.id && m.status === "final" && !finals.some(f => f.id === m.id) ? [...finals, m] : finals;
+  const model = BKM.buildBracket(pick, live);
+  /* what to show: the scorekeeper's pick for this station (On stream), else ?view= / ?from= on the link, else auto */
+  const v = BKM.bracketView(model, station.bk?.id === pick.id && station.bk?.view || q.get("view") || "auto");
+  if (q.get("from") != null && !station.bk?.view) v.from = Math.max(0, +q.get("from") || 0);
   const logo = sc => { const x = schoolInfo(site, sc), l = x?.logo || (BKM.isHartland(sc) ? "assets/eagle.png" : ""); return l ? (/^(https?:|data:)/.test(l) ? l : BASE + l) : ""; };
   const us = model.rounds.flat().filter(x => x.us && !x.bye), last = us[us.length - 1];
   let foot = "";
   if (model.champ) foot = model.champ.us ? `<em>${esc(model.champ.label || "Hartland")}</em> are champions` : `Champion: <em>${esc(model.champ.label || shortSchool(model.champ.school))}</em>`;
   else if (last){ const opp = last.a?.us ? last.b : last.a, nm = model.names[last.r];
     foot = !last.w ? `Next: <em>Hartland</em> vs ${esc(opp ? opp.label || shortSchool(opp.school) : "TBD")} · ${esc(nm)}` : last.winner?.us ? `<em>Hartland</em> advance to the ${esc(model.names[last.r + 1] || "Final")}` : `Hartland's run ended in the ${esc(nm)}`; }
-  out.html = frame("bkf", m, g, {title:"Playoffs", script:"Bracket", sub:pick.title || "", body:`<div class="bkbox r${model.R - from}">${BKM.bracketHTML(model, {from, esc, logo, short:sc => shortSchool(sc)})}</div>`, foot});
+  /* the scene's look: Site Manager > Playoff brackets > Stream scene ("Road to MSU"), or this bracket's own title */
+  const sc = site.bracketScene || {}, name = String(pick.scene || sc.title || "Playoffs").trim(), rt = name.match(/^(road to|welcome to|journey to)\s+(.+)$/i);
+  const img = u => u ? (/^(https?:|data:)/.test(u) ? u : BASE + u) : "";
+  const html = BKM.bracketHTML(model, {from:v.from, part:v.part, esc, logo, short:x => shortSchool(x)});
+  const rows = (html.match(/--rows:(\d+)/) || [])[1] || 8;
+  out.html = frame("bkf" + (sc.logo ? " has-badge" : ""), m, g, {title:rt ? rt[2] : name, script:rt ? rt[1][0].toUpperCase() + rt[1].slice(1) : "Bracket", pre:!!rt,
+    sub:[pick.title, v.label].filter(Boolean).join(" · "), bg:img(sc.bg), badge:img(sc.logo), body:`<div class="bkbox" data-rows="${rows}">${html}</div>`, foot});
 }
 
 /* ---------- instant replay + live (every game) ----------
@@ -840,8 +850,9 @@ let finalsReady = ["scorebug", "replay-live", "duo-pov"].includes(LAYER);   // t
 setTimeout(() => { if (!finalsReady){ finalsReady = true; draw(); } }, 2500);
 function draw(){
   if (!finalsReady || offAir) return;
+  if (LAYER === "bracket" && !station.matchId && !station.show?.on && (station.bk?.id || q.get("b"))){ bracketLayer(null); return; }
   if (!station.matchId && !station.show?.on){ empty(`Station ${STATION} has no match on it. Pick one in the scorekeeper.`); return; }
-  if (!match){ empty("Loading the match…"); return; }
+  if (!match){ if (LAYER === "bracket" && (station.bk?.id || q.get("b"))){ bracketLayer(null); return; } empty("Loading the match…"); return; }
   const g = gameFor(site, match.game);
   if ((LAYER || "scorebug") === "scorebug" && g.liveFeed === "sos"){ startSOS(); rlbug(match); return; }
   if (RL_LAYER){

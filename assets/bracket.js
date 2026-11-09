@@ -1,7 +1,9 @@
 /* Playoff brackets: one model for the Site Manager builder, the website and the stream overlay.
    A bracket in site.json (site.brackets[i]) can carry a built bracket:
      size   4 / 8 / 16 / 32 (single elimination, standard seeding: 1 v 16, 8 v 9, …)
-     seeds  [{school, label}] in seed order (seed 1 first). An empty seed is a bye.
+     seeds  [{school, label, teamId}] in seed order (seed 1 first). An empty seed is a bye.
+            label = the team's own name ("Varsity", "JV", "Fortnite #2", "DCC Varsity RL") when a school has more than one
+            team in the bracket; it shows instead of the school. teamId = which of OUR teams a Hartland seed is.
      res    {"r-m": {w:"a"|"b", s:"3-1"}}: who won match m of round r (0 = first round), and the score
      game / teamId   which of our teams this bracket is for, so our matches fill in from the scorekeeper
    Hartland's own results fill in by themselves from final playoff matches, unless a result was typed. */
@@ -24,14 +26,19 @@ export const isHartland = s => /\bhartland\b/i.test(String(s || ""));
    finals: our final matches (to fill in our own results), teamId/game narrow them to this bracket. */
 export function buildBracket(b, finals = []){
   const n = SIZES.includes(+b.size) ? +b.size : 8, R = Math.log2(n), seeds = Array.from({length:n}, (_, i) => b.seeds?.[i] || {});
-  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:sd, school:String(t.school).trim(), label:String(t.label || "").trim(), us:isHartland(t.school)} : null; };
+  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
   const order = seedOrder(n), rounds = [];
   /* our playoff results from the scorekeeper: final playoff/finals matches of this team against that school */
-  const ours = finals.filter(m => (m.stage === "playoffs" || m.stage === "finals") && m.status === "final" && (m.result === "W" || m.result === "L") && (!b.teamId || m.teamId === b.teamId) && (!b.game || m.game === b.game))
+  const ourIds = new Set([b.teamId, ...seeds.map(x => x?.teamId)].filter(Boolean));
+  const ours = finals.filter(m => (m.stage === "playoffs" || m.stage === "finals") && m.status === "final" && (m.result === "W" || m.result === "L") && (!ourIds.size || ourIds.has(m.teamId)) && (!b.game || m.game === b.game))
     .sort((x, y) => String(x.startsAt).localeCompare(String(y.startsAt)));
   const used = new Set();
-  const auto = (a, c) => { const opp = a?.us ? c : c?.us ? a : null; if (!opp) return null;
-    const m = ours.find(x => !used.has(x.id) && key(x.opponent?.school) && (key(x.opponent.school) === key(opp.school) || key(x.opponent.school).includes(key(opp.school)) || key(opp.school).includes(key(x.opponent.school))));
+  const near = (x, y) => { x = key(x); y = key(y); return !!x && !!y && (x === y || x.includes(y) || y.includes(x)); };
+  const auto = (a, c) => { if (a?.us && c?.us) return null; const me = a?.us ? a : c?.us ? c : null, opp = me === a ? c : a; if (!me) return null;
+    const mine = me.teamId || b.teamId;
+    const cands = ours.filter(x => !used.has(x.id) && (!mine || x.teamId === mine) && near(x.opponent?.school, opp.school));
+    /* a school with two teams here: prefer the match whose opponent team name fits this seed's name */
+    const m = cands.find(x => opp.label && near(x.opponent?.team, opp.label)) || cands.find(x => !opp.label || !x.opponent?.team) || cands[0];
     if (!m) return null; used.add(m.id);
     const usWon = m.result === "W", sc = m.score ? `${m.score.us}-${m.score.them}` : "";
     return {w:(usWon ? a?.us : !a?.us) ? "a" : "b", s:a?.us ? sc : sc.split("-").reverse().join("-"), auto:true, matchId:m.id}; };

@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=25";
-import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=52";
+import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=53";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -772,21 +772,22 @@ function splitShell(m, plates, guides, cls = ""){
    Shows up to four rounds (a 32-team bracket starts at the Round of 16); ?from=0 shows every round. */
 let BKM = null;
 let bkList = [];
-if (LAYER === "bracket"){ import("../assets/bracket.js?v=2").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
+if (LAYER === "bracket"){ import("../assets/bracket.js?v=3").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
+const bkHas = (b, id) => !!id && (b.teamId === id || (b.seeds || []).some(x => x?.teamId === id));
 function bracketLayer(m){
   const g = gameFor(site, m.game);
   if (!BKM) return;
   const built = sortBrackets(bkList);
-  const pick = q.get("b") ? built.find(b => b.id === q.get("b")) || built[+q.get("b") - 1] : built.find(b => b.teamId && b.teamId === m.teamId && b.status !== "Final") || built.find(b => b.teamId === m.teamId) || built.find(b => b.game === m.game && b.status === "In progress") || built.find(b => b.game === m.game);
+  const pick = q.get("b") ? built.find(b => b.id === q.get("b")) || built[+q.get("b") - 1] : built.find(b => bkHas(b, m.teamId) && b.status !== "Final") || built.find(b => bkHas(b, m.teamId)) || built.find(b => b.game === m.game && b.status === "In progress") || built.find(b => b.game === m.game);
   if (!pick){ empty("No bracket built for this team yet: Scorekeeper > Playoff brackets."); return; }
   const live = m.status === "final" && !finals.some(f => f.id === m.id) ? [...finals, m] : finals;
   const model = BKM.buildBracket(pick, live), from = q.get("from") != null ? Math.max(0, +q.get("from") || 0) : Math.max(0, model.R - 4);
   const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };
   const us = model.rounds.flat().filter(x => x.us && !x.bye), last = us[us.length - 1];
   let foot = "";
-  if (model.champ) foot = model.champ.us ? `<em>Hartland</em> are champions` : `Champion: <em>${esc(shortSchool(model.champ.school))}</em>`;
+  if (model.champ) foot = model.champ.us ? `<em>${esc(model.champ.label || "Hartland")}</em> are champions` : `Champion: <em>${esc(model.champ.label || shortSchool(model.champ.school))}</em>`;
   else if (last){ const opp = last.a?.us ? last.b : last.a, nm = model.names[last.r];
-    foot = !last.w ? `Next: <em>Hartland</em> vs ${esc(opp ? shortSchool(opp.school) : "TBD")} · ${esc(nm)}` : last.winner?.us ? `<em>Hartland</em> advance to the ${esc(model.names[last.r + 1] || "Final")}` : `Hartland's run ended in the ${esc(nm)}`; }
+    foot = !last.w ? `Next: <em>Hartland</em> vs ${esc(opp ? opp.label || shortSchool(opp.school) : "TBD")} · ${esc(nm)}` : last.winner?.us ? `<em>Hartland</em> advance to the ${esc(model.names[last.r + 1] || "Final")}` : `Hartland's run ended in the ${esc(nm)}`; }
   out.html = frame("bkf", m, g, {title:"Playoffs", script:"Bracket", sub:pick.title || "", body:`<div class="bkbox r${model.R - from}">${BKM.bracketHTML(model, {from, esc, logo, short:sc => shortSchool(sc)})}</div>`, foot});
 }
 

@@ -206,9 +206,11 @@ details.bkset[open]{padding-bottom:12px}
 .bkf{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .bkx>summary .bkt{font:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .bkx>summary span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
-.bk-seeds{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
-.bk-seeds label{display:flex;align-items:center;gap:6px}.bk-seeds b{width:24px;text-align:right;font-size:13px;color:var(--muted)}
-.bk-seeds input{flex:1;min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:6px 10px;font:inherit}
+.bk-seeds{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:6px 14px}
+.bk-seed{display:grid;grid-template-columns:24px minmax(0,1.4fr) minmax(0,1fr);align-items:center;gap:6px}.bk-seeds b{text-align:right;font-size:13px;color:var(--muted)}
+.bk-seeds input:disabled{opacity:.35}
+.bk-seeds select{min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--gold);background:var(--surface);color:var(--text);padding:6px 8px;font:inherit}
+.bk-seeds input{min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:6px 10px;font:inherit}
 .bk-admin{overflow-x:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;-webkit-overflow-scrolling:touch}
 .bk{display:grid;grid-template-columns:repeat(calc(var(--rounds) + 1),minmax(190px,1fr));gap:14px;min-width:calc((var(--rounds) + 1) * 204px)}
 .bk-r{display:flex;flex-direction:column}.bk-r h4{margin:0 0 8px;font:800 12px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
@@ -322,8 +324,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=25";
-import {watchFinals, sortBrackets} from "../../assets/live.js?v=52";
-import * as BK from "../../assets/bracket.js?v=2";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=53";
+import * as BK from "../../assets/bracket.js?v=3";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
 
@@ -338,7 +340,7 @@ const NOW = seasonOf();  // the current season; "season" below is the one being 
 let site = {teams:[], games:[]}, be = null, user = null, season = NOW, matches = [], unwatch = null;
 let dir = {alumni:[], seasons:[], rosters:{}}, lastEntry = null;
 let tick = {messages:[]};
-let brackets = [], bkOpen = new Set(), bkSaveT = {};   // playoff brackets (brackets/{id})
+let brackets = [], bkOpen = new Set(), bkSetOpen = new Set(), bkSaveT = {};   // playoff brackets (brackets/{id})
 let bc = {stations:{}};   // LevelUP: which match is on each streaming station
 let allFinals = null, recDismissed = new Set();   // every final match (for record checks)
 let role = null, myTeams = null;   // "coach" | "captain" (student scorekeeper, limited to myTeams)
@@ -789,7 +791,7 @@ function renderBrackets(){
       return `<details class="sec bkx" data-bid="${esc(b.id)}"${bkOpen.has(b.id) ? " open" : ""}><summary><b class="bkt">${esc(b.title || "Untitled bracket")}</b><span>${esc([team ? teamLabel(site, team) : "", champ].filter(Boolean).join(" · "))}</span></summary><div class="secb">
         ${mine ? `<p class="hint" style="margin:0 2px 8px">Tap a team to make it the winner (tap again to undo). ✎ adds the score. Hartland's matches fill in from the scorekeeper when they're final.</p>` : `<p class="hint" style="margin:0 2px 8px">View only: this is another team's bracket.</p>`}
         <div class="bk-admin${mine ? " can" : ""}">${BK.bracketHTML(model, {esc, logo:bkLogo, edit:mine, short:sc => shortSchool(sc)})}</div>
-        ${mine ? `<details class="bkset"${(b.seeds || []).some(x => x.school) ? "" : " open"}><summary>Setup and seeds</summary><div class="bkf">
+        ${mine ? `<details class="bkset"${bkSetOpen.has(b.id) || !(b.seeds || []).some(x => x.school) ? " open" : ""}><summary>Setup and seeds</summary><div class="bkf">
           <label class="f"><span>Title</span><input data-bf="title" value="${esc(b.title || "")}" placeholder="Fall 2026 MHSEL Playoffs · Smash"></label>
           <label class="f"><span>Our team in it</span><select data-bf="teamId"><option value="">—</option>${bkTeams().map(t => `<option value="${esc(t.id)}"${t.id === b.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select></label>
           <label class="f"><span>Status</span><select data-bf="status">${["Upcoming", "In progress", "Final"].map(x => `<option${x === b.status ? " selected" : ""}>${x}</option>`).join("")}</select></label>
@@ -799,8 +801,13 @@ function renderBrackets(){
         </div>
         <label class="tog" style="margin:10px 2px"><input type="checkbox" data-bf="on"${b.on !== false ? " checked" : ""}> Show on the website</label>
         <h2>Seeds</h2>
-        <div class="bk-seeds">${Array.from({length:+b.size}, (_, k) => `<label><b>${k + 1}</b><input list="bkSchools" data-seed="${k}" value="${esc(b.seeds?.[k]?.school || "")}" placeholder="${k ? "School (blank = bye)" : "School"}" autocomplete="off"></label>`).join("")}</div>
-        <details style="margin:8px 2px"><summary class="hint" style="cursor:pointer;margin:0">Paste seeds instead</summary><textarea data-bkpaste rows="5" style="width:100%;margin-top:6px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:10px;font:inherit" placeholder="One school per line, seed 1 first. A blank line is a bye."></textarea><button type="button" class="btn btn-line" data-bkpasteok style="margin-top:6px">Fill in the seeds</button></details></details>` : ""}
+        <p class="hint" style="margin:0 2px 8px">School gives the logo. Team name is what shows on the bracket, so use it when a school has more than one team in (Varsity / JV, #1 / #2), or to match the league's names.</p>
+        <div class="bk-seeds">${Array.from({length:+b.size}, (_, k) => { const sd = b.seeds?.[k] || {}, us = BK.isHartland(sd.school);
+          const ourT = (site.teams || []).filter(t => !b.game || t.gameKey === b.game);
+          return `<div class="bk-seed"><b>${k + 1}</b><input list="bkSchools" data-seed="${k}" value="${esc(sd.school || "")}" placeholder="${k ? "School (blank = bye)" : "School"}" autocomplete="off">${us
+            ? `<select data-seedteam="${k}" aria-label="Which of our teams"><option value="">Our team…</option>${ourT.map(t => `<option value="${esc(t.id)}"${t.id === sd.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select>`
+            : `<input data-seedlab="${k}" value="${esc(sd.label || "")}" placeholder="Team name (optional)" autocomplete="off"${sd.school ? "" : " disabled"}>`}</div>`; }).join("")}</div>
+        <details style="margin:8px 2px"><summary class="hint" style="cursor:pointer;margin:0">Paste seeds instead</summary><p class="hint" style="margin:8px 0 0">One per line, seed 1 first. Add a team name after a tab or " | ", like <i>Detroit Catholic Central | JV</i>. A blank line is a bye.</p><textarea data-bkpaste rows="5" style="width:100%;margin-top:6px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:10px;font:inherit" placeholder="Detroit Catholic Central | Varsity&#10;Detroit Catholic Central | JV"></textarea><button type="button" class="btn btn-line" data-bkpasteok style="margin-top:6px">Fill in the seeds</button></details></details>` : ""}
         ${mine ? `<div class="tools" style="flex-wrap:wrap;margin-top:10px"><button type="button" class="btn btn-line" data-bkclear>Clear results</button>${role === "coach" ? `<button type="button" class="btn btn-line" data-bkdel style="color:var(--live)">Delete bracket</button>` : ""}</div>` : ""}
         <p class="hint" style="margin:10px 2px 0">Stream: the Bracket overlay shows this automatically during ${esc(team ? teamLabel(site, team) : "this team's")} matches. To pin this one: <button type="button" class="linkbtn" data-copy="${esc(SITE)}overlay/bracket.html?b=${esc(b.id)}">Copy its overlay link</button></p>
       </div></details>`; }).join("")}</div>`;
@@ -813,13 +820,17 @@ function renderBrackets(){
     brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); renderBrackets();
     setTimeout(() => document.querySelector(`[data-bid="${id}"] [data-bf="title"]`)?.focus(), 50); });
   document.querySelectorAll("#bkPage details.bkx").forEach(d => d.ontoggle = () => d.open ? bkOpen.add(d.dataset.bid) : bkOpen.delete(d.dataset.bid));
+  document.querySelectorAll("#bkPage details.bkset").forEach(d => d.ontoggle = () => { const id = d.closest("[data-bid]").dataset.bid; d.open ? bkSetOpen.add(id) : bkSetOpen.delete(id); });
   document.querySelectorAll("#bkPage [data-copy]").forEach(x => x.onclick = () => { navigator.clipboard?.writeText(x.dataset.copy).then(() => toast("Overlay link copied.")).catch(() => prompt("Copy this link:", x.dataset.copy)); });
 }
+const bkSeeds = b => { b.seeds = Array.from({length:+b.size}, (_, k) => ({school:"", ...(b.seeds?.[k] || {})})); };
 const bkOf = el => { const id = el.closest("[data-bid]")?.dataset.bid; return brackets.find(b => b.id === id); };
 document.addEventListener("input", e => {
   if (view !== "brackets") return;
   const el = e.target, b = bkOf(el); if (!b || !bkMine(b)) return;
-  if (el.dataset.seed != null){ b.seeds = Array.from({length:+b.size}, (_, k) => b.seeds?.[k] || {school:""}); b.seeds[+el.dataset.seed] = {school:el.value.trim()}; bkSave(b, 900);
+  if (el.dataset.seedlab != null){ bkSeeds(b); b.seeds[+el.dataset.seedlab].label = el.value.trim(); bkSave(b, 900);
+    clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => bkRedraw(b), 900); return; }
+  if (el.dataset.seed != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seed]; sd.school = el.value.trim(); if (!BK.isHartland(sd.school)) delete sd.teamId; bkSave(b, 900);
     clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => { if (document.activeElement === el) bkRedraw(b); }, 900); return; }
   const f = el.dataset.bf; if (!f) return;
   if (f === "title" || f === "league" || f === "link"){ b[f] = el.value; bkSave(b, 700); const t = el.closest("details").querySelector(".bkt"); if (f === "title" && t) t.textContent = el.value || "Untitled bracket"; }
@@ -827,7 +838,10 @@ document.addEventListener("input", e => {
 document.addEventListener("change", e => {
   if (view !== "brackets") return;
   const el = e.target, b = bkOf(el); if (!b || !bkMine(b)) return;
-  const f = el.dataset.bf; if (!f || f === "title" || f === "league" || f === "link") { if (el.dataset.seed != null) renderBrackets(); return; }
+  if (el.dataset.seedteam != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seedteam], t = (site.teams || []).find(t => t.id === el.value);
+    sd.teamId = el.value; sd.label = t && (site.teams || []).filter(x => x.gameKey === t.gameKey).length > 1 ? `Hartland ${t.name}` : "";
+    if (t && !b.teamId){ b.teamId = t.id; b.game = t.gameKey; } bkSave(b); renderBrackets(); return; }
+  const f = el.dataset.bf; if (!f || f === "title" || f === "league" || f === "link") { if (el.dataset.seed != null || el.dataset.seedlab != null) renderBrackets(); return; }
   if (f === "on") b.on = el.checked;
   else if (f === "size"){ if (Object.keys(b.res || {}).length && !confirm("Changing the size clears the results. Go ahead?")){ el.value = b.size; return; } b.size = +el.value; b.res = {}; }
   else if (f === "teamId"){ b.teamId = el.value; b.game = (site.teams || []).find(t => t.id === el.value)?.gameKey || ""; }
@@ -843,7 +857,8 @@ document.addEventListener("click", e => {
   if (e.target.closest("[data-bkpasteok]")){ const lines = e.target.closest(".secb").querySelector("[data-bkpaste]").value.split(/\r?\n/).map(x => x.trim());
     while (lines.length && !lines[lines.length - 1]) lines.pop();
     const n = BK.SIZES.find(x => x >= lines.length) || 32; if (n !== +b.size && (!Object.keys(b.res).length || confirm(`That's ${lines.length} teams: make this a ${n}-team bracket? Results are cleared.`))){ b.size = n; b.res = {}; }
-    b.seeds = Array.from({length:+b.size}, (_, k) => ({school:lines[k] || ""})); bkSave(b); renderBrackets(); toast("Seeds filled in."); return; }
+    b.seeds = Array.from({length:+b.size}, (_, k) => { const [sc, ...lab] = (lines[k] || "").split(/\t|\s+\|\s+|\s+[-–]\s+/).map(x => x.trim()).filter(Boolean);
+      return sc ? {school:sc, label:lab.join(" ")} : {school:""}; }); bkSave(b); renderBrackets(); toast("Seeds filled in."); return; }
   if (e.target.closest("[data-bkclear]")){ if (confirm("Clear every result in this bracket?")){ b.res = {}; bkSave(b); renderBrackets(); } return; }
   if (e.target.closest("[data-bkdel]")){ if (confirm(`Delete "${b.title || "this bracket"}" from the website and stream?`)){ brackets = brackets.filter(x => x !== b); clearTimeout(bkSaveT[b.id]); delete bkLocal[b.id]; bkKeep(); be.deleteBracket(b.id).catch(() => toast("Couldn't delete it. Check the connection.")); renderBrackets(); } return; }
   const mEl = e.target.closest(".bk-m[data-k]"); if (!mEl || !mEl.closest(".bk-admin.can")) return;

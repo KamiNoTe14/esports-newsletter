@@ -360,7 +360,7 @@ export function sortBrackets(list){
 }
 export async function startBrackets(site){
   const box = document.querySelector("[data-bk-live]"); if (!box) return;
-  const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=2");
+  const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=3");
   const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };
   let finals = [], list = [];
   const draw = () => {

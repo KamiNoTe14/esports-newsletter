@@ -342,6 +342,15 @@ export function startNextLevel(site){
 }
 
 /* ---------- player profile ---------- */
+/* ---------- playoff brackets on the Teams page: built in the Site Manager; our results fill in live ---------- */
+export async function startBrackets(site){
+  const boxes = [...document.querySelectorAll("[data-bk-site]")]; if (!boxes.length) return;
+  const BK = await import(BASE + "assets/bracket.js?v=1");
+  const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };
+  const draw = finals => boxes.forEach(box => { const b = site.brackets?.[+box.dataset.bkSite]; if (!b) return;
+    box.innerHTML = BK.bracketHTML(BK.buildBracket(b, finals), {esc, logo, short:sc => shortSchool(sc)}); });
+  draw([]); watchFinals(site, draw);
+}
 /* ---------- coach profiles (coach.html?c=cameron-montney) ----------
    Career numbers over the seasons they coached (First season … Last season in the Site Manager, every game or one):
    match and game record, playoff runs from the match history, deep runs and titles from the record book, players

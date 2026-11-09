@@ -138,9 +138,10 @@ function bracketsHTML(site){
   const list = (site.brackets || []).filter(s => s.on !== false);
   if (!on(site, "brackets") || !list.length) return "";
   return `<section class="section"><div class="wrap">${secH("Playoff brackets")}
-    <div class="grid g2">${list.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px">
+    <div class="grid g2">${list.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px${+b.size ? ";grid-column:1/-1" : ""}">
       <div class="chips">${b.status ? `<span class="chip gold">${esc(b.status)}</span>` : ""}${b.league ? `<span class="chip">${esc(b.league)}</span>` : ""}</div>
       <h3>${esc(b.title)}</h3>
+      ${+b.size ? `<div class="bk-wrap" data-bk-site="${(site.brackets || []).indexOf(b)}"><div class="loading">Drawing the bracket…</div></div>` : ""}
       ${b.image ? `<a href="${esc(url(b.image))}" target="_blank" rel="noopener"><img src="${esc(url(b.image))}" alt="${esc(b.title)} bracket" loading="lazy" style="border-radius:6px;background:#fff"></a>` : ""}
       ${b.text ? `<p class="muted" style="margin:0">${esc(b.text)}</p>` : ""}
       ${safe(b.link) ? `<a class="btn btn-line" style="align-self:flex-start" href="${esc(safe(b.link))}" target="_blank" rel="noopener">View bracket</a>` : ""}
@@ -437,8 +438,8 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, schedule, results, player, coach, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "coach", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=50").then(L => {
-    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams") L.startTeamRecords(site);
+  if (["home", "schedule", "results", "player", "coach", "legacy", "rival", "opponent", "teams"].includes(PAGE)) import(BASE + "assets/live.js?v=51").then(L => {
+    if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams"){ L.startTeamRecords(site); L.startBrackets(site); }
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site); if (PAGE === "coach") L.startCoach(site);
   }).catch(e => { console.error(e); const r = $("#results") || $("#player") || $("#coach") || $("#rival") || $("#opponent") || $("#allTime"); if (r) r.innerHTML = `<div class="empty">Couldn't load scores right now. Please refresh in a minute.</div>`; });

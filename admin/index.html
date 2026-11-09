@@ -103,6 +103,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .needs li small{display:block;color:#6b7684;font-size:12.5px}
 .needs .miss{display:flex;flex-wrap:wrap;gap:4px}.needs .miss i{font-style:normal;font-size:12px;padding:2px 7px;border-radius:999px;background:#fdecc8;color:#7a4a00}.needs .miss i.new{background:#fde2e1;color:#9b1c1c}
 @media (max-width:640px){.needs li{grid-template-columns:1fr}}
+/* bracket builder */
+.bk-seeds{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.bk-seeds label{display:flex;align-items:center;gap:6px}.bk-seeds b{width:24px;text-align:right;font-size:13px;color:var(--muted)}.bk-seeds input{flex:1;min-width:0}
+.bk-admin{overflow-x:auto;background:#0B1B2E;border-radius:10px;padding:12px}
+.bk{display:grid;grid-template-columns:repeat(calc(var(--rounds) + 1),minmax(170px,1fr));gap:18px;min-width:calc((var(--rounds) + 1) * 188px)}
+.bk-r{display:flex;flex-direction:column}.bk-r h4{margin:0 0 8px;font:700 12px/1 sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#FFBC05}
+.bk-ms{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+.bk-m{position:relative;border-radius:8px;overflow:hidden;background:#13304D;border:1px solid #2C5279;cursor:pointer}
+.bk-m.bye{opacity:.55;cursor:default}.bk-m.us{border-color:#FFBC05}
+.bk-t{display:grid;grid-template-columns:22px 22px 1fr auto;gap:6px;align-items:center;padding:5px 8px;color:#F2F6FA;font-size:13px}
+.bk-t + .bk-t{border-top:1px solid #2C5279}
+.bk-t i{font-style:normal;font-size:11px;color:#9DB0C6;text-align:right}.bk-t img{width:20px;height:20px;object-fit:contain}.bk-t em{font-style:normal;width:20px;text-align:center;color:#9DB0C6}
+.bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk-t b{font-weight:700;min-width:12px;text-align:right}
+.bk-t.win{background:#1E4470;font-weight:700}.bk-t.out{opacity:.55}.bk-t.us span{color:#FFBC05}.bk-t.none{color:#6E87A3}
+.bk-t:not(.empty):hover{background:#244E7E}
+.bk-edit{position:absolute;right:2px;top:50%;transform:translateY(-50%);border:0;background:#0B1B2E;color:#FFBC05;border-radius:6px;padding:2px 6px;font-size:12px;cursor:pointer;opacity:0}
+.bk-m:hover .bk-edit,.bk-edit:focus{opacity:1}
 </style>
 </head>
 <body>
@@ -195,8 +212,12 @@ const LISTS = {
     fields:[["name","Full name","text","Rocket League"],["short","Short name","text","Rocket League"],["abbr","Abbreviation","text","RL"],["key","ID (no spaces, don't change once used)","text","rocket-league"],["unit","A match is a series of…","select",["Game","Set","Map","Round"]],["points","Score inside each one (blank = just win/lose)","text","Goals"],["firstTo","First to this many wins a game (blank = tap who won)","text","10"],["bestOf","Usually best of","select",["1","3","5","7"]],["teamSize","Players per side","text","3"],["stats","Player stats to track (comma separated; end one with % to average it)","text","Goals, Assists, Saves, Accuracy %"],["roles","Roles a player can pick (optional)","text","Vanguard, Duelist, Strategist"],["charLabel","Track a character per game? Name the box (blank = no)","text","Hero"],["charSlots","Characters per set/game (Smash sets are best of 3, so 3)","select",["1","2","3","4","5"]],["chars","Character list, for suggestions while typing","textarea"],["icon","Icon (optional)","image"],["art","Card artwork, shown in the corner of team cards (optional)","image"],["liveFeed","Live game data for the stream score bug","select",[["","Off (scorekeeper only)"],["sos","Rocket League: clock and goals from the game (official Stats API)"]]]]},
   rivals:{title:"Rival", add:"Add rival", intro:"Matches against these schools get a gold rivalry tag on the scores strip, the Results page and the scorekeeper. Type the school the way it appears in matches; \"Howell\" also matches \"Howell High School\".", name:i => i.school || "Rival",
     fields:[["school","School","text","Howell"],["title","Rivalry name (optional)","text","Battle of M-59"],["note","Why they're a rival (for the rivalry pages later)","textarea"]]},
-  brackets:{title:"Bracket", add:"Add bracket", intro:"Link to the bracket on RallyCry, upload a screenshot of it, or both.", name:i => i.title || "Bracket",
-    fields:[["title","Title","text","Fall 2026 MHSEL Playoffs · Smash"],["league","League"],["status","Status","select",["","Upcoming","In progress","Final"]],["link","Bracket link","url"],["image","Bracket image","image"],["text","Notes","textarea"],["on","Show this bracket","check"]]},
+  brackets:{title:"Bracket", add:"Add bracket", intro:"Build the bracket here (seeds in, then click each winner) and it shows on the Teams page and on the stream's Bracket overlay. Hartland's own results fill in by themselves from the scorekeeper. You can also link the bracket on RallyCry or upload a screenshot.", name:i => i.title || "Bracket",
+    fields:[["title","Title","text","Fall 2026 MHSEL Playoffs · Smash"],["league","League"],["status","Status","select",["","Upcoming","In progress","Final"]],
+      ["game","Game","select",() => [["", "—"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["teamId","Our team in it (fills in our results)","select",() => [["", "—"], ...(site.teams || []).filter(t => t.id).map(t => [t.id, `${t.game} ${t.name}`])]],
+      ["size","Teams in the bracket","select",[["", "Not building one (link or image only)"], ["4", "4 teams"], ["8", "8 teams"], ["16", "16 teams"], ["32", "32 teams"]]],
+      ["link","Bracket link","url"],["image","Bracket image","image"],["text","Notes","textarea"],["on","Show this bracket","check"]],
+    after:(it, i) => bracketBuilder(it, i)},
   records:{title:"Record", add:"Add record", intro:"The record book on the Legacy page. Championships and top finishes hang as banners, everything with a season goes on the timeline, honors are listed by title, and statistical records get their own table.", name:i => i.title || "Record",
     fields:[["title","Title","text","State Champions"],["type","Type (decides where it shows)","select",[["milestone","Milestone (timeline only)"],["championship","State or league championship (gold banner)"],["tournament","Tournament or invitational win (white banner)"],["finish","Runner-up or top finish (silver banner)"],["honor","Honor, one per player (listed under its title)"],["record","Statistical record (records table)"]]],["org","League or event","text","MHSEL"],["year","Season, with the year","text","Fall 2024"],["game","Game","select",() => [["", "All games / program-wide"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["value","The number (statistical records only)","text","27–2"],["detail","Details (the story; for an honor, the player's name)","textarea"]]},
   news:{title:"Article", add:"Add article", intro:"News coverage of the program. Newest shows first.", name:i => i.title || "Article",
@@ -282,10 +303,50 @@ function listEditor(key, spec){
       <div class="grid g2">${main.map(f => `<div style="${f[2] === "textarea" || f[2] === "image" ? "grid-column:1/-1" : ""}">${field(`${base}.${f[0]}`, f, it[f[0]] ?? "")}</div>`).join("")}</div>
       ${checks.length ? `<div style="display:flex;gap:16px;flex-wrap:wrap">${checks.map(f => field(`${base}.${f[0]}`, f, it[f[0]] ?? (f[0] === "on" ? true : false))).join("")}</div>` : ""}
       ${spec.sub ? subEditor(`${base}.${spec.sub.key}`, spec.sub, it[spec.sub.key] = it[spec.sub.key] || []) : ""}
+      ${spec.after ? spec.after(it, i) : ""}
     </div>`;
   }).join("")}<button class="add" type="button" data-add="${key}">+ ${esc(spec.add)}</button></div>`;
 }
 /* Everyone on a roster, for the Highlight videos player picker */
+/* ---------- bracket builder ----------
+   Seeds (school names, with suggestions from the School library) in seed order, then the bracket itself: click a
+   team to make it the winner of that match, ✎ to add the score. Changing a winner clears what it fed later. */
+let BK = null;
+import("../assets/bracket.js?v=1").then(m => { BK = m; if (tab === "brackets") renderPanel(); }).catch(e => console.error(e));
+function bracketBuilder(b, i){
+  const n = +b.size; if (!n) return "";
+  if (!BK) return `<p class="muted">Loading the bracket builder…</p>`;
+  b.seeds = b.seeds || []; for (let k = 0; k < n; k++) b.seeds[k] = b.seeds[k] || {school:""}; b.seeds.length = n; b.res = b.res || {};
+  const model = BK.buildBracket(b, []);
+  const logo = sc => { const x = (site.highSchools || []).find(h => h.name && (h.name.toLowerCase() === String(sc).toLowerCase() || (h.short && h.short.toLowerCase() === String(sc).toLowerCase()) || String(sc).toLowerCase().startsWith(String(h.short || h.name).toLowerCase()))); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : SITE_BASE + x.logo) : ""; };
+  return `<div class="bkb" data-bk="${i}">
+    <h3 style="margin:16px 0 6px">Seeds</h3>
+    <datalist id="bkSchools">${(site.highSchools || []).map(h => `<option value="${esc(h.name)}">`).join("")}<option value="Hartland High School"></datalist>
+    <div class="bk-seeds">${b.seeds.map((sd, k) => `<label><b>${k + 1}</b><input list="bkSchools" data-path="brackets.${i}.seeds.${k}.school" value="${esc(sd.school || "")}" placeholder="${k + 1 === n ? "School (blank = bye)" : "School"}"></label>`).join("")}</div>
+    <details style="margin:8px 0"><summary class="muted" style="cursor:pointer">Paste seeds instead</summary><textarea data-bkpaste="${i}" rows="4" placeholder="One school per line, seed 1 first"></textarea><button type="button" class="btn btn-line" data-bkpasteok="${i}" style="margin-top:6px">Fill in the seeds</button></details>
+    <h3 style="margin:16px 0 6px">Bracket</h3><p class="muted" style="margin:0 0 8px">Click a team to make it the winner. ✎ adds the score. Hartland's matches fill in from the scorekeeper on the site and stream if you leave them blank here.</p>
+    <div class="bk-admin">${BK.bracketHTML(model, {esc, logo, edit:true, short:s => s.replace(/\s+(High School|High|HS)$/i, "")})}</div>
+    <button type="button" class="btn btn-line" data-bkclear="${i}" style="margin-top:8px">Clear all results</button></div>`;
+}
+function bracketClick(e){
+  const box = e.target.closest("[data-bk]"); if (!box || !BK) return false;
+  const i = +box.dataset.bk, b = site.brackets[i];
+  if (e.target.closest("[data-bkpasteok]")){ const lines = box.querySelector("[data-bkpaste]").value.split(/\r?\n/).map(x => x.trim());
+    lines.slice(0, +b.size).forEach((l, k) => b.seeds[k] = {school:l}); setDirty(true); setStatus(); renderPanel(); return true; }
+  if (e.target.closest("[data-bkclear]")){ if (confirm("Clear every result in this bracket?")){ b.res = {}; setDirty(true); setStatus(); renderPanel(); } return true; }
+  const mEl = e.target.closest(".bk-m[data-k]"); if (!mEl) return false;
+  const k = mEl.dataset.k, [r, mi] = k.split("-").map(Number), model = BK.buildBracket(b, []), m = model.rounds[r]?.[mi]; if (!m || m.bye) return true;
+  const clearAfter = () => { for (let rr = r + 1, ii = mi >> 1; rr < model.R; rr++, ii >>= 1) delete b.res[`${rr}-${ii}`]; };
+  if (e.target.closest(".bk-edit")){ if (!m.a || !m.b) return true;
+    const v = prompt(`Score, ${m.a.school} first (like 3-1). Leave blank to clear.`, b.res[k]?.s || ""); if (v === null) return true;
+    const sc = v.trim().replace(/\s+/g, ""); const p = sc.match(/^(\d+)[-–](\d+)$/);
+    b.res[k] = {...(b.res[k] || {}), s:p ? `${p[1]}-${p[2]}` : ""}; if (p && +p[1] !== +p[2] && !b.res[k].w){ b.res[k].w = +p[1] > +p[2] ? "a" : "b"; clearAfter(); }
+    if (!b.res[k].w && !b.res[k].s) delete b.res[k]; setDirty(true); setStatus(); renderPanel(); return true; }
+  const tEl = e.target.closest(".bk-t"); if (!tEl || tEl.classList.contains("empty")) return true;
+  const which = [...mEl.querySelectorAll(".bk-t")].indexOf(tEl) === 0 ? "a" : "b";
+  if (b.res[k]?.w === which) delete b.res[k]; else b.res[k] = {...(b.res[k] || {}), w:which};
+  clearAfter(); setDirty(true); setStatus(); renderPanel(); return true;
+}
 /* Awards: who can receive one. Coaches are "coach:<their-name-slug>", the program is "program". */
 const coachSlug = n => String(n || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 function whoOptions(){
@@ -862,9 +923,12 @@ $("#panel").addEventListener("input", e => {
   if (/^alumni\.\d+\.(name|tag|gradYear)$/.test(path)){ const a = getP(path.replace(/\.\w+$/, "")), sm = document.querySelector(`details[data-pid="${CSS.escape(a.id)}"] summary b`); if (sm) sm.textContent = a.private ? a.tag : (a.name || a.tag); }
   setDirty(true); setStatus();
   if (el.type === "checkbox" && path.startsWith("sections.")) renderPanel();
+  if (/^brackets\.\d+\.size$/.test(path)) renderPanel();
+  if (/^brackets\.\d+\.seeds\.\d+\.school$/.test(path)){ clearTimeout(renderPanel.bk); renderPanel.bk = setTimeout(() => { const pos = el.dataset.path; renderPanel(); const x = document.querySelector(`[data-path="${pos}"]`); if (x){ x.focus(); x.setSelectionRange?.(x.value.length, x.value.length); } }, 1200); }
   if (el.type === "url" && /\.(image|logo)$/.test(path)) { clearTimeout(renderPanel.t); renderPanel.t = setTimeout(() => { const pos = el.id; renderPanel(); document.getElementById(pos)?.focus(); }, 900); }
 });
 $("#panel").addEventListener("click", async e => {
+  if (bracketClick(e)) return;
   const b = e.target.closest("button"); if (!b) return;
   if (b.id === "ghConnect"){
     const cfg = {owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), token:$("#ghToken").value.trim()};

@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=24";
-import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=49";
+import {watchBroadcast, watchMatch, watchFinals} from "../assets/live.js?v=51";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -766,6 +766,29 @@ function splitShell(m, plates, guides, cls = ""){
   if (g.liveFeed === "sos"){ startSOS(); rlbug(m, wrap); } else scorebug(m, wrap);
 }
 
+/* ---------- playoff bracket (full screen) ----------
+   The bracket built in the Site Manager (Playoff brackets) for this match's team, or ?b=2 for the second built bracket.
+   Our results fill in from the scorekeeper the moment a playoff match is final; others from the Site Manager.
+   Shows up to four rounds (a 32-team bracket starts at the Round of 16); ?from=0 shows every round. */
+let BKM = null;
+import("../assets/bracket.js?v=1").then(x => { BKM = x; if (LAYER === "bracket") draw(); }).catch(e => console.error(e));
+function bracketLayer(m){
+  const g = gameFor(site, m.game);
+  if (!BKM) return;
+  const built = (site.brackets || []).filter(b => +b.size && b.on !== false);
+  const pick = q.get("b") ? built[+q.get("b") - 1] : built.find(b => b.teamId && b.teamId === m.teamId && b.status !== "Final") || built.find(b => b.teamId === m.teamId) || built.find(b => b.game === m.game && b.status === "In progress") || built.find(b => b.game === m.game);
+  if (!pick){ empty("No bracket built for this team yet: Site Manager > Playoff brackets."); return; }
+  const live = m.status === "final" && !finals.some(f => f.id === m.id) ? [...finals, m] : finals;
+  const model = BKM.buildBracket(pick, live), from = q.get("from") != null ? Math.max(0, +q.get("from") || 0) : Math.max(0, model.R - 4);
+  const logo = sc => { const x = schoolInfo(site, sc); return x?.logo ? (/^(https?:|data:)/.test(x.logo) ? x.logo : BASE + x.logo) : ""; };
+  const us = model.rounds.flat().filter(x => x.us && !x.bye), last = us[us.length - 1];
+  let foot = "";
+  if (model.champ) foot = model.champ.us ? `<em>Hartland</em> are champions` : `Champion: <em>${esc(shortSchool(model.champ.school))}</em>`;
+  else if (last){ const opp = last.a?.us ? last.b : last.a, nm = model.names[last.r];
+    foot = !last.w ? `Next: <em>Hartland</em> vs ${esc(opp ? shortSchool(opp.school) : "TBD")} · ${esc(nm)}` : last.winner?.us ? `<em>Hartland</em> advance to the ${esc(model.names[last.r + 1] || "Final")}` : `Hartland's run ended in the ${esc(nm)}`; }
+  out.html = frame("bkf", m, g, {title:"Playoffs", script:"Bracket", sub:pick.title || "", body:`<div class="bkbox r${model.R - from}">${BKM.bracketHTML(model, {from, esc, logo, short:sc => shortSchool(sc)})}</div>`, foot});
+}
+
 /* ---------- instant replay + live (every game) ----------
    Same frame: the left window plays the newest clip and loops it, the right window is see-through for the live game.
    Clips come from OBS's replay buffer through the LevelUP Relay: press OBS's "Save Replay" hotkey, or tap Instant
@@ -807,7 +830,7 @@ function replayLive(m){
 }
 
 /* ---------- wiring ---------- */
-const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame, "smash-vs":smashVs, "duo-pov":duoPov, "replay-live":replayLive};
+const LAYERS = {scorebug, vs, lineups, "team-compare":teamCompare, "player-compare":playerCompare, "rl-team":rlTeam, "rl-players":rlPlayers, "rl-box":rlBox, highlights, corner, pov, "box-score":boxScore, "post-game":postGame, "smash-vs":smashVs, "duo-pov":duoPov, "replay-live":replayLive, bracket:bracketLayer};
 const RL_LAYER = /^rl-/.test(LAYER || "");
 let rlDrawAt = 0, rlDrawTimer = null;
 /* Full-screen graphics wait (up to 2.5 s) for season results so the entrance plays with the real numbers. */

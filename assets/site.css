@@ -630,3 +630,18 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .coach-card{display:flex;gap:16px;align-items:center;text-decoration:none;color:inherit}
 .coach-card .player-photo{width:76px;height:76px;font-size:36px;flex:none}
 .coach-card b{display:block;font:700 24px/1.1 var(--display);text-transform:uppercase}.coach-card small{color:var(--muted)}
+
+/* ---------- playoff brackets ---------- */
+.bk-wrap{overflow-x:auto;margin:4px -4px 0;padding:4px}
+.bk{display:grid;grid-template-columns:repeat(calc(var(--rounds) + 1),minmax(180px,1fr));gap:20px;min-width:calc((var(--rounds) + 1) * 196px)}
+.bk-r{display:flex;flex-direction:column}
+.bk-r h4{margin:0 0 10px;font:700 13px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.bk-ms{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:10px}
+.bk-m{border-radius:8px;overflow:hidden;background:var(--bg-2);border:1px solid var(--line)}
+.bk-m.us{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}.bk-m.bye{opacity:.5}
+.bk-t{display:grid;grid-template-columns:20px 22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 10px;font-size:14.5px}
+.bk-t + .bk-t{border-top:1px solid var(--line)}
+.bk-t i{font-style:normal;font-size:12px;color:var(--muted);text-align:right}.bk-t img{width:22px;height:22px;object-fit:contain}.bk-t em{font-style:normal;text-align:center;color:var(--muted);font-weight:700}
+.bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk-t b{font:700 16px/1 var(--display)}
+.bk-t.win{background:rgba(255,255,255,.06);font-weight:700}.bk-t.out{opacity:.5}.bk-t.us span{color:var(--gold)}.bk-t.none{color:var(--muted)}
+.bk-champ .bk-m{border-color:var(--gold)}

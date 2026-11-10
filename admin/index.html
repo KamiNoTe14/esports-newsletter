@@ -103,6 +103,21 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .needs li small{display:block;color:#6b7684;font-size:12.5px}
 .needs .miss{display:flex;flex-wrap:wrap;gap:4px}.needs .miss i{font-style:normal;font-size:12px;padding:2px 7px;border-radius:999px;background:#fdecc8;color:#7a4a00}.needs .miss i.new{background:#fde2e1;color:#9b1c1c}
 @media (max-width:640px){.needs li{grid-template-columns:1fr}}
+/* college picker */
+.cpick{display:flex;flex-direction:column;gap:8px}
+.cp-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cp-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 4px 4px 6px;border-radius:999px;background:var(--chip);font-weight:600;font-size:14px}
+.cp-chip img,.cp-opt img{width:24px;height:24px;object-fit:contain;background:#fff;border-radius:5px;padding:2px}
+.cp-chip i,.cp-opt i{width:24px;height:24px;display:grid;place-items:center;background:#fff;border-radius:5px;font-style:normal;font-weight:800;color:var(--navy)}
+.cp-chip button{border:0;background:none;width:26px;height:26px;border-radius:50%;font-size:18px;line-height:1;cursor:pointer;color:var(--muted)}
+.cp-chip button:hover{background:#fff;color:var(--danger)}
+.cp-box{position:relative;max-width:560px}
+.cp-box input{width:100%;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--field);font:inherit}
+.cp-box input:focus{outline:2px solid var(--gold);outline-offset:0;background:#fff}
+.cp-res{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,20,40,.16);max-height:340px;overflow:auto;padding:4px}
+.cp-opt{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:8px 10px;border-radius:7px;font:inherit;text-align:left;cursor:pointer}
+.cp-opt span{flex:1}.cp-opt small{color:var(--muted);font-weight:600}
+.cp-opt.on,.cp-opt:hover{background:var(--chip)}
 </style>
 </head>
 <body>
@@ -371,6 +386,47 @@ function renderPanel(){
     ${spec.csv ? csvBar(tab, spec) : ""}
     ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}${tab === "brackets" ? sceneCard() : ""}`;
 }
+/* Colleges of interest: search by any part of the name, short name, city or nickname in the school's site (bulldogs),
+   pick from a list with logos. Chosen schools are chips with a remove button. Saved as profiles.<id>.interest.<collegeId> = true. */
+const cpWords = sc => [sc.name, sc.short, (() => { try { return new URL(sc.link).hostname.replace(/^www\./, "").split(".")[0]; } catch(e){ return ""; } })()].filter(Boolean).join(" ").toLowerCase();
+const cpLogo = sc => sc.logo ? `<img src="${esc(/^(https?:|data:)/.test(sc.logo) ? sc.logo : "../" + sc.logo)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : `<i>${esc((sc.short || sc.name || "?")[0])}</i>`;
+function collegePicker(P){
+  const pr = getP(P) || {}, picked = (site.colleges || []).filter(sc => sc.id && pr.interest?.[sc.id]).sort((a, b) => a.name.localeCompare(b.name));
+  return `<div class="cpick" data-cpick="${esc(P)}">
+    <div class="cp-chips">${picked.map(sc => `<span class="cp-chip">${cpLogo(sc)}${esc(sc.name)}<button type="button" data-cpdel="${esc(sc.id)}" aria-label="Remove ${esc(sc.name)}">×</button></span>`).join("") || `<span class="muted">No schools of interest yet.</span>`}</div>
+    <div class="cp-box"><input type="search" data-cpq placeholder="Add a school: type any part of the name, like eastern, flint or bulldogs" autocomplete="off" aria-label="Search colleges"><div class="cp-res" role="listbox" hidden></div></div></div>`;
+}
+function cpResults(box){
+  const wrap = box.closest("[data-cpick]"), pr = getP(wrap.dataset.cpick) || {}, q = box.value.trim().toLowerCase(), res = wrap.querySelector(".cp-res");
+  if (!q){ res.hidden = true; res.innerHTML = ""; return; }
+  const terms = q.split(/\s+/);
+  const hits = (site.colleges || []).filter(sc => sc.id && sc.name && !pr.interest?.[sc.id]).map(sc => { const w = cpWords(sc), sh = String(sc.short || "").toLowerCase();
+      if (!terms.every(t => w.includes(t))) return null;
+      return {sc, score:(sh === q ? 0 : 2) + (sc.name.toLowerCase().startsWith(q) ? 0 : 1) + (w.split(/\s+/).some(x => x.startsWith(terms[0])) ? 0 : 1)}; })
+    .filter(Boolean).sort((a, b) => a.score - b.score || a.sc.name.localeCompare(b.sc.name)).slice(0, 12);
+  res.innerHTML = hits.length ? hits.map((h, i) => `<button type="button" role="option" class="cp-opt${i ? "" : " on"}" data-cpadd="${esc(h.sc.id)}">${cpLogo(h.sc)}<span>${esc(h.sc.name)}</span>${h.sc.short ? `<small>${esc(h.sc.short)}</small>` : ""}</button>`).join("")
+    : `<p class="muted" style="margin:6px 10px">No match. Add the school on the <b>Colleges/Universities</b> tab first.</p>`;
+  res.hidden = false;
+}
+function cpRedraw(wrap){ const P = wrap.dataset.cpick, focus = document.activeElement?.matches?.("[data-cpq]") && wrap.contains(document.activeElement);
+  wrap.outerHTML = collegePicker(P); if (focus) document.querySelector(`[data-cpick="${CSS.escape(P)}"] [data-cpq]`)?.focus(); }
+function cpSet(wrap, id, on){ const P = wrap.dataset.cpick, pr = getP(P); pr.interest = pr.interest && typeof pr.interest === "object" ? pr.interest : {};
+  if (on) pr.interest[id] = true; else delete pr.interest[id]; setDirty(true); setStatus(); cpRedraw(wrap); }
+document.addEventListener("input", e => { if (e.target.matches?.("[data-cpq]")) cpResults(e.target); });
+document.addEventListener("keydown", e => {
+  if (!e.target.matches?.("[data-cpq]")) return;
+  const res = e.target.parentElement.querySelector(".cp-res"), opts = [...res.querySelectorAll(".cp-opt")], i = opts.findIndex(o => o.classList.contains("on"));
+  if (e.key === "ArrowDown" || e.key === "ArrowUp"){ e.preventDefault(); if (!opts.length) return; const n = (i + (e.key === "ArrowDown" ? 1 : -1) + opts.length) % opts.length; opts.forEach((o, k) => o.classList.toggle("on", k === n)); opts[n].scrollIntoView({block:"nearest"}); }
+  else if (e.key === "Enter"){ e.preventDefault(); const o = opts[i] || opts[0]; if (o) cpSet(e.target.closest("[data-cpick]"), o.dataset.cpadd, true); }
+  else if (e.key === "Escape"){ e.target.value = ""; cpResults(e.target); }
+});
+document.addEventListener("click", e => {
+  const add = e.target.closest("[data-cpadd]"), del = e.target.closest("[data-cpdel]");
+  if (add) cpSet(add.closest("[data-cpick]"), add.dataset.cpadd, true);
+  else if (del) cpSet(del.closest("[data-cpick]"), del.dataset.cpdel, false);
+  else document.querySelectorAll(".cp-res:not([hidden])").forEach(r => { if (!r.parentElement.contains(e.target)) r.hidden = true; });
+});
+
 /* The stream's Bracket scene: title, a badge beside it and a background photo (overlay/bracket.html). */
 function sceneCard(){
   site.bracketScene = site.bracketScene || {};
@@ -396,7 +452,7 @@ function profileCard(id, e, open){
           <div><p class="sub-h">Rank by game</p><p class="muted" style="margin:2px 0 8px">Typed in by hand. Leave a game blank if they don't have a rank; the profile never shows "unranked".</p>
             <div class="grid g3">${(site.games || []).map(g => field(`${P}.ranks.${g.key}`, ["", g.short || g.name, "text", g.key === "rocket-league" ? "Grand Champion II" : ""], pr.ranks[g.key] || "")).join("")}</div></div>
           <div><p class="sub-h">Colleges</p>${schools.length ? `<p class="muted" style="margin:2px 0 8px">Schools of interest show with their logos. A commitment announces "Committed to …" and re-skins the profile in that school's colors.</p>
-            ${e.alum ? "" : `<div style="display:flex;flex-wrap:wrap;gap:6px 16px">${schools.filter(sc => sc.id && sc.name).map(sc => field(`${P}.interest.${sc.id}`, ["", sc.short || sc.name, "check"], !!pr.interest[sc.id])).join("")}</div>`}
+            ${e.alum ? "" : collegePicker(P)}
             <div class="grid g2" style="margin-top:8px">${field(`${P}.committed`, ["committed",e.alum ? "Plays for / attends" : "Committed to","select",[["", e.alum ? (auto ? `Matched from "Playing now at": ${auto.name}` : nowText ? `No match for "${nowText}"` : "None (add \"Playing now at\" in the scorekeeper)") : "Not committed"], ...schools.filter(sc => sc.id && sc.name).map(sc => [sc.id, sc.name])]], pr.committed || "")}
               ${field(`${P}.commitLabel`, ["commitLabel","Banner wording","select",[["", e.alum ? "Now playing at (default)" : "Committed to (default)"], ...["Committed to","Signed with","Now playing at","Attending"].map(x => [x, x])]], pr.commitLabel || "")}</div>`
             : `<p class="muted" style="margin:2px 0 0">Add colleges on the <b>Colleges/Universities</b> tab first, then pick them here.</p>`}</div>

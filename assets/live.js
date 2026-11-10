@@ -679,15 +679,21 @@ function classTable(site, fin, dir){
   const year = {};
   Object.entries(site.profiles || {}).forEach(([id, p]) => { if (/^\d{4}$/.test(String(p?.gradYear || "").trim())) year[id] = String(p.gradYear).trim(); });
   [...(site.alumni || []), ...(dir?.alumni || [])].forEach(a => { const y = String(a?.gradYear || "").trim(); if (a?.id && /^\d{4}$/.test(y) && !year[a.id]) year[a.id] = y; });
-  const by = {}, seen = new Set(), missing = new Set();
-  fin.forEach(m => { const ys = new Set(); (m.players || []).forEach(p => { if (!p.id) return; seen.add(p.id); if (year[p.id]) ys.add(year[p.id]); else missing.add(p.id); });
+  const by = {}, seen = new Set(), missing = new Set(), who = {}, mine = {};
+  fin.forEach(m => { const ys = new Set(); (m.players || []).forEach(p => { if (!p.id) return; seen.add(p.id); who[p.id] = p; (mine[p.id] = mine[p.id] || []).push(m);
+      if (year[p.id]) ys.add(year[p.id]); else missing.add(p.id); });
     ys.forEach(y => { const c = by[y] = by[y] || {list:[], ids:new Set()}; c.list.push(m); }); });
   Object.entries(year).forEach(([id, y]) => { if (by[y] && seen.has(id)) by[y].ids.add(id); });
   const rows = Object.entries(by).sort((a, b) => b[0].localeCompare(a[0]));
   if (!rows.length) return "";
   const now = new Date(), senior = now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
-  return `<div class="tbl-wrap" style="margin-top:18px"><table class="tbl"><thead><tr><th>By graduating class</th><th class="n">Players</th><th class="n">W</th><th class="n">L</th><th class="n">Win %</th></tr></thead><tbody>
-    ${rows.map(([y, c]) => { const r = wl(c.list), n = r.w + r.l; return `<tr><td>Class of ${esc(y)}${+y >= senior ? ` <span class="muted" style="font-size:13px">${+y === senior ? "seniors" : "still playing"}</span>` : ""}</td><td class="n">${c.ids.size}</td><td class="n">${r.w}</td><td class="n">${r.l}</td><td class="n">${n ? Math.round(r.w / n * 1000) / 10 + "%" : "–"}</td></tr>`; }).join("")}</tbody></table></div>
+  /* tap a class to see its players: name (gamertag only for private players), their record and games */
+  const people = c => [...c.ids].map(id => { const l = mine[id] || [], r = wl(l), gs = [...new Set(l.map(m => gameFor(site, m.game).name || m.gameName))].filter(Boolean);
+      return {id, n:l.length, html:`<li><a href="${BASE}player.html?id=${encodeURIComponent(id)}">${esc(playerName(who[id] || {id}))}</a><span class="muted">${r.w}-${r.l}${gs.length ? ` · ${esc(gs.join(", "))}` : ""}</span></li>`}; })
+    .sort((a, b) => b.n - a.n).map(x => x.html).join("");
+  return `<div class="tbl-wrap" style="margin-top:18px"><table class="tbl cls-tbl"><thead><tr><th>By graduating class</th><th class="n">Players</th><th class="n">W</th><th class="n">L</th><th class="n">Win %</th></tr></thead><tbody>
+    ${rows.map(([y, c]) => { const r = wl(c.list), n = r.w + r.l; return `<tr class="cls-row"><td><button type="button" class="cls-tog" aria-expanded="false" aria-controls="cls-${esc(y)}" onclick="const o=this.getAttribute('aria-expanded')!=='true';this.setAttribute('aria-expanded',o);document.getElementById('cls-${esc(y)}').hidden=!o">Class of ${esc(y)}${+y >= senior ? ` <span class="muted" style="font-size:13px">${+y === senior ? "seniors" : "still playing"}</span>` : ""}</button></td><td class="n">${c.ids.size}</td><td class="n">${r.w}</td><td class="n">${r.l}</td><td class="n">${n ? Math.round(r.w / n * 1000) / 10 + "%" : "–"}</td></tr>
+      <tr class="cls-list" id="cls-${esc(y)}" hidden><td colspan="5"><ul>${people(c)}</ul></td></tr>`; }).join("")}</tbody></table></div>
     ${missing.size ? `<p class="muted" style="margin:8px 0 0;font-size:14px">${missing.size} player${missing.size === 1 ? " doesn't" : "s don't"} have a class year yet, so their matches only count once a year is added.</p>` : ""}`;
 }
 

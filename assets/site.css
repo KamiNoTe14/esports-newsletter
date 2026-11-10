@@ -645,3 +645,10 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk-t b{font:700 16px/1 var(--display)}
 .bk-t.win{background:rgba(255,255,255,.06);font-weight:700}.bk-t.out{opacity:.5}.bk-t.us span{color:var(--gold)}.bk-t.none{color:var(--muted)}
 .bk-champ .bk-m{border-color:var(--gold)}
+
+/* record book: tap a graduating class to see its players */
+.cls-tog{all:unset;cursor:pointer;display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:0 6px;color:var(--gold);font-weight:600;min-height:28px}
+.cls-tog::after{content:"▾";font-size:.8em;transition:transform .2s}.cls-tog[aria-expanded="true"]::after{transform:rotate(180deg)}
+.cls-tog:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
+.cls-list td{padding-top:0}.cls-list ul{list-style:none;margin:0;padding:4px 0 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px 18px}
+.cls-list li{display:flex;flex-direction:column;line-height:1.3}.cls-list li a{font-weight:600}.cls-list li span{font-size:13px}

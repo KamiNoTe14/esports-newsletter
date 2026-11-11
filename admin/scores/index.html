@@ -1141,7 +1141,7 @@ function deskPeople(){
   return [...inM, ...ros];
 }
 function deskHTML(g, them){
-  loadPast(); if (!oppSets[cur.id]) loadOppSets(); if (!rlOppNames[cur.id]) loadOppNames();
+  loadPast(); if (!oppSets[cur.id]) loadOppSets(); loadOppNames();
   const n = cur.current || 1, gm = (cur.games || []).find(x => x.n === n) || {n, us:0, them:0}, unit = g.unit || "Set", L = setLen(g), need = setNeed(g);
   const gw = gwOf(gm), ourId = Object.keys(gm.p || {})[0] || "", row = gm.p?.[ourId] || {}, opp = oppSets[cur.id]?.[n] || {};
   const sn = stationOf(cur.id), st = sn ? bc.stations[sn] : null;
@@ -1682,7 +1682,7 @@ function bindInbox(){
 /* Rocket League player matchup picker: one Hartland player and one opponent, by their in-game names. Blank = that
    side's top scorer. Changes show on the stream right away. Name suggestions: our roster's gamertags, and the
    opponent's from their lineup, stats waiting here and their scouting report. */
-let rlOppNames = {};
+let rlOppNames = {}, oppLoadedAt = {};
 function rlPickHTML(st, them){
   const team = (site.teams || []).find(t => t.id === cur.teamId);
   const ours = [...new Set([...(cur.players || []), ...(team?.roster || [])].map(p => p.tag).filter(Boolean))];
@@ -1740,11 +1740,12 @@ function oppRosterHTML(st, them){
     <p class="hint" style="margin:6px 0 0">From ${esc(them)}'s scouting roster: tap who's starting (${on.size} picked). <a class="linkbtn" href="../../scout/" target="_blank" rel="noopener">Edit roster</a></p></div>`;
 }
 async function loadOppNames(){
-  if (!cur || rlOppNames[cur.id] || !be.scoutFor) return;
-  const id = cur.id; rlOppNames[id] = [];
+  /* re-checked (at most every 20 seconds) so a roster added in scouting after the match was opened still shows up */
+  if (!cur || !be.scoutFor || Date.now() - (oppLoadedAt[cur.id] || 0) < 20000) return;
+  const id = cur.id; oppLoadedAt[id] = Date.now(); rlOppNames[id] = rlOppNames[id] || [];
   try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || ""); rlOppNames[id] = (r?.players || []).map(p => p.tag).filter(Boolean);
     oppRoster[id] = (r?.players || []).filter(p => p.tag); oppDefault(id);
-    if (cur?.id === id && $("#oppRoster") && !document.activeElement?.closest?.("#details")) renderMatch(true);
+    if (cur?.id === id && $("#onStream") && !document.activeElement?.closest?.("#details")) renderMatch(true);
     const dl = $("#rlThem") || $("#cmpThem"); if (dl && cur?.id === id) rlOppNames[id].forEach(n => { if (![...dl.options].some(o => o.value === n)){ const o = document.createElement("option"); o.value = n; dl.appendChild(o); } }); } catch(e){}
 }
 

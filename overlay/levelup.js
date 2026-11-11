@@ -895,7 +895,14 @@ function obsState(){
   const off = !obsVisible || !obsActive;
   if (off === offAir) return; offAir = off;
   if (off){ const rv = document.getElementById("rpv"); if (rv){ rv.pause(); } clearTimeout(held); held = null; clearTimeout(rlDrawTimer); rlDrawTimer = null; enterUntil = 0; lastHTML = ""; lastScores = null; rlStatic = ""; app.innerHTML = ""; document.querySelectorAll(".splash").forEach(el => el.remove()); }
-  else { const rv = document.getElementById("rpv"); if (rv && rv.src) rv.play().catch(() => {}); replay(); }
+  else { const rv = document.getElementById("rpv"); if (rv && rv.src) rv.play().catch(() => {}); replay(); freshSite(); }
+}
+/* Coming back on air also re-reads the site file (standings, schools, scene settings) in the background, so a Publish
+   in the Site Manager shows up without OBS reloading the page (a reload blanks the graphic for a moment). */
+let siteReadAt = Date.now();
+async function freshSite(){
+  if (Date.now() - siteReadAt < 30000) return; siteReadAt = Date.now();
+  try { const s = await (await fetch(BASE + "data/site.json?v=" + Date.now(), {cache:"no-store"})).json(); if (s && JSON.stringify(s) !== JSON.stringify(site)){ site = s; draw(); } } catch(e){}
 }
 window.addEventListener("obsSourceActiveChanged", e => { obsActive = !!e.detail?.active; obsState(); });
 window.addEventListener("obsSourceVisibleChanged", e => { obsVisible = !!e.detail?.visible; obsState(); });

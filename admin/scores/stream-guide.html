@@ -182,9 +182,9 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
         <li>In the <b>Sources</b> box, add your game first (Game Capture, Video Capture Device for a console capture card, or NDI Source).</li>
         <li>Click <b>+ › Browser</b>, name it after the overlay (like <i>Score bug</i>), and click OK.</li>
         <li>Paste the overlay's link from the list below in <b>URL</b>. Set <b>Width 1920</b> and <b>Height 1080</b>.</li>
-        <li>Check <b>Shutdown source when not visible</b> and <b>Refresh browser when scene becomes active</b>. Click OK.</li>
+        <li>Leave <b>Shutdown source when not visible</b> and <b>Refresh browser when scene becomes active</b> <b>unchecked</b>. Click OK. (Our overlays replay their entrance and pick up changes by themselves each time their scene goes live. With refresh on, the graphic blanks for a moment on every switch.)</li>
         <li>Make sure the overlay is <b>above</b> the game in the Sources list (drag it to the top).</li></ol>
-      <div class="warn"><b>Exception:</b> the <b>LevelUP Remote</b> source is the only one with "Shutdown source when not visible" <b>unchecked</b>. See step 5.</div>
+
     </div>
     <div class="step" data-step="scenes-links"><button class="ck" type="button" aria-label="Mark done">✓</button>
       <h3>Overlay links for this PC</h3>
@@ -312,7 +312,8 @@ footer{margin-top:40px;color:var(--muted);font-size:14px;text-align:center}
       <li>Is the match on this PC's <b>station</b>? (Scorekeeper › match › On stream.)</li>
       <li>Does the link's station number match this PC? Station 1 links have no <code>station=</code>; station 2 links end in <code>station=2</code>.</li>
       <li>Right-click the source › <b>Refresh</b>.</li></ul></div></details>
-    <details class="faq"><summary>An old graphic flashes when I switch scenes</summary><div><p>That source needs <b>Shutdown source when not visible</b> checked (double-click the source to open its settings).</p></div></details>
+    <details class="faq"><summary>The graphic goes black for a moment when I switch scenes</summary><div><p>That source is reloading on every switch. Double-click it and <b>uncheck</b> both <b>Shutdown source when not visible</b> and <b>Refresh browser when scene becomes active</b>. Do it for every overlay source.</p></div></details>
+    <details class="faq"><summary>An old graphic flashes when I switch scenes</summary><div><p>Right-click the source › <b>Refresh</b> once. Our overlays clear themselves the moment they go off air, so this shouldn't come back.</p></div></details>
     <details class="faq"><summary>OBS remote says "Not connected"</summary><div><ul>
       <li>Is OBS open, with the <b>LevelUP Remote</b> source in a scene?</li>
       <li>Its <b>Shutdown source when not visible</b> must be <b>unchecked</b>.</li>

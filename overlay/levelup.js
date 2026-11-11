@@ -318,15 +318,33 @@ function rlUpdate(us){
 const sameOpp = (a, m) => shortSchool(a.opponent?.school || a.opponent?.team).toLowerCase() === shortSchool(m.opponent?.school || m.opponent?.team).toLowerCase();
 function record(list){ const w = list.filter(x => x.result === "W").length, l = list.filter(x => x.result === "L").length; return {w, l, text:`${w}–${l}`}; }
 function teamSeason(m){ return finals.filter(x => x.teamName === m.teamName && (x.season || seasonOf(x.startsAt)) === (m.season || seasonOf(m.startsAt)) && x.id !== m.id); }
-function standingFor(m){
+/* The standings tables for this match's game, best first: same league (MHSEL / USAEL) and same level (a JV team
+   reads the JV table, everyone else the non-JV one). */
+function standTables(m){
   const g = gameFor(site, m.game), word = String(g.short || g.name || "").split(/\s+/)[0].toLowerCase();
-  const key = s => String(s || "").toLowerCase().replace(/\s+high school$/, "").trim();
-  for (const t of site.standings || []){
-    if (word && !String(t.title || "").toLowerCase().includes(word)) continue;
-    const row = (t.rows || []).find(r => !r.us && ((r.school && key(r.school) === key(m.opponent?.school)) || (r.team && key(r.team) === key(m.opponent?.team))));
+  const team = (site.teams || []).find(t => t.id === m.teamId), jv = /\bjv\b/i.test(`${team?.level || ""} ${m.teamName || ""}`);
+  const lg = String(m.league || team?.leagues || "").toLowerCase().split(/[\s,\/]+/).filter(Boolean);
+  return (site.standings || []).filter(t => t.on !== false && word && String(t.title || "").toLowerCase().includes(word))
+    .map(t => { const ti = String(t.title || "").toLowerCase();
+      return {t, score:(lg.some(l => ti.includes(l)) ? 2 : 0) + (/\bjv\b/.test(ti) === jv ? 1 : 0)}; })
+    .sort((a, b) => b.score - a.score).map(x => x.t);
+}
+const stKey = s => String(s || "").toLowerCase().replace(/\s+high school$/, "").trim();
+function standingFor(m){
+  for (const t of standTables(m)){
+    const row = (t.rows || []).find(r => !r.us && ((r.school && stKey(r.school) === stKey(m.opponent?.school)) || (r.team && stKey(r.team) === stKey(m.opponent?.team))));
     if (row) return {...row, of:(t.rows || []).length};
   }
   return null;
+}
+/* Our own row: with two of our teams in one table (Fortnite and Fortnite 2), the one whose number matches this team's ("#2"). */
+function ourStanding(m){
+  const team = (site.teams || []).find(t => t.id === m.teamId), num = (`${team?.name || ""} ${m.teamName || ""}`.match(/#\s*(\d+)/) || [])[1] || "";
+  const t = standTables(m)[0]; if (!t) return null;
+  const mine = (t.rows || []).filter(r => r.us); if (!mine.length) return null;
+  const end = r => (String(r.team || "").match(/(\d+)\s*$/) || [])[1] || "";
+  const row = mine.length === 1 ? mine[0] : mine.find(r => end(r) === num) || (num === "1" || !num ? mine.find(r => !end(r)) : null);
+  return row ? {...row, of:(t.rows || []).length} : null;
 }
 
 /* ---------- VS screen ---------- */
@@ -342,7 +360,8 @@ function vsName(name){
 }
 function vs(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), mine = teamSeason(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), st = standingFor(m);
-  const ourLine = mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l}, #${st.rank} in the league` : "";
+  const us = ourStanding(m);
+  const ourLine = us ? `${us.w}–${us.l}, #${us.rank} in the league` : mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l}, #${st.rank} in the league` : "";
   const lineup = s => m.show ? [] : s.us ? (m.players || []).map(p => tagOf(p) || nameOf(p)) : oppList(m);
   const side = (s, c) => `<div class="side ${c}" style="${skin(s)}"><div class="crest">${logoHTML(s.logo, s.name)}</div>
     ${vsName(s.name)}${(s.team || s.school) ? `<span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>` : ""}
@@ -442,8 +461,9 @@ function teamCompare(m){
   const our = record(mine), form = mine.slice(-5).map(x => x.result).join(" ");
   const usRows = {rec:our.text, w:our.w, rank:"", rating:""};
   const thRows = {rec:st ? `${st.w}–${st.l}` : "–", w:st ? +st.w : 0, rank:st ? `#${st.rank}` : "–", rating:st?.rating || "–"};
-  const ourSt = (site.standings || []).flatMap(t => (t.rows || []).filter(r => r.us && String(t.title || "").toLowerCase().includes(String(g.short || "").split(/\s+/)[0].toLowerCase())))[0];
-  if (ourSt){ usRows.rank = `#${ourSt.rank}`; usRows.rating = ourSt.rating; }
+  /* the league's numbers on both sides when our row is in the standings (same table as theirs, so they compare fairly) */
+  const ourSt = ourStanding(m);
+  if (ourSt){ usRows.rank = `#${ourSt.rank}`; usRows.rating = ourSt.rating; if (st){ usRows.rec = `${ourSt.w}–${ourSt.l}`; usRows.w = +ourSt.w; } }
   const rows = [
     {k:"Season record", a:usRows.w, b:thRows.w, fa:usRows.rec, fb:thRows.rec},
     ...(usRows.rank || st ? [{k:"League rank", a:parseInt(String(usRows.rank).slice(1)) || 0, b:parseInt(String(thRows.rank).slice(1)) || 0, fa:usRows.rank || "–", fb:thRows.rank, lower:true}] : []),

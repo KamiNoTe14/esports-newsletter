@@ -187,6 +187,7 @@ export function board(host, play, {editable = false, onChange = () => {}} = {}){
     seek(time){ pause(); t = Math.max(0, Math.min(length(), time)); frame(t); },
     play: play_, pause, set speed(v){ speed = v; }, set pen(c){ pen = c; svg.classList.toggle("pen", !!c); },
     set onTick(f){ onTick = f; },
+    get svg(){ return svg; }, get caption(){ return cap.hidden ? "" : cap.textContent; },
     relabel(){ PIECES.forEach(k => { if (k !== "ball") els[k].querySelector(".pb-lbl").textContent = play.labels?.[k] || ""; }); }
   };
 }
@@ -273,6 +274,7 @@ export function playbookView(M, ctx, saved, close){
       <div id="pbBoard"></div>
       <div class="pb-bar"><button class="btn btn-gold" id="pbPlay">▶ Play</button>
         <select id="pbSpeed" aria-label="Speed"><option value="0.25">¼ speed</option><option value="0.5"${film ? " selected" : ""}>½ speed</option><option value="1"${film ? "" : " selected"}>Normal</option></select>
+        <button class="btn btn-line btn-sm" id="pbExport" title="Download this as a video">⬇ Export video</button>
         ${film ? `<input type="range" class="pb-scrub" id="pbScrub" min="0" max="1000" value="0" aria-label="Scrub"><span class="pb-time" id="pbTime"></span>` : `<div class="pb-steps" id="pbSteps"></div>`}</div>
       ${film ? `<div class="pb-key">${["b1", "b2", "b3", "o1", "o2", "o3"].map(k => `<span><i class="${k[0]}">${k[1]}</i>${esc(play.labels?.[k] || "")}</span>`).join("")}</div>` : ""}
       ${film ? `<p class="muted" style="margin:0">Blue = Hartland (our goal is on the left). The bar under each car is its boost (red = under 25). Dashed gold circles show where a player should have been.</p>` : ""}
@@ -302,6 +304,14 @@ export function playbookView(M, ctx, saved, close){
   b.speed = +M.querySelector("#pbSpeed").value;
   if (film){ const s = M.querySelector("#pbScrub"); s.oninput = () => b.seek(+s.value / 1000 * b.length); b.seek(0); }
   else fillStep();
+  const ex = M.querySelector("#pbExport");
+  ex.onclick = async () => {
+    if (ex.disabled) return; b.pause(); ex.disabled = true; const sp = +M.querySelector("#pbSpeed").value;
+    try { const ext = await exportVideo(play, {speed:sp, onProgress:f => { ex.textContent = `Recording… ${Math.round(f * 100)}%`; }});
+      ctx.toast(ext === "mp4" ? "Video saved to your downloads." : "Saved as a .webm video: this browser can't record MP4. Chrome or Edge can."); }
+    catch(e){ console.error(e); ctx.toast(e.message || "Couldn't make the video."); }
+    ex.disabled = false; ex.textContent = "⬇ Export video";
+  };
   M.querySelector("#pbBack").onclick = () => { if (dirty && edit && !confirm("Leave without saving this play?")) return; b.pause(); close(); };
   if (edit){
     M.querySelector("#pbTitle").oninput = e => { play.title = e.target.value; dirty = true; };
@@ -325,4 +335,79 @@ export function playbookView(M, ctx, saved, close){
   const del = M.querySelector("#pbDel");
   if (del) del.onclick = async () => { if (!confirm(`Delete "${saved.title || "this play"}"?`)) return; try { await ctx.db.removePlay(saved.id); b.pause(); close(); } catch(e){ ctx.toast("Couldn't delete it."); } };
   return () => b.pause();
+}
+
+/* ---------- export a play or film clip as a video file ----------
+   Plays it back off screen at the chosen speed, draws each frame (field, caption, key, title) onto a 1280x720 canvas
+   and records it with the browser's own recorder. Chrome and Edge record MP4; a browser that can't falls back to WebM.
+   Takes as long as the clip runs (a 10 second clip at half speed takes about 20 seconds). */
+export async function exportVideo(play, {speed = 1, onProgress = () => {}} = {}){
+  const types = ["video/mp4;codecs=avc1.42E01F", "video/mp4;codecs=avc1", "video/mp4", "video/webm;codecs=vp9", "video/webm"];
+  const mime = window.MediaRecorder && types.find(t => MediaRecorder.isTypeSupported(t));
+  if (!mime) throw new Error("This browser can't record video. Use Chrome or Edge.");
+  const W = 1280, H = 720, FW = 860, FH = Math.round(FW * 8600 / 12200), FX = 36, FY = 96;
+  const host = document.createElement("div");
+  const b = board(host, structuredClone(play));
+  const svg = b.svg; svg.setAttribute("width", FW); svg.setAttribute("height", FH);
+  const st = document.createElementNS("http://www.w3.org/2000/svg", "style");
+  st.textContent = playbookCSS().replace(/var\(--display\)/g, "'Arial Narrow',Arial,sans-serif").replace(/var\(--body\)/g, "Arial,sans-serif").replace(/var\(--[a-z-]+\)/g, "#FFBC05");
+  svg.insertBefore(st, svg.firstChild);
+  /* each frame is drawn on a hidden canvas, then copied in one go to the recorded one (else the recorder can catch a half-drawn frame) */
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const g = cv.getContext("2d");
+  const out = document.createElement("canvas"); out.width = W; out.height = H; const og = out.getContext("2d");
+  try { await document.fonts.ready; } catch(e){}
+  const D = "'Barlow Condensed','Arial Narrow',Arial,sans-serif", B = "Barlow,Arial,sans-serif";
+  const film = play.kind === "film", L = play.labels || {};
+  const wrap = (text, x, y, w, lh, max) => { const words = String(text || "").split(/\s+/); let line = "", n = 0;
+    for (const wd of words){ const tst = line ? line + " " + wd : wd; if (g.measureText(tst).width > w && line){ g.fillText(line, x, y + n * lh); n++; line = wd; if (n >= max) return; } else line = tst; }
+    if (line && n < max) g.fillText(line, x, y + n * lh); };
+  const img = new Image();
+  const drawField = () => new Promise(res => { const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], {type:"image/svg+xml"}));
+    img.onload = () => { g.drawImage(img, FX, FY, FW, FH); URL.revokeObjectURL(url); res(); }; img.onerror = () => { URL.revokeObjectURL(url); res(); }; img.src = url; });
+  async function paint(rel){
+    g.fillStyle = "#0B1F33"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#FFBC05"; g.fillRect(0, 0, W, 6);
+    g.fillStyle = "#FFBC05"; g.font = `700 15px ${B}`; g.fillText("HARTLAND ESPORTS · FILM ROOM", FX, 38);
+    g.fillStyle = "#FFFFFF"; g.font = `700 34px ${D}`; g.fillText(String(play.title || "Play").toUpperCase(), FX, 76);
+    if (play.from){ g.font = `500 16px ${B}`; g.fillStyle = "#9DB0C6"; const tw = g.measureText(String(play.title || "Play").toUpperCase()).width; g.font = `700 34px ${D}`; const w2 = g.measureText(String(play.title || "Play").toUpperCase()).width; g.font = `500 16px ${B}`; g.fillText(play.from, FX + w2 + 16, 74); }
+    await drawField();
+    const PX = FX + FW + 28, PW = W - PX - 30;
+    if (film && rel != null){ g.fillStyle = "#FFBC05"; g.font = `700 44px ${D}`; g.fillText(rel <= 0 ? `${Math.abs(rel).toFixed(1)}s` : "GOAL", PX, 140); g.font = `600 14px ${B}`; g.fillStyle = "#9DB0C6"; if (rel <= 0) g.fillText("TO THE GOAL", PX, 162); }
+    else { g.fillStyle = "#FFBC05"; g.font = `700 32px ${D}`; g.fillText(`STEP ${b.step + 1}`, PX, 140); }
+    const keys = ["b1", "b2", "b3", "o1", "o2", "o3"]; let y = 214;
+    g.font = `700 13px ${B}`; g.fillStyle = "#9DB0C6"; g.fillText("HARTLAND", PX, y - 16);
+    keys.forEach((k, i) => { if (i === 3){ y += 18; g.font = `700 13px ${B}`; g.fillStyle = "#9DB0C6"; g.fillText("OPPONENT", PX, y - 16); }
+      g.fillStyle = k[0] === "b" ? BLUE : ORANGE; g.beginPath(); g.roundRect(PX, y - 16, 24, 24, 6); g.fill();
+      g.fillStyle = "#fff"; g.font = `700 16px ${D}`; g.textAlign = "center"; g.fillText(k[1], PX + 12, y + 2); g.textAlign = "left";
+      g.font = `600 16px ${B}`; g.fillText(L[k] || (k[0] === "b" ? "Hartland " : "Opponent ") + k[1], PX + 34, y + 1); y += 34; });
+    const c = b.caption;
+    if (c){ y += 20; g.fillStyle = "#13304D"; g.fillRect(PX - 10, y - 4, PW + 14, 190); g.fillStyle = "#FFBC05"; g.fillRect(PX - 10, y - 4, 4, 190);
+      g.fillStyle = "#fff"; g.font = `500 18px ${B}`; wrap(c, PX + 4, y + 24, PW - 10, 25, 7); }
+    g.fillStyle = "#6E87A3"; g.font = `500 13px ${B}`; g.fillText(film ? "Blue = Hartland, our goal on the left. Bars = boost. Gold circle = where a player should be." : "Blue = Hartland, our goal on the left.", FX, H - 18);
+  }
+  const fps = 30, stream = out.captureStream(0), track = stream.getVideoTracks()[0], rec = new MediaRecorder(stream, {mimeType:mime, videoBitsPerSecond:6e6}), chunks = [];
+  const show = () => { og.drawImage(cv, 0, 0); track.requestFrame && track.requestFrame(); };
+  rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+  const done = new Promise(r => rec.onstop = r);
+  const len = b.length, hold = 1.5, total = len / speed + hold * 2;
+  b.seek(0); await paint(film ? (play.frames?.[0]?.t ?? 0) : null); show();
+  rec.start();
+  const t0 = performance.now();
+  /* draw in real time so the video's timing matches the playback */
+  while (true){
+    const wall = (performance.now() - t0) / 1000; if (wall >= total) break;
+    const pt = Math.max(0, Math.min(len, (wall - hold) * speed));
+    b.seek(pt);
+    const rel = film && play.frames?.length ? play.frames[0].t + pt : null;
+    await paint(rel); show();
+    onProgress(Math.min(1, wall / total));
+    await new Promise(r => setTimeout(r, Math.max(0, 1000 / fps - ((performance.now() - t0) % (1000 / fps)))));
+  }
+  rec.stop(); await done;
+  const ext = mime.startsWith("video/mp4") ? "mp4" : "webm";
+  const blob = new Blob(chunks, {type:mime.split(";")[0]});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `${String(play.title || "play").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}.${ext}`;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  return ext;
 }

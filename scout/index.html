@@ -131,6 +131,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
    Coaches (EDITORS) manage members and edit everything. Captains edit reports for their games.
    Everyone on a team can read their games' reports and add notes. */
 import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=25";
+import {playbookCSS, playbookList, playbookView} from "./playbook.js?v=1";
+document.head.insertAdjacentHTML("beforeend", `<style>${playbookCSS()}</style>`);
 const BASE = new URL("../", import.meta.url).href;
 const DOMAIN = "hartlandschools.us";
 const $ = s => document.querySelector(s);
@@ -162,7 +164,12 @@ async function firebaseDB(){
     watchNotes(rid, game, cb){ return live(fb.query(fb.collection(db, "scoutReports", rid, "notes"), fb.where("game", "==", game)), cb); },
     addNote(rid, n){ return fb.setDoc(fb.doc(fb.collection(db, "scoutReports", rid, "notes")), clean(n)); },
     saveNote(rid, nid, n){ return fb.setDoc(fb.doc(db, "scoutReports", rid, "notes", nid), clean(n)); },
-    removeNote(rid, nid){ return fb.deleteDoc(fb.doc(db, "scoutReports", rid, "notes", nid)); }
+    removeNote(rid, nid){ return fb.deleteDoc(fb.doc(db, "scoutReports", rid, "notes", nid)); },
+    /* Rocket League playbook (plays/{id}): same privacy as reports */
+    watchPlays(games, cb){ const c = fb.collection(db, "plays"); return live(games === "all" ? c : fb.query(c, fb.where("game", "in", games.slice(0, 30))), cb); },
+    newPlayId(){ return fb.doc(fb.collection(db, "plays")).id; },
+    savePlay(id, p){ return fb.setDoc(fb.doc(db, "plays", id), clean(p)); },
+    removePlay(id){ return fb.deleteDoc(fb.doc(db, "plays", id)); }
   };
 }
 function mockDB(){
@@ -188,13 +195,19 @@ function mockDB(){
     watchNotes(rid, game, cb){ return sub(() => cb(Object.entries(read().notes[rid] || {}).map(([id, n]) => ({id, ...n})).filter(n => n.game === game))); },
     async addNote(rid, n){ const d = read(); (d.notes[rid] = d.notes[rid] || {})[id()] = n; write(d); },
     async saveNote(rid, nid, n){ const d = read(); (d.notes[rid] = d.notes[rid] || {})[nid] = n; write(d); },
-    async removeNote(rid, nid){ const d = read(); delete (d.notes[rid] || {})[nid]; write(d); }
+    async removeNote(rid, nid){ const d = read(); delete (d.notes[rid] || {})[nid]; write(d); },
+    watchPlays(games, cb){ return sub(() => cb(Object.entries(read().plays || {}).map(([id, p]) => ({id, ...p})).filter(p => games === "all" || games.includes(p.game)))); },
+    newPlayId: id,
+    async savePlay(pid, p){ const d = read(); (d.plays = d.plays || {})[pid] = JSON.parse(JSON.stringify(p)); write(d); },
+    async removePlay(pid){ const d = read(); delete (d.plays || {})[pid]; write(d); }
   };
 }
 
 /* ---------- state ---------- */
 let db, site = {teams:[], games:[]}, user = null, me = null, meReady = false, members = [], reports = [], finals = [], board = null;
 let view = {kind:"home"}, gameF = "", editing = null, notes = [], unNotes = null, unReports = null, unMembers = null, unMe = null;
+let plays = [], unPlays = null, stopPlay = null;
+const PB_GAME = "rocket-league";
 const isCoach = () => !!user && EDITORS.includes(user.email);
 const inDomain = () => !!user && user.verified && user.email.endsWith("@" + DOMAIN);
 const myGames = () => isCoach() ? [...new Set([...(site.games || []).map(g => g.key), ...reports.map(r => r.game)])] : (me?.games || []);
@@ -242,6 +255,7 @@ function layout(){
       <div><h3>Up next</h3><div class="list">${up.length ? up.slice(0, 12).map(m => btn({kind:"report", school:m.opponent.school, game:m.game}, `${esc(gShort(m.game))} · ${esc(fmtDay(m.startsAt))}${reportFor(m.opponent.school, m.game) ? "" : " · no report yet"}`)).join("") : `<p class="muted" style="margin:4px 10px">Nothing on the schedule.</p>`}</div></div>
       <div><h3>Scouting reports</h3><div class="list">${reps.length ? reps.map(r => btn({kind:"report", school:r.school, game:r.game}, esc(gShort(r.game)))).join("") : `<p class="muted" style="margin:4px 10px">No reports yet.</p>`}</div></div>
       ${games.some(canEdit) ? `<button class="btn btn-line" data-new="1">+ New report</button>` : ""}
+      ${canSee(PB_GAME) ? `<div><h3>Team</h3><div class="list"><button type="button" data-view='{"kind":"playbook"}'${view.kind === "playbook" || view.kind === "play" ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🏎️</span><span><b>Rocket League playbook</b><small>${plays.length} play${plays.length === 1 ? "" : "s"}</small></span></button></div></div>` : ""}
       ${isCoach() ? `<div><h3>Coach</h3><div class="list"><button type="button" data-view='{"kind":"members"}'${view.kind === "members" ? ' aria-current="true"' : ""}><span class="ph">👥</span><span><b>Members</b><small>${members.length} people</small></span></button></div></div>` : ""}
     </aside><main class="panel" id="main"></main></div>`;
   $("#app").querySelectorAll("[data-view]").forEach(b => b.onclick = () => go(JSON.parse(b.dataset.view)));
@@ -250,7 +264,8 @@ function layout(){
   drawMain();
 }
 function go(v){
-  view = v; editing = null;
+  if (stopPlay){ stopPlay(); stopPlay = null; }
+  view = v; editing = v.kind === "play" ? "play" : null;   // an open play isn't redrawn when data changes (it would reset the board)
   if (unNotes){ unNotes(); unNotes = null; } notes = [];
   if (v.kind === "report"){ const r = reportFor(v.school, v.game); if (r) unNotes = db.watchNotes(r.id, r.game, n => { notes = n; if (view.kind === "report" && !editing) drawMain(); }); }
   layout(); window.scrollTo({top:0});
@@ -265,6 +280,9 @@ function drawMainInner(M){
   if (view.kind === "members") return drawMembers(M);
   if (view.kind === "new") return drawNew(M);
   if (view.kind === "report") return drawReport(M);
+  const pbCtx = {db, user, canEdit, toast, game:PB_GAME};
+  if (view.kind === "playbook") return playbookList(M, pbCtx, plays.filter(p => p.game === PB_GAME), id => go({kind:"play", id}));
+  if (view.kind === "play"){ const p = view.id ? plays.find(x => x.id === view.id) : null; if (view.id && !p) return go({kind:"playbook"}); stopPlay = playbookView(M, pbCtx, p, () => go({kind:"playbook"})); return; }
   const up = upcoming();
   M.innerHTML = `<div class="card"><h2>Scouting</h2><p class="intro">Pick an opponent on the left. Reports cover how a team plays, who to watch and what's beaten them, plus notes from everyone on the team. ${canEditAny() ? "As a " + (isCoach() ? "coach" : "captain") + " you can start and edit reports." : "Anyone on the team can add notes."}</p>
     ${up[0] ? `<div class="notice ok">Next up: <b>${esc(shortSchool(up[0].opponent.school))}</b> in ${esc(gName(up[0].game))}, ${esc(fmtDay(up[0].startsAt))} at ${esc(fmtTime(up[0].startsAt))}. <a href="#" data-goup="1">Open the scouting report →</a></div>` : ""}</div>`;
@@ -496,10 +514,11 @@ const strip = ({id, ...m}) => m;
   live.watchFinals(site, f => { finals = f; if (user && view.kind === "report" && !editing) drawMain(); });
   live.watchBoard(b => { board = b; if (user && (isCoach() || me) && !editing) layout(); });
   db.onUser(u => {
-    user = u; me = null; meReady = false; [unMe, unReports, unMembers].forEach(f => f && f()); unMe = unReports = unMembers = null; reports = []; members = [];
+    user = u; me = null; meReady = false; [unMe, unReports, unMembers, unPlays].forEach(f => f && f()); unMe = unReports = unMembers = unPlays = null; reports = []; members = []; plays = [];
     if (!u){ render(); return; }
     if (isCoach()){
       unReports = db.watchReports("all", r => { reports = r; if (user && !editing) layout(); });
+      unPlays = db.watchPlays("all", p => { plays = p; if (user && !editing) layout(); });
       unMembers = db.watchMembers(m => { members = m; if (user && view.kind !== "report" && !editing) layout(); });
       render(); return;
     }
@@ -507,6 +526,8 @@ const strip = ({id, ...m}) => m;
     unMe = db.watchMe(u.email, m => { me = m; meReady = true;
       if (unReports){ unReports(); unReports = null; }
       if ((m?.games || []).length) unReports = db.watchReports(m.games, r => { reports = r; if (user && !editing) layout(); });
+      if (unPlays){ unPlays(); unPlays = null; }
+      if ((m?.games || []).includes(PB_GAME)) unPlays = db.watchPlays([PB_GAME], p => { plays = p; if (user && !editing) layout(); });
       render(); });
     render();
   });

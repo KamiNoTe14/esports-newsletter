@@ -131,6 +131,22 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Playbook (scout/: Rocket League whiteboard plays and film clips) ----------
+    // Same privacy as scouting reports: members of that game's team watch them; coaches and captains make and edit them.
+    function validPlay() {
+      let d = request.resource.data;
+      return d.game is string && d.title is string && d.title.size() <= 120
+        && d.kind in ['drawn', 'film']
+        && (!('steps' in d) || (d.steps is list && d.steps.size() <= 60))
+        && (!('frames' in d) || (d.frames is list && d.frames.size() <= 400));
+    }
+    match /plays/{playId} {
+      allow read: if canSee(resource.data.game);
+      allow create: if canEdit(request.resource.data.game) && validPlay();
+      allow update: if canEdit(resource.data.game) && request.resource.data.game == resource.data.game && validPlay();
+      allow delete: if canEdit(resource.data.game);
+    }
+
     // ---------- Rocket League stats from the stream ----------
     // The stream's score bug isn't signed in. When a game ends it may ADD one box score here, only for a match
     // that is live or final, with a fixed shape. Nobody but coaches can read, change or delete them; a coach

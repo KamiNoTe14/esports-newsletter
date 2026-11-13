@@ -132,8 +132,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
    Everyone on a team can read their games' reports and add notes. */
 import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=25";
 import {playbookCSS, playbookList, playbookView} from "./playbook.js?v=2";
-import {smashCSS, smashPlaybook, smashStage} from "./smash.js?v=1";
-document.head.insertAdjacentHTML("beforeend", `<style>${playbookCSS()}${smashCSS()}</style>`);
+import {smashCSS, smashPlaybook, smashStage} from "./smash.js?v=2";
+import {framesCSS, charList, charSheet} from "./frames.js?v=1";
+document.head.insertAdjacentHTML("beforeend", `<style>${playbookCSS()}${smashCSS()}${framesCSS()}</style>`);
 const BASE = new URL("../", import.meta.url).href;
 const DOMAIN = "hartlandschools.us";
 const $ = s => document.querySelector(s);
@@ -170,7 +171,12 @@ async function firebaseDB(){
     watchPlays(games, cb){ const c = fb.collection(db, "plays"); return live(games === "all" ? c : fb.query(c, fb.where("game", "in", games.slice(0, 30))), cb); },
     newPlayId(){ return fb.doc(fb.collection(db, "plays")).id; },
     savePlay(id, p){ return fb.setDoc(fb.doc(db, "plays", id), clean(p)); },
-    removePlay(id){ return fb.deleteDoc(fb.doc(db, "plays", id)); }
+    removePlay(id){ return fb.deleteDoc(fb.doc(db, "plays", id)); },
+    /* Smash frame data (framedata/{slug} + framedata/_index): coaches import it once, the Smash team reads it */
+    async getFrameIndex(){ const s = await fb.getDoc(fb.doc(db, "framedata", "_index")); return s.exists() ? s.data() : {chars:[]}; },
+    async getFrame(slug){ const s = await fb.getDoc(fb.doc(db, "framedata", slug)); return s.exists() ? s.data() : null; },
+    async importFrames(index, chars){ for (let i = 0; i < chars.length; i += 20){ const b = fb.writeBatch(db); chars.slice(i, i + 20).forEach(c => b.set(fb.doc(db, "framedata", c.slug), clean(c))); await b.commit(); }
+      await fb.setDoc(fb.doc(db, "framedata", "_index"), clean(index)); }
   };
 }
 function mockDB(){
@@ -200,14 +206,17 @@ function mockDB(){
     watchPlays(games, cb){ return sub(() => cb(Object.entries(read().plays || {}).map(([id, p]) => ({id, ...p})).filter(p => games === "all" || games.includes(p.game)))); },
     newPlayId: id,
     async savePlay(pid, p){ const d = read(); (d.plays = d.plays || {})[pid] = JSON.parse(JSON.stringify(p)); write(d); },
-    async removePlay(pid){ const d = read(); delete (d.plays || {})[pid]; write(d); }
+    async removePlay(pid){ const d = read(); delete (d.plays || {})[pid]; write(d); },
+    async getFrameIndex(){ try { return JSON.parse(localStorage.getItem("eagles-mock-frames"))?._index || {chars:[]}; } catch(e){ return {chars:[]}; } },
+    async getFrame(slug){ try { return JSON.parse(localStorage.getItem("eagles-mock-frames"))?.[slug] || null; } catch(e){ return null; } },
+    async importFrames(index, chars){ const o = {_index:index}; chars.forEach(c => o[c.slug] = c); localStorage.setItem("eagles-mock-frames", JSON.stringify(o)); }
   };
 }
 
 /* ---------- state ---------- */
 let db, site = {teams:[], games:[]}, user = null, me = null, meReady = false, members = [], reports = [], finals = [], board = null;
 let view = {kind:"home"}, gameF = "", editing = null, notes = [], unNotes = null, unReports = null, unMembers = null, unMe = null;
-let plays = [], unPlays = null, stopPlay = null;
+let plays = [], unPlays = null, stopPlay = null, frameIndex = null, frameCache = {};
 const PB_GAME = "rocket-league";
 const isCoach = () => !!user && EDITORS.includes(user.email);
 const inDomain = () => !!user && user.verified && user.email.endsWith("@" + DOMAIN);
@@ -258,7 +267,7 @@ function layout(){
       ${games.some(canEdit) ? `<button class="btn btn-line" data-new="1">+ New report</button>` : ""}
       ${canSee(PB_GAME) || canSee("smash") ? `<div><h3>Team</h3><div class="list">
         ${canSee(PB_GAME) ? `<button type="button" data-view='{"kind":"playbook"}'${view.kind === "playbook" || view.kind === "play" ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🏎️</span><span><b>Rocket League playbook</b><small>${plays.filter(p => p.game === PB_GAME).length} plays</small></span></button>` : ""}
-        ${canSee("smash") ? `<button type="button" data-view='{"kind":"smash"}'${view.kind === "smash" || view.kind === "smashStage" ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🥊</span><span><b>Smash playbook</b><small>8 stages</small></span></button>` : ""}
+        ${canSee("smash") ? `<button type="button" data-view='{"kind":"smash"}'${/^smash/.test(view.kind) ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🥊</span><span><b>Smash playbook</b><small>Stages and characters</small></span></button>` : ""}
       </div></div>` : ""}
       ${isCoach() ? `<div><h3>Coach</h3><div class="list"><button type="button" data-view='{"kind":"members"}'${view.kind === "members" ? ' aria-current="true"' : ""}><span class="ph">👥</span><span><b>Members</b><small>${members.length} people</small></span></button></div></div>` : ""}
     </aside><main class="panel" id="main"></main></div>`;
@@ -284,8 +293,9 @@ function drawMainInner(M){
   if (view.kind === "members") return drawMembers(M);
   if (view.kind === "new") return drawNew(M);
   if (view.kind === "report") return drawReport(M);
-  const pbCtx = {db, user, canEdit, toast, game:PB_GAME};
-  if (view.kind === "smash") return smashPlaybook(M, pbCtx, plays.filter(p => p.game === "smash" && p.kind === "stage"), key => go({kind:"smashStage", key}));
+  const pbCtx = {db, user, canEdit, isCoach, toast, game:PB_GAME};
+  if (view.kind === "smashChars" || view.kind === "smashChar") return drawFrames(M, {...pbCtx, tabs:smashTabs("chars")});
+  if (view.kind === "smash") return smashPlaybook(M, {...pbCtx, tabs:smashTabs("stages")}, plays.filter(p => p.game === "smash" && p.kind === "stage"), key => go({kind:"smashStage", key}));
   if (view.kind === "smashStage") return smashStage(M, pbCtx, plays.filter(p => p.game === "smash" && p.kind === "stage"), view.key, () => go({kind:"smash"}));
   if (view.kind === "playbook") return playbookList(M, pbCtx, plays.filter(p => p.game === PB_GAME && p.kind !== "stage"), id => go({kind:"play", id}));
   if (view.kind === "play"){ const p = view.id ? plays.find(x => x.id === view.id) : null; if (view.id && !p) return go({kind:"playbook"}); stopPlay = playbookView(M, pbCtx, p, () => go({kind:"playbook"})); return; }
@@ -295,6 +305,44 @@ function drawMainInner(M){
   M.querySelector("[data-goup]") && (M.querySelector("[data-goup]").onclick = e => { e.preventDefault(); go({kind:"report", school:up[0].opponent.school, game:up[0].game}); });
 }
 const canEditAny = () => myGames().some(canEdit);
+
+/* ---------- Smash characters (frame data) ---------- */
+function smashTabs(on){
+  setTimeout(() => document.querySelectorAll("[data-stab]").forEach(b => b.onclick = () => go({kind:b.dataset.stab})), 0);
+  return `<div class="fd-tabs"><button class="chip" data-stab="smash" aria-pressed="${on === "stages"}">Stages</button><button class="chip" data-stab="smashChars" aria-pressed="${on === "chars"}">Characters</button></div>`;
+}
+const smashIcon = c => { const g = gameFor(site, "smash"), dir = String(g.charIcons || "assets/heroes/smash").replace(/\/$/, "");
+  return BASE + dir + "/" + String(c.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-logo.webp"; };
+/* their characters in the next Smash match, from the scouting report's game history */
+function oppSmashChars(){
+  const m = upcoming().find(x => /smash/.test(x.game)); const r = m && reportFor(m.opponent.school, m.game); if (!r || !frameIndex) return [];
+  const names = new Set(); (r.statGames || []).forEach(gm => (gm.players || []).forEach(p => (p.chars?.length ? p.chars : [p.char]).filter(Boolean).forEach(n => names.add(n))));
+  return [...names].flatMap(n => (frameIndex.roster || {})[n] || frameIndex.chars.filter(c => c.name.toLowerCase() === n.toLowerCase()).map(c => c.slug));
+}
+async function drawFrames(M, ctx){
+  if (!frameIndex){ M.innerHTML = `${ctx.tabs}<div class="card"><p class="muted">Loading characters…</p></div>`;
+    try { frameIndex = await db.getFrameIndex(); } catch(e){ console.warn(e); M.innerHTML = `${ctx.tabs}<div class="card"><p class="intro">Couldn't load frame data. ${isCoach() ? "If you just added it, publish the latest database rules in Firebase." : "Ask a coach."}</p></div>`; return; }
+    if (!/^smashChar/.test(view.kind)) return; }
+  const v = view;
+  if (v.kind === "smashChars") return charList(M, ctx, frameIndex, {opp:[...new Set(oppSmashChars())], icon:smashIcon, onOpen:slug => go({kind:"smashChar", slug}), onImport:importFrames});
+  const get = async s => frameCache[s] || (frameCache[s] = await db.getFrame(s));
+  M.innerHTML = `${ctx.tabs}<div class="card"><p class="muted">Loading…</p></div>`;
+  let c, ours = null;
+  try { [c, ours] = await Promise.all([get(v.slug), v.vs ? get(v.vs) : null]); } catch(e){ console.warn(e); }
+  if (view !== v) return;
+  if (!c){ M.innerHTML = `${ctx.tabs}<div class="card"><p class="intro">That character isn't in the frame data.</p></div>`; return; }
+  charSheet(M, ctx, c, {ours, ourChoices:frameIndex.chars.map(x => ({slug:x.slug, label:x.name})), icon:smashIcon,
+    onVs:s => go({kind:"smashChar", slug:v.slug, vs:s || undefined}), back:() => go({kind:"smashChars"})});
+}
+async function importFrames(file){
+  let d; try { d = JSON.parse(await file.text()); } catch(e){ return toast("That file isn't frame data."); }
+  if (d?.type !== "hartland-framedata" || !Array.isArray(d.characters) || !d.characters.length) return toast("That file isn't frame data.");
+  const index = {source:d.source || "Ultimate Frame Data", sourceUrl:d.sourceUrl || "", copied:d.copied || "", roster:d.roster || {},
+    chars:d.characters.map(c => ({slug:c.slug, name:c.name})).sort((a, b) => a.name.localeCompare(b.name))};
+  toast(`Importing ${index.chars.length} characters…`);
+  try { await db.importFrames(index, d.characters); frameIndex = index; frameCache = {}; toast(`Imported ${index.chars.length} characters.`); if (view.kind === "smashChars") drawMain(); }
+  catch(e){ console.error(e); toast("Couldn't import. Publish the latest database rules in Firebase, then try again."); }
+}
 
 /* ---------- new report ---------- */
 function drawNew(M){

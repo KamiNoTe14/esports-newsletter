@@ -92,7 +92,7 @@ export function smashPlaybook(M, ctx, docs, open){
   const card = st => `<button type="button" class="ss-card" data-stage="${st.key}"><div class="ss-pic">${stageSVG(st)}</div>
       <div class="ss-name">${esc(st.name)}</div><div class="ss-nums"><span>Top <b>${fmt(st.bz[2])}</b></span><span>Sides <b>${fmt(sides(st))}</b></span><span>Width <b>${width(st) ? fmt(width(st)) : "?"}</b></span></div>
       <div class="ss-types">${typeChips(bestOf(docs, st))}</div></button>`;
-  M.innerHTML = `<div class="card"><div class="card-h"><h2>Smash playbook</h2><span class="tag">2026–27 stage list</span></div>
+  M.innerHTML = `${ctx.tabs || ""}<div class="card"><div class="card-h"><h2>Smash playbook</h2><span class="tag">2026–27 stage list</span></div>
       <p class="intro">Our competition stages with their sizes. Smaller numbers mean that blast zone is closer, so KOs happen sooner in that direction. Tap a stage for the full diagram${can ? ", to set who it's best for, and to add notes" : " and the coaches' notes"}.</p>
       <p class="muted" style="margin:0"><b>Striking:</b> game 1, the home team strikes 1 starter, the away team strikes 2, then the home team strikes 1 more. After that, the winner of the last game strikes 2 and the loser picks from what's left, counterpicks included.</p></div>
     <div class="card"><h4>Starters</h4><div class="ss-grid">${STAGES.filter(s => s.tier === "Starter").map(card).join("")}</div></div>

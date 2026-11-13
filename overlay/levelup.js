@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=25";
-import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=57";
+import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=58";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -792,7 +792,7 @@ function splitShell(m, plates, guides, cls = ""){
    Shows up to four rounds (a 32-team bracket starts at the Round of 16); ?from=0 shows every round. */
 let BKM = null;
 let bkList = [];
-if (LAYER === "bracket"){ import("../assets/bracket.js?v=4").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
+if (LAYER === "bracket"){ import("../assets/bracket.js?v=5").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
 const bkHas = (b, id) => !!id && (b.teamId === id || (b.seeds || []).some(x => x?.teamId === id));
 function bracketLayer(m){
   if (!BKM) return;

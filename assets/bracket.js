@@ -6,6 +6,8 @@
             team in the bracket; it shows instead of the school. teamId = which of OUR teams a Hartland seed is.
      res    {"r-m": {w:"a"|"b", s:"3-1"}}: who won match m of round r (0 = first round), and the score
      game / teamId   which of our teams this bracket is for, so our matches fill in from the scorekeeper
+     seq    true when the seeds are in bracket order instead (league's own bracket, imported): seeds[0] v seeds[1] is
+            the top match, and no seed numbers are shown
    Hartland's own results fill in by themselves from final playoff matches, unless a result was typed. */
 
 export const SIZES = [4, 8, 16, 32];
@@ -26,8 +28,8 @@ export const isHartland = s => /\bhartland\b/i.test(String(s || ""));
    finals: our final matches (to fill in our own results), teamId/game narrow them to this bracket. */
 export function buildBracket(b, finals = []){
   const n = SIZES.includes(+b.size) ? +b.size : 8, R = Math.log2(n), seeds = Array.from({length:n}, (_, i) => b.seeds?.[i] || {});
-  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
-  const order = seedOrder(n), rounds = [];
+  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:b.seq ? "" : sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
+  const order = b.seq ? Array.from({length:n}, (_, i) => i + 1) : seedOrder(n), rounds = [];
   /* our playoff results from the scorekeeper: final playoff/finals matches of this team against that school */
   const ourIds = new Set([b.teamId, ...seeds.map(x => x?.teamId)].filter(Boolean));
   const ours = finals.filter(m => (m.stage === "playoffs" || m.stage === "finals") && m.status === "final" && (m.result === "W" || m.result === "L") && (!ourIds.size || ourIds.has(m.teamId)) && (!b.game || m.game === b.game))
@@ -109,4 +111,48 @@ export function bracketHTML(model, {from = 0, part = [0, 1], logo = () => "", sh
   return `<div class="bk" style="--rounds:${whole ? rounds.length : rounds.length - 1};--rows:${rounds[0]?.[1].length || 1}">${rounds.map(([r, list]) => `<div class="bk-r"><h4>${esc(model.names[r])}</h4><div class="bk-ms">${list.map(m =>
     `<div class="bk-m${m.us ? " us" : ""}${m.bye ? " bye" : ""}${m.auto ? " auto" : ""}" data-k="${m.key}">${side(m, m.a, "a")}${side(m, m.b, "b")}${edit && m.a && m.b ? `<button type="button" class="bk-edit" aria-label="Score">✎</button>` : ""}</div>`).join("")}</div></div>`).join("")}
     ${whole ? `<div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none"><i></i>${tile("", " no")}<span>TBD</span><b></b></div>`}</div></div></div>` : ""}</div>`;
+}
+
+/* A league bracket exported from PlayVS / Rally Cry as JSON ({bracket, rounds, matches:[{round, number, slots}],
+   edges}) → our bracket fields {size, seq, seeds, res, status, game, teamId, src}. Teams are placed in the league's
+   own match order (seq), so it looks just like theirs. schoolOf(teamName) → school name or "". */
+export function fromLeagueJSON(x, {schoolOf, ourTeams = []} = {}){
+  if (!x || !Array.isArray(x.matches) || !x.matches.length) throw new Error("That file doesn't look like a bracket.");
+  const R = Math.max(...x.matches.map(m => +m.round || 0)), n = 2 ** R;
+  if (!SIZES.includes(n)) throw new Error(`That bracket has ${R} rounds; brackets here go up to 32 teams.`);
+  const ms = x.matches.map(m => ({...m, round:+m.round, number:+m.number})), byExt = new Map(ms.map(m => [String(m.externalId ?? m.number), m]));
+  /* who's in it */
+  const first = ms.filter(m => m.round === 1).sort((a, b) => a.number - b.number);
+  const names = {}; first.forEach(m => (m.slots || []).forEach(sl => names[sl.entryId] = String(sl.entryName || "").trim()));
+  const schoolCount = {}; const sch = {};
+  Object.entries(names).forEach(([id, nm]) => { sch[id] = (schoolOf && schoolOf(nm)) || ""; const k = sch[id] || nm; schoolCount[k] = (schoolCount[k] || 0) + 1; });
+  /* which game: from the team names */
+  const all = Object.values(names).join(" ");
+  const game = /rocket|\bRL\b/i.test(all) ? "rocket-league" : /smash|ssbu/i.test(all) ? "smash" : /fortnite|\bFN\b/i.test(all) ? "fortnite-zw" : /rivals/i.test(all) ? "marvel-rivals" : /kart|\bMK\b/i.test(all) ? "mario-kart" : "";
+  const seeds = Array.from({length:n}, () => ({school:""}));
+  let teamId = "";
+  first.forEach(m => [0, 1].forEach(pos => { const sl = (m.slots || []).find(s => +s.position === pos); if (!sl) return;
+    const nm = names[sl.entryId], school = sch[sl.entryId] || nm, k = (m.number - 1) * 2 + pos, us = isHartland(school) || isHartland(nm);
+    const sd = {school:us && !isHartland(school) ? "Hartland High School" : school, entry:String(sl.entryId)};
+    if (!sch[sl.entryId] || schoolCount[sch[sl.entryId]] > 1) sd.label = nm;
+    if (us){ const mine = ourTeams.filter(t => !game || t.gameKey === game);
+      const t = mine.length > 1 ? mine.find(t => new RegExp(`\\b${String(t.name || "").replace(/[^a-z0-9#]+/gi, ".?")}\\b`, "i").test(nm)) || mine[0] : mine[0];
+      if (t){ sd.teamId = t.id; teamId = teamId || t.id; if (mine.length > 1) sd.label = `Hartland ${t.name}`; } }
+    seeds[k] = sd; }));
+  /* results: who won each match, as a / b in our model, and the games score */
+  const won = {}, res = {};
+  ms.sort((a, b) => a.round - b.round || a.number - b.number).forEach(m => {
+    const slots = m.slots || [], w = slots.find(s => s.won); if (!w) return;
+    won[m.id] = String(w.entryId);
+    let aEntry;
+    if (m.round === 1) aEntry = String((slots.find(s => +s.position === 0) || {}).entryId);
+    else { const pre = String(m.prerequisiteMatchIdsCsv || "").split(",").map(s => byExt.get(s.trim())).filter(Boolean).sort((a, b) => a.number - b.number);
+      aEntry = pre[0] ? won[pre[0].id] : String((slots.find(s => +s.position === 0) || {}).entryId); }
+    const A = slots.find(s => String(s.entryId) === aEntry), B = slots.find(s => String(s.entryId) !== aEntry);
+    const g = s => +(s?.gamesWon ?? s?.setsWon ?? 0);
+    res[`${m.round - 1}-${m.number - 1}`] = {w:String(w.entryId) === aEntry ? "a" : "b", s:A && B && (g(A) || g(B)) ? `${g(A)}-${g(B)}` : ""};
+  });
+  const done = /complete|finish|closed/i.test(x.bracket?.state || "") || !!res[`${R - 1}-0`];
+  return {size:n, seq:true, seeds, res, game, teamId, status:done ? "Final" : Object.keys(res).length ? "In progress" : "Upcoming",
+    src:"league-" + (x.bracket?.id ?? ""), starts:Object.fromEntries([...new Set(ms.map(m => m.round))].map(r => [r - 1, ms.find(m => m.round === r)?.startDate || ""]))};
 }

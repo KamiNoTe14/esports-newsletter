@@ -330,8 +330,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=25";
-import {watchFinals, sortBrackets} from "../../assets/live.js?v=57";
-import * as BK from "../../assets/bracket.js?v=4";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=58";
+import * as BK from "../../assets/bracket.js?v=5";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
 
@@ -806,7 +806,7 @@ function renderBrackets(){
   const finals = bkFinals();
   $("#app").innerHTML = `<div id="bkPage"><div class="mhead"><button class="back" type="button" id="bkBack" aria-label="Back to matches">←</button>
       <div class="t"><b>Playoff brackets</b><span>Live on the website and the stream's Bracket overlay</span></div>
-      ${canAdd ? `<button class="btn btn-gold" type="button" id="bkNew" style="min-height:48px;padding:0 14px;font-size:16px">+ New</button>` : ""}</div>
+      ${canAdd ? `<label class="btn btn-line" style="min-height:48px;padding:0 12px;font-size:15px;cursor:pointer;margin-right:6px" title="Import the bracket file from PlayVS / Rally Cry">Import file<input type="file" id="bkImport" accept=".json,application/json" hidden></label><button class="btn btn-gold" type="button" id="bkNew" style="min-height:48px;padding:0 14px;font-size:16px">+ New</button>` : ""}</div>
     <datalist id="bkSchools">${(site.highSchools || []).map(h => `<option value="${esc(h.name)}">`).join("")}<option value="Hartland High School"></datalist>
     ${bkLegacy().length ? `<div class="card" style="padding:14px;margin-bottom:12px"><b>${bkLegacy().length === 1 ? "A bracket was" : `${bkLegacy().length} brackets were`} started in the Site Manager</b><p class="hint" style="margin:6px 0 10px">Brackets live here now, so they update on the website and stream right away. Move ${bkLegacy().length === 1 ? "it" : "them"} over with the seeds and results kept.</p><button type="button" class="btn btn-gold" id="bkMove">Move to the scorekeeper</button></div>` : ""}
     ${list.length ? "" : `<div class="card empty">No brackets yet. Tap <b>+ New</b> when the seeds come out.</div>`}
@@ -827,7 +827,7 @@ function renderBrackets(){
         </div>
         <label class="tog" style="margin:10px 2px"><input type="checkbox" data-bf="on"${b.on !== false ? " checked" : ""}> Show on the website</label>
         <h2>Seeds</h2>
-        <p class="hint" style="margin:0 2px 8px">School gives the logo. Team name is what shows on the bracket, so use it when a school has more than one team in (Varsity / JV, #1 / #2), or to match the league's names.</p>
+        ${b.seq ? `<p class="hint" style="margin:0 2px 8px">Imported from the league's bracket file, so these are in bracket order (1 v 2 is the top match), not seeds. Import the file again later to bring in new results.</p>` : ""}<p class="hint" style="margin:0 2px 8px">School gives the logo. Team name is what shows on the bracket, so use it when a school has more than one team in (Varsity / JV, #1 / #2), or to match the league's names.</p>
         <div class="bk-seeds">${Array.from({length:+b.size}, (_, k) => { const sd = b.seeds?.[k] || {}, us = BK.isHartland(sd.school);
           const ourT = (site.teams || []).filter(t => !b.game || t.gameKey === b.game);
           return `<div class="bk-seed"><b>${k + 1}</b><input list="bkSchools" data-seed="${k}" value="${esc(sd.school || "")}" placeholder="${k ? "School (blank = bye)" : "School"}" autocomplete="off">${us
@@ -841,6 +841,7 @@ function renderBrackets(){
   $("#bkMove") && ($("#bkMove").onclick = () => { bkLegacy().forEach(([i, x]) => { const id = be.newBracketId(), g = (site.games || []).find(g => g.key === x.game);
     const b = {id, title:x.title || `${g?.name || "Playoff"} bracket`, league:x.league || "MHSEL", status:x.status || "Upcoming", teamId:x.teamId || "", game:x.game || "", size:+x.size, seeds:(x.seeds || []).slice(0, +x.size).map(sd => ({school:sd.school || ""})), res:x.res || {}, on:x.on !== false, link:x.link || "", text:x.text || "", src:"site-" + i, created:new Date().toISOString()};
     brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); }); toast("Moved. Give it a title under Setup and seeds."); renderBrackets(); });
+  $("#bkImport") && ($("#bkImport").onchange = async e => { const f = e.target.files[0]; e.target.value = ""; if (f) bkImportFile(f); });
   $("#bkNew") && ($("#bkNew").onclick = () => {
     const t = bkTeams()[0], id = be.newBracketId(), b = {id, title:"", league:"MHSEL", status:"Upcoming", teamId:role === "coach" ? "" : t?.id || "", game:role === "coach" ? "" : t?.gameKey || "", size:8, seeds:[], res:{}, on:true, created:new Date().toISOString()};
     brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); renderBrackets();
@@ -848,6 +849,34 @@ function renderBrackets(){
   document.querySelectorAll("#bkPage details.bkx").forEach(d => d.ontoggle = () => d.open ? bkOpen.add(d.dataset.bid) : bkOpen.delete(d.dataset.bid));
   document.querySelectorAll("#bkPage details.bkset").forEach(d => d.ontoggle = () => { const id = d.closest("[data-bid]").dataset.bid; d.open ? bkSetOpen.add(id) : bkSetOpen.delete(id); });
   document.querySelectorAll("#bkPage [data-copy]").forEach(x => x.onclick = () => { navigator.clipboard?.writeText(x.dataset.copy).then(() => toast("Overlay link copied.")).catch(() => prompt("Copy this link:", x.dataset.copy)); });
+}
+/* ---------- import a league bracket file (PlayVS / Rally Cry "export JSON") ----------
+   Places the teams exactly as the league has them, works out each school from the team name (the team → school
+   list from imports and standings, then the high school list), and fills in any results already in the file.
+   Importing the same bracket again later updates it (new results), keeping our title, stream and website settings. */
+function bkSchoolOf(name){
+  const n = s => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(), k = n(name); if (!k) return "";
+  const known = Object.entries(site.teamSchools || {}).find(([t]) => n(t) === k); if (known) return known[1];
+  for (const t of site.standings || []) { const r = (t.rows || []).find(r => n(r.team) === k && r.school); if (r) return r.school; }
+  if (BK.isHartland(name)) return "Hartland High School";
+  /* "Manistee RL" → Manistee High School: a high school whose short name or first words start the team name */
+  const hs = (site.highSchools || []).map(h => ({h, keys:[h.short, h.name.replace(/\b(high|school|senior|junior|jr|sr|community|area|public|schools?)\b.*$/i, "")].map(n).filter(x => x.length > 2)}));
+  const hit = hs.filter(({keys}) => keys.some(x => k === x || k.startsWith(x + " "))).sort((a, b) => Math.max(...b.keys.map(x => x.length)) - Math.max(...a.keys.map(x => x.length)))[0];
+  return hit ? hit.h.name : "";
+}
+async function bkImportFile(f){
+  let x; try { x = JSON.parse(await f.text()); } catch(e){ return toast("That isn't a bracket file (it should end in .json)."); }
+  let d; try { d = BK.fromLeagueJSON(x, {schoolOf:bkSchoolOf, ourTeams:site.teams || []}); } catch(e){ return toast(e.message); }
+  if (role !== "coach" && d.teamId && !myTeams.has(d.teamId)) return toast("That bracket is for another team.");
+  if (role !== "coach" && !d.teamId){ const t = bkTeams().find(t => !d.game || t.gameKey === d.game); if (!t) return toast("That bracket isn't for your team."); d.teamId = t.id; }
+  const old = brackets.find(b => b.src && b.src === d.src);
+  const gm = (site.games || []).find(g => g.key === d.game), name = x.bracket?.name && !/^playoffs?$/i.test(x.bracket.name) ? x.bracket.name : "Playoffs";
+  const unknown = d.seeds.filter(s => s.school && s.label === s.school).map(s => s.school);
+  if (old){ Object.assign(old, {size:d.size, seq:true, seeds:d.seeds, res:{...(old.res || {}), ...d.res}, starts:d.starts, status:old.status === "Final" ? "Final" : d.status, game:old.game || d.game, teamId:old.teamId || d.teamId});
+    bkOpen.add(old.id); bkSave(old); renderBrackets(); toast(`Updated "${old.title || "bracket"}" from the file: ${Object.keys(d.res).length} result${Object.keys(d.res).length === 1 ? "" : "s"}.`); }
+  else { const id = be.newBracketId(), b = {id, title:`${gm?.short || gm?.name || "Playoff"} ${name}`.trim(), league:/rally|mhsel/i.test(JSON.stringify(x).slice(0, 2000)) ? "MHSEL" : "MHSEL", ...d, on:true, created:new Date().toISOString()};
+    brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); renderBrackets(); toast(`Imported ${d.seeds.filter(s => s.school).length} teams.`); }
+  if (unknown.length) setTimeout(() => toast(`No school found for ${unknown.join(", ")}: fix the school under Setup and seeds for its logo.`), 2600);
 }
 const bkSeeds = b => { b.seeds = Array.from({length:+b.size}, (_, k) => ({school:"", ...(b.seeds?.[k] || {})})); };
 const bkOf = el => { const id = el.closest("[data-bid]")?.dataset.bid; return brackets.find(b => b.id === id); };

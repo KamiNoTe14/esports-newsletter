@@ -135,7 +135,7 @@ import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtD
 import {playbookCSS, playbookList, playbookView} from "./playbook.js?v=2";
 import {smashCSS, smashPlaybook, smashStage, TYPES as SMASH_TYPES} from "./smash.js?v=3";
 import {framesCSS, charList, charSheet} from "./frames.js?v=2";
-import {suggestCSS, suggestHTML, styleOf} from "./suggest.js?v=1";
+import {suggestCSS, suggestHTML, styleOf} from "./suggest.js?v=2";
 document.head.insertAdjacentHTML("beforeend", `<style>${playbookCSS()}${smashCSS()}${framesCSS()}${suggestCSS()}</style>`);
 const BASE = new URL("../", import.meta.url).href;
 const DOMAIN = "hartlandschools.us";
@@ -324,10 +324,25 @@ function oppSmashChars(){
 async function loadFrameIndex(){ if (!frameIndex) frameIndex = await db.getFrameIndex(); return frameIndex; }
 const getFrame = async s => frameCache[s] || (frameCache[s] = await db.getFrame(s));
 /* Smash report: suggestions from frame data, stage sheets and our characters (suggest.js) */
+/* whose characters to suggest: the team that plays this school next, else the one that played them last, else Varsity */
+let sgTeam = {};
+function sgDefaultTeam(r, teams){
+  const mine = m => m.game === r.game && reportFor(m.opponent?.school, m.game)?.id === r.id && teams.some(t => t.id === m.teamId);
+  const next = upcoming().find(mine); if (next) return next.teamId;
+  const last = (finals || []).filter(mine).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1)[0]; if (last) return last.teamId;
+  const lastStat = (r.statGames || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)))[0]?.team;
+  const named = lastStat && teams.find(t => [t.name, t.level, t.id].some(x => x && String(lastStat).toLowerCase().includes(String(x).toLowerCase())));
+  return named ? named.id : teams[0]?.id || "all";
+}
 async function fillSuggest(r){
   const box = $("#sgBox"), v = view;
+  const teams = (site.teams || []).filter(t => t.gameKey === "smash");
+  const pick = sgTeam[r.id] || (sgTeam[r.id] = sgDefaultTeam(r, teams));
+  const seg = $("#sgTeams");
+  if (seg && teams.length > 1){ seg.innerHTML = `<span class="seg" role="group" aria-label="Our picks from">${teams.map(t => `<button type="button" data-sgteam="${t.id}" aria-pressed="${pick === t.id}">${esc(t.level || t.name)}</button>`).join("")}<button type="button" data-sgteam="all" aria-pressed="${pick === "all"}">Both</button></span>`;
+    seg.querySelectorAll("[data-sgteam]").forEach(b => b.onclick = () => { sgTeam[r.id] = b.dataset.sgteam; fillSuggest(r); }); }
   let html;
-  try { await loadFrameIndex(); html = await suggestHTML({report:r, index:frameIndex, site, finals, plays, icon:smashIcon, get:getFrame}); }
+  try { await loadFrameIndex(); html = await suggestHTML({report:r, index:frameIndex, site, finals, plays, icon:smashIcon, get:getFrame, teamIds:pick === "all" ? null : [pick]}); }
   catch(e){ console.warn(e); html = `<p class="empty">Couldn't load frame data${isCoach() ? ". Publish the latest database rules in Firebase" : ""}.</p>`; }
   if (view !== v || !box.isConnected) return;
   box.innerHTML = html;
@@ -473,7 +488,7 @@ function drawReport(M){
         <p class="muted" style="margin:0">Gamertags only, no real names. The roster shows up in the scorekeeper for matches against this school, where you tick who's starting; usual starters are ticked for you. Opponent info stays in scouting and never appears on the public site.</p>`
         : players.length ? `<div class="plist">${players.map(p => `<div class="pcard"><b>${esc(p.tag)}</b>${p.starter ? `<span class="sbadge">Starter</span>` : ""}${p.role ? `<span class="r">${esc(p.role)}</span>` : ""}${p.notes ? `<p>${esc(p.notes)}</p>` : ""}</div>`).join("")}</div>` : `<p class="empty">No roster yet. Edit the report to add their players.</p>`}</div>
     ${ed ? statsEditHTML(d, game) : statsHTML(r)}
-    ${!ed && game === "smash" ? `<div class="sec"><div class="sec-h"><h4>From our playbook</h4></div><div id="sgBox" class="grid" style="gap:12px"><p class="muted">Loading suggestions…</p></div></div>` : ""}
+    ${!ed && game === "smash" ? `<div class="sec"><div class="sec-h"><h4>From our playbook</h4><span id="sgTeams"></span></div><div id="sgBox" class="grid" style="gap:12px"><p class="muted">Loading suggestions…</p></div></div>` : ""}
     <div class="sec"><div class="sec-h"><h4>VODs and replays</h4>${ed ? `<button class="btn btn-line btn-sm" id="addV">+ Link</button>` : ""}</div>
       ${ed ? `<div class="plist">${vods.map((v, i) => `<div class="prow" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto"><input data-v="${i}" data-vk="label" value="${esc(v.label || "")}" placeholder="What it shows (Game 2, 4:10)"><input data-v="${i}" data-vk="url" value="${esc(v.url || "")}" placeholder="https://youtu.be/…"><button class="btn btn-line btn-sm danger" data-delv="${i}">Remove</button></div>`).join("")}</div>`
         : vods.filter(v => safe(v.url)).length ? `<ul class="vods">${vods.filter(v => safe(v.url)).map(v => `<li>▶ <a href="${esc(safe(v.url))}" target="_blank" rel="noopener">${esc(v.label || v.url)}</a></li>`).join("")}</ul>` : `<p class="empty">Nothing yet.</p>`}</div>

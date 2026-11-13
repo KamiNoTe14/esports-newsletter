@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "updated": "2026-11-13T13:17:07.662Z",
+  "updated": "2026-11-13T16:16:35.167Z",
   "matches": [
     {
       "id": "ROvHXFsolTwtYJ6HXqo9",
@@ -6001,102 +6001,125 @@
     },
     {
       "id": "9EK3iDylQb4F4zbiOAZw",
-      "week": "8",
-      "bye": false,
-      "term": "fall",
+      "perGame": true,
+      "league": "MHSEL",
       "result": "W",
-      "score": {
-        "us": 3,
-        "them": 2
-      },
-      "clinched": "us",
-      "notes": "",
+      "event": "MHSEL Fall 2026",
       "players": [
         {
-          "stats": {},
           "games": [],
           "name": "Rownin Flanagan",
-          "private": false,
+          "tag": "Rinferno53",
+          "stats": {},
           "id": "p-75b76f7a",
-          "tag": "Rinferno53"
+          "private": false
         },
         {
-          "tag": "Lypuff",
-          "name": "Jeffery Howe",
           "games": [
             2,
             4
           ],
+          "name": "Jeffery Howe",
+          "tag": "Lypuff",
+          "private": false,
           "stats": {
             "stocks_lost": 3,
             "stocks_taken": 12
           },
-          "private": false,
           "id": "p-e8f9e498"
         },
         {
-          "id": "p-66fae53c",
+          "tag": "DeviousDawgs",
           "stats": {
             "stocks_taken": 16,
             "stocks_lost": 10
           },
           "name": "Bo West",
+          "id": "p-66fae53c",
           "games": [
             1,
             4,
             5
           ],
-          "tag": "DeviousDawgs",
           "private": false
         },
         {
-          "stats": {
-            "stocks_taken": 4,
-            "stocks_lost": 6
-          },
-          "id": "p-860b6fbe",
-          "private": false,
           "games": [
             3
           ],
+          "private": false,
           "name": "Calvin Lauren",
-          "tag": "Carrot King"
+          "tag": "Carrot King",
+          "id": "p-860b6fbe",
+          "stats": {
+            "stocks_taken": 4,
+            "stocks_lost": 6
+          }
         }
       ],
-      "forfeit": null,
-      "level": "Varsity",
-      "gameName": "Super Smash Bros. Ultimate",
+      "stage": "regular",
+      "teamId": "t3",
       "status": "final",
+      "teamName": "Smash Varsity",
+      "updatedAt": "2026-11-13T16:16:31.657Z",
+      "opponent": {
+        "abbr": "EWS",
+        "short": "Seaholm",
+        "team": "Birmingham HS Smash V",
+        "school": "Ernest W. Seaholm High School",
+        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_4/v1688066144/birminghamk12mius/rqaadhghytfsdcvod3yh/SEAMainII.png"
+      },
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/pSgKtFoHZ2Q?feature=share"
+      },
+      "forfeit": null,
+      "clinched": "us",
+      "season": "2026-27",
+      "startsAt": "2026-11-11T20:30:00.000Z",
+      "week": "8",
+      "bye": false,
+      "source": {},
+      "current": 1,
+      "term": "fall",
+      "game": "smash",
+      "level": "Varsity",
+      "notes": "",
+      "score": {
+        "us": 3,
+        "them": 2
+      },
+      "bestOf": 5,
       "games": [
         {
           "n": 1,
+          "winner": "them",
           "p": {
             "p-66fae53c": {
-              "stocks_taken": 4,
-              "hero": "Sora",
               "hero2": "Sora",
-              "stocks_lost": 6
+              "stocks_taken": 4,
+              "stocks_lost": 6,
+              "hero": "Sora"
             }
           },
+          "us": 0,
           "them": 2,
           "gw": [
             "them",
             "them"
-          ],
-          "winner": "them",
-          "us": 0
+          ]
         },
         {
-          "them": 0,
           "n": 2,
           "p": {
             "p-e8f9e498": {
-              "stocks_taken": 6,
-              "hero": "King K. Rool",
               "hero2": "King K. Rool",
-              "stocks_lost": 2
+              "stocks_lost": 2,
+              "stocks_taken": 6,
+              "hero": "King K. Rool"
             }
           },
+          "them": 0,
           "us": 2,
           "winner": "us",
           "gw": [
@@ -6105,93 +6128,70 @@
           ]
         },
         {
-          "n": 3,
           "p": {
             "p-860b6fbe": {
-              "stocks_lost": 6,
               "stocks_taken": 4,
+              "stocks_lost": 6,
               "hero2": "Incineroar",
               "hero": "Incineroar"
             }
           },
+          "n": 3,
+          "winner": "them",
+          "them": 2,
+          "us": 0,
           "gw": [
             "them",
             "them"
-          ],
-          "us": 0,
-          "them": 2,
-          "winner": "them"
+          ]
         },
         {
-          "us": 2,
-          "them": 0,
-          "winner": "us",
           "gw": [
             "us",
             "us"
           ],
-          "n": 4,
+          "winner": "us",
+          "us": 2,
           "p": {
             "p-e8f9e498": {
               "stocks_taken": 6,
               "hero": "King K. Rool",
-              "stocks_lost": 1,
-              "hero2": "King K. Rool"
+              "hero2": "King K. Rool",
+              "stocks_lost": 1
             },
             "p-66fae53c": {
-              "stocks_lost": 2,
-              "hero": "Sora",
-              "hero2": "Sora",
-              "stocks_taken": 6
-            }
-          }
-        },
-        {
-          "n": 5,
-          "p": {
-            "p-66fae53c": {
-              "hero": "Sora",
               "hero2": "Sora",
               "stocks_taken": 6,
+              "hero": "Sora",
               "stocks_lost": 2
             }
           },
-          "winner": "us",
+          "them": 0,
+          "n": 4
+        },
+        {
+          "them": 0,
+          "n": 5,
+          "p": {
+            "p-66fae53c": {
+              "stocks_taken": 6,
+              "stocks_lost": 2,
+              "hero": "Sora",
+              "hero2": "Sora"
+            }
+          },
+          "us": 2,
           "gw": [
             "us",
             "us"
           ],
-          "us": 2,
-          "them": 0
+          "winner": "us"
         }
       ],
-      "season": "2026-27",
-      "stage": "regular",
+      "gameName": "Super Smash Bros. Ultimate",
       "announced": {
         "smash:career:stocks_taken": "p-e8f9e498"
-      },
-      "current": 5,
-      "stream": {
-        "vod": "",
-        "live": "https://youtube.com/live/pSgKtFoHZ2Q?feature=share"
-      },
-      "updatedAt": "2026-11-11T21:26:47.188Z",
-      "game": "smash",
-      "startsAt": "2026-11-11T20:30:00.000Z",
-      "teamId": "t3",
-      "league": "MHSEL",
-      "perGame": true,
-      "event": "MHSEL Fall 2026",
-      "source": {},
-      "opponent": {
-        "team": "Birmingham HS Smash V",
-        "school": "Ernest W. Seaholm High School",
-        "short": "Seaholm",
-        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_4/v1688066144/birminghamk12mius/rqaadhghytfsdcvod3yh/SEAMainII.png",
-        "abbr": "EWS"
-      },
-      "teamName": "Smash Varsity",
-      "bestOf": 5
+      }
     },
     {
       "id": "s6zm28J4RjpPqgpTZnWP",
@@ -6349,6 +6349,179 @@
       "updatedAt": "2026-11-11T21:41:36.265Z",
       "game": "smash",
       "event": "MHSEL Fall 2026"
+    },
+    {
+      "id": "ipUiTPVcn8gIIFUTwVom",
+      "perGame": false,
+      "players": [
+        {
+          "id": "p-00c5cd5f",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "sunny.1000",
+          "private": false,
+          "name": "Elka Borreson",
+          "stats": {},
+          "roles": [
+            "Strategist"
+          ]
+        },
+        {
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Alexander Berry",
+          "tag": "Squish212",
+          "stats": {},
+          "roles": [
+            "Duelist"
+          ],
+          "starter": true,
+          "id": "p-cef94125"
+        },
+        {
+          "name": "Declan Ward",
+          "stats": {},
+          "roles": [
+            "Vanguard"
+          ],
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "Declan",
+          "id": "p-0d4320f9",
+          "private": false
+        },
+        {
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "SimplyChaotic",
+          "name": "Connor Davis",
+          "stats": {},
+          "roles": [
+            "Duelist"
+          ],
+          "private": false,
+          "id": "p-0d309b46"
+        },
+        {
+          "id": "p-0a81a3ee",
+          "private": false,
+          "stats": {},
+          "tag": "abbyprofen",
+          "name": "Abby Grandy",
+          "games": [],
+          "starter": false
+        },
+        {
+          "private": false,
+          "stats": {},
+          "roles": [
+            "Vanguard"
+          ],
+          "id": "p-c279257f",
+          "name": "Jack Arnold",
+          "starter": true,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "Cow02man"
+        },
+        {
+          "starter": false,
+          "tag": "gxc9310",
+          "stats": {},
+          "private": false,
+          "name": "Gavin Cowles",
+          "id": "p-2ea9376c",
+          "games": []
+        },
+        {
+          "stats": {},
+          "roles": [
+            "Strategist"
+          ],
+          "private": false,
+          "tag": "TwinkyToes",
+          "name": "Jeffery Lewis",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "id": "p-71b5eeec"
+        }
+      ],
+      "updatedAt": "2026-11-13T16:14:34.845Z",
+      "term": "fall",
+      "league": "MHSEL",
+      "result": "L",
+      "game": "marvel-rivals",
+      "event": "MHSEL Fall 2026",
+      "status": "final",
+      "teamId": "t6",
+      "stage": "regular",
+      "stream": {
+        "live": "https://youtube.com/live/eTvOEV1_-fE?feature=share",
+        "vod": ""
+      },
+      "forfeit": null,
+      "bye": false,
+      "source": {},
+      "gameName": "Marvel Rivals",
+      "season": "2026-27",
+      "current": 3,
+      "level": "Varsity",
+      "notes": "",
+      "opponent": {
+        "team": "IC Marvel Rivals",
+        "short": "",
+        "logo": "assets/uploads/highSchools/imlay-city.png",
+        "abbr": "IC",
+        "school": "Imlay City High School"
+      },
+      "teamName": "Marvel Rivals Varsity",
+      "games": [
+        {
+          "n": 1,
+          "winner": "them",
+          "us": 0,
+          "them": 0
+        },
+        {
+          "winner": "them",
+          "them": 0,
+          "n": 2,
+          "us": 0
+        },
+        {
+          "winner": "them",
+          "n": 3,
+          "us": 0,
+          "them": 0
+        }
+      ],
+      "bestOf": 5,
+      "clinched": "them",
+      "startsAt": "2026-11-12T20:30:00.000Z",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "week": "8"
     },
     {
       "id": "toz7j1qGyXIiTFJku1VZ",

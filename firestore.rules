@@ -131,12 +131,12 @@ service cloud.firestore {
       }
     }
 
-    // ---------- Playbook (scout/: Rocket League whiteboard plays and film clips) ----------
+    // ---------- Playbook (scout/: Rocket League plays and film clips, Smash stage notes) ----------
     // Same privacy as scouting reports: members of that game's team watch them; coaches and captains make and edit them.
     function validPlay() {
       let d = request.resource.data;
       return d.game is string && d.title is string && d.title.size() <= 120
-        && d.kind in ['drawn', 'film']
+        && d.kind in ['drawn', 'film', 'stage']
         && (!('steps' in d) || (d.steps is list && d.steps.size() <= 60))
         && (!('frames' in d) || (d.frames is list && d.frames.size() <= 400));
     }

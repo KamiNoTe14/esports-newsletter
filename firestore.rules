@@ -147,6 +147,11 @@ service cloud.firestore {
       allow delete: if canEdit(resource.data.game);
     }
 
+    // ---------- Player rankings: coaches only (never students, never the public site) ----------
+    match /rankings/{gameKey} {
+      allow read, write: if isCoach();
+    }
+
     // ---------- Smash frame data (copied from Ultimate Frame Data): private, the Smash team reads, coaches import ----------
     match /framedata/{charId} {
       allow read: if canSee('smash');

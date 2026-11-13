@@ -102,14 +102,14 @@ export function suggestCSS(){ return `
 .sg-cols li b{white-space:nowrap;font-variant-numeric:tabular-nums}
 .sg-ours{display:flex;flex-direction:column;gap:6px}
 .sg-our{display:flex;gap:8px;align-items:center;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#FAFCFD;text-align:left;color:var(--ink)}
-.sg-tm{font:700 10.5px var(--body);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--muted);margin-left:4px}
+.sg-our .sg-tm{margin-left:4px}
 .sg-our small.sg-rec{color:var(--ink);font-weight:600}
 .sg-our:hover{border-color:var(--gold)}.sg-our img{width:28px;height:28px;object-fit:contain}.sg-our small{display:block;color:var(--muted);font-size:12px}
 `; }
 
 /* The "From our playbook" section on a Smash scouting report.
    get(slug) → frame-data doc (cached); open(slug, vs) opens a character sheet; openStage(key) opens a stage. */
-export async function suggestHTML({report, index, site, finals, plays, icon, get, teamIds = null}){
+export async function suggestHTML({report, index, site, finals, plays, icon, get, teamIds = null, ranks = null}){
   if (!index?.chars?.length) return `<p class="empty">Import frame data (Smash playbook → Characters) to get suggestions here.</p>`;
   const theirs = theirChars(report, index).slice(0, 6);
   if (!theirs.length) return `<p class="empty">Add their characters to see suggestions: type mains in the roster's "Mains" box (for example "Piranha Plant, Joker"), or add games under "Stats against us".</p>`;
@@ -132,9 +132,11 @@ export async function suggestHTML({report, index, site, finals, plays, icon, get
   const cards = theirs.map((t, i) => { const c = T[i]; if (!c) return "";
     const S = sumUp(c), style = styleOf(t.slug, plays);
     const watch = S.fastest.slice(0, 4), resp = S.safe.slice(0, 3), pun = S.unsafe.slice(0, 5);
-    /* rank player + character: half frame data, half how that player has done on that character */
+    /* rank player + character: frame data, how that player has done on that character, and (if a coach has ranked
+       the players) where the coach ranks them: 40 / 30 / 30, or half and half without a ranking */
     const edges = {}; slugs.forEach(s => ourDoc(s) && (edges[s] = frameEdge(ourDoc(s), c)));
-    const ranked = ours.filter(o => edges[o.slug]).map(o => ({o, e:edges[o.slug], r:(edges[o.slug].score + form(o)) / 2})).sort((a, b) => b.r - a.r)
+    const score = o => { const e = edges[o.slug].score, f = form(o), k = ranks?.[o.pid]; return k ? .4 * e + .3 * f + .3 * k.skill : (e + f) / 2; };
+    const ranked = ours.filter(o => edges[o.slug]).map(o => ({o, e:edges[o.slug], r:score(o)})).sort((a, b) => b.r - a.r)
       /* echo fighters (Samus / Dark Samus) by the same player come out the same: show one */
       .filter((x, k, arr) => !arr.slice(0, k).some(y => y.e.score === x.e.score && y.o.pid === x.o.pid)).slice(0, 3);
     return `<div class="sg-ch"><div class="sg-top">${icon(t) ? `<img src="${esc(icon(t))}" alt="" onerror="this.remove()">` : ""}<div><h3>${esc(t.name)}</h3>
@@ -145,11 +147,11 @@ export async function suggestHTML({report, index, site, finals, plays, icon, get
         <div><h5>Punish these (shield, then hit back)</h5><ul>${pun.map(m => `<li><span>${esc(m.name)}</span><b class="fd-bad">${fmtAdv(m.advWorst)}</b></li>`).join("")}</ul>
           <p class="muted" style="margin:6px 0 0;font-size:13px">They hit back out of shield on frame ${S.oosFast ?? "?"}${S.oos[0] ? ` (${esc(S.oos[0].move)})` : ""}. Don't leave ${S.oosFast ?? "that many"}+ frames open on their shield.</p></div>
         <div><h5>Our best picks</h5>${ranked.length ? `<div class="sg-ours">${ranked.map(({o, e}) => `<button type="button" class="sg-our" data-sgopen="${esc(t.slug)}" data-sgvs="${esc(o.slug)}">${icon(o) ? `<img src="${esc(icon(o))}" alt="" onerror="this.remove()">` : ""}<span><b>${esc(o.tag)}</b> on <b>${esc(o.name)}</b>${teamIds?.length === 1 ? "" : ` <span class="sg-tm">${esc(o.teamName)}</span>`}
-            <small class="sg-rec">${o.w + o.l ? `${o.w}–${o.l} in games on ${esc(o.name)}` : "Listed main, no match games yet"}</small>
+            <small class="sg-rec">${ranks?.[o.pid] ? `Ranked #${ranks[o.pid].rank} of ${ranks[o.pid].of} · ` : ""}${o.w + o.l ? `${o.w}–${o.l} in games on ${esc(o.name)}` : "Listed main, no match games yet"}</small>
             <small>${e.ourOos ? `${esc(e.ourOos.move)} out of shield (frame ${e.ourOos.f}) punishes ${e.punish.length} of their ${e.punishN} moves` : "No out-of-shield data"} · ${e.safe.length} of our ${e.safeN} moves safe on their shield</small></span></button>`).join("")}</div>`
           : `<p class="muted" style="margin:0;font-size:13px">No characters for ${teamIds?.length === 1 ? "this team's" : "our"} players yet. They come from finished matches in the scorekeeper, or mains typed on a player's profile.</p>`}</div>
       </div></div>`; }).join("");
-  return `<p class="intro" style="font-size:14px;margin:0">From the characters in this report${theirs.length > 1 ? ` (${theirs.length})` : ""}: what to watch for, what to punish, our best picks and stages. Our picks weigh frame data and each player's own record on that character equally; your read on the players still comes first.</p>
+  return `<p class="intro" style="font-size:14px;margin:0">From the characters in this report${theirs.length > 1 ? ` (${theirs.length})` : ""}: what to watch for, what to punish, our best picks and stages. Our picks weigh frame data, each player's record on that character${ranks ? " and your player rankings" : ""}; your read on the players still comes first.</p>
     <div><h5 style="margin:0 0 6px;font:700 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Stages</h5>
       <div class="sg-pills">${strike.map(r => `<button type="button" class="sg-pill ban" data-sgstage="${r.st.key}">✕ ${esc(r.st.name)} <small>suits their ${esc(r.bad.map(k => typeName(k).replace(/^\S+ /, "").toLowerCase()).join(" / "))}</small></button>`).join("")}
         ${pick.map(r => `<button type="button" class="sg-pill pick" data-sgstage="${r.st.key}">✓ ${esc(r.st.name)} <small>suits our ${esc(r.good.map(k => typeName(k).replace(/^\S+ /, "").toLowerCase()).join(" / "))}</small></button>`).join("")}

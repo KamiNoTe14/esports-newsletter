@@ -15,7 +15,7 @@ const CATS = {jabattacks:"Jabs", groundattacks:"Ground", tiltattacks:"Tilts", da
 const ATTACK = m => m.cat !== "dodges" && m.cat !== "grabs" && !/pummel|throw/i.test(m.name);
 /* a move's own first hit (UFD lists later hits too, e.g. "16 (1/6/11/16)"), and moves that start an attack:
    not follow-up jabs or hits, counters, reflectors, landing hits or self-hits */
-const first = s => { const m = String(s || "").match(/\d+/); return m ? +m[0] : null; };
+const first = s => { const m = String(s || "").match(/(\d+)\s*(?:\(\+(\d+)\))?/); return m ? +m[1] + (+m[2] || 0) : null; };   // "2(+18)": 18 frames to charge, then 2
 const opener = m => !/jab\s*[2-9]|finisher|hit\s*[2-9]|counter|reflect|absorb|guard|tetrakarn|makarakarn|self-hit|reel in|explosion|landing|\brest\b|spinout/i.test(m.name)
   && !/start of (counter|block)|counter window/i.test(m.startup + " " + m.notes);
 const frames = s => { const m = String(s || "").match(/\d+/); return m ? +m[0] : null; };
@@ -26,7 +26,8 @@ const statOf = (c, re) => (c.stats || []).find(s => re.test(s.k))?.v || "";
 export function oosOf(c){
   /* counters, reflectors and absorbs aren't punishes; skip rows that are only those */
   const notHit = m => m.split(/\s+or\s+/i).every(x => /counter|reflect|absorb|vortex/i.test(x));
-  const list = (c.oos || []).filter(o => !notHit(o.move)).map(o => ({move:o.move, f:frames(o.frames)})).filter(o => o.f != null);
+  /* Jigglypuff's fastest listed option is Rest out of shield: a hard read, not a reliable punish */
+  const list = (c.oos || []).filter(o => !notHit(o.move) && !(c.slug === "jigglypuff" && /^down b/i.test(o.move))).map(o => ({move:o.move, f:frames(o.frames)})).filter(o => o.f != null);
   const sg = frames(statOf(c, /^Shield Grab/i)); if (sg) list.push({move:"Shield grab", f:sg});
   return list.sort((a, b) => a.f - b.f);
 }
@@ -73,7 +74,7 @@ export function charList(M, ctx, index, {opp = [], icon, onOpen, onImport}){
 }
 
 /* ---------- one character's sheet (+ matchup against one of ours) ---------- */
-export function charSheet(M, ctx, c, {ours = null, ourChoices = [], icon, onVs, back}){
+export function charSheet(M, ctx, c, {ours = null, ourChoices = [], icon, onVs, back, style = null, types = [], onStyle = null}){
   const atk = (c.moves || []).filter(ATTACK);
   const oos = oosOf(c), oosFast = oos[0]?.f ?? null;
   const fastest = atk.filter(opener).map(m => ({...m, s:first(m.startup)})).filter(m => m.s > 0).sort((a, b) => a.s - b.s).slice(0, 8);
@@ -100,7 +101,8 @@ export function charSheet(M, ctx, c, {ours = null, ourChoices = [], icon, onVs, 
   M.innerHTML = `${ctx.tabs}
     <div class="card"><div class="card-h"><button class="btn btn-line btn-sm" id="fdBack">← Characters</button><a class="btn btn-line btn-sm" href="${ufdURL(c.slug)}" target="_blank" rel="noopener">Hitboxes on Ultimate Frame Data ↗</a></div>
       <div class="fd-head">${icon(c) ? `<img src="${esc(icon(c))}" alt="">` : ""}<div><h2>${esc(c.name)}</h2>
-        <div class="fd-stats"><span>Weight <b>${esc(statOf(c, /^Weight/))}</b></span><span>Run <b>${esc(statOf(c, /^Run Speed/))}</b></span><span>Air <b>${esc(statOf(c, /^Air Speed/))}</b></span><span>Fall / fast fall <b>${esc(statOf(c, /^Fall Speed/))}</b></span>${grab ? `<span>Grab <b>frame ${esc(grab.startup)}</b></span>` : ""}</div></div></div>
+        <div class="fd-stats"><span>Weight <b>${esc(statOf(c, /^Weight/))}</b></span><span>Run <b>${esc(statOf(c, /^Run Speed/))}</b></span><span>Air <b>${esc(statOf(c, /^Air Speed/))}</b></span><span>Fall / fast fall <b>${esc(statOf(c, /^Fall Speed/))}</b></span>${grab ? `<span>Grab <b>frame ${esc(grab.startup)}</b></span>` : ""}</div>
+        ${style ? `<div class="fd-stats" style="margin-top:6px;align-items:center"><span>Plays like</span>${types.map(([k, n, e]) => onStyle ? `<button type="button" class="ss-type" data-sty="${k}" aria-pressed="${style.includes(k)}">${e} ${n}</button>` : style.includes(k) ? `<span class="ss-type">${e} ${n}</span>` : "").join("")}</div>` : ""}</div></div>
       ${ourChoices.length ? `<label class="f" style="max-width:360px"><span>Matchup: pick our character</span><select id="fdVs"><option value="">Just show ${esc(c.name)}</option>${ourChoices.map(o => `<option value="${esc(o.slug)}"${ours?.slug === o.slug ? " selected" : ""}>${esc(o.label)}</option>`).join("")}</select></label>` : ""}</div>
     ${vs}
     <div class="card"><div class="fd-cols">
@@ -115,5 +117,28 @@ export function charSheet(M, ctx, c, {ours = null, ourChoices = [], icon, onVs, 
     </tbody></table></div>
     <p class="muted" style="margin:0">Frame data: <a href="${ufdURL(c.slug)}" target="_blank" rel="noopener">Ultimate Frame Data, ${esc(c.name)}</a>.</p></div>`;
   M.querySelector("#fdBack").onclick = back;
+  M.querySelectorAll("[data-sty]").forEach(b => b.onclick = () => { const k = b.dataset.sty; onStyle(style.includes(k) ? style.filter(x => x !== k) : [...style, k]); });
   const v = M.querySelector("#fdVs"); if (v) v.onchange = () => onVs(v.value);
+}
+
+/* shared with the scouting report suggestions (suggest.js) */
+export {ATTACK, opener, first, fmtAdv, statOf};
+/* one character, boiled down: fastest openers, out-of-shield speed, worst and safest on shield */
+export function sumUp(c){
+  const atk = (c.moves || []).filter(ATTACK), oos = oosOf(c);
+  return {atk, oos, oosFast:oos[0]?.f ?? null,
+    fastest:atk.filter(opener).map(m => ({...m, s:first(m.startup)})).filter(m => m.s > 0).sort((a, b) => a.s - b.s),
+    unsafe:atk.filter(m => m.advWorst != null).sort((a, b) => a.advWorst - b.advWorst),
+    safe:atk.filter(m => m.advBest != null).sort((a, b) => b.advBest - a.advBest)};
+}
+/* how one of ours lines up against one of theirs, on frame data alone:
+   punish = share of their moves (with shield data) our fastest out-of-shield option can punish
+   safe   = share of our moves (with shield data) they can't punish out of shield */
+export function frameEdge(ours, theirs){
+  const O = sumUp(ours), T = sumUp(theirs);
+  const theirAdv = T.atk.filter(m => m.advWorst != null), ourAdv = O.atk.filter(m => m.advBest != null);
+  const punish = O.oosFast == null ? [] : theirAdv.filter(m => -m.advWorst >= O.oosFast);
+  const safe = T.oosFast == null ? [] : ourAdv.filter(m => -m.advBest < T.oosFast);
+  const pp = theirAdv.length ? punish.length / theirAdv.length : 0, sp = ourAdv.length ? safe.length / ourAdv.length : 0;
+  return {score:(pp + sp) / 2, punish, safe, punishN:theirAdv.length, safeN:ourAdv.length, ourOos:O.oos[0], theirOos:T.oos[0]};
 }

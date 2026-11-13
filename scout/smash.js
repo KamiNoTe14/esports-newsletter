@@ -78,7 +78,7 @@ export function smashCSS(){ return `
 `; }
 
 const notesFor = (docs, key) => docs.find(d => d.stage === key) || null;
-const bestOf = (docs, st) => notesFor(docs, st.key)?.best || st.best;
+export const bestOf = (docs, st) => notesFor(docs, st.key)?.best || st.best;
 const typeChips = (keys, cls = "") => keys.map(k => { const t = TYPES.find(x => x[0] === k); return t ? `<span class="ss-type ${cls}">${t[2]} ${t[1]}</span>` : ""; }).join("");
 
 /* ctx: {db, user, canEdit(game), toast, game:"smash"}; docs = this game's stage notes from plays/ */

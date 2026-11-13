@@ -136,7 +136,7 @@ service cloud.firestore {
     function validPlay() {
       let d = request.resource.data;
       return d.game is string && d.title is string && d.title.size() <= 120
-        && d.kind in ['drawn', 'film', 'stage']
+        && d.kind in ['drawn', 'film', 'stage', 'char']
         && (!('steps' in d) || (d.steps is list && d.steps.size() <= 60))
         && (!('frames' in d) || (d.frames is list && d.frames.size() <= 400));
     }

@@ -879,3 +879,6 @@ img{display:block}
 .full .top .badge{height:150px;max-width:220px;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,8,20,.6)) drop-shadow(0 10px 18px rgba(0,0,0,.5))}
 .full.enter .top .badge{animation:popIn .6s .35s var(--snap) both}
 .bkf.has-badge .top .glogo{display:none}
+
+/* league-order brackets (imported) have no seed numbers; long team names wrap to two lines */
+.bk.noseed .bk-t{grid-template-columns:var(--lg) minmax(0,1fr) auto}.bk.noseed .bk-t i{display:none}

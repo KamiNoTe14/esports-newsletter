@@ -65,7 +65,7 @@ export function buildBracket(b, finals = []){
   /* how far we got: our last match */
   const ourMatches = rounds.flat().filter(m => m.us && !m.bye);
   const first = rounds[0].findIndex(m => m.a?.us || m.b?.us);
-  return {n, R, rounds, champ, names:rounds.map((_, r) => roundName(r, R)), ourLast:ourMatches[ourMatches.length - 1] || null, ourSlot:first < 0 ? null : first};
+  return {n, R, seq:!!b.seq, rounds, champ, names:rounds.map((_, r) => roundName(r, R)), ourLast:ourMatches[ourMatches.length - 1] || null, ourSlot:first < 0 ? null : first};
 }
 
 /* Views for the stream (picked in the scorekeeper): which rounds, and which slice of the bracket.
@@ -94,6 +94,15 @@ export function bracketView(model, view = "auto"){
 }
 
 /* HTML for a bracket (website + overlay style it). from = first round to show; logo(school) -> image url or "". */
+/* What a team is called on the bracket. The school's short name, unless that school has more than one team in it
+   (or no school was found): then its own team name, trimmed of what everyone shares ("Fortnite", "RL", "Esports"),
+   so "Novi Wildcats Varsity Fortnite" → "Novi Wildcats Varsity" and "DCC Varsity RL" → "DCC Varsity". */
+const GAMEWORDS = /\b(fortnite|fn|zone wars|rocket league|rl|super smash bros\.? ultimate|smash|ssbu|marvel rivals|rivals|mario kart|mk|esports?|e-sports|gaming|schools?|hs)\b/gi;
+export function teamName(t, short = s => s){
+  if (!t.label) return short(t.school);
+  const x = t.label.replace(GAMEWORDS, " ").replace(/\bteam\b(?!\s*#?\d)/gi, " ").replace(/[()]/g, " ").replace(/\s+[-–|]\s*$/, "").replace(/\s{2,}/g, " ").trim();
+  return x || short(t.school);
+}
 export function bracketHTML(model, {from = 0, part = [0, 1], logo = () => "", short = s => s, esc = s => String(s ?? ""), edit = false} = {}){
   const [lo, hi] = part, whole = lo <= 0 && hi >= 1, rounds = [];
   model.rounds.slice(from).forEach((list, ri) => {
@@ -106,9 +115,9 @@ export function bracketHTML(model, {from = 0, part = [0, 1], logo = () => "", sh
   const side = (m, t, which) => {
     if (!t) return `<div class="bk-t none"><i></i>${tile("", " no")}<span>${m.r === 0 ? (m.bye ? "Bye" : "TBD") : "TBD"}</span><b></b></div>`;
     const sc = m.s ? m.s.split(/[-–]/)[which === "a" ? 0 : 1] : "", lg = logo(t.school);
-    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}"><i>${t.seed}</i>${lg ? tile(`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('txt');this.replaceWith(document.createTextNode('${esc((short(t.school) || "?")[0]).replace(/'/g, "")}'))">`) : tile(esc((short(t.school) || "?")[0]), " txt")}<span>${esc(t.label || short(t.school))}</span><b>${esc(sc)}</b></div>`; };
+    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}"><i>${t.seed}</i>${lg ? tile(`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('txt');this.replaceWith(document.createTextNode('${esc((short(t.school) || "?")[0]).replace(/'/g, "")}'))">`) : tile(esc((short(t.school) || "?")[0]), " txt")}<span title="${esc(t.label || t.school)}">${esc(teamName(t, short))}</span><b>${esc(sc)}</b></div>`; };
   /* --rounds is the column count minus one (the champion column), so a slice without a champion still fills the width */
-  return `<div class="bk" style="--rounds:${whole ? rounds.length : rounds.length - 1};--rows:${rounds[0]?.[1].length || 1}">${rounds.map(([r, list]) => `<div class="bk-r"><h4>${esc(model.names[r])}</h4><div class="bk-ms">${list.map(m =>
+  return `<div class="bk${model.seq ? " noseed" : ""}" style="--rounds:${whole ? rounds.length : rounds.length - 1};--rows:${rounds[0]?.[1].length || 1}">${rounds.map(([r, list]) => `<div class="bk-r"><h4>${esc(model.names[r])}</h4><div class="bk-ms">${list.map(m =>
     `<div class="bk-m${m.us ? " us" : ""}${m.bye ? " bye" : ""}${m.auto ? " auto" : ""}" data-k="${m.key}">${side(m, m.a, "a")}${side(m, m.b, "b")}${edit && m.a && m.b ? `<button type="button" class="bk-edit" aria-label="Score">✎</button>` : ""}</div>`).join("")}</div></div>`).join("")}
     ${whole ? `<div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none"><i></i>${tile("", " no")}<span>TBD</span><b></b></div>`}</div></div></div>` : ""}</div>`;
 }

@@ -226,7 +226,7 @@ details.bkset[open]{padding-bottom:12px}
 .bk-t{display:grid;grid-template-columns:20px 26px minmax(0,1fr) auto;gap:6px;align-items:center;min-height:40px;padding:4px 30px 4px 8px;font-size:14px}
 .bk-t + .bk-t{border-top:1px solid var(--line-2)}
 .bk-t i{font-style:normal;font-size:11px;color:var(--muted);text-align:right}.bk-lg{width:26px;height:26px;border-radius:6px;background:#fff;display:grid;place-items:center;overflow:hidden;font-weight:800;font-size:13px;color:#00274C}.bk-lg img{width:100%;height:100%;object-fit:contain;padding:2px;box-sizing:border-box}.bk-lg.no{background:none}
-.bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk-t b{font-weight:800;min-width:12px;text-align:right}
+.bk-t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bk.noseed .bk-t{grid-template-columns:26px minmax(0,1fr) auto}.bk.noseed .bk-t i{display:none}.bk-t > span:not(.bk-lg){white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.15;overflow-wrap:anywhere}.bk-t b{font-weight:800;min-width:12px;text-align:right}
 .bk-t.win{background:#1E4470;font-weight:700}.bk-t.out{opacity:.5}.bk-t.us span{color:var(--gold)}.bk-t.none{color:var(--muted)}
 .bk-edit{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:var(--bg);color:var(--gold);border-radius:8px;width:26px;height:30px;font-size:13px;cursor:pointer}
 .bk-champ .bk-m{border-color:var(--gold)}
@@ -330,8 +330,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=25";
-import {watchFinals, sortBrackets} from "../../assets/live.js?v=58";
-import * as BK from "../../assets/bracket.js?v=5";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=59";
+import * as BK from "../../assets/bracket.js?v=6";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
 
@@ -876,7 +876,7 @@ async function bkImportFile(f){
     bkOpen.add(old.id); bkSave(old); renderBrackets(); toast(`Updated "${old.title || "bracket"}" from the file: ${Object.keys(d.res).length} result${Object.keys(d.res).length === 1 ? "" : "s"}.`); }
   else { const id = be.newBracketId(), b = {id, title:`${gm?.short || gm?.name || "Playoff"} ${name}`.trim(), league:/rally|mhsel/i.test(JSON.stringify(x).slice(0, 2000)) ? "MHSEL" : "MHSEL", ...d, on:true, created:new Date().toISOString()};
     brackets = [...brackets, b]; bkOpen.add(id); bkSave(b); renderBrackets(); toast(`Imported ${d.seeds.filter(s => s.school).length} teams.`); }
-  if (unknown.length) setTimeout(() => toast(`No school found for ${unknown.join(", ")}: fix the school under Setup and seeds for its logo.`), 2600);
+  if (unknown.length) setTimeout(() => toast(`No school found for ${[...new Set(unknown)].join(", ")}: fix the school under Setup and seeds for its logo.`), 2600);
 }
 const bkSeeds = b => { b.seeds = Array.from({length:+b.size}, (_, k) => ({school:"", ...(b.seeds?.[k] || {})})); };
 const bkOf = el => { const id = el.closest("[data-bid]")?.dataset.bid; return brackets.find(b => b.id === id); };

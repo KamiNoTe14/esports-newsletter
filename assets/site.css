@@ -652,3 +652,7 @@ a.opp-card .more{margin-left:auto;font:700 13px var(--body);letter-spacing:.08em
 .cls-tog:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px}
 .cls-list td{padding-top:0}.cls-list ul{list-style:none;margin:0;padding:4px 0 8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px 18px}
 .cls-list li{display:flex;flex-direction:column;line-height:1.3}.cls-list li a{font-weight:600}.cls-list li span{font-size:13px}
+
+/* league-order brackets (imported) have no seed numbers; long team names wrap to two lines */
+.bk.noseed .bk-t{grid-template-columns:26px minmax(0,1fr) auto}.bk.noseed .bk-t i{display:none}
+.bk-t > span:not(.bk-lg){white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.15;overflow-wrap:anywhere}

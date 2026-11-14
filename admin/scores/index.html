@@ -802,13 +802,65 @@ document.addEventListener("click", e => {
     setStation(n, {...(bc.stations[n] || {}), bk:{id:b.id, view:vb.dataset.bkview}}, `Station ${n}: ${vb.textContent}.`).then(renderBrackets); renderBrackets(); }
   if (fr){ const n = fr.dataset.bkfree; setStation(n, {...(bc.stations[n] || {}), bk:null}, `Station ${n} follows its match again.`).then(renderBrackets); }
 });
+/* ---------- the national school directory (data/school-directory.json) ----------
+   Every U.S. school offering grades 9-12, from the National Center for Education Statistics (public and charter:
+   Common Core of Data; private: Private School Universe Survey). Only the brackets page loads it. Used to work out
+   which school a league team name belongs to, and to offer every school in the "School" box. */
+let DIR = null, dirLoading = null;
+function loadDirectory(){ return DIR ? Promise.resolve(DIR) : dirLoading || (dirLoading = fetch(SITE + "data/school-directory.json?v=1").then(r => r.json())
+  .then(d => { DIR = (d.schools || []).map(([name, city, state, type]) => ({name, city, state, type, key:dirKey(name)})); if (view === "brackets") renderBrackets(); return DIR; })
+  .catch(e => { console.warn("school directory", e); DIR = []; return DIR; })); }
+const dnorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/&/g, " and ").replace(/\bst\.?\s/g, "saint ").replace(/[^a-z0-9]+/g, " ").trim();
+/* a school's name without what every school has: "Hartland High School" → "hartland" */
+const dirKey = name => dnorm(name).replace(/\b(jr|junior|sr|senior)\b\s*(jr|sr)?\s*\b(high|hs)\b.*$/, "").replace(/\b(high school|high|hs|school|secondary school|middle high school|community high school)\b\s*$/, "").replace(/\b(community|area|public|senior|sr)\s*$/, "").trim();
+/* a league team name without what every team has: "Novi Wildcats Varsity Fortnite #2" → "novi wildcats" */
+const teamKey = name => dnorm(name).replace(/\b(fortnite|fortenite|fn|zone wars|rocket league|rl|smash|ssbu|super smash bros|ultimate|marvel rivals|rivals|mario kart|mk|esports?|e sports|gaming|varsity|var|jv|junior varsity|team|squad|blue|red|white|black|gold|silver|orange|purple|green|navy|maroon|grey|gray|[0-9]+)\b/g, " ").replace(/\s+/g, " ").trim();
+const STATE_NAMES = {michigan:"MI", louisiana:"LA", ohio:"OH", indiana:"IN", illinois:"IL", texas:"TX", california:"CA", florida:"FL", georgia:"GA", "north carolina":"NC", "south carolina":"SC", virginia:"VA", pennsylvania:"PA", "new york":"NY", wisconsin:"WI", minnesota:"MN", arizona:"AZ", "new mexico":"NM", colorado:"CO", utah:"UT", nevada:"NV", washington:"WA", oregon:"OR", tennessee:"TN", kentucky:"KY", alabama:"AL", mississippi:"MS", missouri:"MO", iowa:"IA", kansas:"KS", oklahoma:"OK", arkansas:"AR", nebraska:"NE"};
+/* candidates for one team name: schools whose name starts the team name ("Manistee RL" → Manistee High School), or whose
+   full name the team name is ("Louisiana Virtual Charter Academy"). Longest school name wins. */
+function dirCandidates(name){
+  if (!DIR?.length) return [];
+  const full = dnorm(name), t = teamKey(name); if (!t) return [];
+  const exact = DIR.filter(s => dnorm(s.name) === full || dnorm(s.name) === t); if (exact.length) return exact;
+  let best = [], len = 0;
+  for (const s of DIR){ const k = s.key; if (k.length < 4 || k.length < len) continue;
+    if (t === k || t.startsWith(k + " ") || (k.startsWith(t + " ") && t.split(" ").length >= 3)){ if (k.length > len){ best = []; len = k.length; } best.push(s); } }
+  /* "weak": a one-word school name that only starts the team name ("Louisiana Homeschool" isn't Louisiana High) */
+  return best.map(s => ({...s, weak:t !== s.key && !s.key.includes(" ")}));
+}
+/* every team name in a league file → school name, using the state most of the bracket's teams are from to settle
+   names that exist in several states (there's a Milton in a dozen of them); names it can't settle stay blank */
+function bkResolveNames(names){
+  const out = {}, cand = {};
+  names.forEach(n => { const known = bkSchoolOf(n); if (known) out[n] = {school:known, state:"MI"}; else cand[n] = dirCandidates(n); });
+  Object.entries(cand).forEach(([n, c]) => { if (c.length === 1 && !c[0].weak) out[n] = {school:c[0].name, state:c[0].state}; });
+  const states = Object.values(out).map(x => x.state), mi = states.filter(s => s === "MI").length;
+  const home = states.length && mi / states.length >= .6 ? "MI" : null;
+  Object.entries(cand).forEach(([n, c]) => { if (out[n] || c.length < 2 || c[0].weak) return;
+    const said = Object.entries(STATE_NAMES).find(([w]) => dnorm(n).includes(w))?.[1];
+    const pick = c.filter(s => s.state === (said || home));
+    if (pick.length === 1) out[n] = {school:pick[0].name, state:pick[0].state}; });
+  /* weak matches only count inside the bracket's home state */
+  Object.entries(cand).forEach(([n, c]) => { if (out[n] || !home) return; const pick = c.filter(s => s.state === home); if (pick.length === 1) out[n] = {school:pick[0].name, state:home}; });
+  return Object.fromEntries(Object.entries(out).map(([n, x]) => [n, x.school]));
+}
+/* the School box's suggestions: our library, then every Michigan school, then every school in the states this
+   page's brackets reach (city and state shown beside each) */
+function bkSchoolOptions(list){
+  const lib = (site.highSchools || []).map(h => h.name), seen = new Set(lib.map(dnorm));
+  const inUse = new Set((list || []).flatMap(b => (b.seeds || []).map(s => dnorm(s.school))));
+  const states = new Set(["MI", ...(DIR || []).filter(s => inUse.has(dnorm(s.name))).map(s => s.state)]);
+  const dir = (DIR || []).filter(s => states.has(s.state) && !seen.has(dnorm(s.name)) && (seen.add(dnorm(s.name)), true));
+  return [...lib.map(n => `<option value="${esc(n)}">`), `<option value="Hartland High School">`, ...dir.map(s => `<option value="${esc(s.name)}">${esc(s.city)}, ${s.state}</option>`)].join("");
+}
 function renderBrackets(){
+  loadDirectory();
   const list = sortBrackets(brackets), canAdd = role === "coach" || bkTeams().length;
   const finals = bkFinals();
   $("#app").innerHTML = `<div id="bkPage"><div class="mhead"><button class="back" type="button" id="bkBack" aria-label="Back to matches">←</button>
       <div class="t"><b>Playoff brackets</b><span>Live on the website and the stream's Bracket overlay</span></div>
       ${canAdd ? `<label class="btn btn-line" style="min-height:48px;padding:0 12px;font-size:15px;cursor:pointer;margin-right:6px" title="Import the bracket file from PlayVS / Rally Cry">Import file<input type="file" id="bkImport" accept=".json,application/json" hidden></label><button class="btn btn-gold" type="button" id="bkNew" style="min-height:48px;padding:0 14px;font-size:16px">+ New</button>` : ""}</div>
-    <datalist id="bkSchools">${(site.highSchools || []).map(h => `<option value="${esc(h.name)}">`).join("")}<option value="Hartland High School"></datalist>
+    <datalist id="bkSchools">${bkSchoolOptions(list)}</datalist>
     ${bkLegacy().length ? `<div class="card" style="padding:14px;margin-bottom:12px"><b>${bkLegacy().length === 1 ? "A bracket was" : `${bkLegacy().length} brackets were`} started in the Site Manager</b><p class="hint" style="margin:6px 0 10px">Brackets live here now, so they update on the website and stream right away. Move ${bkLegacy().length === 1 ? "it" : "them"} over with the seeds and results kept.</p><button type="button" class="btn btn-gold" id="bkMove">Move to the scorekeeper</button></div>` : ""}
     ${list.length ? "" : `<div class="card empty">No brackets yet. Tap <b>+ New</b> when the seeds come out.</div>`}
     ${list.map(b => { const mine = bkMine(b), team = (site.teams || []).find(t => t.id === b.teamId), model = BK.buildBracket(b, finals);
@@ -867,14 +919,19 @@ function bkSchoolOf(name){
 }
 async function bkImportFile(f){
   let x; try { x = JSON.parse(await f.text()); } catch(e){ return toast("That isn't a bracket file (it should end in .json)."); }
-  let d; try { d = BK.fromLeagueJSON(x, {schoolOf:bkSchoolOf, ourTeams:site.teams || []}); } catch(e){ return toast(e.message); }
+  await loadDirectory();
+  const names = [...new Set((x?.matches || []).flatMap(m => (m.slots || []).map(s => String(s.entryName || "").trim())).filter(Boolean))];
+  const resolved = bkResolveNames(names);
+  let d; try { d = BK.fromLeagueJSON(x, {schoolOf:n => resolved[String(n).trim()] || "", ourTeams:site.teams || []}); } catch(e){ return toast(e.message); }
   if (role !== "coach" && d.teamId && !myTeams.has(d.teamId)) return toast("That bracket is for another team.");
   if (role !== "coach" && !d.teamId){ const t = bkTeams().find(t => !d.game || t.gameKey === d.game); if (!t) return toast("That bracket isn't for your team."); d.teamId = t.id; }
   const old = brackets.find(b => b.src && b.src === d.src);
   const gm = (site.games || []).find(g => g.key === d.game), name = x.bracket?.name && !/^playoffs?$/i.test(x.bracket.name) ? x.bracket.name : "Playoffs";
   const unknown = d.seeds.filter(s => s.school && s.label === s.school).map(s => s.school);
-  if (old){ const typed = {}; (old.seeds || []).forEach(sd => { if (sd?.entry && sd.seedNo) typed[sd.entry] = sd.seedNo; });
-    d.seeds.forEach(sd => { if (sd.entry && !sd.seedNo && typed[sd.entry]) sd.seedNo = typed[sd.entry]; });
+  if (old){ /* keep what was typed here: seeds, and any school or team name fixed by hand */
+    const was = {}; (old.seeds || []).forEach(sd => { if (sd?.entry) was[sd.entry] = sd; });
+    d.seeds.forEach(sd => { const o = was[sd.entry]; if (!o) return; if (!sd.seedNo && o.seedNo) sd.seedNo = o.seedNo;
+      if (o.manual){ sd.school = o.school; sd.label = o.label; if (o.teamId) sd.teamId = o.teamId; sd.manual = true; if (!sd.label) delete sd.label; } });
     Object.assign(old, {size:d.size, seq:true, seeds:d.seeds, res:{...(old.res || {}), ...d.res}, starts:d.starts, status:old.status === "Final" ? "Final" : d.status, game:old.game || d.game, teamId:old.teamId || d.teamId});
     bkOpen.add(old.id); bkSave(old); renderBrackets(); toast(`Updated "${old.title || "bracket"}" from the file: ${Object.keys(d.res).length} result${Object.keys(d.res).length === 1 ? "" : "s"}.`); }
   else { const id = be.newBracketId(), b = {id, title:`${gm?.short || gm?.name || "Playoff"} ${name}`.trim(), league:/rally|mhsel/i.test(JSON.stringify(x).slice(0, 2000)) ? "MHSEL" : "MHSEL", ...d, on:true, created:new Date().toISOString()};
@@ -888,9 +945,9 @@ document.addEventListener("input", e => {
   const el = e.target, b = bkOf(el); if (!b || !bkMine(b)) return;
   if (el.dataset.seedno != null){ bkSeeds(b); const v = el.value.replace(/\D/g, "").slice(0, 3); if (v !== el.value) el.value = v; b.seeds[+el.dataset.seedno].seedNo = v; bkSave(b, 900);
     clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => bkRedraw(b), 900); return; }
-  if (el.dataset.seedlab != null){ bkSeeds(b); b.seeds[+el.dataset.seedlab].label = el.value.trim(); bkSave(b, 900);
+  if (el.dataset.seedlab != null){ bkSeeds(b); b.seeds[+el.dataset.seedlab].label = el.value.trim(); b.seeds[+el.dataset.seedlab].manual = true; bkSave(b, 900);
     clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => bkRedraw(b), 900); return; }
-  if (el.dataset.seed != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seed]; sd.school = el.value.trim(); if (!BK.isHartland(sd.school)) delete sd.teamId; bkSave(b, 900);
+  if (el.dataset.seed != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seed]; sd.school = el.value.trim(); sd.manual = true; if (!BK.isHartland(sd.school)) delete sd.teamId; bkSave(b, 900);
     clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => { if (document.activeElement === el) bkRedraw(b); }, 900); return; }
   const f = el.dataset.bf; if (!f) return;
   if (f === "title" || f === "league" || f === "link" || f === "scene"){ b[f] = el.value; bkSave(b, 700); const t = el.closest("details").querySelector(".bkt"); if (f === "title" && t) t.textContent = el.value || "Untitled bracket"; }

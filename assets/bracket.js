@@ -7,7 +7,7 @@
      res    {"r-m": {w:"a"|"b", s:"3-1"}}: who won match m of round r (0 = first round), and the score
      game / teamId   which of our teams this bracket is for, so our matches fill in from the scorekeeper
      seq    true when the seeds are in bracket order instead (league's own bracket, imported): seeds[0] v seeds[1] is
-            the top match, and no seed numbers are shown
+            the top match, and each team's seed number is its seedNo (from the file, or typed in)
    Hartland's own results fill in by themselves from final playoff matches, unless a result was typed. */
 
 export const SIZES = [4, 8, 16, 32];
@@ -28,7 +28,7 @@ export const isHartland = s => /\bhartland\b/i.test(String(s || ""));
    finals: our final matches (to fill in our own results), teamId/game narrow them to this bracket. */
 export function buildBracket(b, finals = []){
   const n = SIZES.includes(+b.size) ? +b.size : 8, R = Math.log2(n), seeds = Array.from({length:n}, (_, i) => b.seeds?.[i] || {});
-  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:b.seq ? "" : sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
+  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:b.seq ? String(t.seedNo ?? "").trim() : sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
   const order = b.seq ? Array.from({length:n}, (_, i) => i + 1) : seedOrder(n), rounds = [];
   /* our playoff results from the scorekeeper: final playoff/finals matches of this team against that school */
   const ourIds = new Set([b.teamId, ...seeds.map(x => x?.teamId)].filter(Boolean));
@@ -113,13 +113,13 @@ export function bracketHTML(model, {from = 0, part = [0, 1], logo = () => "", sh
   });
   const tile = (inner, cls = "") => `<span class="bk-lg${cls}">${inner}</span>`;
   const side = (m, t, which) => {
-    if (!t) return `<div class="bk-t none"><i></i>${tile("", " no")}<span>${m.r === 0 ? (m.bye ? "Bye" : "TBD") : "TBD"}</span><b></b></div>`;
+    if (!t) return `<div class="bk-t none">${tile("", " no")}<span>${m.r === 0 ? (m.bye ? "Bye" : "TBD") : "TBD"}</span><b></b></div>`;
     const sc = m.s ? m.s.split(/[-–]/)[which === "a" ? 0 : 1] : "", lg = logo(t.school);
-    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}"><i>${t.seed}</i>${lg ? tile(`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('txt');this.replaceWith(document.createTextNode('${esc((short(t.school) || "?")[0]).replace(/'/g, "")}'))">`) : tile(esc((short(t.school) || "?")[0]), " txt")}<span title="${esc(t.label || t.school)}">${esc(teamName(t, short))}</span><b>${esc(sc)}</b></div>`; };
+    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}">${lg ? tile(`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('txt');this.replaceWith(document.createTextNode('${esc((short(t.school) || "?")[0]).replace(/'/g, "")}'))">`) : tile(esc((short(t.school) || "?")[0]), " txt")}<span title="${esc(t.label || t.school)}">${t.seed !== "" ? `<i>${esc(t.seed)}</i>` : ""}${esc(teamName(t, short))}</span><b>${esc(sc)}</b></div>`; };
   /* --rounds is the column count minus one (the champion column), so a slice without a champion still fills the width */
-  return `<div class="bk${model.seq ? " noseed" : ""}" style="--rounds:${whole ? rounds.length : rounds.length - 1};--rows:${rounds[0]?.[1].length || 1}">${rounds.map(([r, list]) => `<div class="bk-r"><h4>${esc(model.names[r])}</h4><div class="bk-ms">${list.map(m =>
+  return `<div class="bk" style="--rounds:${whole ? rounds.length : rounds.length - 1};--rows:${rounds[0]?.[1].length || 1}">${rounds.map(([r, list]) => `<div class="bk-r"><h4>${esc(model.names[r])}</h4><div class="bk-ms">${list.map(m =>
     `<div class="bk-m${m.us ? " us" : ""}${m.bye ? " bye" : ""}${m.auto ? " auto" : ""}" data-k="${m.key}">${side(m, m.a, "a")}${side(m, m.b, "b")}${edit && m.a && m.b ? `<button type="button" class="bk-edit" aria-label="Score">✎</button>` : ""}</div>`).join("")}</div></div>`).join("")}
-    ${whole ? `<div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none"><i></i>${tile("", " no")}<span>TBD</span><b></b></div>`}</div></div></div>` : ""}</div>`;
+    ${whole ? `<div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none">${tile("", " no")}<span>TBD</span><b></b></div>`}</div></div></div>` : ""}</div>`;
 }
 
 /* A league bracket exported from PlayVS / Rally Cry as JSON ({bracket, rounds, matches:[{round, number, slots}],
@@ -143,6 +143,7 @@ export function fromLeagueJSON(x, {schoolOf, ourTeams = []} = {}){
   first.forEach(m => [0, 1].forEach(pos => { const sl = (m.slots || []).find(s => +s.position === pos); if (!sl) return;
     const nm = names[sl.entryId], school = sch[sl.entryId] || nm, k = (m.number - 1) * 2 + pos, us = isHartland(school) || isHartland(nm);
     const sd = {school:us && !isHartland(school) ? "Hartland High School" : school, entry:String(sl.entryId)};
+    const seedNo = sl.seed ?? sl.seedNumber ?? sl.entrySeed ?? sl.entry?.seed; if (seedNo != null && seedNo !== "") sd.seedNo = String(seedNo);
     if (!sch[sl.entryId] || schoolCount[sch[sl.entryId]] > 1) sd.label = nm;
     if (us){ const mine = ourTeams.filter(t => !game || t.gameKey === game);
       const t = mine.length > 1 ? mine.find(t => new RegExp(`\\b${String(t.name || "").replace(/[^a-z0-9#]+/gi, ".?")}\\b`, "i").test(nm)) || mine[0] : mine[0];

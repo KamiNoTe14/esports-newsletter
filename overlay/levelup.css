@@ -854,9 +854,9 @@ img{display:block}
 .bkf .bk-m{background:#fff;border:2px solid rgba(11,20,32,.18);border-radius:8px;overflow:hidden;box-shadow:0 3px 0 rgba(11,20,32,.12)}
 .bkf .bk-m.us{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,188,5,.45),0 3px 0 rgba(11,20,32,.12)}
 .bkf .bk-m.bye{opacity:.55}
-.bkf .bk-t{display:grid;grid-template-columns:calc(var(--fs) * 1.2) var(--lg) minmax(0,1fr) auto;gap:calc(var(--fs) * .5);align-items:center;padding:var(--pad) 12px;font:600 var(--fs)/1.1 var(--t);color:var(--ink)}
+.bkf .bk-t{display:grid;grid-template-columns:var(--lg) minmax(0,1fr) auto;gap:calc(var(--fs) * .5);align-items:center;padding:var(--pad) 12px;font:600 var(--fs)/1.1 var(--t);color:var(--ink)}
 .bkf .bk-t + .bk-t{border-top:1px solid rgba(11,20,32,.12)}
-.bkf .bk-t i{font:600 calc(var(--fs) * .7)/1 var(--t);font-style:normal;color:#6B7F96;text-align:right}
+.bkf .bk-t i{font:700 calc(var(--fs) * .72)/1 var(--t);font-style:normal;color:#6B7F96;margin-right:.45em}
 .bkf .bk-lg{width:var(--lg);height:var(--lg);border-radius:22%;background:#fff;display:grid;place-items:center;overflow:hidden;box-shadow:0 0 0 1.5px rgba(11,20,32,.16);font:400 calc(var(--lg) * .6)/1 var(--d);color:var(--navy)}
 .bkf .bk-lg img{width:100%;height:100%;object-fit:contain;padding:8%;box-sizing:border-box}
 .bkf .bk-lg.no{background:none;box-shadow:none}
@@ -881,4 +881,3 @@ img{display:block}
 .bkf.has-badge .top .glogo{display:none}
 
 /* league-order brackets (imported) have no seed numbers; long team names wrap to two lines */
-.bk.noseed .bk-t{grid-template-columns:var(--lg) minmax(0,1fr) auto}.bk.noseed .bk-t i{display:none}

@@ -28,7 +28,16 @@ export const isHartland = s => /\bhartland\b/i.test(String(s || ""));
    finals: our final matches (to fill in our own results), teamId/game narrow them to this bracket. */
 export function buildBracket(b, finals = []){
   const n = SIZES.includes(+b.size) ? +b.size : 8, R = Math.log2(n), seeds = Array.from({length:n}, (_, i) => b.seeds?.[i] || {});
-  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {seed:b.seq ? String(t.seedNo ?? "").trim() : sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
+  /* schools with more than one team in the bracket get letters: Hartland A, Hartland B… in the order of their own
+     numbers (#1, #2 / Team 1, Team 2), then Varsity before JV, then where they sit in the bracket */
+  const dup = {}, groups = {};
+  seeds.forEach((t, i) => { const sc = String(t.school || "").trim(); if (sc && !(t.label && t.label === sc)) (groups[sc.toLowerCase()] = groups[sc.toLowerCase()] || []).push(i); });
+  Object.values(groups).filter(g => g.length > 1).forEach(g => {
+    const key = i => { const l = String(seeds[i].label || ""), num = l.match(/#?\s*(\d+)\s*$|#\s*(\d+)|\bteam\s*(\d+)/i);
+      return [num ? +(num[1] || num[2] || num[3]) : 99, /\bjv\b|junior varsity/i.test(l) ? 1 : 0, i]; };
+    g.sort((a, b) => { const A = key(a), B = key(b); return A[0] - B[0] || A[1] - B[1] || A[2] - B[2]; }).forEach((i, k) => dup[i] = String.fromCharCode(65 + k));
+  });
+  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {dup:dup[sd - 1] || "", seed:b.seq ? String(t.seedNo ?? "").trim() : sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
   const order = b.seq ? Array.from({length:n}, (_, i) => i + 1) : seedOrder(n), rounds = [];
   /* our playoff results from the scorekeeper: final playoff/finals matches of this team against that school */
   const ourIds = new Set([b.teamId, ...seeds.map(x => x?.teamId)].filter(Boolean));
@@ -94,12 +103,13 @@ export function bracketView(model, view = "auto"){
 }
 
 /* HTML for a bracket (website + overlay style it). from = first round to show; logo(school) -> image url or "". */
-/* What a team is called on the bracket. The school's short name, unless that school has more than one team in it
-   (or no school was found): then its own team name, trimmed of what everyone shares ("Fortnite", "RL", "Esports"),
-   so "Novi Wildcats Varsity Fortnite" → "Novi Wildcats Varsity" and "DCC Varsity RL" → "DCC Varsity". */
+/* What a team is called on the bracket: the school's short name; "Hartland A", "Hartland B" when a school has more
+   than one team in it. Only when no school was found does the team's own name show, trimmed of what everyone shares
+   ("Fortnite", "RL", "Esports"), so "Onyx Fortnite" → "Onyx". */
 const GAMEWORDS = /\b(fortnite|fn|zone wars|rocket league|rl|super smash bros\.? ultimate|smash|ssbu|marvel rivals|rivals|mario kart|mk|esports?|e-sports|gaming|schools?|hs)\b/gi;
 export function teamName(t, short = s => s){
-  if (!t.label) return short(t.school);
+  if (t.dup) return `${short(t.school)} ${t.dup}`;
+  if (!t.label || t.label !== t.school) return short(t.school);
   const x = t.label.replace(GAMEWORDS, " ").replace(/\bteam\b(?!\s*#?\d)/gi, " ").replace(/[()]/g, " ").replace(/\s+[-–|]\s*$/, "").replace(/\s{2,}/g, " ").trim();
   return x || short(t.school);
 }

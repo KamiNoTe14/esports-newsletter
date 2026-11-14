@@ -2,7 +2,7 @@
    Live scores come from the Firestore "public/scoreboard" summary (pushed instantly, about 1 read per update).
    Finished matches with full detail come from the repo backup, data/matches/<season>.json
    (refreshed automatically every hour by a GitHub Action). The two are merged by match id. */
-import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo, shortSchool} from "./matches.js?v=25";
+import {slug, seasonOf, seasonList, seasonLabel, gameFor, oppShort, rivalFor, roundLabel, postseason, fmtStat, fmtDay, fmtTime, isMock, FIREBASE_CONFIG, schoolInfo, shortSchool} from "./matches.js?v=26";
 import {bioDraft, isSenior, buildRecords, programRecords, legacyRecords, termLabel} from "./records.js?v=5";
 
 const BASE = new URL("../", import.meta.url).href;
@@ -360,7 +360,7 @@ export function sortBrackets(list){
 }
 export async function startBrackets(site){
   const box = document.querySelector("[data-bk-live]"); if (!box) return;
-  const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=8");
+  const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=9");
   const logo = sc => { const x = schoolInfo(site, sc), l = x?.logo || (BK.isHartland(sc) ? "assets/eagle.png" : ""); return l ? (/^(https?:|data:)/.test(l) ? l : BASE + l) : ""; };
   let finals = [], list = [];
   const draw = () => {

@@ -62,6 +62,13 @@ service cloud.firestore {
       allow delete: if isCoach();
     }
 
+    // Team memory for bracket imports: league team id -> our school. Coaches and scorekeepers.
+    match /leagueTeams/{entryId} {
+      allow read: if isCoach() || isScorer();
+      allow write: if (isCoach() || isScorer()) && request.resource.data.school is string && request.resource.data.school.size() <= 120
+        && (!('names' in request.resource.data) || (request.resource.data.names is list && request.resource.data.names.size() <= 20));
+    }
+
     // Small summary documents the website reads (scores strip, etc.)
     match /public/{docId} {
       allow read: if true;

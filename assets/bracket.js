@@ -26,14 +26,17 @@ export const isHartland = s => /\bhartland\b/i.test(String(s || ""));
 
 /* The whole bracket worked out: rounds of matches, who's in each, who won.
    finals: our final matches (to fill in our own results), teamId/game narrow them to this bracket. */
+/* one key per school however it's written: "Milton Area High School" = "Milton Area", "Cass City Jr/Sr High" = "Cass City" */
+export const schoolKey = s => String(s || "").toLowerCase().replace(/&/g, " and ").replace(/\bst\.?\s/g, "saint ").replace(/[^a-z0-9]+/g, " ")
+  .replace(/\s+(jr\s*sr\s+|junior\s+|senior\s+|community\s+|area\s+)?(high\s+school|high|hs|schools?|secondary\s+school)$/, "").replace(/\s+(area|community|senior)$/, "").trim();
 export function buildBracket(b, finals = []){
   const n = SIZES.includes(+b.size) ? +b.size : 8, R = Math.log2(n), seeds = Array.from({length:n}, (_, i) => b.seeds?.[i] || {});
   /* schools with more than one team in the bracket get letters: Hartland A, Hartland B… in the order of their own
      numbers (#1, #2 / Team 1, Team 2), then Varsity before JV, then where they sit in the bracket */
   const dup = {}, groups = {};
-  seeds.forEach((t, i) => { const sc = String(t.school || "").trim(); if (sc && !(t.label && t.label === sc)) (groups[sc.toLowerCase()] = groups[sc.toLowerCase()] || []).push(i); });
+  seeds.forEach((t, i) => { const sc = String(t.school || "").trim(); if (sc && !(t.label && t.label === sc)) { const k = schoolKey(sc); (groups[k] = groups[k] || []).push(i); } });
   Object.values(groups).filter(g => g.length > 1).forEach(g => {
-    const key = i => { const l = String(seeds[i].label || ""), num = l.match(/#?\s*(\d+)\s*$|#\s*(\d+)|\bteam\s*(\d+)/i);
+    const key = i => { const l = String(seeds[i].team || seeds[i].label || ""), num = l.match(/#?\s*(\d+)\s*$|#\s*(\d+)|\bteam\s*(\d+)/i);
       return [num ? +(num[1] || num[2] || num[3]) : 99, /\bjv\b|junior varsity/i.test(l) ? 1 : 0, i]; };
     g.sort((a, b) => { const A = key(a), B = key(b); return A[0] - B[0] || A[1] - B[1] || A[2] - B[2]; }).forEach((i, k) => dup[i] = String.fromCharCode(65 + k));
   });
@@ -144,7 +147,7 @@ export function fromLeagueJSON(x, {schoolOf, ourTeams = []} = {}){
   const first = ms.filter(m => m.round === 1).sort((a, b) => a.number - b.number);
   const names = {}; first.forEach(m => (m.slots || []).forEach(sl => names[sl.entryId] = String(sl.entryName || "").trim()));
   const schoolCount = {}; const sch = {};
-  Object.entries(names).forEach(([id, nm]) => { sch[id] = (schoolOf && schoolOf(nm)) || ""; const k = sch[id] || nm; schoolCount[k] = (schoolCount[k] || 0) + 1; });
+  Object.entries(names).forEach(([id, nm]) => { sch[id] = (schoolOf && schoolOf(nm, id)) || ""; const k = sch[id] || nm; schoolCount[k] = (schoolCount[k] || 0) + 1; });
   /* which game: from the team names */
   const all = Object.values(names).join(" ");
   const game = /rocket|\bRL\b/i.test(all) ? "rocket-league" : /smash|ssbu/i.test(all) ? "smash" : /fortnite|\bFN\b/i.test(all) ? "fortnite-zw" : /rivals/i.test(all) ? "marvel-rivals" : /kart|\bMK\b/i.test(all) ? "mario-kart" : "";
@@ -154,10 +157,10 @@ export function fromLeagueJSON(x, {schoolOf, ourTeams = []} = {}){
     const nm = names[sl.entryId], school = sch[sl.entryId] || nm, k = (m.number - 1) * 2 + pos, us = isHartland(school) || isHartland(nm);
     const sd = {school:us && !isHartland(school) ? "Hartland High School" : school, entry:String(sl.entryId)};
     const seedNo = sl.seed ?? sl.seedNumber ?? sl.entrySeed ?? sl.entry?.seed; if (seedNo != null && seedNo !== "") sd.seedNo = String(seedNo);
-    if (!sch[sl.entryId] || schoolCount[sch[sl.entryId]] > 1) sd.label = nm;
+    sd.team = nm; if (!sch[sl.entryId]) sd.label = nm;
     if (us){ const mine = ourTeams.filter(t => !game || t.gameKey === game);
       const t = mine.length > 1 ? mine.find(t => new RegExp(`\\b${String(t.name || "").replace(/[^a-z0-9#]+/gi, ".?")}\\b`, "i").test(nm)) || mine[0] : mine[0];
-      if (t){ sd.teamId = t.id; teamId = teamId || t.id; if (mine.length > 1) sd.label = `Hartland ${t.name}`; } }
+      if (t){ sd.teamId = t.id; teamId = teamId || t.id; } }
     seeds[k] = sd; }));
   /* results: who won each match, as a / b in our model, and the games score */
   const won = {}, res = {};

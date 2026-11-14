@@ -40,7 +40,9 @@ export function slug(s){ return String(s || "").toLowerCase().replace(/[^a-z0-9]
 /* "Novi High School" -> "Novi", "Detroit Catholic Central" stays. Used wherever space is tight (scores strip, scorekeeper). */
 /* An opponent's entry in the School library (site.highSchools), matched loosely: "Novi" finds "Novi High School". */
 export function schoolInfo(site, name){
-  const key = n => shortSchool(n).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(), k = key(name);
+  /* "Cass City Jr/Sr High", "Milton Area Schools", "St. Mary" all find their library entry */
+  const key = n => shortSchool(n).toLowerCase().replace(/&/g, " and ").replace(/\bst\.?\s/g, "saint ").replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+(jr\s*sr|junior|senior)(\s+high)?$/, "").replace(/\s+(schools?|area|community|senior)$/, "").trim(), k = key(name);
   if (!k) return null;
   return (site?.highSchools || []).find(x => [x.name, x.short].some(n => n && key(n) === k)) || null;
 }
@@ -259,6 +261,9 @@ async function firebaseBackend(){
     newBracketId(){ return fb.doc(fb.collection(db, "brackets")).id; },
     async saveBracket(id, b){ const {id:_, ...d} = b; await fb.setDoc(fb.doc(db, "brackets", id), strip(d)); },
     async deleteBracket(id){ await fb.deleteDoc(fb.doc(db, "brackets", id)); },
+    /* team memory: league team id (PlayVS / Rally Cry entry) → our school, so a team named just "Fortnite" is known once placed */
+    async getLeagueTeams(){ const s = await fb.getDocs(fb.collection(db, "leagueTeams")); const o = {}; s.docs.forEach(d => o[d.id] = d.data()); return o; },
+    async saveLeagueTeam(id, d){ await fb.setDoc(fb.doc(db, "leagueTeams", String(id)), strip(d)); },
     newScoutId(){ return fb.doc(fb.collection(db, "scoutReports")).id; },
     async saveScout(id, r){ await fb.setDoc(fb.doc(db, "scoutReports", id), strip(r)); }
   };
@@ -287,6 +292,8 @@ function mockBackend(){
       f(); window.addEventListener("storage", e => { if (e.key === "eagles-mock-brackets") f(); }); bkSubs.add(f); return () => bkSubs.delete(f); },
     newBracketId(){ return "b" + Date.now().toString(36); },
     async saveBracket(id, b){ let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-brackets")) || {}; } catch(e){} const {id:_, ...d} = b; all[id] = JSON.parse(JSON.stringify(d)); localStorage.setItem("eagles-mock-brackets", JSON.stringify(all)); bkSubs.forEach(f => f()); },
+    async getLeagueTeams(){ try { return JSON.parse(localStorage.getItem("eagles-mock-leagueteams")) || {}; } catch(e){ return {}; } },
+    async saveLeagueTeam(id, d){ let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-leagueteams")) || {}; } catch(e){} all[id] = JSON.parse(JSON.stringify(d)); localStorage.setItem("eagles-mock-leagueteams", JSON.stringify(all)); },
     async deleteBracket(id){ let all = {}; try { all = JSON.parse(localStorage.getItem("eagles-mock-brackets")) || {}; } catch(e){} delete all[id]; localStorage.setItem("eagles-mock-brackets", JSON.stringify(all)); bkSubs.forEach(f => f()); },
     async getMember(email){ return mockScout().members?.[email] || null; },
     async getSeason(season){ return Object.entries(read()).map(([id, m]) => ({id, ...m})).filter(m => m.season === season); },

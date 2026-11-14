@@ -450,7 +450,7 @@ async function boot(){
   document.body.insertAdjacentHTML("afterbegin", header(site));
   const render = {home, teams, standings, playoffs, schedule, results, player, coach, newsletters, media, about, legacy, rival, opponent, future}[PAGE] || home;
   app.innerHTML = render(site, issues);
-  if (["home", "schedule", "results", "player", "coach", "legacy", "rival", "opponent", "teams", "playoffs"].includes(PAGE)) import(BASE + "assets/live.js?v=61").then(L => {
+  if (["home", "schedule", "results", "player", "coach", "legacy", "rival", "opponent", "teams", "playoffs"].includes(PAGE)) import(BASE + "assets/live.js?v=62").then(L => {
     if (PAGE === "legacy") L.startLegacy(site); if (PAGE === "rival") L.startRival(site); if (PAGE === "opponent") L.startOpponent(site); if (PAGE === "teams"){ L.startTeamRecords(site); L.startBrackets(site); } if (PAGE === "playoffs") L.startBrackets(site);
     if (PAGE === "home" || PAGE === "schedule") L.startUpcoming(site, upcoming(issues));
     if (PAGE === "home") L.startStrip(site); if (PAGE === "results") L.startResults(site); if (PAGE === "player") L.startPlayer(site); if (PAGE === "coach") L.startCoach(site);

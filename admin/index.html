@@ -118,6 +118,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .cp-opt{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:8px 10px;border-radius:7px;font:inherit;text-align:left;cursor:pointer}
 .cp-opt span{flex:1}.cp-opt small{color:var(--muted);font-weight:600}
 .cp-opt.on,.cp-opt:hover{background:var(--chip)}
+.btn-sm{min-height:34px;padding:4px 12px;font-size:13px}
+.dirhelp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;margin-top:12px;padding:10px 12px;border:1px dashed #b9c6d6;border-radius:10px;background:#f4f8fc;font-size:14px}
+.dirhelp > a{justify-self:start}.dirhelp small{display:block}
+.dirhelp .chip.ok{background:#e3f4ea;color:#1e7a45;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+.dirfind{border:1px solid #cfd6e0;border-radius:12px;padding:12px;background:#fff}
+.dirlist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.dirlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #e3e8ef;padding:6px 2px}
+.dirlist small{display:block;color:#5b6b7f}
 </style>
 </head>
 <body>
@@ -227,7 +235,7 @@ const LISTS = {
   colleges:{title:"College", add:"Add college or university", csv:true, intro:"Colleges for player profiles: schools a player is interested in show with their logo, and a player who commits gets their profile re-skinned in that school's colors. Transparent PNG logos look best.", name:i => i.name || "College",
     fields:[["name","College or university","text","Michigan State University"],["short","Short name (optional)","text","Michigan State"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["link","Esports program page (optional)","url"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"]]},
   highSchools:{title:"School", add:"Add school", csv:true, seed:true, intro:"High schools we compete against. Their logos and details are filled in automatically wherever a match is against them: the stream overlays, and the opponent on new matches in the scorekeeper. Type the school the way it appears in matches; \"Novi\" also matches \"Novi High School\".", name:i => [i.name, i.mascot].filter(Boolean).join(" · ") || "School",
-    fields:[["name","School","text","Novi High School"],["short","Short name for overlays (optional)","text","Novi"],["mascot","Mascot / team name","text","Wildcats"],["city","City","text","Novi"],["state","State","text","MI"],["league","League or conference","text","MHSEL · KLAA"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"],["notes","Notes (scouting, contacts…)","textarea"],["noRemind","Don't flag this school for missing info","check"]]},
+    fields:[["name","School","text","e.g. Novi High School"],["short","Short name for overlays (optional)","text","e.g. Novi"],["mascot","Mascot / team name","text","e.g. Wildcats"],["city","City","text","e.g. Novi"],["state","State","text","e.g. MI"],["league","League or conference","text","e.g. MHSEL · KLAA"],["primary","Primary color","color"],["secondary","Secondary color","color"],["logo","Logo","image"],["website","Website","url"],["youtube","YouTube","url"],["twitch","Twitch","url"],["x","X / Twitter","url"],["instagram","Instagram","url"],["tiktok","TikTok","url"],["notes","Notes (scouting, contacts…)","textarea"],["noRemind","Don't flag this school for missing info","check"]]},
   legacyRecords:{title:"Pre-tracking record", add:"Add a legend", intro:"Records from before the scorekeeper existed. They show in their own \"Before the scorekeeper\" section of the record book, clearly marked, and never mix with the leaderboards that are worked out from logged matches. Check \"At least\" when the number is a provable floor: the site shows it with a + (for example 6 stocks for every best-of-3 set won, because you can't win one with fewer).", name:i => [i.holder, i.title].filter(Boolean).join(" · ") || "Record",
     fields:[["title","Record","text","Career stocks taken"],["holder","Who holds it","text","Griffin Appleby"],["game","Game","select",() => [["", "All games"], ...(site.games || []).map(g => [g.key, g.name || g.key])]],["value","Number","text","96"],["years","Years","text","2023–2025"],["note","How it was counted","textarea"],["floor","At least (show it with a +)","check"]]},
   roadmap:{title:"Planned feature", add:"Add a planned feature", intro:"Features planned for LevelUP that aren't built yet, with a short description of each. This list is just for the coaches; it doesn't show on the website.", name:i => i.title || "Feature",
@@ -285,6 +293,7 @@ function listEditor(key, spec){
         <button type="button" data-move="${key}" data-i="${i}" data-d="1" aria-label="Move down"${i === arr.length - 1 ? " disabled" : ""}>▼</button>
         <button type="button" class="x" data-del="${key}" data-i="${i}" aria-label="Remove ${esc(spec.title)}">×</button>
       </div></summary>
+      ${key === "highSchools" ? `<div data-dirslot="${i}">${open ? dirHelp(it, i) : ""}</div>` : ""}
       <div class="grid g2" style="margin-top:12px">${main.map(f => `<div style="${f[2] === "textarea" || f[2] === "image" ? "grid-column:1/-1" : ""}">${field(`${base}.${f[0]}`, f, it[f[0]] ?? "")}</div>`).join("")}</div>
       ${checks.length ? `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px">${checks.map(f => field(`${base}.${f[0]}`, f, !!it[f[0]])).join("")}</div>` : ""}
     </details>`;
@@ -382,7 +391,7 @@ function renderPanel(){
   const spec = LISTS[tab];
   P.innerHTML = `<div class="card"><div class="card-h"><h2>${esc(t.label)}</h2></div>${spec.intro ? `<p class="intro">${esc(spec.intro)}</p>` : ""}${t.toggle ? sectionSwitch(t) : ""}
     ${tab === "teams" ? `<p class="muted" style="margin:0">For any student who shouldn't be named publicly, check <b>Gamertag only</b>, and the site shows just their gamertag.</p>` : ""}
-    ${tab === "highSchools" ? needsInfoCard() : ""}
+    ${tab === "highSchools" ? dirFinder() + needsInfoCard() : ""}
     ${spec.csv ? csvBar(tab, spec) : ""}
     ${listEditor(tab, spec)}</div>${tab === "standings" ? schoolsCard() : ""}${tab === "brackets" ? sceneCard() : ""}`;
 }
@@ -504,6 +513,68 @@ function ungraduate(i){
   (a.fromTeams || []).forEach(({teamId, ...r}) => { const t = (site.teams || []).find(x => x.id === teamId); if (t && !(t.roster || []).some(x => x.id === a.id)) (t.roster = t.roster || []).push({...r, id:a.id, name:a.name, tag:a.tag, private:!!a.private}); });
   site.alumni.splice(i, 1);
 }
+/* ---------- the national school directory (data/school-directory.json) ----------
+   Every U.S. school with grades 9-12 from the National Center for Education Statistics: official name, city, state,
+   public / charter / private, and the school's website when it's listed. Loaded only on the School library tab.
+   Fills in a school's name, short name, city, state and website; logos and colors still come from you (the website
+   and "Find a logo" links help). */
+let DIR = null, dirLoading = null, dirQ = "";
+function loadDirectory(){ return DIR ? Promise.resolve(DIR) : dirLoading || (dirLoading = fetch(SITE_BASE + "data/school-directory.json?v=2").then(r => r.json())
+  .then(d => { DIR = (d.schools || []).map(([name, city, state, type, website]) => ({name, city, state, type, website:website || "", key:dirKey(name), n:dnorm(name)})); if (tab === "highSchools") renderPanel(); return DIR; })
+  .catch(e => { console.warn("school directory", e); DIR = []; return DIR; })); }
+const dnorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/&/g, " and ").replace(/\bst\.?\s/g, "saint ").replace(/[^a-z0-9]+/g, " ").trim();
+const dirKey = n => dnorm(n).replace(/\s+(jr\s*sr\s+|junior\s+|senior\s+|community\s+|area\s+|middle\s+)?(high\s+school|high|hs|schools?|secondary\s+school)$/, "").replace(/\s+(area|community|senior)$/, "").trim();
+const TYPE = {p:"Public", c:"Charter", v:"Private"};
+/* schools in the directory that are this name: same name first, then same name without "High School"; Michigan first */
+function dirMatches(name, state){
+  if (!DIR?.length) return []; const n = dnorm(name), k = dirKey(name); if (!k) return [];
+  const exact = DIR.filter(s => s.n === n), same = exact.length ? exact : DIR.filter(s => s.key === k);
+  const st = String(state || "").toUpperCase();
+  return same.sort((a, b) => (b.state === st) - (a.state === st) || (b.state === "MI") - (a.state === "MI") || a.name.localeCompare(b.name)).slice(0, 4);
+}
+function dirSearch(q){
+  const t = dnorm(q); if (!DIR?.length || t.length < 3) return [];
+  const words = t.split(" ");
+  return DIR.filter(s => words.every(w => s.n.includes(w) || dnorm(s.city).includes(w) || s.state.toLowerCase() === w))
+    .sort((a, b) => (b.state === "MI") - (a.state === "MI") || (b.n.startsWith(t)) - (a.n.startsWith(t)) || a.name.length - b.name.length).slice(0, 10);
+}
+const dirShort = name => String(name).replace(/\s+(jr\.?\s*\/\s*sr\.?\s+|junior\s+|senior\s+|community\s+)?(high\s+sc?h?c?ool|high|hs|school)\s*$/i, "").replace(/\s+senior$/i, "").trim() || name;
+const logoSearch = it => "https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(`${it.name} ${it.city || ""} ${it.state || ""} logo`.replace(/\s+/g, " ").trim());
+/* fill what's blank from a directory school (never overwrites what you typed) */
+function dirFill(it, d, all = false){
+  const set = (k, v) => { if (v && (all || !String(it[k] || "").trim())) it[k] = v; };
+  if (all) it.name = d.name; set("short", dirShort(d.name)); set("city", d.city); set("state", d.state); set("website", d.website);
+}
+function dirHelp(it, i){
+  loadDirectory();
+  if (!DIR) return `<p class="muted" style="margin:10px 0 0;font-size:13px">Checking the national school list…</p>`;
+  const m = dirMatches(it.name, it.state), done = m[0] && it.city && it.state && (!m[0].website || it.website);
+  const links = `<a class="btn btn-line btn-sm" href="${esc(logoSearch(it))}" target="_blank" rel="noopener">Find a logo ↗</a>${it.website ? `<a class="btn btn-line btn-sm" href="${esc(it.website)}" target="_blank" rel="noopener">School website ↗</a>` : ""}`;
+  if (!m.length) return `<div class="dirhelp"><span class="muted">Not found in the national list under this name.${it.name ? " Try the official name (search above)." : ""}</span>${it.name ? links : ""}</div>`;
+  return `<div class="dirhelp">${m.map((d, j) => `<span><b>${esc(d.name)}</b> <span class="muted">${esc(d.city)}, ${d.state} · ${TYPE[d.type] || ""}</span></span>
+    ${done && j === 0 ? `<span class="chip ok">Filled in</span>` : `<button type="button" class="btn btn-gold btn-sm" data-dirfill="${i}" data-dj="${j}">Fill in city, state${d.website ? ", website" : ""}</button>`}`).join("")}${links}</div>`;
+}
+function dirFinder(){
+  loadDirectory();
+  const res = dirQ ? dirSearch(dirQ) : [];
+  return `<div class="dirfind"><label class="f" style="margin:0"><span>Add a school from the national list</span><input type="search" id="dirQ" value="${esc(dirQ)}" placeholder="${DIR ? "Type a school or city, e.g. Capac or Louisiana Virtual" : "Loading the national school list…"}" autocomplete="off"${DIR ? "" : " disabled"}></label>
+    <div id="dirRes">${dirResHTML(res)}</div></div>`;
+}
+function dirResHTML(res){
+  if (!dirQ || dnorm(dirQ).length < 3) return "";
+  if (!res.length) return `<p class="muted" style="margin:6px 0 0">No school by that name. Public, charter and private schools with grades 9–12 are listed.</p>`;
+  const lib = site.highSchools || [];
+  return `<ul class="dirlist">${res.map((d, j) => { const have = lib.find(x => dirKey(x.name) === d.key && (!x.state || x.state === d.state));
+    return `<li><span><b>${esc(d.name)}</b><small>${esc(d.city)}, ${d.state} · ${TYPE[d.type] || ""}</small></span>${have ? `<button type="button" class="btn btn-line btn-sm" data-diropen="${esc(have.id)}">Open</button>` : `<button type="button" class="btn btn-gold btn-sm" data-diradd="${j}">Add</button>`}</li>`; }).join("")}</ul>`;
+}
+/* bulk: library schools missing city or state that have exactly one match in the national list (Michigan first) */
+function dirBulkList(){
+  if (!DIR?.length) return [];
+  return (site.highSchools || []).map((it, i) => ({it, i})).filter(({it}) => it.name && (!it.city || !it.state || !it.website)).map(({it, i}) => {
+    const m = dirMatches(it.name, it.state), mi = m.filter(d => d.state === (it.state || "MI"));
+    const d = mi.length === 1 ? mi[0] : m.length === 1 ? m[0] : null;
+    return d && (!it.city || !it.state || (!it.website && d.website)) ? {it, i, d} : null; }).filter(Boolean);
+}
 /* ---------- School library: opponents we've played whose info is missing ---------- */
 const NEED = [["city","city"],["state","state"],["logo","logo"],["primary","primary color"],["secondary","secondary color"]];
 function loadOpponents(){
@@ -525,13 +596,14 @@ function needsInfo(){
 function needsInfoCard(){
   loadOpponents();
   if (oppSeen === false) return `<p class="muted" style="margin:0">Checking the match history for schools that need info…</p>`;
-  const list = needsInfo(); if (!list.length) return `<div class="notice ok" style="margin:0">Every school we've played has a city, state, logo and colors.</div>`;
+  const bulk = dirBulkList(), bulkBtn = bulk.length ? `<button type="button" class="btn btn-gold" data-dirbulk="1">Fill in city, state and website for ${bulk.length} school${bulk.length === 1 ? "" : "s"} from the national list</button>` : "";
+  const list = needsInfo(); if (!list.length) return `${bulkBtn}<div class="notice ok" style="margin:0">Every school we've played has a city, state, logo and colors.</div>`;
   const shown = list.slice(0, needsAll ? list.length : 8);
   return `<div class="needs"><div class="needs-h"><b>⚑ ${list.length} school${list.length === 1 ? "" : "s"} we've played ${list.length === 1 ? "needs" : "need"} info</b><span class="muted">Newest opponents first. Fill in what's missing so logos and colors show on results, overlays and head-to-head pages.</span></div>
     <ul>${shown.map(x => `<li><span><b>${esc(x.name)}</b><small>${x.n} match${x.n === 1 ? "" : "es"}${x.last ? ` · last ${esc(new Date(x.last).toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"}))}` : ""}</small></span>
       <span class="miss">${x.s ? x.miss.map(m => `<i>${esc(m)}</i>`).join("") : `<i class="new">Not in the library</i>`}</span>
       <button type="button" class="btn btn-line" data-fillin="${esc(x.name)}">${x.s ? "Fill in" : "Add school"}</button></li>`).join("")}</ul>
-    ${list.length > shown.length ? `<button type="button" class="btn btn-line" data-needsall="1">Show all ${list.length}</button>` : ""}</div>`;
+    ${list.length > shown.length ? `<button type="button" class="btn btn-line" data-needsall="1">Show all ${list.length}</button>` : ""}${bulkBtn}</div>`;
 }
 let needsAll = false;
 /* ---------- CSV import for the college and high school lists ---------- */
@@ -952,6 +1024,15 @@ $("#panel").addEventListener("click", async e => {
     if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; setDirty(true); setStatus(); renderPanel(); return;
   }
   if (b.dataset.needsall){ needsAll = true; renderPanel(); return; }
+  if (b.dataset.dirfill != null){ const it = site.highSchools[+b.dataset.dirfill], d = dirMatches(it.name, it.state)[+b.dataset.dj]; if (it && d){ dirFill(it, d); openOid = it.id; setDirty(true); setStatus(); renderPanel(); } return; }
+  if (b.dataset.dirbulk){ const l = dirBulkList(); l.forEach(({it, d}) => dirFill(it, d)); setDirty(true); setStatus(); renderSide(); renderPanel(); toast?.(`Filled in ${l.length} schools. Publish to save.`); return; }
+  if (b.dataset.diradd != null){ const d = dirSearch(dirQ)[+b.dataset.diradd]; if (!d) return; const lib = site.highSchools = site.highSchools || [];
+    const sc = {id:"h-" + Math.random().toString(16).slice(2, 10), name:d.name, short:dirShort(d.name), mascot:"", city:d.city, state:d.state, primary:"", secondary:"", logo:"", website:d.website || ""};
+    lib.push(sc); lib.sort((a, c) => String(a.name).localeCompare(String(c.name))); setDirty(true); setStatus();
+    dirQ = ""; openOid = sc.id; listFilter.highSchools = sc.name; renderSide(); renderPanel();
+    const el = document.querySelector(`details[data-oid="${CSS.escape(sc.id)}"]`); el?.scrollIntoView({block:"start", behavior:"smooth"}); return; }
+  if (b.dataset.diropen){ openOid = b.dataset.diropen; const sc = (site.highSchools || []).find(x => x.id === openOid); listFilter.highSchools = sc?.name || ""; dirQ = ""; renderPanel();
+    document.querySelector(`details[data-oid="${CSS.escape(openOid)}"]`)?.scrollIntoView({block:"start", behavior:"smooth"}); return; }
   if (b.dataset.fillin){
     const n = b.dataset.fillin, k = nameKey(n), lib = site.highSchools = site.highSchools || [];
     let sc = lib.find(x => nameKey(x.name) === k || (x.short && nameKey(x.short) === k));
@@ -1017,6 +1098,13 @@ $("#clipInput").addEventListener("change", async e => {
   toast(`Imported ${rows.length} play${rows.length === 1 ? "" : "s"}.${missing ? ` ${missing} didn't match a rostered player; pick them from the list.` : ""} It goes live when you publish.`);
 });
 let csvKey = null;
+$("#panel").addEventListener("input", e => { if (e.target.id !== "dirQ") return; dirQ = e.target.value; $("#dirRes").innerHTML = dirResHTML(dirSearch(dirQ)); });
+/* opening a school: show its national-list match */
+$("#panel").addEventListener("toggle", e => { const d = e.target; if (!d.matches?.("details[data-oid]") || !d.open) return; const slot = d.querySelector("[data-dirslot]"); if (!slot) return;
+  const i = +slot.dataset.dirslot, it = site.highSchools?.[i]; if (it) slot.innerHTML = dirHelp(it, i); }, true);
+/* typed a school's name: look it up in the national list */
+$("#panel").addEventListener("change", e => { const m = String(e.target.dataset?.path || "").match(/^highSchools\.(\d+)\.name$/); if (!m) return;
+  const it = site.highSchools[+m[1]]; if (it){ openOid = it.id; renderPanel(); } });
 $("#panel").addEventListener("input", e => { const el = e.target.closest("[data-filter]"); if (!el) return;
   const q = (listFilter[el.dataset.filter] = el.value).trim().toLowerCase();
   el.parentElement.querySelectorAll("details[data-fname]").forEach(d => { d.hidden = !!q && !d.dataset.fname.includes(q); }); });

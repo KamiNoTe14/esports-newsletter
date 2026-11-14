@@ -813,7 +813,7 @@ document.addEventListener("click", e => {
    Common Core of Data; private: Private School Universe Survey). Only the brackets page loads it. Used to work out
    which school a league team name belongs to, and to offer every school in the "School" box. */
 let DIR = null, dirLoading = null;
-function loadDirectory(){ return DIR ? Promise.resolve(DIR) : dirLoading || (dirLoading = fetch(SITE + "data/school-directory.json?v=1").then(r => r.json())
+function loadDirectory(){ return DIR ? Promise.resolve(DIR) : dirLoading || (dirLoading = fetch(SITE + "data/school-directory.json?v=2").then(r => r.json())
   .then(d => { DIR = (d.schools || []).map(([name, city, state, type]) => ({name, city, state, type, key:dirKey(name)})); if (view === "brackets") renderBrackets(); return DIR; })
   .catch(e => { console.warn("school directory", e); DIR = []; return DIR; })); }
 const dnorm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/&/g, " and ").replace(/\bst\.?\s/g, "saint ").replace(/[^a-z0-9]+/g, " ").trim();

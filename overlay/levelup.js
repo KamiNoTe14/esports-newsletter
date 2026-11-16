@@ -22,10 +22,24 @@ const ENTRANCE_MS = 2600;   // longest entrance; updates that land during it wai
 const out = {set html(h){
   if (h === lastHTML) return;
   const first = !lastHTML;
-  if (!first && Date.now() < enterUntil){ clearTimeout(held); held = setTimeout(() => { held = null; app.innerHTML = h; }, enterUntil - Date.now()); lastHTML = h; return; }
-  lastHTML = h; app.innerHTML = h;
+  if (!first && Date.now() < enterUntil){ clearTimeout(held); held = setTimeout(() => { held = null; app.innerHTML = h; fitBracket(); }, enterUntil - Date.now()); lastHTML = h; return; }
+  lastHTML = h; app.innerHTML = h; fitBracket();
   if (first){ app.firstElementChild?.classList.add("enter"); app.querySelectorAll(".duo > .bug, .duo .full").forEach(el => el.classList.add("enter")); enterUntil = Date.now() + ENTRANCE_MS; countUp(); }
 }};
+/* The bracket box starts below the title block (badge, title, event tape), however tall that turns out, so it never
+   covers the tape. Measured from layout, not the screen, so entrance animations don't throw it off. */
+function fitBracket(){
+  const box = app.querySelector(".bkbox"), top = app.querySelector(".bkf .top"); if (!box || !top) return;
+  const parent = box.offsetParent; let y = 0;
+  for (const el of top.querySelectorAll("*")){ let t = 0, n = el; while (n && n !== parent){ t += n.offsetTop; n = n.offsetParent; } if (n === parent && el.offsetHeight) y = Math.max(y, t + el.offsetHeight); }
+  box.style.top = Math.max(300, Math.ceil(y) + 14) + "px";
+  /* less room than planned: shrink the rows until the whole first round fits */
+  ["--fs", "--lg", "--pad", "--sc"].forEach(k => box.style.removeProperty(k));
+  const bk = box.querySelector(".bk"); if (!bk) return;
+  const cs = getComputedStyle(box), base = Object.fromEntries(["--fs", "--lg", "--pad", "--sc"].map(k => [k, parseFloat(cs.getPropertyValue(k)) || 0]));
+  for (let f = .94, i = 0; i < 8 && bk.scrollHeight > bk.clientHeight + 1; f -= .06, i++) Object.entries(base).forEach(([k, v]) => box.style.setProperty(k, (v * f).toFixed(1) + "px"));
+}
+document.fonts?.ready.then(fitBracket);
 /* Numbers on comparison rows count up from zero during the entrance. */
 function countUp(){
   app.querySelectorAll("[data-count]").forEach((el, i) => {

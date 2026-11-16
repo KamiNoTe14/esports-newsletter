@@ -708,17 +708,31 @@ function boxScore(m){
   </div>`;
 }
 
+/* MVP sticker. Games with a stat that counts against you (Stocks lost, Deaths) rank by the difference: stocks taken
+   minus stocks lost, elims minus deaths, so 6 taken / 1 lost (+5) beats 8 taken / 5 lost (+3). Ties go to fewer lost,
+   then more taken. Rocket League uses its own MVPs count, then goals. Other games: the first stat. A tie at the top,
+   or nobody on the board, means no sticker. */
+function mvpOf(players, defs, val){
+  if (players.length < 2 || !defs.length) return "";
+  const neg = defs.find(d => /\b(lost|deaths?|died|falls?|conceded|against)\b/i.test(d.label)), pos = defs.find(d => d !== neg && !d.avg);
+  const mv = defs.find(d => /^mvps?$/i.test(d.label));
+  const key = r => neg && pos ? [(val(r.st, pos.key) ?? 0) - (val(r.st, neg.key) ?? 0), -(val(r.st, neg.key) ?? 0), val(r.st, pos.key) ?? 0]
+    : mv ? [val(r.st, mv.key) ?? 0, val(r.st, (defs.find(d => d !== mv) || mv).key) ?? 0] : [val(r.st, defs[0].key) ?? 0];
+  const ranked = players.map(r => ({r, k:key(r)})).sort((a, b) => { for (let i = 0; i < a.k.length; i++) if (b.k[i] !== a.k[i]) return b.k[i] - a.k[i]; return 0; });
+  const [a, b] = ranked, same = b && a.k.every((v, i) => v === b.k[i]);
+  const any = defs.some(d => players.some(r => val(r.st, d.key)));
+  return !any || same || (pos && neg ? (val(a.r.st, pos.key) ?? 0) <= 0 : a.k[0] <= 0) ? "" : a.r.p.id;
+}
 /* ---------- post-game stats (full screen) ----------
    The match result, every game's score, then a card for each Hartland player with the stats typed into the
-   scorekeeper (plus K/D when there are elims and deaths). The leader in the first stat gets the MVP sticker. */
+   scorekeeper (plus K/D when there are elims and deaths). MVP: see mvpOf. */
 function postGame(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), unit = g.unit || "Game";
   const games = (m.games || []).filter(x => x.winner || x.us || x.them).sort((a, b) => a.n - b.n);
   const defs = (g.statList || []).filter(d => !d.avg), has = k => defs.some(d => d.key === k), kd = has("elims") && has("deaths");
   const val = (st, k) => st && st[k] != null && st[k] !== "" ? +st[k] : null;
   const players = (m.players || []).map(p => ({p, st:p.stats || {}})).filter(r => Object.keys(r.st).length || !defs.length);
-  const lead = defs[0] && players.length > 1 ? players.slice().sort((a, b) => (val(b.st, defs[0].key) ?? -1) - (val(a.st, defs[0].key) ?? -1))[0] : null;
-  const mvp = lead && (val(lead.st, defs[0].key) ?? 0) > 0 ? lead.p.id : "";
+  const mvp = mvpOf(players, defs, val);
   const fin = m.status === "final", us = L.us ? L : R, them = L.us ? R : L, won = us.won > them.won;
   const head = s => `<div class="pgt ${s.us ? "us" : "them"}" style="${skin(s)}"><div class="pgl">${logoHTML(s.logo, s.name)}</div><b style="font-size:${fitName(s.name, 64, 380)}px">${esc(s.name)}</b></div>`;
   const chip = x => `<span class="pgg${x.winner ? " " + (x.winner === "us" ? "w" : "l") : " live"}"><small>${esc(unit)} ${x.n}</small>${L.us ? `${x.us || 0}–${x.them || 0}` : `${x.them || 0}–${x.us || 0}`}</span>`;

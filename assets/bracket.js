@@ -129,13 +129,13 @@ export function bracketHTML(model, {from = 0, part = [0, 1], logo = () => "", sh
   });
   const tile = (inner, cls = "") => `<span class="bk-lg${cls}">${inner}</span>`;
   const side = (m, t, which) => {
-    if (!t) return `<div class="bk-t none">${tile("", " no")}<span>${m.r === 0 ? (m.bye ? "Bye" : "TBD") : "TBD"}</span><b></b></div>`;
+    if (!t) return `<div class="bk-t none">${tile("", " no")}<i></i><span>${m.r === 0 ? (m.bye ? "Bye" : "TBD") : "TBD"}</span><b></b></div>`;
     const sc = m.s ? m.s.split(/[-–]/)[which === "a" ? 0 : 1] : "", lg = logo(t.school);
-    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}">${lg ? tile(`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('txt');this.replaceWith(document.createTextNode('${esc((short(t.school) || "?")[0]).replace(/'/g, "")}'))">`) : tile(esc((short(t.school) || "?")[0]), " txt")}<span title="${esc(t.label || t.school)}">${t.seed !== "" ? `<i>${esc(t.seed)}</i>` : ""}${esc(teamName(t, short))}</span><b>${esc(sc)}</b></div>`; };
+    return `<div class="bk-t${m.w === which ? " win" : m.w ? " out" : ""}${t.us ? " us" : ""}">${lg ? tile(`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('txt');this.replaceWith(document.createTextNode('${esc((short(t.school) || "?")[0]).replace(/'/g, "")}'))">`) : tile(esc((short(t.school) || "?")[0]), " txt")}<i>${esc(t.seed)}</i><span title="${esc(t.label || t.school)}">${esc(teamName(t, short))}</span><b>${esc(sc)}</b></div>`; };
   /* --rounds is the column count minus one (the champion column), so a slice without a champion still fills the width */
   return `<div class="bk" style="--rounds:${whole ? rounds.length : rounds.length - 1};--rows:${rounds[0]?.[1].length || 1}">${rounds.map(([r, list]) => `<div class="bk-r"><h4>${esc(model.names[r])}</h4><div class="bk-ms">${list.map(m =>
     `<div class="bk-m${m.us ? " us" : ""}${m.bye ? " bye" : ""}${m.auto ? " auto" : ""}" data-k="${m.key}">${side(m, m.a, "a")}${side(m, m.b, "b")}${edit && m.a && m.b ? `<button type="button" class="bk-edit" aria-label="Score">✎</button>` : ""}</div>`).join("")}</div></div>`).join("")}
-    ${whole ? `<div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none">${tile("", " no")}<span>TBD</span><b></b></div>`}</div></div></div>` : ""}</div>`;
+    ${whole ? `<div class="bk-r bk-champ"><h4>Champion</h4><div class="bk-ms"><div class="bk-m">${model.champ ? side({r:99, w:"a", s:""}, model.champ, "a") : `<div class="bk-t none">${tile("", " no")}<i></i><span>TBD</span><b></b></div>`}</div></div></div>` : ""}</div>`;
 }
 
 /* A league bracket exported from PlayVS / Rally Cry as JSON ({bracket, rounds, matches:[{round, number, slots}],

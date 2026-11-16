@@ -12,6 +12,9 @@
 
 export const SIZES = [4, 8, 16, 32];
 /* Standard bracket order of seeds for n teams: 8 -> [1,8,4,5,2,7,3,6] */
+/* League brackets (PlayVS / Rally Cry) are laid out the standard way: 1 v 16 at the top, then 8 v 9, 4 v 13…
+   so a team's place in the first round gives its seed. A seed typed in the scorekeeper wins over this. */
+export const posSeed = (n, pos) => seedOrder(n)[pos - 1] ?? "";
 export function seedOrder(n){
   let o = [1];
   while (o.length < n){ const m = o.length * 2 + 1; o = o.flatMap(s => [s, m - s]); }
@@ -40,7 +43,7 @@ export function buildBracket(b, finals = []){
       return [num ? +(num[1] || num[2] || num[3]) : 99, /\bjv\b|junior varsity/i.test(l) ? 1 : 0, i]; };
     g.sort((a, b) => { const A = key(a), B = key(b); return A[0] - B[0] || A[1] - B[1] || A[2] - B[2]; }).forEach((i, k) => dup[i] = String.fromCharCode(65 + k));
   });
-  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {dup:dup[sd - 1] || "", seed:b.seq ? String(t.seedNo ?? "").trim() : sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
+  const team = sd => { const t = seeds[sd - 1]; return t && String(t.school || "").trim() ? {dup:dup[sd - 1] || "", seed:b.seq ? String(t.seedNo ?? "").trim() || (b.posSeeds === false ? "" : posSeed(n, sd)) : sd, school:String(t.school).trim(), label:String(t.label || "").trim(), teamId:t.teamId || "", us:isHartland(t.school)} : null; };
   const order = b.seq ? Array.from({length:n}, (_, i) => i + 1) : seedOrder(n), rounds = [];
   /* our playoff results from the scorekeeper: final playoff/finals matches of this team against that school */
   const ourIds = new Set([b.teamId, ...seeds.map(x => x?.teamId)].filter(Boolean));

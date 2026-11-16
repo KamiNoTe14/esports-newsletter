@@ -337,8 +337,8 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=26";
-import {watchFinals, sortBrackets} from "../../assets/live.js?v=62";
-import * as BK from "../../assets/bracket.js?v=9";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=63";
+import * as BK from "../../assets/bracket.js?v=10";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
 
@@ -924,10 +924,11 @@ function renderBrackets(){
         </div>
         <label class="tog" style="margin:10px 2px"><input type="checkbox" data-bf="on"${b.on !== false ? " checked" : ""}> Show on the website</label>
         <h2>Seeds</h2>
-        ${b.seq ? `<p class="hint" style="margin:0 2px 8px">Imported from the league's bracket file, so teams are in bracket order (the first two are the top match). The league's file doesn't include seeds: type each team's seed in the small box and it shows next to the name. Import the file again later to bring in new results; seeds you typed stay.</p>` : ""}<p class="hint" style="margin:0 2px 8px">School gives the logo. Team name is what shows on the bracket, so use it when a school has more than one team in (Varsity / JV, #1 / #2), or to match the league's names.</p>
+        ${b.seq ? `<p class="hint" style="margin:0 2px 8px">Imported from the league's bracket file, so teams are in bracket order (the first two are the top match). The league's file doesn't list seeds, so each team's seed comes from its place in the bracket (the league lays brackets out 1 v ${b.size}, then ${b.size / 2} v ${b.size / 2 + 1}…), shown faintly in the small box. If one is wrong, type the right seed over it. Import the file again later to bring in new results; seeds you typed stay.</p>
+        <label class="toggle" style="margin:0 2px 8px"><input type="checkbox" data-posseeds${b.posSeeds === false ? "" : " checked"}> Show seeds from bracket position</label>` : ""}<p class="hint" style="margin:0 2px 8px">School gives the logo. Team name is what shows on the bracket, so use it when a school has more than one team in (Varsity / JV, #1 / #2), or to match the league's names.</p>
         <div class="bk-seeds">${Array.from({length:+b.size}, (_, k) => { const sd = b.seeds?.[k] || {}, us = BK.isHartland(sd.school);
           const ourT = (site.teams || []).filter(t => !b.game || t.gameKey === b.game);
-          return `<div class="bk-seed">${b.seq ? `<input class="bk-sn" data-seedno="${k}" value="${esc(sd.seedNo || "")}" inputmode="numeric" placeholder="#" aria-label="Seed number" title="Seed number"${sd.school ? "" : " disabled"}>` : `<b>${k + 1}</b>`}<input list="bkSchools" data-seed="${k}" value="${esc(sd.school || "")}" placeholder="${k ? "School (blank = bye)" : "School"}" autocomplete="off">${us
+          return `<div class="bk-seed">${b.seq ? `<input class="bk-sn" data-seedno="${k}" value="${esc(sd.seedNo || "")}" inputmode="numeric" placeholder="${b.posSeeds === false ? "#" : BK.posSeed(b.size, k + 1)}" aria-label="Seed number" title="Seed number"${sd.school ? "" : " disabled"}>` : `<b>${k + 1}</b>`}<input list="bkSchools" data-seed="${k}" value="${esc(sd.school || "")}" placeholder="${k ? "School (blank = bye)" : "School"}" autocomplete="off">${us
             ? `<select data-seedteam="${k}" aria-label="Which of our teams"><option value="">Our team…</option>${ourT.map(t => `<option value="${esc(t.id)}"${t.id === sd.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select>`
             : `<input data-seedlab="${k}" value="${esc(sd.label || "")}" placeholder="Team name (optional)" autocomplete="off"${sd.school ? "" : " disabled"}>`}</div>`; }).join("")}</div>
         <details style="margin:8px 2px"><summary class="hint" style="cursor:pointer;margin:0">Paste seeds instead</summary><p class="hint" style="margin:8px 0 0">One per line, seed 1 first. Add a team name after a tab or " | ", like <i>Detroit Catholic Central | JV</i>. A blank line is a bye.</p><textarea data-bkpaste rows="5" style="width:100%;margin-top:6px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:10px;font:inherit" placeholder="Detroit Catholic Central | Varsity&#10;Detroit Catholic Central | JV"></textarea><button type="button" class="btn btn-line" data-bkpasteok style="margin-top:6px">Fill in the seeds</button></details></details>` : ""}
@@ -994,6 +995,7 @@ const bkOf = el => { const id = el.closest("[data-bid]")?.dataset.bid; return br
 document.addEventListener("input", e => {
   if (view !== "brackets") return;
   const el = e.target, b = bkOf(el); if (!b || !bkMine(b)) return;
+  if (el.dataset.posseeds != null){ b.posSeeds = el.checked; bkSave(b); bkRedraw(b); renderBrackets(); return; }
   if (el.dataset.seedno != null){ bkSeeds(b); const v = el.value.replace(/\D/g, "").slice(0, 3); if (v !== el.value) el.value = v; b.seeds[+el.dataset.seedno].seedNo = v; bkSave(b, 900);
     clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => bkRedraw(b), 900); return; }
   if (el.dataset.seedlab != null){ bkSeeds(b); b.seeds[+el.dataset.seedlab].label = el.value.trim(); b.seeds[+el.dataset.seedlab].manual = true; bkSave(b, 900);

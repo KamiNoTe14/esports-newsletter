@@ -361,6 +361,25 @@ function ourStanding(m){
   return row ? {...row, of:(t.rows || []).length} : null;
 }
 
+/* Playoff seeds for a postseason match, from the playoff bracket: ours (the seed carrying this team) and theirs (the
+   other team in our bracket match, else their school's only seed). null outside the playoffs or with no bracket. */
+function playoffSeeds(m){
+  if (!BKM || !postseason(m) || !bkList.length) return null;
+  const ok = k => BKM.schoolKey(k), opp = ok(m.opponent?.school || m.opponent?.team || "");
+  for (const b of sortBrackets(bkList).filter(b => b.game === m.game)){
+    const seeds = b.seeds || []; if (!seeds.length) continue;
+    const model = BKM.buildBracket(b, []), isUs = t => t && (t.teamId ? t.teamId === m.teamId : BKM.isHartland(t.school) && !seeds.some(s => s.teamId));
+    for (const round of model.rounds) for (const x of round){
+      const [u, o] = isUs(x.a) ? [x.a, x.b] : isUs(x.b) ? [x.b, x.a] : [];
+      if (u && o && ok(o.school) === opp && u.seed !== "" && o.seed !== "") return {us:u.seed, them:o.seed};
+    }
+    const u = model.rounds[0].flatMap(x => [x.a, x.b]).find(isUs); if (!u) continue;
+    const theirs = model.rounds[0].flatMap(x => [x.a, x.b]).filter(t => t && ok(t.school) === opp);
+    return {us:u.seed || "", them:theirs.length === 1 ? theirs[0].seed || "" : ""};
+  }
+  return null;
+}
+
 /* ---------- VS screen ---------- */
 /* Team name on the VS screen: one line when it fits at a good size; otherwise split into two balanced lines
    ("Walled Lake / Western"), sized so the longer line fits the 660px column. */
@@ -375,7 +394,10 @@ function vsName(name){
 function vs(m){
   const g = gameFor(site, m.game), [L, R] = sides(m), mine = teamSeason(m), h2h = finals.filter(x => x.game === m.game && sameOpp(x, m)), st = standingFor(m);
   const us = ourStanding(m);
-  const ourLine = us ? `${us.w}–${us.l}, #${us.rank} in the league` : mine.length ? `${record(mine).text} this season` : "", theirLine = st ? `${st.w}–${st.l}, #${st.rank} in the league` : "";
+  /* in the playoffs the number that matters is the bracket seed, not the regular-season rank */
+  const sd = playoffSeeds(m), rank = (row, seed) => seed !== undefined && seed !== "" ? `#${seed} seed` : row ? `#${row.rank} in the league` : "";
+  const ourLine = us ? `${us.w}–${us.l}, ${rank(us, sd?.us)}` : mine.length ? `${record(mine).text} this season${sd?.us ? `, #${sd.us} seed` : ""}` : sd?.us ? `#${sd.us} seed` : "";
+  const theirLine = st ? `${st.w}–${st.l}, ${rank(st, sd?.them)}` : sd?.them ? `#${sd.them} seed` : "";
   const lineup = s => m.show ? [] : s.us ? (m.players || []).map(p => tagOf(p) || nameOf(p)) : oppList(m);
   const side = (s, c) => `<div class="side ${c}" style="${skin(s)}"><div class="crest">${logoHTML(s.logo, s.name)}</div>
     ${vsName(s.name)}${(s.team || s.school) ? `<span class="team">${esc(s.us ? s.team : s.team || s.school)}</span>` : ""}
@@ -818,9 +840,10 @@ function splitShell(m, plates, guides, cls = ""){
    The bracket built in the scorekeeper (Playoff brackets) for this match's team, or ?b=2 for the second one listed there.
    Live: a winner clicked in the scorekeeper shows here in seconds, and our results fill in when a playoff match is final.
    Shows up to four rounds (a 32-team bracket starts at the Round of 16); ?from=0 shows every round. */
-let BKM = null;
-let bkList = [];
-if (LAYER === "bracket"){ import("../assets/bracket.js?v=11").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0); }
+var BKM = null;   // var: the VS screen may draw before this line runs
+var bkList = [];
+/* brackets: the bracket layer draws them; every other layer reads playoff seeds from them (VS screen) */
+import("../assets/bracket.js?v=11").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0);
 const bkHas = (b, id) => !!id && (b.teamId === id || (b.seeds || []).some(x => x?.teamId === id));
 function bracketLayer(m){
   if (!BKM) return;

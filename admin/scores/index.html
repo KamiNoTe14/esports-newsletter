@@ -336,7 +336,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
-  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=26";
+  fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=27";
 import {watchFinals, sortBrackets} from "../../assets/live.js?v=64";
 import * as BK from "../../assets/bracket.js?v=11";
 import {recordBreaks} from "../../assets/records.js?v=5";
@@ -952,6 +952,9 @@ function renderBrackets(){
    Places the teams exactly as the league has them, works out each school from the team name (the team → school
    list from imports and standings, then the high school list), and fills in any results already in the file.
    Importing the same bracket again later updates it (new results), keeping our title, stream and website settings. */
+/* Smash has Varsity and JV leagues, and their Varsity and JV are different players, so scouting keeps a report per level */
+function scoutLevel(m){ const ts = (site.teams || []).filter(t => t.gameKey === m.game), lv = new Set(ts.map(t => t.level).filter(Boolean)); if (lv.size < 2) return "";
+  return ts.find(t => t.id === m.teamId)?.level || (/\bjv\b/i.test(m.teamName || "") ? "JV" : "Varsity"); }
 function bkSchoolOf(name){
   const n = s => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(), k = n(name); if (!k) return "";
   const known = Object.entries(site.teamSchools || {}).find(([t]) => n(t) === k); if (known) return known[1];
@@ -1481,7 +1484,7 @@ function oppSetHTML(g, n, unit){
 }
 async function loadOppSets(){
   const id = cur.id; oppSets[id] = {};
-  try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || "");
+  try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || "", scoutLevel(cur));
     oppRep[id] = r || null;
     (r?.statGames || []).filter(x => x.matchId === id).forEach(x => { const p = (x.players || [])[0]; if (p){ const o = oppSets[id][x.n] = {tag:p.tag || ""}; (p.chars?.length ? p.chars : [p.char]).forEach((c, k) => { if (c && k < OK.length) o[OK[k]] = c; }); } });
     if (cur?.id === id && Object.keys(oppSets[id]).length) $("#details") && !document.activeElement?.closest?.("#details") && renderMatch(); } catch(e){}
@@ -1491,9 +1494,9 @@ async function saveOppSet(n){
   const g = gameFor(site, cur.game), v = oppSets[cur.id]?.[n]; if (!v) return;
   try {
     const school = cur.opponent?.school || cur.opponent?.team || oppName(cur), now = new Date().toISOString();
-    const r = await be.scoutFor(cur.game, school), id = r?.id || be.newScoutId();
+    const r = await be.scoutFor(cur.game, school, scoutLevel(cur)), id = r?.id || be.newScoutId();
     const base = r ? Object.fromEntries(Object.entries(r).filter(([k]) => k !== "id"))
-      : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
+      : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, ...(scoutLevel(cur) ? {level:scoutLevel(cur)} : {}), plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
     base.statGames = (base.statGames || []).filter(x => !(x.matchId === cur.id && x.n === n));
     if (v.tag){
       const gm = (cur.games || []).find(x => x.n === n) || {}, ours = Object.values(gm.p || {})[0] || {}, chars = OK.map(f => v[f] || "").filter(Boolean);
@@ -1704,9 +1707,9 @@ function bindReads(){
     if (box.querySelector("[data-rscout]")?.checked && theirs.length){
       try {
         const school = cur.opponent?.school || cur.opponent?.team || oppName(cur), now = new Date().toISOString();
-        const r = await be.scoutFor(cur.game, school), id = r?.id || be.newScoutId();
+        const r = await be.scoutFor(cur.game, school, scoutLevel(cur)), id = r?.id || be.newScoutId();
         const base = r ? Object.fromEntries(Object.entries(r).filter(([k]) => k !== "id"))
-          : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
+          : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, ...(scoutLevel(cur) ? {level:scoutLevel(cur)} : {}), plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
         base.players = base.players || [];
         theirs.forEach(p => { if (base.players.length < 40 && !base.players.some(x => tagKey(x.tag) === tagKey(p.tag))) base.players.push({tag:p.tag, role:"", notes:""}); });
         const gm = (cur.games || []).find(x => x.n === n) || {};
@@ -1811,9 +1814,9 @@ function bindInbox(){
       if (el.querySelector("[data-scout]").checked && theirs.length){
         try {
           const school = cur.opponent?.school || cur.opponent?.team || oppName(cur), now = new Date().toISOString();
-          const r = await be.scoutFor(cur.game, school), id = r?.id || be.newScoutId();
+          const r = await be.scoutFor(cur.game, school, scoutLevel(cur)), id = r?.id || be.newScoutId();
           const base = r ? Object.fromEntries(Object.entries(r).filter(([k]) => k !== "id"))
-            : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
+            : {school:schoolInfo(site, school)?.name || school, schoolKey:scoutKey(school), game:cur.game, ...(scoutLevel(cur) ? {level:scoutLevel(cur)} : {}), plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:now, createdBy:user?.email || ""};
           base.players = base.players || [];
           theirs.forEach(p => { if (base.players.length < 40 && !base.players.some(x => rlKey(x.tag) === rlKey(p.name))) base.players.push({tag:p.name, role:"", notes:""}); });
           const entry = {matchId:cur.id, n, date:cur.startsAt, team:cur.teamName, result:won ? "L" : "W", score:`${gt}–${gu}`,
@@ -1860,7 +1863,7 @@ function cmpPickHTML(g, st, them){
 async function cmpScout(n, name){
   if (!be.scoutFor) return;
   try {
-    const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || ""), k = String(name).toLowerCase().replace(/[^a-z0-9]/g, "");
+    const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || "", scoutLevel(cur)), k = String(name).toLowerCase().replace(/[^a-z0-9]/g, "");
     const rows = (r?.statGames || []).flatMap(x => (x.players || []).filter(p => String(p.tag || "").toLowerCase().replace(/[^a-z0-9]/g, "") === k));
     const role = (r?.players || []).find(p => String(p.tag || "").toLowerCase().replace(/[^a-z0-9]/g, "") === k)?.role || "";
     const sum = {}; rows.forEach(p => Object.entries(p).forEach(([key, v]) => { if (key !== "tag" && !isNaN(+v)) sum[key] = (sum[key] || 0) + (+v); }));
@@ -1893,7 +1896,7 @@ async function loadOppNames(){
   /* re-checked (at most every 20 seconds) so a roster added in scouting after the match was opened still shows up */
   if (!cur || !be.scoutFor || Date.now() - (oppLoadedAt[cur.id] || 0) < 20000) return;
   const id = cur.id; oppLoadedAt[id] = Date.now(); rlOppNames[id] = rlOppNames[id] || [];
-  try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || ""); rlOppNames[id] = (r?.players || []).map(p => p.tag).filter(Boolean);
+  try { const r = await be.scoutFor(cur.game, cur.opponent?.school || cur.opponent?.team || "", scoutLevel(cur)); rlOppNames[id] = (r?.players || []).map(p => p.tag).filter(Boolean);
     oppRoster[id] = (r?.players || []).filter(p => p.tag); oppDefault(id);
     if (cur?.id === id && $("#onStream") && !document.activeElement?.closest?.("#details")) renderMatch(true);
     const dl = $("#rlThem") || $("#cmpThem"); if (dl && cur?.id === id) rlOppNames[id].forEach(n => { if (![...dl.options].some(o => o.value === n)){ const o = document.createElement("option"); o.value = n; dl.appendChild(o); } }); } catch(e){}

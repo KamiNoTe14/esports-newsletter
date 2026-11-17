@@ -152,6 +152,8 @@ div.sgside{cursor:default}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;border-left:4px solid var(--gold);padding:10px 16px;border-radius:6px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);z-index:50}
 .private{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#7A4A00;background:#FFF4D1;border:1px solid #F0D98A;border-radius:999px;padding:3px 10px}
 .side-team{padding-bottom:10px;border-bottom:1px solid var(--line)}
+.lvbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:14.5px}
+.lvbar.warn{border-color:#F0D98A;background:#FFF8E1}
 .side-q{width:100%;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
 .side-sub{display:block;margin:2px 10px 4px;color:var(--muted);font-size:12px}
 .side-all summary{cursor:pointer;list-style:none;margin:6px 4px 4px;padding:8px 10px;border-radius:8px;font-weight:700;color:var(--ink);display:flex;justify-content:space-between}
@@ -173,7 +175,7 @@ div.sgside{cursor:default}
    coaches and people a coach has added to a team can read it. Nothing here is ever written to the public site files.
    Coaches (EDITORS) manage members and edit everything. Captains edit reports for their games.
    Everyone on a team can read their games' reports and add notes. */
-import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=26";
+import {FIREBASE_CONFIG, EDITORS, isMock, gameFor, schoolInfo, shortSchool, fmtDay, fmtTime, seasonOf} from "../assets/matches.js?v=27";
 import {playbookCSS, playbookList, playbookView} from "./playbook.js?v=2";
 import {smashCSS, smashPlaybook, smashStage, TYPES as SMASH_TYPES} from "./smash.js?v=3";
 import {framesCSS, charList, charSheet} from "./frames.js?v=2";
@@ -277,7 +279,14 @@ const gName = k => { const g = gameFor(site, k); return (g.name && g.name !== k 
 const gShort = k => { const g = gameFor(site, k); return (g.short && g.short !== k ? g.short : "") || gName(k); };
 const logoOf = school => { if (/^hartland\b/i.test(String(school || "").trim())) return BASE + "assets/eagle.png"; const l = schoolInfo(site, school)?.logo; return l ? (/^(https?:|data:)/.test(l) ? l : BASE + l) : ""; };
 const imgTag = (school, cls) => { const u = logoOf(school); return u ? `<img class="${cls || ""}" src="${esc(u)}" alt="" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph ${cls || ""}'}))">` : `<span class="ph ${cls || ""}"></span>`; };
-const reportFor = (school, game) => reports.find(r => r.schoolKey === key(school) && r.game === game);
+/* Games where we field teams at more than one level (Smash: Varsity and JV, in separate leagues) get a report per
+   level, because their Varsity and JV are different players. Elsewhere one report covers the school. */
+const levelsOf = game => [...new Set((site.teams || []).filter(t => t.gameKey === game).map(t => t.level || "").filter(Boolean))];
+const leveled = game => levelsOf(game).length > 1;
+const levelOfTeam = (teamId, teamName) => { const t = (site.teams || []).find(x => x.id === teamId); return t?.level || (/\bjv\b|junior varsity/i.test(teamName || "") ? "JV" : /varsity/i.test(teamName || "") ? "Varsity" : ""); };
+const reportFor = (school, game, level) => { const mine = reports.filter(r => r.schoolKey === key(school) && r.game === game);
+  if (!leveled(game) || !level) return mine.find(r => !r.level) || mine[0];
+  return mine.find(r => r.level === level) || mine.find(r => !r.level); };
 
 /* ---------- top bar ---------- */
 function drawActs(){
@@ -307,7 +316,7 @@ function layout(){
   const games = myGames().filter(g => reports.some(r => r.game === g) || upcoming().some(m => m.game === g) || isCoach());
   const up = upcoming().filter(m => !gameF || m.game === gameF);
   const reps = reports.filter(r => canSee(r.game) && (!gameF || r.game === gameF)).sort((a, b) => String(a.school).localeCompare(String(b.school)));
-  const cur = x => view.kind === x.kind && view.school === x.school && view.game === x.game;
+  const cur = x => view.kind === x.kind && view.school === x.school && view.game === x.game && (view.level || "") === (x.level || "");
   const btn = (x, sub) => `<button type="button" data-find="${esc((shortSchool(x.school) + " " + x.school + " " + gShort(x.game)).toLowerCase())}" data-view='${esc(JSON.stringify(x))}'${cur(x) ? ' aria-current="true"' : ""}>${imgTag(x.school)}<span><b>${esc(shortSchool(x.school))}</b><small>${sub}</small></span></button>`;
   $("#app").innerHTML = `<div class="layout"><aside class="side">
       <span class="private">🔒 Private to Hartland esports</span>
@@ -317,13 +326,14 @@ function layout(){
       </div></div>` : ""}
       ${games.length > 1 ? `<div class="chips"><button class="chip" data-gf="" aria-pressed="${!gameF}">All</button>${games.map(g => `<button class="chip" data-gf="${esc(g)}" aria-pressed="${gameF === g}">${esc(gShort(g))}</button>`).join("")}</div>` : ""}
       ${reps.length > 6 ? `<input type="search" class="side-q" id="sideQ" value="${esc(sideQ)}" placeholder="Find a school…" autocomplete="off" aria-label="Find a scouting report">` : ""}
-      <div><h3>Up next</h3><div class="list">${up.length ? up.slice(0, 12).map(m => btn({kind:"report", school:m.opponent.school, game:m.game}, `${esc(gShort(m.game))} · ${esc(fmtDay(m.startsAt))}${reportFor(m.opponent.school, m.game) ? "" : " · no report yet"}`)).join("") : `<p class="muted" style="margin:4px 10px">Nothing on the schedule.</p>`}</div></div>
+      <div><h3>Up next</h3><div class="list">${up.length ? up.slice(0, 12).map(m => { const lv = leveled(m.game) ? levelOfTeam(m.teamId, m.teamName) : "", rr = reportFor(m.opponent.school, m.game, lv);
+        return btn({kind:"report", school:m.opponent.school, game:m.game, ...(lv ? {level:lv} : {})}, `${esc(gShort(m.game))}${lv ? " " + esc(lv) : ""} · ${esc(fmtDay(m.startsAt))}${!rr ? " · no report yet" : lv && rr.level !== lv ? " · no " + esc(lv) + " report yet" : ""}`); }).join("") : `<p class="muted" style="margin:4px 10px">Nothing on the schedule.</p>`}</div></div>
       <div><h3>Scouting reports</h3>${(() => {
         if (!reps.length) return `<p class="muted" style="margin:4px 10px">No reports yet.</p>`;
         /* the six most recently worked on, then everything else folded away (search looks through all of them) */
         const day = iso => iso ? new Date(iso).toLocaleDateString(undefined, {month:"short", day:"numeric"}) : "";
         const recent = reps.slice().sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""))).slice(0, reps.length > 8 ? 6 : reps.length);
-        const rest = reps.filter(r => !recent.includes(r)), item = r => btn({kind:"report", school:r.school, game:r.game}, `${esc(gShort(r.game))}${r.updatedAt ? ` · updated ${esc(day(r.updatedAt))}` : ""}`);
+        const rest = reps.filter(r => !recent.includes(r)), item = r => btn({kind:"report", school:r.school, game:r.game, ...(r.level ? {level:r.level} : {})}, `${esc(gShort(r.game))}${r.level ? " " + esc(r.level) : leveled(r.game) ? " · team not set" : ""}${r.updatedAt ? ` · updated ${esc(day(r.updatedAt))}` : ""}`);
         return `<div class="list" id="repRecent">${rest.length ? `<small class="side-sub">Recently updated</small>` : ""}${recent.map(item).join("")}</div>
           ${rest.length ? `<details class="side-all" id="repAll"${sideAll || sideQ ? " open" : ""}><summary>More reports <span>(${rest.length})</span></summary><div class="list">${rest.map(item).join("")}</div></details>` : ""}
           <p class="muted side-none" hidden style="margin:4px 10px">No school matches.</p>`; })()}</div>
@@ -351,7 +361,7 @@ function go(v){
   if (stopPlay){ stopPlay(); stopPlay = null; }
   view = v; editing = v.kind === "play" || v.kind === "smashStage" ? v.kind : null;   // an open play isn't redrawn when data changes (it would reset the board)
   if (unNotes){ unNotes(); unNotes = null; } notes = [];
-  if (v.kind === "report"){ const r = reportFor(v.school, v.game); if (r) unNotes = db.watchNotes(r.id, r.game, n => { notes = n; if (view.kind === "report" && !editing) drawMain(); }); }
+  if (v.kind === "report"){ const r = reportFor(v.school, v.game, v.level); if (r) unNotes = db.watchNotes(r.id, r.game, n => { notes = n; if (view.kind === "report" && !editing) drawMain(); }); }
   layout(); window.scrollTo({top:0});
 }
 function drawMain(){
@@ -435,7 +445,7 @@ const smashIcon = c => { const g = gameFor(site, "smash"), dir = String(g.charIc
   return BASE + dir + "/" + String(c.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-logo.webp"; };
 /* their characters in the next Smash match, from the scouting report's game history */
 function oppSmashChars(){
-  const m = upcoming().find(x => /smash/.test(x.game)); const r = m && reportFor(m.opponent.school, m.game); if (!r || !frameIndex) return [];
+  const m = upcoming().find(x => /smash/.test(x.game)); const r = m && reportFor(m.opponent.school, m.game, levelOfTeam(m.teamId, m.teamName)); if (!r || !frameIndex) return [];
   const names = new Set(); (r.statGames || []).forEach(gm => (gm.players || []).forEach(p => (p.chars?.length ? p.chars : [p.char]).filter(Boolean).forEach(n => names.add(n))));
   return [...names].flatMap(n => (frameIndex.roster || {})[n] || frameIndex.chars.filter(c => c.name.toLowerCase() === n.toLowerCase()).map(c => c.slug));
 }
@@ -445,7 +455,8 @@ const getFrame = async s => frameCache[s] || (frameCache[s] = await db.getFrame(
 /* whose characters to suggest: the team that plays this school next, else the one that played them last, else Varsity */
 let sgTeam = {};
 function sgDefaultTeam(r, teams){
-  const mine = m => m.game === r.game && reportFor(m.opponent?.school, m.game)?.id === r.id && teams.some(t => t.id === m.teamId);
+  if (r.level){ const t = teams.find(t => t.level === r.level); if (t) return t.id; }
+  const mine = m => m.game === r.game && reportFor(m.opponent?.school, m.game, levelOfTeam(m.teamId, m.teamName))?.id === r.id && teams.some(t => t.id === m.teamId);
   const next = upcoming().find(mine); if (next) return next.teamId;
   const last = (finals || []).filter(mine).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1)[0]; if (last) return last.teamId;
   const lastStat = (r.statGames || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)))[0]?.team;
@@ -499,13 +510,16 @@ function drawNew(M){
   const schools = [...new Set([...(site.highSchools || []).map(s => s.name), ...finals.map(m => m.opponent?.school).filter(Boolean), ...upcoming().map(m => m.opponent.school)])].sort();
   M.innerHTML = `<div class="card"><h2>New scouting report</h2><p class="intro">One report per opponent per game. If one already exists you'll be taken to it.</p>
     <div class="grid g2"><label class="f"><span>Opponent school</span><input id="nSchool" list="nSchools" placeholder="Novi High School"><datalist id="nSchools">${schools.map(s => `<option value="${esc(s)}">`).join("")}</datalist></label>
-    <label class="f"><span>Game</span><select id="nGame">${games.map(g => `<option value="${esc(g)}"${g === gameF ? " selected" : ""}>${esc(gName(g))}</option>`).join("")}</select></label></div>
+    <label class="f"><span>Game</span><select id="nGame">${games.map(g => `<option value="${esc(g)}"${g === gameF ? " selected" : ""}>${esc(gName(g))}</option>`).join("")}</select></label>
+    <label class="f" id="nLevelF"><span>Their team (the one we'd play)</span><select id="nLevel"></select></label></div>
     <div><button class="btn btn-gold" id="nGo">Start report</button></div></div>`;
+  const lvl = () => { const L = levelsOf($("#nGame").value); $("#nLevelF").hidden = L.length < 2; $("#nLevel").innerHTML = L.map(l => `<option>${esc(l)}</option>`).join(""); };
+  $("#nGame").onchange = lvl; lvl();
   $("#nGo").onclick = async () => {
-    const school = $("#nSchool").value.trim(), game = $("#nGame").value; if (!school){ toast("Type the opponent school."); return; }
-    const lib = schoolInfo(site, school), name = lib?.name || school;
-    if (reportFor(name, game)) return go({kind:"report", school:name, game});
-    await startReport(name, game); go({kind:"report", school:name, game}); };
+    const school = $("#nSchool").value.trim(), game = $("#nGame").value, level = leveled(game) ? $("#nLevel").value : ""; if (!school){ toast("Type the opponent school."); return; }
+    const lib = schoolInfo(site, school), name = lib?.name || school, v = {kind:"report", school:name, game, ...(level ? {level} : {})};
+    const ex = reportFor(name, game, level); if (ex && (ex.level || "") === level) return go(v);
+    await startReport(name, game, level); go(v); };
 }
 /* Rocket League box scores saved from our streamed games (the scorekeeper's "Stats from the stream"). Per gamertag:
    games played and per-game averages, best first; then each game. */
@@ -623,37 +637,41 @@ function statsEditHTML(d, game){
           <td><button class="btn btn-line btn-sm danger" data-delsp="${gi}:${pi}" aria-label="Remove this player from the game">×</button></td></tr>`).join("")}</table></div>
       <button class="btn btn-line btn-sm" data-addsp="${gi}">+ Player</button></div>`; }).join("")}</div>`;
 }
-async function startReport(school, game){
+async function startReport(school, game, level = ""){
   const id = db.newReportId();
-  const r = {school, schoolKey:key(school), game, plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:new Date().toISOString(), createdBy:user.email, updatedAt:new Date().toISOString(), updatedBy:user.email};
+  const r = {school, schoolKey:key(school), game, ...(level ? {level} : {}), plan:"", tendencies:"", picks:"", players:[], vods:[], createdAt:new Date().toISOString(), createdBy:user.email, updatedAt:new Date().toISOString(), updatedBy:user.email};
   reports = [...reports, {id, ...r}];
   try { await db.saveReport(id, r); toast("Report started."); } catch(e){ console.error(e); toast("Couldn't start the report. You may not have permission."); }
 }
 
 /* ---------- one report ---------- */
-function history(school, game){
-  return finals.filter(m => key(m.opponent?.school) === key(school) && m.game === game).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
+function history(school, game, level){
+  return finals.filter(m => key(m.opponent?.school) === key(school) && m.game === game && (!level || levelOfTeam(m.teamId, m.teamName) === level)).sort((a, b) => a.startsAt > b.startsAt ? -1 : 1);
 }
 function drawReport(M){
-  const {school, game} = view, r = reportFor(school, game), lib = schoolInfo(site, school), edit = canEdit(game), hist = history(school, game);
+  const {school, game} = view, lv = leveled(game) ? (view.level || "") : "", r0 = reportFor(school, game, lv), r = r0 && (!lv || !r0.level || r0.level === lv) ? r0 : null;
+  const level = lv || r?.level || "", lib = schoolInfo(site, school), edit = canEdit(game), hist = history(school, game, level);
   const w = hist.filter(m => m.result === "W").length, l = hist.filter(m => m.result === "L").length;
   const gw = hist.reduce((a, m) => { (m.games || []).forEach(x => { if (x.winner === "us") a[0]++; else if (x.winner === "them") a[1]++; }); return a; }, [0, 0]);
-  const next = upcoming().find(m => key(m.opponent.school) === key(school) && m.game === game);
-  const head = `<div class="card"><div class="hero">${imgTag(school, "logo")}<div><h4>${esc(gName(game))} scouting</h4><h2>${esc(lib?.name || school)}</h2>
+  const next = upcoming().find(m => key(m.opponent.school) === key(school) && m.game === game && (!level || levelOfTeam(m.teamId, m.teamName) === level));
+  const head = `<div class="card"><div class="hero">${imgTag(school, "logo")}<div><h4>${esc(gName(game))}${level ? " " + esc(level) : ""} scouting</h4><h2>${esc(lib?.name || school)}</h2>
       <div class="muted">${esc([lib?.mascot, [lib?.city, lib?.state].filter(Boolean).join(", ")].filter(Boolean).join(" · "))}${lib ? ` · <a href="${BASE}opponent.html?school=${encodeURIComponent(lib.name)}" target="_blank" rel="noopener">Public head to head ↗</a>` : ""}</div></div></div>
-    <div class="stats"><div class="stat"><small>Our record in ${esc(gShort(game))}</small><b>${w}–${l}</b><span>${hist.length ? `${hist.length} meeting${hist.length === 1 ? "" : "s"}` : "Never played them"}</span></div>
+    <div class="stats"><div class="stat"><small>Our record in ${esc(gShort(game))}${level ? " " + esc(level) : ""}</small><b>${w}–${l}</b><span>${hist.length ? `${hist.length} meeting${hist.length === 1 ? "" : "s"}` : "Never played them"}</span></div>
       <div class="stat"><small>Games / sets</small><b>${gw[0]}–${gw[1]}</b><span>${gw[0] + gw[1] ? Math.round(100 * gw[0] / (gw[0] + gw[1])) + "% won" : ""}</span></div>
       <div class="stat"><small>${next ? "Next meeting" : "Last meeting"}</small><b>${next ? esc(fmtDay(next.startsAt)) : hist[0] ? esc(fmtDay(hist[0].startsAt)) : "–"}</b><span>${next ? esc(`${next.teamName} · ${fmtTime(next.startsAt)}`) : hist[0] ? esc(`${hist[0].teamName} · ${hist[0].result === "W" ? "Won" : "Lost"} ${hist[0].score?.us}–${hist[0].score?.them}`) : ""}</span></div></div>
-    ${hist.length ? `<details><summary class="muted" style="cursor:pointer">Every meeting in ${esc(gShort(game))}</summary><table class="hist">${hist.map(m => `<tr><td>${esc(fmtDay(m.startsAt))}, ${new Date(m.startsAt).getFullYear()}</td><td>${esc(m.teamName)}</td><td class="${m.result}">${esc(m.result || "")} ${m.score?.us}–${m.score?.them}</td><td class="muted">${esc((m.games || []).map(x => `${x.us}-${x.them}`).join(", "))}</td></tr>`).join("")}</table></details>` : ""}</div>`;
+    ${hist.length ? `<details><summary class="muted" style="cursor:pointer">Every meeting in ${esc(gShort(game))}${level ? " " + esc(level) : ""}</summary><table class="hist">${hist.map(m => `<tr><td>${esc(fmtDay(m.startsAt))}, ${new Date(m.startsAt).getFullYear()}</td><td>${esc(m.teamName)}</td><td class="${m.result}">${esc(m.result || "")} ${m.score?.us}–${m.score?.them}</td><td class="muted">${esc((m.games || []).map(x => `${x.us}-${x.them}`).join(", "))}</td></tr>`).join("")}</table></details>` : ""}</div>`;
   if (!r){
     M.innerHTML = head + `<div class="card"><h3 style="margin:0">No scouting report yet</h3><p class="intro">${edit ? "Start one to add a game plan, players to watch and VODs. The whole team can then add notes." : "A captain or coach needs to start the report. Once they do, you can add notes here."}</p>${edit ? `<div><button class="btn btn-gold" id="start">Start the report</button></div>` : ""}</div>`;
-    $("#start") && ($("#start").onclick = async () => { await startReport(lib?.name || school, game); go(view); });
+    $("#start") && ($("#start").onclick = async () => { await startReport(lib?.name || school, game, level); go(view); });
     return;
   }
   const ed = editing === r.id, d = ed ? editDraft : r;
   const txt = (k, label, hint) => `<div class="sec"><div class="sec-h"><h4>${label}</h4></div>${ed ? `<textarea data-k="${k}" rows="4" placeholder="${esc(hint)}">${esc(d[k] || "")}</textarea>` : d[k] ? `<p class="text">${esc(d[k])}</p>` : `<p class="empty">Nothing yet.</p>`}</div>`;
   const players = d.players || [], vods = d.vods || [];
-  M.innerHTML = head + `<div class="card"><div class="card-h"><h2 style="font-size:22px">Scouting report</h2>
+  /* which of their teams this report is about (Smash Varsity and JV are different players) */
+  const lvBar = leveled(game) ? `<div class="lvbar${r.level ? "" : " warn"}"><span>${r.level ? `This report is about ${esc(shortSchool(school))}'s <b>${esc(r.level)}</b> team.` : `Which of ${esc(shortSchool(school))}'s teams is this report about? Their Varsity and JV are different players.`}</span>
+    ${edit ? `<span class="chips">${levelsOf(game).map(l => `<button class="chip" data-setlv="${esc(l)}" aria-pressed="${r.level === l}">${esc(l)}</button>`).join("")}</span>` : ""}</div>` : "";
+  M.innerHTML = head + lvBar + `<div class="card"><div class="card-h"><h2 style="font-size:22px">Scouting report</h2>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="muted">Updated ${esc(when(r.updatedAt))}${r.updatedBy ? ` by ${esc(nameOf(r.updatedBy))}` : ""}</span>
       ${edit ? (ed ? `<button class="btn btn-gold btn-sm" id="save">Save</button><button class="btn btn-line btn-sm" id="cancel">Cancel</button>` : `<button class="btn btn-line btn-sm" id="edit">Edit report</button>`) : ""}</div></div>
     ${txt("plan", "Game plan", "How we beat them: draft, roles, what to focus on.")}
@@ -682,6 +700,11 @@ let editDraft = null;
 const nameOf = email => { const m = members.find(x => x.email === email); return m?.name || (email === user?.email ? user.name : email.split("@")[0]); };
 function bindReport(r){
   const M = $("#main"), q = s => M.querySelector(s);
+  M.querySelectorAll("[data-setlv]").forEach(b => b.onclick = async () => { const level = b.dataset.setlv; if (level === r.level) return;
+    const other = reports.find(x => x.id !== r.id && x.schoolKey === r.schoolKey && x.game === r.game && x.level === level);
+    if (other) return toast(`There's already a ${level} report for ${shortSchool(r.school)}. Open it from the list.`);
+    try { await db.saveReport(r.id, {...strip(r), level, updatedAt:new Date().toISOString(), updatedBy:user.email}); r.level = level; toast(`Marked as their ${level} team.`); go({kind:"report", school:r.school, game:r.game, level}); }
+    catch(e){ console.error(e); toast("Couldn't save. You may not have permission to edit this report."); } });
   if ($("#sgBox")) fillSuggest(r);
   q("#edit") && (q("#edit").onclick = () => { editing = r.id; editDraft = JSON.parse(JSON.stringify({plan:r.plan, tendencies:r.tendencies, picks:r.picks, players:r.players || [], vods:r.vods || [], statGames:r.statGames || []})); editDraft.players.forEach(p => p._orig = p.tag || ""); drawMain(); });
   q("#cancel") && (q("#cancel").onclick = () => { editing = null; drawMain(); });
@@ -728,7 +751,7 @@ function bindReport(r){
   M.querySelectorAll("[data-delp]").forEach(b => b.onclick = () => { pull(); editDraft.players.splice(+b.dataset.delp, 1); drawMain(); });
   M.querySelectorAll("[data-delv]").forEach(b => b.onclick = () => { pull(); editDraft.vods.splice(+b.dataset.delv, 1); drawMain(); });
   q("#save") && (q("#save").onclick = async () => { pull();
-    const data = {school:r.school, schoolKey:r.schoolKey, game:r.game, createdAt:r.createdAt || "", createdBy:r.createdBy || "",
+    const data = {school:r.school, schoolKey:r.schoolKey, game:r.game, ...(r.level ? {level:r.level} : {}), createdAt:r.createdAt || "", createdBy:r.createdBy || "",
       plan:editDraft.plan.trim(), tendencies:editDraft.tendencies.trim(), picks:editDraft.picks.trim(),
       players:editDraft.players.map(p => ({tag:String(p.tag || "").trim(), role:String(p.role || "").trim(), notes:String(p.notes || "").trim(), ...(p.starter ? {starter:true} : {})})).filter(p => p.tag || p.notes).slice(0, 40),
       vods:editDraft.vods.map(v => ({label:String(v.label || "").trim(), url:String(v.url || "").trim()})).filter(v => v.url).slice(0, 40),

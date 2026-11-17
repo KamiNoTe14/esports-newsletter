@@ -9,6 +9,13 @@
 
    Add ?mock=1 to a page URL to use a pretend database in this browser (for testing). */
 
+/* the scouting report for one school: with a level (Smash Varsity / JV, where their teams are different players), the
+   report for that level, else one with no level set yet; null when only the other level's report exists */
+function pickScout(list, school, level){
+  const mine = list.filter(r => r.schoolKey === scoutKey(school) || scoutKey(r.school) === scoutKey(school));
+  if (!level) return mine.find(r => !r.level) || mine[0] || null;
+  return mine.find(r => r.level === level) || mine.find(r => !r.level) || null;
+}
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAcJVvVCfWZ0d_ykE2QtI4PbP3WHFpCblA",
   authDomain: "hartland-esports.firebaseapp.com",
@@ -251,10 +258,9 @@ async function firebaseBackend(){
     watchRLInbox(matchId, cb){ return fb.onSnapshot(fb.query(fb.collection(db, "rlInbox"), fb.where("matchId", "==", matchId)), s => cb(s.docs.map(d => ({id:d.id, ...d.data()}))), () => cb([])); },
     async removeRLBox(id){ await fb.deleteDoc(fb.doc(db, "rlInbox", id)); },
     /* scouting report for one opponent and game (coaches can read and write every report) */
-    async scoutFor(game, school){
+    async scoutFor(game, school, level = ""){
       const s = await fb.getDocs(fb.query(fb.collection(db, "scoutReports"), fb.where("game", "==", game)));
-      const d = s.docs.find(x => x.data().schoolKey === scoutKey(school) || scoutKey(x.data().school) === scoutKey(school));
-      return d ? {id:d.id, ...d.data()} : null;
+      return pickScout(s.docs.map(d => ({id:d.id, ...d.data()})), school, level);
     },
     /* Playoff brackets (brackets/{id}): built and updated in the scorekeeper, read live by the website and stream. */
     watchBrackets(cb){ return fb.onSnapshot(fb.collection(db, "brackets"), s => cb(s.docs.map(d => ({id:d.id, ...d.data()}))), e => { console.error(e); cb([]); }); },
@@ -318,7 +324,7 @@ function mockBackend(){
     watchRLInbox(matchId, cb){ const f = () => { let all = {}; try { all = JSON.parse(localStorage.getItem(RLK)) || {}; } catch(e){} cb(Object.entries(all).map(([id, b]) => ({id, ...b})).filter(b => b.matchId === matchId)); };
       f(); const h = e => { if (e.key === RLK) f(); }; window.addEventListener("storage", h); const t = setInterval(f, 2000); return () => { window.removeEventListener("storage", h); clearInterval(t); }; },
     async removeRLBox(id){ let all = {}; try { all = JSON.parse(localStorage.getItem(RLK)) || {}; } catch(e){} delete all[id]; localStorage.setItem(RLK, JSON.stringify(all)); },
-    async scoutFor(game, school){ const d = mockScout(); const e = Object.entries(d.reports).find(([, r]) => r.game === game && (r.schoolKey === scoutKey(school) || scoutKey(r.school) === scoutKey(school))); return e ? {id:e[0], ...e[1]} : null; },
+    async scoutFor(game, school, level = ""){ const d = mockScout(); return pickScout(Object.entries(d.reports).filter(([, r]) => r.game === game).map(([id, r]) => ({id, ...r})), school, level); },
     newScoutId(){ return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
     async saveScout(id, r){ const d = mockScout(); d.reports[id] = JSON.parse(JSON.stringify(r)); localStorage.setItem("eagles-mock-scout", JSON.stringify(d)); }
   };

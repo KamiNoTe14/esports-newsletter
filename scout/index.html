@@ -692,7 +692,7 @@ function bindReport(r){
     M.querySelectorAll("[data-sg]").forEach(t => { const gm = editDraft.statGames[+t.dataset.sg];
       if (t.dataset.sk === "us" || t.dataset.sk === "them"){ (gm._sc = gm._sc || {})[t.dataset.sk] = t.value.replace(/\D/g, ""); }
       else if (t.dataset.sk) gm[t.dataset.sk] = t.dataset.sk === "n" ? (+t.value || "") : t.value;
-      else { const p = gm.players[+t.dataset.sp], f = t.dataset.sf;
+      else { gm.players = gm.players || []; const p = gm.players[+t.dataset.sp] || (gm.players[+t.dataset.sp] = {}), f = t.dataset.sf;   // a set row always has its player's boxes, even before a player is saved
         if (f === "tag") p.tag = t.value;
         else if (f === "chars"){ const c = t.value.split("/").map(x => x.trim()).filter(Boolean); delete p.char; delete p.chars; if (c.length) p.char = c[0]; if (c.length > 1) p.chars = c; }
         else if (t.value.trim() === "") delete p[f]; else { const v = parseFloat(t.value.replace(/[^0-9.\-]/g, "")); if (!isNaN(v)) p[f] = v; } } });

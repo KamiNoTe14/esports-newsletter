@@ -547,7 +547,7 @@ const hasChars = game => !!(gameFor(site, game).charLabel || "").trim();
 /* Smash, the league's way: a GAME is the whole school-vs-school contest (best of 5 sets), a SET is one player against
    one player (best of 3), a MATCH is a single fight. Saved entries are sets (one per entry, grouped into a game by
    matchId), each with matches won by each side; the game score is sets won. */
-const sgGroup = (gm, i) => gm.matchId || "_" + i;
+const sgGroup = (gm, i) => gm.matchId || `_${String(gm.date || "").slice(0, 10)}|${String(gm.vs || "").toLowerCase()}`;   // older sets with no match id: same day + same opponent = one game
 function smashEditHTML(d, game){
   const list = d.statGames || [], g = gameFor(site, game), school = view.school, oppName = shortSchool(school), ourTeams = (site.teams || []).filter(t => t.gameKey === game);
   const toWin = Math.ceil((+g.bestOf || 5) / 2), tags = (d.players || []).map(p => p.tag).filter(Boolean);
@@ -706,16 +706,18 @@ function bindReport(r){
   q("#addG") && !/smash/.test(r.game) && (q("#addG").onclick = () => { pull(); const size = Math.max(1, +gameFor(site, r.game).teamSize || 1), ros = editDraft.players.filter(p => p.tag), st = ros.filter(p => p.starter);
     editDraft.statGames.unshift({matchId:"manual-" + Math.random().toString(36).slice(2, 9), n:1, date:new Date().toISOString().slice(0, 10), team:"", result:"", score:"", players:(st.length ? st : ros).slice(0, size).map(p => ({tag:p.tag}))}); drawMain(); });
   M.querySelectorAll("[data-addset]").forEach(b => b.onclick = () => { pull(); const id = b.dataset.addset, mine = editDraft.statGames.map((gm, i) => ({gm, i})).filter(x => sgGroup(x.gm, x.i) === id), h = mine[0].gm;
-    if (!h.matchId) h.matchId = "manual-" + Math.random().toString(36).slice(2, 9);
+    if (!h.matchId){ const mid = "manual-" + Math.random().toString(36).slice(2, 9); mine.forEach(x => x.gm.matchId = mid); }
     const n = Math.max(0, ...mine.map(x => +x.gm.n || 0)) + 1, st = editDraft.players.filter(p => p.tag && p.starter);
     editDraft.statGames.splice(Math.max(...mine.map(x => x.i)) + 1, 0, {matchId:h.matchId, n, date:h.date, vs:h.vs || "", team:h.team || "", result:"", score:"", players:[{tag:st[n - 1]?.tag || ""}]}); drawMain(); });
   M.querySelectorAll("[data-delgame]").forEach(b => b.onclick = () => { pull(); if (!confirm("Remove this whole game and all its sets?")) return; const id = b.dataset.delgame;
     editDraft.statGames = editDraft.statGames.filter((gm, i) => sgGroup(gm, i) !== id); drawMain(); });
   M.querySelectorAll('[data-gk="vs"]').forEach(t => t.onchange = () => { pull(); editDraft.statGames.forEach((gm, i) => { if (sgGroup(gm, i) === t.dataset.sgg){ if (/^hartland\b/i.test(gm.vs || "")) gm.vs = ""; if (gm.vs) gm.team = ""; } }); drawMain(); });
   M.querySelectorAll('[data-sk="vs"]').forEach(t => t.onchange = () => { pull(); const gm = editDraft.statGames[+t.dataset.sg]; if (/^hartland\b/i.test(gm.vs || "")) gm.vs = ""; if (gm.vs) gm.team = ""; drawMain(); });
-  M.querySelectorAll("[data-sgw]").forEach(b => b.onclick = () => { pull(); const [g, side] = b.dataset.sgw.split(":"), gm = editDraft.statGames[+g], v = side === "us" ? "L" : "W";
-    gm.result = gm.result === v ? "" : v; drawMain(); });
-  M.querySelectorAll("[data-delg]").forEach(b => b.onclick = () => { pull(); if (!confirm("Remove this game's stats?")) return; editDraft.statGames.splice(+b.dataset.delg, 1); drawMain(); });
+  /* tapping a winner: compare with what was picked BEFORE this tap (saving the boxes may have just picked one from the score) */
+  M.querySelectorAll("[data-sgw]").forEach(b => b.onclick = () => { const [g, side] = b.dataset.sgw.split(":"), v = side === "us" ? "L" : "W";
+    const before = M.querySelector(`[data-sg="${g}"][data-sk="result"]`)?.value || ""; pull(); const gm = editDraft.statGames[+g];
+    gm.result = before === v ? "" : v; drawMain(); });
+  M.querySelectorAll("[data-delg]").forEach(b => b.onclick = () => { pull(); if (!confirm(/smash/.test(r.game) ? "Remove this set?" : "Remove this game's stats?")) return; editDraft.statGames.splice(+b.dataset.delg, 1); drawMain(); });
   M.querySelectorAll("[data-addsp]").forEach(b => b.onclick = () => { pull(); editDraft.statGames[+b.dataset.addsp].players.push({tag:""}); drawMain(); });
   M.querySelectorAll("[data-delsp]").forEach(b => b.onclick = () => { pull(); const [g, p] = b.dataset.delsp.split(":").map(Number); editDraft.statGames[g].players.splice(p, 1); drawMain(); });
   q("#addP") && (q("#addP").onclick = () => { pull(); editDraft.players.push({tag:"", role:"", notes:""}); drawMain(); });

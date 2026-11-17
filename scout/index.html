@@ -127,6 +127,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .sgside i{font-style:normal;font:800 11px/1 inherit;letter-spacing:.08em;background:#FFBC05;color:#0B1D33;padding:3px 6px;border-radius:4px}
 .sgsc{width:64px;height:56px;text-align:center;font:700 28px/1 inherit;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#fff;color:#0B1D33}
 .sgdash{color:#9FB3C8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;text-align:center}
+.sgtop.sm{grid-template-columns:minmax(130px,1fr) minmax(150px,1.3fr) minmax(120px,1fr) 0 auto}
+@media (max-width:760px){.sgtop.sm{grid-template-columns:1fr 1fr}}
+.sets{display:flex;flex-direction:column;gap:8px}
+.setrow{display:grid;grid-template-columns:64px minmax(110px,1fr) minmax(110px,1fr) auto 84px 84px auto;gap:8px;align-items:end;padding:8px;border:1px solid var(--line);border-radius:10px;background:#F7F9FC}
+.setwin > div{display:flex;gap:6px;align-items:center}
+.setwin > span{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.sw{min-height:40px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;font:700 13px inherit;color:var(--ink);cursor:pointer;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw.on{background:#FFBC05;border-color:#E0A400}
+.sgsc.sm{width:46px;height:40px;font-size:20px;border:1px solid var(--line)}
+.sgsc.ro{display:grid;place-items:center}
+div.sgside{cursor:default}
+@media (max-width:860px){.setrow{grid-template-columns:64px minmax(0,1fr) minmax(0,1fr)}.setrow .setwin{grid-column:1/-1}.setrow .btn{justify-self:start}}
 .sghint{margin:0;color:var(--muted);font-size:12.5px}
 .sgbox{margin:4px 0 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 @media (max-width:760px){.sgtop{grid-template-columns:80px minmax(0,1fr)}.sgtop .btn{grid-column:1/-1;justify-self:start}
@@ -532,7 +544,50 @@ function statCols(game, list){
   return keys.map(k => [defs.find(d => d[1] === k)?.[0] || S_LABEL[k] || k.replace(/_/g, " "), k]);
 }
 const hasChars = game => !!(gameFor(site, game).charLabel || "").trim();
+/* Smash, the league's way: a GAME is the whole school-vs-school contest (best of 5 sets), a SET is one player against
+   one player (best of 3), a MATCH is a single fight. Saved entries are sets (one per entry, grouped into a game by
+   matchId), each with matches won by each side; the game score is sets won. */
+const sgGroup = (gm, i) => gm.matchId || "_" + i;
+function smashEditHTML(d, game){
+  const list = d.statGames || [], g = gameFor(site, game), school = view.school, oppName = shortSchool(school), ourTeams = (site.teams || []).filter(t => t.gameKey === game);
+  const toWin = Math.ceil((+g.bestOf || 5) / 2), tags = (d.players || []).map(p => p.tag).filter(Boolean);
+  const groups = []; list.forEach((gm, i) => { const id = sgGroup(gm, i); let gr = groups.find(x => x.id === id); if (!gr) groups.push(gr = {id, sets:[]}); gr.sets.push({gm, i}); });
+  return `<div class="sec"><div class="sec-h"><h4>Games and stats</h4><button class="btn btn-line btn-sm" id="addG">+ Game</button></div>
+    <p class="sghint" style="margin:0 0 4px">A game is the whole best-of-${esc(g.bestOf || 5)} against one school; each set is one player against one player, best of 3 matches. Change "Played against" to log their games against other schools.</p>
+    <datalist id="vsSchools"><option value="Hartland">${(site.highSchools || []).filter(h => key(h.name) !== key(school)).map(h => `<option value="${esc(h.name)}">`).join("")}</datalist>
+    <datalist id="oppTags">${tags.map(t => `<option value="${esc(t)}">`).join("")}</datalist>
+    ${groups.length ? "" : `<p class="empty">No games yet. Add one, or they fill in from the scorekeeper.</p>`}
+    ${groups.map(gr => { const h = gr.sets[0].gm, vs = String(h.vs || "").trim(), usGame = !vs || /^hartland\b/i.test(vs), vsName = usGame ? "Hartland" : shortSchool(vs), vsSchool = usGame ? "Hartland High School" : vs;
+      const sets = gr.sets.slice().sort((a, b) => (+a.gm.n || 0) - (+b.gm.n || 0));
+      const sw = sets.filter(x => x.gm.result === "L").length, sl = sets.filter(x => x.gm.result === "W").length, gw = sw >= toWin ? "us" : sl >= toWin ? "them" : "";
+      const teamOpts = [...new Set([...ourTeams.map(t => t.name), h.team].filter(Boolean))];
+      return `<div class="sgame"><div class="sgtop sm">
+        <label class="f"><span>Date</span><input type="date" data-sgg="${esc(gr.id)}" data-gk="date" value="${esc(String(h.date || "").slice(0, 10))}"></label>
+        <label class="f"><span>Played against</span><input list="vsSchools" data-sgg="${esc(gr.id)}" data-gk="vs" value="${esc(usGame ? "" : vs)}" placeholder="Hartland" autocomplete="off"></label>
+        ${usGame ? `<label class="f"><span>Our team</span><select data-sgg="${esc(gr.id)}" data-gk="team"><option value="">–</option>${teamOpts.map(t => `<option${t === h.team ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>` : `<span></span>`}
+        <span></span><button class="btn btn-line btn-sm danger" data-delgame="${esc(gr.id)}">Remove game</button></div>
+      <div class="sgboard">
+        <div class="sgside us${gw === "us" ? " win" : gw ? " lose" : ""}">${imgTag(vsSchool)}<span><b>${esc(vsName)}</b><small>${usGame ? esc(h.team || "") : "Their opponent"}</small></span>${gw === "us" ? `<i>WIN</i>` : ""}</div>
+        <b class="sgsc ro">${sw}</b><span class="sgdash">Sets</span><b class="sgsc ro">${sl}</b>
+        <div class="sgside them${gw === "them" ? " win" : gw ? " lose" : ""}">${gw === "them" ? `<i>WIN</i>` : ""}<span><b>${esc(oppName)}</b><small>${usGame ? "Opponent" : "Scouting"}</small></span>${imgTag(school)}</div></div>
+      <p class="sghint">The game score counts itself from the sets below: first to ${toWin} sets wins.</p>
+      <div class="sets">${sets.map(({gm, i}) => { const [th, us] = String(gm.score || "").split(/[^0-9]+/).filter(Boolean), won = gm.result === "L" ? "us" : gm.result === "W" ? "them" : "", p = (gm.players || [])[0] || {};
+        return `<div class="setrow"><input type="hidden" data-sg="${i}" data-sk="result" value="${esc(gm.result || "")}">
+          <label class="f sgn"><span>Set</span><input type="number" min="1" data-sg="${i}" data-sk="n" value="${esc(gm.n ?? "")}"></label>
+          <label class="f"><span>${esc(oppName)} player</span><input list="oppTags" data-sg="${i}" data-sp="0" data-sf="tag" value="${esc(p.tag || "")}" placeholder="Gamertag"></label>
+          <label class="f"><span>Character</span><input data-sg="${i}" data-sp="0" data-sf="chars" value="${esc((p.chars?.length ? p.chars : [p.char]).filter(Boolean).join(" / "))}" placeholder="Char / char"></label>
+          <div class="f setwin"><span>Matches won · tap the winner</span><div>
+            <button type="button" class="sw us${won === "us" ? " on" : ""}" data-sgw="${i}:us">${esc(vsName)}</button>
+            <input class="sgsc sm" inputmode="numeric" data-sg="${i}" data-sk="us" value="${esc(us ?? "")}" placeholder="0" aria-label="${esc(vsName)} matches won">
+            <input class="sgsc sm" inputmode="numeric" data-sg="${i}" data-sk="them" value="${esc(th ?? "")}" placeholder="0" aria-label="${esc(oppName)} matches won">
+            <button type="button" class="sw them${won === "them" ? " on" : ""}" data-sgw="${i}:them">${esc(oppName)}</button></div></div>
+          <label class="f"><span>Stocks taken</span><input inputmode="numeric" data-sg="${i}" data-sp="0" data-sf="stocks_taken" value="${esc(p.stocks_taken ?? "")}"></label>
+          <label class="f"><span>Stocks lost</span><input inputmode="numeric" data-sg="${i}" data-sp="0" data-sf="stocks_lost" value="${esc(p.stocks_lost ?? "")}"></label>
+          <button class="btn btn-line btn-sm danger" data-delg="${i}" aria-label="Remove this set">×</button></div>`; }).join("")}</div>
+      <button class="btn btn-line btn-sm" data-addset="${esc(gr.id)}">+ Set</button></div>`; }).join("")}</div>`;
+}
 function statsEditHTML(d, game){
+  if (/smash/.test(game)) return smashEditHTML(d, game);
   const list = d.statGames || [], F = statCols(game, list), g = gameFor(site, game), unit = g.unit || (/smash/.test(game) ? "Set" : "Game"), ch = hasChars(game);
   /* box score per title: the score is counted in the game's own unit (Smash: games in the set, Rocket League: goals,
      Fortnite: rounds), the columns are that title's stats */
@@ -641,12 +696,22 @@ function bindReport(r){
         if (f === "tag") p.tag = t.value;
         else if (f === "chars"){ const c = t.value.split("/").map(x => x.trim()).filter(Boolean); delete p.char; delete p.chars; if (c.length) p.char = c[0]; if (c.length > 1) p.chars = c; }
         else if (t.value.trim() === "") delete p[f]; else { const v = parseFloat(t.value.replace(/[^0-9.\-]/g, "")); if (!isNaN(v)) p[f] = v; } } });
+    M.querySelectorAll("[data-gk]").forEach(t => editDraft.statGames.forEach((gm, i) => { if (sgGroup(gm, i) === t.dataset.sgg) gm[t.dataset.gk] = t.value; }));
     /* the score is kept as "theirs–ours" (the report is about them); a score with a clear winner picks the winner if none is tapped */
     editDraft.statGames.forEach(gm => { if (!gm._sc) return; const {us = "", them = ""} = gm._sc; delete gm._sc;
       gm.score = us !== "" || them !== "" ? `${them || 0}–${us || 0}` : "";
       if (!gm.result && us !== "" && them !== "" && +us !== +them) gm.result = +us > +them ? "L" : "W"; }); };
-  q("#addG") && (q("#addG").onclick = () => { pull(); const size = Math.max(1, +gameFor(site, r.game).teamSize || 1), ros = editDraft.players.filter(p => p.tag), st = ros.filter(p => p.starter);
+  q("#addG") && /smash/.test(r.game) && (q("#addG").onclick = () => { pull(); const st = editDraft.players.filter(p => p.tag && p.starter);
+    editDraft.statGames.unshift({matchId:"manual-" + Math.random().toString(36).slice(2, 9), n:1, date:new Date().toISOString().slice(0, 10), team:"", result:"", score:"", players:[{tag:st[0]?.tag || ""}]}); drawMain(); });
+  q("#addG") && !/smash/.test(r.game) && (q("#addG").onclick = () => { pull(); const size = Math.max(1, +gameFor(site, r.game).teamSize || 1), ros = editDraft.players.filter(p => p.tag), st = ros.filter(p => p.starter);
     editDraft.statGames.unshift({matchId:"manual-" + Math.random().toString(36).slice(2, 9), n:1, date:new Date().toISOString().slice(0, 10), team:"", result:"", score:"", players:(st.length ? st : ros).slice(0, size).map(p => ({tag:p.tag}))}); drawMain(); });
+  M.querySelectorAll("[data-addset]").forEach(b => b.onclick = () => { pull(); const id = b.dataset.addset, mine = editDraft.statGames.map((gm, i) => ({gm, i})).filter(x => sgGroup(x.gm, x.i) === id), h = mine[0].gm;
+    if (!h.matchId) h.matchId = "manual-" + Math.random().toString(36).slice(2, 9);
+    const n = Math.max(0, ...mine.map(x => +x.gm.n || 0)) + 1, st = editDraft.players.filter(p => p.tag && p.starter);
+    editDraft.statGames.splice(Math.max(...mine.map(x => x.i)) + 1, 0, {matchId:h.matchId, n, date:h.date, vs:h.vs || "", team:h.team || "", result:"", score:"", players:[{tag:st[n - 1]?.tag || ""}]}); drawMain(); });
+  M.querySelectorAll("[data-delgame]").forEach(b => b.onclick = () => { pull(); if (!confirm("Remove this whole game and all its sets?")) return; const id = b.dataset.delgame;
+    editDraft.statGames = editDraft.statGames.filter((gm, i) => sgGroup(gm, i) !== id); drawMain(); });
+  M.querySelectorAll('[data-gk="vs"]').forEach(t => t.onchange = () => { pull(); editDraft.statGames.forEach((gm, i) => { if (sgGroup(gm, i) === t.dataset.sgg){ if (/^hartland\b/i.test(gm.vs || "")) gm.vs = ""; if (gm.vs) gm.team = ""; } }); drawMain(); });
   M.querySelectorAll('[data-sk="vs"]').forEach(t => t.onchange = () => { pull(); const gm = editDraft.statGames[+t.dataset.sg]; if (/^hartland\b/i.test(gm.vs || "")) gm.vs = ""; if (gm.vs) gm.team = ""; drawMain(); });
   M.querySelectorAll("[data-sgw]").forEach(b => b.onclick = () => { pull(); const [g, side] = b.dataset.sgw.split(":"), gm = editDraft.statGames[+g], v = side === "us" ? "L" : "W";
     gm.result = gm.result === v ? "" : v; drawMain(); });

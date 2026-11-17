@@ -114,8 +114,24 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.seg button{border:0;background:none;padding:5px 10px;font:600 12px/1 inherit;color:var(--muted);cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--navy, #00274C);color:#fff}
 .sgame{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;display:grid;gap:8px}
-.sgh{display:grid;grid-template-columns:minmax(150px,1.3fr) 76px repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end}
-@media (max-width:760px){.sgh{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sgtop{display:grid;grid-template-columns:80px minmax(140px,1fr) minmax(140px,1fr) auto;gap:8px;align-items:end}
+.sgtop .btn{align-self:end}
+.sgboard{display:grid;grid-template-columns:minmax(0,1fr) 64px auto 64px minmax(0,1fr);gap:10px;align-items:center;padding:10px;border-radius:12px;background:#0B1D33}
+.sgside{display:flex;align-items:center;gap:10px;min-height:64px;padding:8px 12px;border-radius:10px;border:2px solid transparent;background:rgba(255,255,255,.06);color:#fff;text-align:left;cursor:pointer;font:inherit;position:relative}
+.sgside.them{justify-content:flex-end;text-align:right}
+.sgside img,.sgside .ph{width:40px;height:40px;border-radius:8px;background:#fff;object-fit:contain;flex:none}
+.sgside b{display:block;font:700 18px/1.1 var(--display, inherit);text-transform:uppercase;letter-spacing:.02em}
+.sgside small{display:block;color:#9FB3C8;font-size:12px}
+.sgside:hover{border-color:rgba(255,188,5,.5)}
+.sgside.win{border-color:#FFBC05;background:rgba(255,188,5,.16)}.sgside.lose{opacity:.55}
+.sgside i{font-style:normal;font:800 11px/1 inherit;letter-spacing:.08em;background:#FFBC05;color:#0B1D33;padding:3px 6px;border-radius:4px}
+.sgsc{width:64px;height:56px;text-align:center;font:700 28px/1 inherit;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#fff;color:#0B1D33}
+.sgdash{color:#9FB3C8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;text-align:center}
+.sghint{margin:0;color:var(--muted);font-size:12.5px}
+.sgbox{margin:4px 0 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:760px){.sgtop{grid-template-columns:80px minmax(0,1fr)}.sgtop .btn{grid-column:1/-1;justify-self:start}
+  .sgboard{grid-template-columns:minmax(0,1fr) 54px;grid-template-areas:"a b" "c d"}.sgboard .sgdash{display:none}
+  .sgside.them{grid-row:2;grid-column:1;justify-content:flex-end;text-align:left;flex-direction:row-reverse}.sgboard .sgsc:last-of-type{grid-row:2;grid-column:2}.sgsc{width:54px}}
 .sedit td{padding:3px 4px}.sedit input{min-width:62px;width:100%}.sedit td:first-child input{min-width:130px}
 .hist .W{color:var(--ok);font-weight:700}.hist .L{color:var(--danger);font-weight:700}
 .tbl{width:100%;border-collapse:collapse}
@@ -123,6 +139,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .tbl td{border-top:1px solid var(--line);padding:8px;vertical-align:top}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;border-left:4px solid var(--gold);padding:10px 16px;border-radius:6px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);z-index:50}
 .private{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#7A4A00;background:#FFF4D1;border:1px solid #F0D98A;border-radius:999px;padding:3px 10px}
+.side-team{padding-bottom:10px;border-bottom:1px solid var(--line)}
 .side-q{width:100%;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
 .side-sub{display:block;margin:2px 10px 4px;color:var(--muted);font-size:12px}
 .side-all summary{cursor:pointer;list-style:none;margin:6px 4px 4px;padding:8px 10px;border-radius:8px;font-weight:700;color:var(--ink);display:flex;justify-content:space-between}
@@ -282,6 +299,10 @@ function layout(){
   const btn = (x, sub) => `<button type="button" data-find="${esc((shortSchool(x.school) + " " + x.school + " " + gShort(x.game)).toLowerCase())}" data-view='${esc(JSON.stringify(x))}'${cur(x) ? ' aria-current="true"' : ""}>${imgTag(x.school)}<span><b>${esc(shortSchool(x.school))}</b><small>${sub}</small></span></button>`;
   $("#app").innerHTML = `<div class="layout"><aside class="side">
       <span class="private">🔒 Private to Hartland esports</span>
+      ${canSee(PB_GAME) || canSee("smash") ? `<div class="side-team"><h3>Team playbooks</h3><div class="list">
+        ${canSee(PB_GAME) ? `<button type="button" data-view='{"kind":"playbook"}'${view.kind === "playbook" || view.kind === "play" ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🏎️</span><span><b>Rocket League playbook</b><small>${plays.filter(p => p.game === PB_GAME).length} plays</small></span></button>` : ""}
+        ${canSee("smash") ? `<button type="button" data-view='{"kind":"smash"}'${/^smash/.test(view.kind) ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🥊</span><span><b>Smash playbook</b><small>Stages and characters</small></span></button>` : ""}
+      </div></div>` : ""}
       ${games.length > 1 ? `<div class="chips"><button class="chip" data-gf="" aria-pressed="${!gameF}">All</button>${games.map(g => `<button class="chip" data-gf="${esc(g)}" aria-pressed="${gameF === g}">${esc(gShort(g))}</button>`).join("")}</div>` : ""}
       ${reps.length > 6 ? `<input type="search" class="side-q" id="sideQ" value="${esc(sideQ)}" placeholder="Find a school…" autocomplete="off" aria-label="Find a scouting report">` : ""}
       <div><h3>Up next</h3><div class="list">${up.length ? up.slice(0, 12).map(m => btn({kind:"report", school:m.opponent.school, game:m.game}, `${esc(gShort(m.game))} · ${esc(fmtDay(m.startsAt))}${reportFor(m.opponent.school, m.game) ? "" : " · no report yet"}`)).join("") : `<p class="muted" style="margin:4px 10px">Nothing on the schedule.</p>`}</div></div>
@@ -295,10 +316,6 @@ function layout(){
           ${rest.length ? `<details class="side-all" id="repAll"${sideAll || sideQ ? " open" : ""}><summary>More reports <span>(${rest.length})</span></summary><div class="list">${rest.map(item).join("")}</div></details>` : ""}
           <p class="muted side-none" hidden style="margin:4px 10px">No school matches.</p>`; })()}</div>
       ${games.some(canEdit) ? `<button class="btn btn-line" data-new="1">+ New report</button>` : ""}
-      ${canSee(PB_GAME) || canSee("smash") ? `<div><h3>Team</h3><div class="list">
-        ${canSee(PB_GAME) ? `<button type="button" data-view='{"kind":"playbook"}'${view.kind === "playbook" || view.kind === "play" ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🏎️</span><span><b>Rocket League playbook</b><small>${plays.filter(p => p.game === PB_GAME).length} plays</small></span></button>` : ""}
-        ${canSee("smash") ? `<button type="button" data-view='{"kind":"smash"}'${/^smash/.test(view.kind) ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🥊</span><span><b>Smash playbook</b><small>Stages and characters</small></span></button>` : ""}
-      </div></div>` : ""}
       ${isCoach() ? `<div><h3>Coach</h3><div class="list"><button type="button" data-view='{"kind":"members"}'${view.kind === "members" ? ' aria-current="true"' : ""}><span class="ph">👥</span><span><b>Members</b><small>${members.length} people</small></span></button>
         <button type="button" data-view='{"kind":"ranks"}'${view.kind === "ranks" ? ' aria-current="true"' : ""}><span class="ph">🏅</span><span><b>Player rankings</b><small>Coaches only</small></span></button></div></div>` : ""}
     </aside><main class="panel" id="main"></main></div>`;
@@ -516,24 +533,35 @@ function statCols(game, list){
 }
 const hasChars = game => !!(gameFor(site, game).charLabel || "").trim();
 function statsEditHTML(d, game){
-  const list = d.statGames || [], F = statCols(game, list), unit = /smash/.test(game) ? "Set" : "Game", ch = hasChars(game);
+  const list = d.statGames || [], F = statCols(game, list), g = gameFor(site, game), unit = g.unit || (/smash/.test(game) ? "Set" : "Game"), ch = hasChars(game);
+  /* box score per title: the score is counted in the game's own unit (Smash: games in the set, Rocket League: goals,
+     Fortnite: rounds), the columns are that title's stats */
+  const pts = g.points || "Score", school = view.school, oppName = shortSchool(school), ourTeams = (site.teams || []).filter(t => t.gameKey === game);
   const tags = (d.players || []).map(p => p.tag).filter(Boolean);
   return `<div class="sec"><div class="sec-h"><h4>Stats against us</h4><button class="btn btn-line btn-sm" id="addG">+ Game</button></div>
     <datalist id="oppTags">${tags.map(t => `<option value="${esc(t)}">`).join("")}</datalist>
     ${list.length ? "" : `<p class="empty">No games yet. Add one, or they fill in from the scorekeeper.</p>`}
-    ${list.map((gm, gi) => `<div class="sgame"><div class="sgh">
+    ${list.map((gm, gi) => { const [th, us] = String(gm.score || "").split(/[^0-9]+/).filter(Boolean); const won = gm.result === "L" ? "us" : gm.result === "W" ? "them" : "";
+      const teamOpts = [...new Set([...ourTeams.map(t => t.name), gm.team].filter(Boolean))];
+      return `<div class="sgame${won ? " decided" : ""}"><div class="sgtop">
+        <label class="f sgn"><span>${unit}</span><input type="number" min="1" data-sg="${gi}" data-sk="n" value="${esc(gm.n ?? "")}"></label>
         <label class="f"><span>Date</span><input type="date" data-sg="${gi}" data-sk="date" value="${esc(String(gm.date || "").slice(0, 10))}"></label>
-        <label class="f"><span>${unit}</span><input type="number" min="1" data-sg="${gi}" data-sk="n" value="${esc(gm.n ?? "")}"></label>
-        <label class="f"><span>Our team</span><input data-sg="${gi}" data-sk="team" value="${esc(gm.team || "")}" placeholder="Varsity"></label>
-        <label class="f"><span>Result</span><select data-sg="${gi}" data-sk="result"><option value="">–</option><option value="L"${gm.result === "L" ? " selected" : ""}>We won</option><option value="W"${gm.result === "W" ? " selected" : ""}>They won</option></select></label>
-        <label class="f"><span>Score</span><input data-sg="${gi}" data-sk="score" value="${esc(gm.score || "")}" placeholder="3–1"></label>
-        <button class="btn btn-line btn-sm danger" data-delg="${gi}">Remove game</button></div>
-      <div style="overflow-x:auto"><table class="hist sedit"><tr><th style="text-align:left">Gamertag</th>${ch ? `<th style="text-align:left">Played</th>` : ""}${F.map(([l]) => `<th>${esc(l)}</th>`).join("")}<th></th></tr>
+        <label class="f"><span>Our team</span><select data-sg="${gi}" data-sk="team"><option value="">–</option>${teamOpts.map(t => `<option${t === gm.team ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>
+        <button class="btn btn-line btn-sm danger" data-delg="${gi}">Remove</button></div>
+      <div class="sgboard"><input type="hidden" data-sg="${gi}" data-sk="result" value="${esc(gm.result || "")}">
+        <button type="button" class="sgside us${won === "us" ? " win" : won ? " lose" : ""}" data-sgw="${gi}:us" aria-pressed="${won === "us"}">${imgTag("Hartland High School")}<span><b>Hartland</b><small>${esc(gm.team || "")}</small></span>${won === "us" ? `<i>WIN</i>` : ""}</button>
+        <input class="sgsc" inputmode="numeric" data-sg="${gi}" data-sk="us" value="${esc(us ?? "")}" placeholder="0" aria-label="Hartland ${esc(pts)}">
+        <span class="sgdash">${esc(pts)}</span>
+        <input class="sgsc" inputmode="numeric" data-sg="${gi}" data-sk="them" value="${esc(th ?? "")}" placeholder="0" aria-label="${esc(oppName)} ${esc(pts)}">
+        <button type="button" class="sgside them${won === "them" ? " win" : won ? " lose" : ""}" data-sgw="${gi}:them" aria-pressed="${won === "them"}">${won === "them" ? `<i>WIN</i>` : ""}<span><b>${esc(oppName)}</b><small>Opponent</small></span>${imgTag(school)}</button></div>
+      <p class="sghint">Tap the winner. ${esc(pts)} won by each side${/smash/.test(game) ? " in this set" : ""}.</p>
+      <h5 class="sgbox">${esc(oppName)} box score</h5>
+      <div style="overflow-x:auto"><table class="hist sedit"><tr><th style="text-align:left">Player</th>${ch ? `<th style="text-align:left">${esc(g.charLabel || "Played")}</th>` : ""}${F.map(([l]) => `<th>${esc(l)}</th>`).join("")}<th></th></tr>
         ${(gm.players || []).map((p, pi) => `<tr><td><input list="oppTags" data-sg="${gi}" data-sp="${pi}" data-sf="tag" value="${esc(p.tag || "")}" placeholder="Gamertag"></td>
           ${ch ? `<td><input data-sg="${gi}" data-sp="${pi}" data-sf="chars" value="${esc((p.chars?.length ? p.chars : [p.char]).filter(Boolean).join(" / "))}" placeholder="Char / char"></td>` : ""}
           ${F.map(([l, k]) => `<td><input inputmode="decimal" data-sg="${gi}" data-sp="${pi}" data-sf="${esc(k)}" value="${esc(p[k] ?? "")}" aria-label="${esc(l)}"></td>`).join("")}
           <td><button class="btn btn-line btn-sm danger" data-delsp="${gi}:${pi}" aria-label="Remove this player from the game">×</button></td></tr>`).join("")}</table></div>
-      <button class="btn btn-line btn-sm" data-addsp="${gi}">+ Player</button></div>`).join("")}</div>`;
+      <button class="btn btn-line btn-sm" data-addsp="${gi}">+ Player</button></div>`; }).join("")}</div>`;
 }
 async function startReport(school, game){
   const id = db.newReportId();
@@ -602,13 +630,20 @@ function bindReport(r){
     M.querySelectorAll("[data-pst]").forEach(t => editDraft.players[+t.dataset.pst].starter = t.checked);
     M.querySelectorAll("[data-v]").forEach(t => editDraft.vods[+t.dataset.v][t.dataset.vk] = t.value);
     M.querySelectorAll("[data-sg]").forEach(t => { const gm = editDraft.statGames[+t.dataset.sg];
-      if (t.dataset.sk) gm[t.dataset.sk] = t.dataset.sk === "n" ? (+t.value || "") : t.value;
+      if (t.dataset.sk === "us" || t.dataset.sk === "them"){ (gm._sc = gm._sc || {})[t.dataset.sk] = t.value.replace(/\D/g, ""); }
+      else if (t.dataset.sk) gm[t.dataset.sk] = t.dataset.sk === "n" ? (+t.value || "") : t.value;
       else { const p = gm.players[+t.dataset.sp], f = t.dataset.sf;
         if (f === "tag") p.tag = t.value;
         else if (f === "chars"){ const c = t.value.split("/").map(x => x.trim()).filter(Boolean); delete p.char; delete p.chars; if (c.length) p.char = c[0]; if (c.length > 1) p.chars = c; }
-        else if (t.value.trim() === "") delete p[f]; else { const v = parseFloat(t.value.replace(/[^0-9.\-]/g, "")); if (!isNaN(v)) p[f] = v; } } }); };
+        else if (t.value.trim() === "") delete p[f]; else { const v = parseFloat(t.value.replace(/[^0-9.\-]/g, "")); if (!isNaN(v)) p[f] = v; } } });
+    /* the score is kept as "theirs–ours" (the report is about them); a score with a clear winner picks the winner if none is tapped */
+    editDraft.statGames.forEach(gm => { if (!gm._sc) return; const {us = "", them = ""} = gm._sc; delete gm._sc;
+      gm.score = us !== "" || them !== "" ? `${them || 0}–${us || 0}` : "";
+      if (!gm.result && us !== "" && them !== "" && +us !== +them) gm.result = +us > +them ? "L" : "W"; }); };
   q("#addG") && (q("#addG").onclick = () => { pull(); const size = Math.max(1, +gameFor(site, r.game).teamSize || 1), ros = editDraft.players.filter(p => p.tag), st = ros.filter(p => p.starter);
     editDraft.statGames.unshift({matchId:"manual-" + Math.random().toString(36).slice(2, 9), n:1, date:new Date().toISOString().slice(0, 10), team:"", result:"", score:"", players:(st.length ? st : ros).slice(0, size).map(p => ({tag:p.tag}))}); drawMain(); });
+  M.querySelectorAll("[data-sgw]").forEach(b => b.onclick = () => { pull(); const [g, side] = b.dataset.sgw.split(":"), gm = editDraft.statGames[+g], v = side === "us" ? "L" : "W";
+    gm.result = gm.result === v ? "" : v; drawMain(); });
   M.querySelectorAll("[data-delg]").forEach(b => b.onclick = () => { pull(); if (!confirm("Remove this game's stats?")) return; editDraft.statGames.splice(+b.dataset.delg, 1); drawMain(); });
   M.querySelectorAll("[data-addsp]").forEach(b => b.onclick = () => { pull(); editDraft.statGames[+b.dataset.addsp].players.push({tag:""}); drawMain(); });
   M.querySelectorAll("[data-delsp]").forEach(b => b.onclick = () => { pull(); const [g, p] = b.dataset.delsp.split(":").map(Number); editDraft.statGames[g].players.splice(p, 1); drawMain(); });

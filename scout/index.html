@@ -123,6 +123,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 .tbl td{border-top:1px solid var(--line);padding:8px;vertical-align:top}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;border-left:4px solid var(--gold);padding:10px 16px;border-radius:6px;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);z-index:50}
 .private{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#7A4A00;background:#FFF4D1;border:1px solid #F0D98A;border-radius:999px;padding:3px 10px}
+.side-q{width:100%;min-height:42px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
+.side-sub{display:block;margin:2px 10px 4px;color:var(--muted);font-size:12px}
+.side-all summary{cursor:pointer;list-style:none;margin:6px 4px 4px;padding:8px 10px;border-radius:8px;font-weight:700;color:var(--ink);display:flex;justify-content:space-between}
+.side-all summary::-webkit-details-marker{display:none}.side-all summary::after{content:"▾";color:var(--muted)}.side-all[open] summary::after{content:"▴"}
+.side-all summary span{color:var(--muted);font-weight:500;margin-left:auto;margin-right:8px}
+.side-all summary:hover{background:rgba(0,0,0,.04)}
+.side [data-find][hidden]{display:none}
 </style>
 </head>
 <body>
@@ -228,6 +235,7 @@ function mockDB(){
 
 /* ---------- state ---------- */
 let db, site = {teams:[], games:[]}, user = null, me = null, meReady = false, members = [], reports = [], finals = [], board = null;
+let sideQ = "", sideAll = false;   // sidebar search box and the "All reports" fold
 let view = {kind:"home"}, gameF = "", editing = null, notes = [], unNotes = null, unReports = null, unMembers = null, unMe = null;
 let plays = [], unPlays = null, stopPlay = null, frameIndex = null, frameCache = {};
 const PB_GAME = "rocket-league";
@@ -271,12 +279,21 @@ function layout(){
   const up = upcoming().filter(m => !gameF || m.game === gameF);
   const reps = reports.filter(r => canSee(r.game) && (!gameF || r.game === gameF)).sort((a, b) => String(a.school).localeCompare(String(b.school)));
   const cur = x => view.kind === x.kind && view.school === x.school && view.game === x.game;
-  const btn = (x, sub) => `<button type="button" data-view='${esc(JSON.stringify(x))}'${cur(x) ? ' aria-current="true"' : ""}>${imgTag(x.school)}<span><b>${esc(shortSchool(x.school))}</b><small>${sub}</small></span></button>`;
+  const btn = (x, sub) => `<button type="button" data-find="${esc((shortSchool(x.school) + " " + x.school + " " + gShort(x.game)).toLowerCase())}" data-view='${esc(JSON.stringify(x))}'${cur(x) ? ' aria-current="true"' : ""}>${imgTag(x.school)}<span><b>${esc(shortSchool(x.school))}</b><small>${sub}</small></span></button>`;
   $("#app").innerHTML = `<div class="layout"><aside class="side">
       <span class="private">🔒 Private to Hartland esports</span>
       ${games.length > 1 ? `<div class="chips"><button class="chip" data-gf="" aria-pressed="${!gameF}">All</button>${games.map(g => `<button class="chip" data-gf="${esc(g)}" aria-pressed="${gameF === g}">${esc(gShort(g))}</button>`).join("")}</div>` : ""}
+      ${reps.length > 6 ? `<input type="search" class="side-q" id="sideQ" value="${esc(sideQ)}" placeholder="Find a school…" autocomplete="off" aria-label="Find a scouting report">` : ""}
       <div><h3>Up next</h3><div class="list">${up.length ? up.slice(0, 12).map(m => btn({kind:"report", school:m.opponent.school, game:m.game}, `${esc(gShort(m.game))} · ${esc(fmtDay(m.startsAt))}${reportFor(m.opponent.school, m.game) ? "" : " · no report yet"}`)).join("") : `<p class="muted" style="margin:4px 10px">Nothing on the schedule.</p>`}</div></div>
-      <div><h3>Scouting reports</h3><div class="list">${reps.length ? reps.map(r => btn({kind:"report", school:r.school, game:r.game}, esc(gShort(r.game)))).join("") : `<p class="muted" style="margin:4px 10px">No reports yet.</p>`}</div></div>
+      <div><h3>Scouting reports</h3>${(() => {
+        if (!reps.length) return `<p class="muted" style="margin:4px 10px">No reports yet.</p>`;
+        /* the six most recently worked on, then everything else folded away (search looks through all of them) */
+        const day = iso => iso ? new Date(iso).toLocaleDateString(undefined, {month:"short", day:"numeric"}) : "";
+        const recent = reps.slice().sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""))).slice(0, reps.length > 8 ? 6 : reps.length);
+        const rest = reps.filter(r => !recent.includes(r)), item = r => btn({kind:"report", school:r.school, game:r.game}, `${esc(gShort(r.game))}${r.updatedAt ? ` · updated ${esc(day(r.updatedAt))}` : ""}`);
+        return `<div class="list" id="repRecent">${rest.length ? `<small class="side-sub">Recently updated</small>` : ""}${recent.map(item).join("")}</div>
+          ${rest.length ? `<details class="side-all" id="repAll"${sideAll || sideQ ? " open" : ""}><summary>More reports <span>(${rest.length})</span></summary><div class="list">${rest.map(item).join("")}</div></details>` : ""}
+          <p class="muted side-none" hidden style="margin:4px 10px">No school matches.</p>`; })()}</div>
       ${games.some(canEdit) ? `<button class="btn btn-line" data-new="1">+ New report</button>` : ""}
       ${canSee(PB_GAME) || canSee("smash") ? `<div><h3>Team</h3><div class="list">
         ${canSee(PB_GAME) ? `<button type="button" data-view='{"kind":"playbook"}'${view.kind === "playbook" || view.kind === "play" ? ' aria-current="true"' : ""}><span class="ph" style="display:grid;place-items:center">🏎️</span><span><b>Rocket League playbook</b><small>${plays.filter(p => p.game === PB_GAME).length} plays</small></span></button>` : ""}
@@ -287,8 +304,19 @@ function layout(){
     </aside><main class="panel" id="main"></main></div>`;
   $("#app").querySelectorAll("[data-view]").forEach(b => b.onclick = () => go(JSON.parse(b.dataset.view)));
   $("#app").querySelectorAll("[data-gf]").forEach(b => b.onclick = () => { gameF = b.dataset.gf; layout(); });
+  const sq = $("#sideQ"); if (sq){ sq.oninput = () => { sideQ = sq.value; sideFilter(); }; sideFilter(); }
+  $("#repAll") && ($("#repAll").ontoggle = e => { if (!sideQ) sideAll = e.target.open; });
   $("[data-new]") && ($("[data-new]").onclick = () => go({kind:"new"}));
   drawMain();
+}
+/* sidebar search: hides schools that don't match (in Up next and every report), opening "All reports" while typing */
+function sideFilter(){
+  const q = sideQ.trim().toLowerCase(), side = document.querySelector(".side"); if (!side) return;
+  side.querySelectorAll("[data-find]").forEach(b => b.hidden = !!q && !q.split(/\s+/).every(w => b.dataset.find.includes(w)));
+  const all = $("#repAll"); if (all && q) all.open = true; else if (all) all.open = sideAll;
+  const anyRep = [...side.querySelectorAll("#repRecent [data-find], #repAll [data-find]")].some(b => !b.hidden);
+  side.querySelector(".side-none")?.toggleAttribute("hidden", !q || anyRep);
+  side.querySelectorAll(".side-sub").forEach(x => x.hidden = !!q);
 }
 function go(v){
   if (stopPlay){ stopPlay(); stopPlay = null; }

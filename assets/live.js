@@ -371,7 +371,7 @@ export async function startBrackets(site){
     const all = sortBrackets(list).filter(b => b.on !== false);
     /* more than one bracket: tabs, one bracket at a time */
     const cur = all.find(b => b.id === pick) || all[0], show = all.length > 1 ? (cur ? [cur] : []) : all;
-    const nm = b => { const n = tabName(b); return all.filter(x => tabName(x) === n).length > 1 && b.league ? `${n} · ${b.league}` : n; };   // two Fortnite brackets: add the league
+    const nm = b => { if (String(b.tab || "").trim()) return b.tab.trim(); const n = tabName(b); return all.filter(x => tabName(x) === n).length > 1 && b.league ? `${n} · ${b.league}` : n; };   // two Fortnite brackets: add the league
     const tabs = all.length > 1 ? `<div class="bk-tabs" role="tablist" style="grid-column:1/-1">${all.map(b => `<button type="button" role="tab" class="bk-tab" data-bktab="${esc(b.id)}" aria-selected="${b === cur}">${esc(nm(b))}${b.status ? `<small>${esc(b.status)}</small>` : ""}</button>`).join("")}</div>` : "";
     box.innerHTML = tabs + show.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px;grid-column:1/-1">
       <div class="chips">${b.status ? `<span class="chip gold">${esc(b.status)}</span>` : ""}${b.league ? `<span class="chip">${esc(b.league)}</span>` : ""}</div>

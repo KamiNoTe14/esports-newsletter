@@ -338,7 +338,7 @@ details.olk summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:1
 <script type="module">
 import {slug, backend, EDITORS, LEAGUES, STAGES, blankMatch, settle, gameFor, teamLabel, abbrFor, shortSchool, oppShort, rivalFor, roundLabel, postseason, seasonOf, seasonList, termOf, seasonLabel,
   fmtDay, fmtTime, localInput, scoreboardFrom, seasonDocFrom, rollup, listOf, fmtStat, isMock, schoolInfo, scoutKey} from "../../assets/matches.js?v=27";
-import {watchFinals, sortBrackets} from "../../assets/live.js?v=65";
+import {watchFinals, sortBrackets} from "../../assets/live.js?v=66";
 import * as BK from "../../assets/bracket.js?v=12";
 import {recordBreaks} from "../../assets/records.js?v=5";
 import {LAYOUTS as SB_LAYOUTS} from "../../overlay/sbread.js?v=2";
@@ -916,6 +916,7 @@ function renderBrackets(){
         ${mine ? bkNeedsHTML(b) : ""}
         ${mine ? `<details class="bkset"${bkSetOpen.has(b.id) || !(b.seeds || []).some(x => x.school) ? " open" : ""}><summary>Setup and seeds</summary><div class="bkf">
           <label class="f"><span>Title</span><input data-bf="title" value="${esc(b.title || "")}" placeholder="Fall 2026 MHSEL Playoffs · Smash"></label>
+          <label class="f"><span>Tab name on the Playoffs page</span><input data-bf="tab" value="${esc(b.tab || "")}" placeholder="Blank = the game and team, like Smash Varsity" maxlength="40"></label>
           <label class="f"><span>Our team in it</span><select data-bf="teamId"><option value="">—</option>${bkTeams().map(t => `<option value="${esc(t.id)}"${t.id === b.teamId ? " selected" : ""}>${esc(teamLabel(site, t))}</option>`).join("")}</select></label>
           <label class="f"><span>Status</span><select data-bf="status">${["Upcoming", "In progress", "Final"].map(x => `<option${x === b.status ? " selected" : ""}>${x}</option>`).join("")}</select></label>
           <label class="f"><span>Teams</span><select data-bf="size">${BK.SIZES.map(n => `<option value="${n}"${n === +b.size ? " selected" : ""}>${n} teams</option>`).join("")}</select></label>
@@ -1008,7 +1009,7 @@ document.addEventListener("input", e => {
   if (el.dataset.seed != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seed]; sd.school = el.value.trim(); sd.manual = true; if (!BK.isHartland(sd.school)) delete sd.teamId; bkSave(b, 900);
     clearTimeout(bkSaveT.draw); bkSaveT.draw = setTimeout(() => { if (document.activeElement === el) bkRedraw(b); }, 900); return; }
   const f = el.dataset.bf; if (!f) return;
-  if (f === "title" || f === "league" || f === "link" || f === "scene"){ b[f] = el.value; bkSave(b, 700); const t = el.closest("details").querySelector(".bkt"); if (f === "title" && t) t.textContent = el.value || "Untitled bracket"; }
+  if (f === "title" || f === "tab" || f === "league" || f === "link" || f === "scene"){ b[f] = el.value; bkSave(b, 700); const t = el.closest("details").querySelector(".bkt"); if (f === "title" && t) t.textContent = el.value || "Untitled bracket"; }
 });
 document.addEventListener("change", e => {
   if (view !== "brackets") return;
@@ -1017,7 +1018,7 @@ document.addEventListener("change", e => {
   if (el.dataset.seedteam != null){ bkSeeds(b); const sd = b.seeds[+el.dataset.seedteam], t = (site.teams || []).find(t => t.id === el.value);
     sd.teamId = el.value; sd.label = t && (site.teams || []).filter(x => x.gameKey === t.gameKey).length > 1 ? `Hartland ${t.name}` : "";
     if (t && !b.teamId){ b.teamId = t.id; b.game = t.gameKey; } bkSave(b); renderBrackets(); return; }
-  const f = el.dataset.bf; if (!f || f === "title" || f === "league" || f === "link" || f === "scene") { if (el.dataset.seed != null || el.dataset.seedlab != null) renderBrackets(); return; }
+  const f = el.dataset.bf; if (!f || f === "title" || f === "tab" || f === "league" || f === "link" || f === "scene") { if (el.dataset.seed != null || el.dataset.seedlab != null) renderBrackets(); return; }
   if (f === "on") b.on = el.checked;
   else if (f === "size"){ if (Object.keys(b.res || {}).length && !confirm("Changing the size clears the results. Go ahead?")){ el.value = b.size; return; } b.size = +el.value; b.res = {}; }
   else if (f === "teamId"){ b.teamId = el.value; b.game = (site.teams || []).find(t => t.id === el.value)?.gameKey || ""; }

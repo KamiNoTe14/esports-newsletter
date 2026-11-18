@@ -175,7 +175,8 @@ export function fromLeagueJSON(x, {schoolOf, ourTeams = []} = {}){
     else { const pre = String(m.prerequisiteMatchIdsCsv || "").split(",").map(s => byExt.get(s.trim())).filter(Boolean).sort((a, b) => a.number - b.number);
       aEntry = pre[0] ? won[pre[0].id] : String((slots.find(s => +s.position === 0) || {}).entryId); }
     const A = slots.find(s => String(s.entryId) === aEntry), B = slots.find(s => String(s.entryId) !== aEntry);
-    const g = s => +(s?.gamesWon ?? s?.setsWon ?? 0);
+    /* the match score: sets won when the game plays sets (Smash: 3–1), else games won (Rocket League: 4–2) */
+    const bySets = +m.setsCount > 0 || slots.some(s => +s.setsWon > 0), g = s => +((bySets ? s?.setsWon : s?.gamesWon) ?? s?.gamesWon ?? 0);
     res[`${m.round - 1}-${m.number - 1}`] = {w:String(w.entryId) === aEntry ? "a" : "b", s:A && B && (g(A) || g(B)) ? `${g(A)}-${g(B)}` : ""};
   });
   const done = /complete|finish|closed/i.test(x.bracket?.state || "") || !!res[`${R - 1}-0`];

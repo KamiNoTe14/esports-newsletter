@@ -360,16 +360,25 @@ export function sortBrackets(list){
 }
 export async function startBrackets(site){
   const box = document.querySelector("[data-bk-live]"); if (!box) return;
-  const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=11");
+  const sec = box.closest("section"), BK = await import(BASE + "assets/bracket.js?v=12");
   const logo = sc => { const x = schoolInfo(site, sc), l = x?.logo || (BK.isHartland(sc) ? "assets/eagle.png" : ""); return l ? (/^(https?:|data:)/.test(l) ? l : BASE + l) : ""; };
-  let finals = [], list = [];
+  let finals = [], list = [], pick = "";
+  try { pick = (location.hash.match(/bk=([\w-]+)/) || [])[1] || sessionStorage.getItem("eagles-bk-tab") || ""; } catch(e){}
+  /* tab names: the game, plus the team level when we have more than one team in that game ("Smash Varsity") */
+  const tabName = b => { const g = gameFor(site, b.game), t = (site.teams || []).find(x => x.id === b.teamId), several = (site.teams || []).filter(x => x.gameKey === b.game).length > 1;
+    return `${g.short || g.name || b.title || "Playoffs"}${several && t ? " " + (t.level && !/^varsity$/i.test(t.name || "") ? t.level : t.name) : ""}`; };
   const draw = () => {
-    const show = sortBrackets(list).filter(b => b.on !== false);
-    box.innerHTML = show.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px;grid-column:1/-1">
+    const all = sortBrackets(list).filter(b => b.on !== false);
+    /* more than one bracket: tabs, one bracket at a time */
+    const cur = all.find(b => b.id === pick) || all[0], show = all.length > 1 ? (cur ? [cur] : []) : all;
+    const nm = b => { const n = tabName(b); return all.filter(x => tabName(x) === n).length > 1 && b.league ? `${n} · ${b.league}` : n; };   // two Fortnite brackets: add the league
+    const tabs = all.length > 1 ? `<div class="bk-tabs" role="tablist" style="grid-column:1/-1">${all.map(b => `<button type="button" role="tab" class="bk-tab" data-bktab="${esc(b.id)}" aria-selected="${b === cur}">${esc(nm(b))}${b.status ? `<small>${esc(b.status)}</small>` : ""}</button>`).join("")}</div>` : "";
+    box.innerHTML = tabs + show.map(b => `<article class="card" style="display:flex;flex-direction:column;gap:12px;grid-column:1/-1">
       <div class="chips">${b.status ? `<span class="chip gold">${esc(b.status)}</span>` : ""}${b.league ? `<span class="chip">${esc(b.league)}</span>` : ""}</div>
       <h3>${esc(b.title || "Playoffs")}</h3>
       <div class="bk-wrap">${BK.bracketHTML(BK.buildBracket(b, finals), {esc, logo, short:sc => shortSchool(sc)})}</div>
       ${b.text ? `<p class="muted" style="margin:0">${esc(b.text)}</p>` : ""}${safe(b.link) ? `<a class="btn btn-line" style="align-self:flex-start" href="${esc(safe(b.link))}" target="_blank" rel="noopener">View on the league site</a>` : ""}</article>`).join("");
+    box.querySelectorAll("[data-bktab]").forEach(t => t.onclick = () => { pick = t.dataset.bktab; try { sessionStorage.setItem("eagles-bk-tab", pick); history.replaceState(null, "", "#bk=" + pick); } catch(e){} draw(); });
     box.style.display = show.length ? "contents" : "none";
     const none = sec?.querySelector("[data-bk-none]"); if (none) none.hidden = !!show.length;
     if (sec && !box.hasAttribute("data-bk-page")) sec.hidden = !show.length && !sec.querySelector("article:not([data-bk-live] article)");

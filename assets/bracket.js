@@ -47,7 +47,10 @@ export function buildBracket(b, finals = []){
   const order = b.seq ? Array.from({length:n}, (_, i) => i + 1) : seedOrder(n), rounds = [];
   /* our playoff results from the scorekeeper: final playoff/finals matches of this team against that school */
   const ourIds = new Set([b.teamId, ...seeds.map(x => x?.teamId)].filter(Boolean));
-  const ours = finals.filter(m => (m.stage === "playoffs" || m.stage === "finals") && m.status === "final" && (m.result === "W" || m.result === "L") && (!ourIds.size || ourIds.has(m.teamId)) && (!b.game || m.game === b.game))
+  /* only this postseason's matches: a playoff loss to the same school last year must not fill in this year's bracket */
+  const since = [...Object.values(b.starts || {}), b.created].filter(Boolean).map(x => Date.parse(x)).filter(x => !isNaN(x)).sort((x, y) => x - y)[0];
+  const thisYear = m => { const t = Date.parse(m.startsAt || ""); return isNaN(t) ? !since : since ? t >= since - 21 * 864e5 : t >= Date.now() - 150 * 864e5; };
+  const ours = finals.filter(m => (m.stage === "playoffs" || m.stage === "finals") && m.status === "final" && (m.result === "W" || m.result === "L") && thisYear(m) && (!ourIds.size || ourIds.has(m.teamId)) && (!b.game || m.game === b.game))
     .sort((x, y) => String(x.startsAt).localeCompare(String(y.startsAt)));
   const used = new Set();
   const near = (x, y) => { x = key(x); y = key(y); return !!x && !!y && (x === y || x.includes(y) || y.includes(x)); };

@@ -3,7 +3,7 @@
    Layers: scorebug, vs, lineups, team-compare, player-compare, and for Rocket League rl-team, rl-players, rl-box
    (live stats from the game; ?scope=series adds up every game of the match). Add ?bg=1 to see an overlay on a grey test background. */
 import {schoolInfo, gameFor, oppShort, roundLabel, postseason, seasonOf, shortSchool, slug, fmtStat, fmtTime, listOf, sendRLBox} from "../assets/matches.js?v=27";
-import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=66";
+import {watchBroadcast, watchMatch, watchFinals, watchBrackets, sortBrackets} from "../assets/live.js?v=67";
 import {connectSOS, localAccessState, askLocalAccess} from "./sos.js?v=5";
 
 const q = new URLSearchParams(location.search);
@@ -843,7 +843,7 @@ function splitShell(m, plates, guides, cls = ""){
 var BKM = null;   // var: the VS screen may draw before this line runs
 var bkList = [];
 /* brackets: the bracket layer draws them; every other layer reads playoff seeds from them (VS screen) */
-import("../assets/bracket.js?v=12").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0);
+import("../assets/bracket.js?v=13").then(x => { BKM = x; draw(); }).catch(e => console.error(e)); setTimeout(() => watchBrackets(l => { bkList = l; draw(); }), 0);
 const bkHas = (b, id) => !!id && (b.teamId === id || (b.seeds || []).some(x => x?.teamId === id));
 function bracketLayer(m){
   if (!BKM) return;

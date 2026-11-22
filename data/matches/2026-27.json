@@ -1,31 +1,54 @@
 {
   "season": "2026-27",
-  "updated": "2026-11-22T03:08:32.291Z",
+  "updated": "2026-11-22T11:17:39.029Z",
   "matches": [
     {
       "id": "ROvHXFsolTwtYJ6HXqo9",
-      "term": "fall",
-      "opponent": {
-        "team": "BFHS Fortnite",
-        "logo": "",
-        "school": "Beaver Falls High School",
-        "abbr": "BFHS"
+      "stream": {
+        "live": "",
+        "vod": ""
       },
-      "gameName": "Fortnite Zone Wars Duos",
-      "score": {
-        "them": 0,
-        "us": 2
-      },
-      "season": "2026-27",
-      "startsAt": "2026-09-22T19:30:00.000Z",
-      "stage": "regular",
-      "teamName": "Fortnite Varsity #1",
-      "league": "USAEL Open",
+      "current": 2,
       "week": "2",
-      "bestOf": 3,
-      "clinched": "us",
+      "game": "fortnite-zw",
+      "result": "W",
+      "event": "USAEL Open Fall 2026",
+      "gameName": "Fortnite Zone Wars Duos",
+      "teamName": "Fortnite Varsity #1",
+      "startsAt": "2026-09-22T19:30:00.000Z",
+      "term": "fall",
+      "score": {
+        "us": 2,
+        "them": 0
+      },
       "level": "Varsity",
-      "source": {},
+      "notes": "",
+      "opponent": {
+        "school": "Beaver Falls High School",
+        "team": "BFHS Fortnite",
+        "abbr": "BFHS",
+        "logo": ""
+      },
+      "status": "final",
+      "updatedAt": "2026-10-01T22:01:56.456Z",
+      "forfeit": null,
+      "games": [
+        {
+          "them": 16,
+          "n": 1,
+          "us": 28,
+          "winner": "us"
+        },
+        {
+          "n": 2,
+          "us": 22,
+          "winner": "us",
+          "them": 10
+        }
+      ],
+      "clinched": "us",
+      "season": "2026-27",
+      "league": "USAEL Open",
       "players": [
         {
           "stats": {
@@ -48,38 +71,28 @@
           "private": false
         }
       ],
-      "current": 2,
-      "event": "USAEL Open Fall 2026",
-      "games": [
-        {
-          "them": 16,
-          "n": 1,
-          "us": 28,
-          "winner": "us"
-        },
-        {
-          "n": 2,
-          "us": 22,
-          "winner": "us",
-          "them": 10
-        }
-      ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "status": "final",
-      "result": "W",
-      "updatedAt": "2026-10-01T22:01:56.456Z",
+      "source": {},
+      "stage": "regular",
       "teamId": "t1",
-      "forfeit": null,
-      "game": "fortnite-zw",
-      "notes": ""
+      "bestOf": 3
     },
     {
       "id": "SsNb26EizYEmqDhXLTUd",
-      "event": "MHSEL Fall 2026",
+      "source": {},
+      "bestOf": 3,
       "teamId": "t2",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "opponent": {
+        "logo": "https://resources.finalsite.net/images/v1667204616/nbbroncosnet/l00rywtg7ww4hiiv0ewy/OfficialLogowithColors14.svg",
+        "team": "North Branch Fortnite 2",
+        "school": "North Branch High School",
+        "short": "",
+        "abbr": "NB"
+      },
+      "forfeit": null,
+      "stage": "regular",
+      "gameName": "Fortnite Zone Wars Duos",
       "games": [
         {
           "winner": "them",
@@ -101,18 +114,8 @@
         }
       ],
       "teamName": "Fortnite Varsity #2",
-      "forfeit": null,
-      "bye": false,
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "notes": "",
       "status": "final",
       "startsAt": "2026-09-22T19:30:00.000Z",
-      "result": "W",
-      "source": {},
-      "current": 3,
       "players": [
         {
           "tag": "Ferd",
@@ -129,31 +132,33 @@
           "id": "p-57ba7f60"
         }
       ],
-      "gameName": "Fortnite Zone Wars Duos",
-      "level": "Varsity",
-      "opponent": {
-        "team": "North Branch Fortnite 2",
-        "short": "",
-        "abbr": "NB",
-        "school": "North Branch High School",
-        "logo": "https://resources.finalsite.net/images/v1667204616/nbbroncosnet/l00rywtg7ww4hiiv0ewy/OfficialLogowithColors14.svg"
-      },
-      "game": "fortnite-zw",
-      "term": "fall",
-      "league": "MHSEL",
-      "bestOf": 3,
-      "stage": "regular",
-      "season": "2026-27",
-      "updatedAt": "2026-10-23T18:24:32.930Z",
       "score": {
-        "them": 1,
-        "us": 2
+        "us": 2,
+        "them": 1
       },
+      "notes": "",
+      "level": "Varsity",
+      "current": 3,
       "week": "1",
-      "clinched": "us"
+      "game": "fortnite-zw",
+      "updatedAt": "2026-10-23T18:24:32.930Z",
+      "term": "fall",
+      "event": "MHSEL Fall 2026",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "clinched": "us",
+      "result": "W",
+      "bye": false
     },
     {
       "id": "XKV69M81mqK0GUToEwiC",
+      "clinched": "us",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
       "games": [
         {
           "winner": "us",
@@ -168,43 +173,13 @@
           "them": 2
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "league": "MHSEL",
-      "bestOf": 3,
-      "season": "2026-27",
-      "clinched": "us",
-      "notes": "",
-      "week": "1",
-      "bye": false,
-      "term": "fall",
-      "level": "Varsity",
-      "teamId": "t1",
-      "stage": "regular",
-      "gameName": "Fortnite Zone Wars Duos",
-      "status": "final",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "game": "fortnite-zw",
-      "forfeit": null,
-      "updatedAt": "2026-10-23T18:24:16.397Z",
       "result": "W",
-      "opponent": {
-        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1690289632/novik12mius/ozyvaxiazwhvco1y9vku/PowercatNLogo.png",
-        "school": "Novi High School",
-        "short": "",
-        "abbr": "NOV",
-        "team": "Novi Wildcats JV Fortnite"
-      },
-      "source": {},
-      "teamName": "Fortnite Varsity #1",
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "startsAt": "2026-09-22T19:30:00.000Z",
       "current": 2,
+      "stage": "regular",
+      "startsAt": "2026-09-22T19:30:00.000Z",
+      "term": "fall",
+      "event": "MHSEL Fall 2026",
+      "teamName": "Fortnite Varsity #1",
       "players": [
         {
           "tag": "TRE4TY.",
@@ -220,34 +195,58 @@
           "id": "p-62e0e640",
           "stats": {}
         }
-      ]
+      ],
+      "bye": false,
+      "gameName": "Fortnite Zone Wars Duos",
+      "status": "final",
+      "updatedAt": "2026-10-23T18:24:16.397Z",
+      "level": "Varsity",
+      "notes": "",
+      "source": {},
+      "game": "fortnite-zw",
+      "score": {
+        "us": 2,
+        "them": 0
+      },
+      "week": "1",
+      "forfeit": null,
+      "bestOf": 3,
+      "opponent": {
+        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1690289632/novik12mius/ozyvaxiazwhvco1y9vku/PowercatNLogo.png",
+        "school": "Novi High School",
+        "short": "",
+        "abbr": "NOV",
+        "team": "Novi Wildcats JV Fortnite"
+      },
+      "teamId": "t1",
+      "league": "MHSEL",
+      "season": "2026-27"
     },
     {
       "id": "1ropwGStwY597I9STT9V",
-      "week": "1",
+      "teamName": "Smash Varsity",
+      "bestOf": 5,
+      "teamId": "t3",
+      "source": {},
+      "startsAt": "2026-09-23T19:30:00.000Z",
       "event": "MHSEL Fall 2026",
-      "games": [
-        {
-          "us": 0,
-          "winner": "them",
-          "n": 1,
-          "them": 2
-        },
-        {
-          "us": 0,
-          "them": 2,
-          "n": 2,
-          "winner": "them"
-        },
-        {
-          "winner": "them",
-          "n": 3,
-          "us": 0,
-          "them": 2
-        }
-      ],
+      "gameName": "Super Smash Bros. Ultimate",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "forfeit": null,
+      "opponent": {
+        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1690289632/novik12mius/ozyvaxiazwhvco1y9vku/PowercatNLogo.png",
+        "short": "",
+        "abbr": "NOV",
+        "school": "Novi High School",
+        "team": "Novi Wildcats Varsity SSBU"
+      },
       "notes": "",
-      "clinched": "them",
+      "level": "Varsity",
+      "score": {
+        "them": 3,
+        "us": 0
+      },
       "players": [
         {
           "private": false,
@@ -271,97 +270,44 @@
           "stats": {}
         }
       ],
-      "bye": false,
-      "updatedAt": "2026-10-23T18:25:53.760Z",
+      "status": "final",
+      "games": [
+        {
+          "us": 0,
+          "winner": "them",
+          "n": 1,
+          "them": 2
+        },
+        {
+          "us": 0,
+          "them": 2,
+          "n": 2,
+          "winner": "them"
+        },
+        {
+          "winner": "them",
+          "n": 3,
+          "us": 0,
+          "them": 2
+        }
+      ],
+      "clinched": "them",
       "current": 3,
-      "season": "2026-27",
-      "league": "MHSEL",
-      "term": "fall",
-      "forfeit": null,
-      "bestOf": 5,
-      "level": "Varsity",
+      "bye": false,
       "game": "smash",
+      "week": "1",
       "stage": "regular",
-      "source": {},
-      "opponent": {
-        "team": "Novi Wildcats Varsity SSBU",
-        "short": "",
-        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1690289632/novik12mius/ozyvaxiazwhvco1y9vku/PowercatNLogo.png",
-        "school": "Novi High School",
-        "abbr": "NOV"
-      },
-      "gameName": "Super Smash Bros. Ultimate",
-      "teamName": "Smash Varsity",
-      "score": {
-        "them": 3,
-        "us": 0
-      },
+      "term": "fall",
+      "updatedAt": "2026-10-23T18:25:53.760Z",
       "result": "L",
       "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "status": "final",
-      "teamId": "t3",
-      "startsAt": "2026-09-23T19:30:00.000Z"
+        "vod": "",
+        "live": ""
+      }
     },
     {
       "id": "BtbtAAzmH9Sfl83ycd0G",
       "clinched": "them",
-      "teamId": "t4",
-      "score": {
-        "them": 3,
-        "us": 2
-      },
-      "game": "smash",
-      "status": "final",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "result": "L",
-      "source": {},
-      "stage": "regular",
-      "bye": false,
-      "league": "MHSEL",
-      "gameName": "Super Smash Bros. Ultimate",
-      "opponent": {
-        "team": "NBHS Super Smash Bros",
-        "logo": "https://resources.finalsite.net/images/v1667204616/nbbroncosnet/l00rywtg7ww4hiiv0ewy/OfficialLogowithColors14.svg",
-        "school": "North Branch High School",
-        "short": "",
-        "abbr": "NB"
-      },
-      "bestOf": 5,
-      "season": "2026-27",
-      "updatedAt": "2026-10-23T18:25:43.091Z",
-      "level": "JV",
-      "current": 5,
-      "week": "1",
-      "players": [
-        {
-          "name": "Liam Aeh",
-          "tag": "",
-          "stats": {},
-          "private": false,
-          "id": "p-b1bbb78f"
-        },
-        {
-          "id": "p-f1134599",
-          "stats": {},
-          "name": "Evan Hudgins",
-          "private": false,
-          "tag": "Buptub"
-        },
-        {
-          "stats": {},
-          "private": false,
-          "id": "p-989757e2",
-          "tag": "SKELE",
-          "name": "Nicholas Govier"
-        }
-      ],
-      "startsAt": "2026-09-23T19:30:00.000Z",
       "games": [
         {
           "them": 0,
@@ -394,22 +340,101 @@
           "them": 2
         }
       ],
-      "event": "MHSEL Fall 2026",
+      "status": "final",
+      "current": 5,
+      "source": {},
+      "bestOf": 5,
+      "teamId": "t4",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "bye": false,
+      "stage": "regular",
       "term": "fall",
-      "teamName": "Smash JV",
+      "gameName": "Super Smash Bros. Ultimate",
+      "event": "MHSEL Fall 2026",
       "forfeit": null,
-      "notes": ""
+      "startsAt": "2026-09-23T19:30:00.000Z",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "result": "L",
+      "teamName": "Smash JV",
+      "notes": "",
+      "level": "JV",
+      "updatedAt": "2026-10-23T18:25:43.091Z",
+      "game": "smash",
+      "score": {
+        "us": 2,
+        "them": 3
+      },
+      "week": "1",
+      "players": [
+        {
+          "name": "Liam Aeh",
+          "tag": "",
+          "stats": {},
+          "private": false,
+          "id": "p-b1bbb78f"
+        },
+        {
+          "id": "p-f1134599",
+          "stats": {},
+          "name": "Evan Hudgins",
+          "private": false,
+          "tag": "Buptub"
+        },
+        {
+          "stats": {},
+          "private": false,
+          "id": "p-989757e2",
+          "tag": "SKELE",
+          "name": "Nicholas Govier"
+        }
+      ],
+      "opponent": {
+        "logo": "https://resources.finalsite.net/images/v1667204616/nbbroncosnet/l00rywtg7ww4hiiv0ewy/OfficialLogowithColors14.svg",
+        "abbr": "NB",
+        "school": "North Branch High School",
+        "team": "NBHS Super Smash Bros",
+        "short": ""
+      }
     },
     {
       "id": "SnCqS4elOz02W48H2FuJ",
-      "season": "2026-27",
+      "gameName": "Rocket League",
       "updatedAt": "2026-10-23T18:26:21.672Z",
-      "league": "MHSEL",
-      "term": "fall",
-      "bestOf": 5,
-      "level": "Varsity",
-      "week": "1",
       "event": "MHSEL Fall 2026",
+      "startsAt": "2026-09-24T19:30:00.000Z",
+      "teamName": "Rocket League Varsity",
+      "current": 3,
+      "notes": "",
+      "level": "Varsity",
+      "score": {
+        "them": 0,
+        "us": 3
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "result": "W",
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "team": "Niles Rocket League",
+        "abbr": "NIL",
+        "school": "Niles High School"
+      },
+      "bye": false,
+      "source": {},
+      "term": "fall",
+      "forfeit": null,
+      "teamId": "t5",
+      "bestOf": 5,
+      "clinched": "us",
+      "league": "MHSEL",
+      "season": "2026-27",
       "games": [
         {
           "n": 1,
@@ -430,13 +455,8 @@
           "winner": "us"
         }
       ],
-      "notes": "",
-      "bye": false,
-      "clinched": "us",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
+      "game": "rocket-league",
+      "week": "1",
       "players": [
         {
           "id": "p-0b11aaef",
@@ -472,77 +492,11 @@
           "id": "p-fc730de2"
         }
       ],
-      "result": "W",
-      "teamName": "Rocket League Varsity",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "current": 3,
       "status": "final",
-      "teamId": "t5",
-      "startsAt": "2026-09-24T19:30:00.000Z",
-      "forfeit": null,
-      "game": "rocket-league",
-      "stage": "regular",
-      "opponent": {
-        "logo": "",
-        "abbr": "NIL",
-        "short": "",
-        "team": "Niles Rocket League",
-        "school": "Niles High School"
-      },
-      "gameName": "Rocket League",
-      "source": {}
+      "stage": "regular"
     },
     {
       "id": "kyXcRC97n1lgw0sivxkF",
-      "term": "fall",
-      "gameName": "Marvel Rivals",
-      "opponent": {
-        "team": "Millington Rivals",
-        "school": "Millington High School",
-        "short": "",
-        "logo": "https://image.maxpreps.io/school-mascot/3/d/e/3def3a75-86ee-43c5-b530-13b898042dcf.gif?version=635979741600000000&width=1024&height=1024",
-        "abbr": "MIL"
-      },
-      "stage": "regular",
-      "startsAt": "2026-09-24T19:30:00.000Z",
-      "bestOf": 5,
-      "league": "MHSEL",
-      "week": "1",
-      "teamName": "Marvel Rivals Varsity",
-      "season": "2026-27",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "clinched": "them",
-      "updatedAt": "2026-10-23T18:26:04.786Z",
-      "notes": "",
-      "source": {},
-      "event": "MHSEL Fall 2026",
-      "current": 3,
-      "games": [
-        {
-          "them": 0,
-          "n": 1,
-          "us": 0,
-          "winner": "them"
-        },
-        {
-          "us": 0,
-          "them": 0,
-          "n": 2,
-          "winner": "them"
-        },
-        {
-          "n": 3,
-          "them": 0,
-          "winner": "them",
-          "us": 0
-        }
-      ],
       "players": [
         {
           "private": false,
@@ -594,72 +548,70 @@
           "id": "p-9fba6b8e"
         }
       ],
-      "level": "Varsity",
+      "gameName": "Marvel Rivals",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "game": "marvel-rivals",
       "teamId": "t6",
+      "bestOf": 5,
+      "week": "1",
+      "level": "Varsity",
+      "notes": "",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "source": {},
+      "startsAt": "2026-09-24T19:30:00.000Z",
+      "teamName": "Marvel Rivals Varsity",
+      "bye": false,
+      "forfeit": null,
+      "status": "final",
+      "event": "MHSEL Fall 2026",
+      "updatedAt": "2026-10-23T18:26:04.786Z",
+      "opponent": {
+        "abbr": "MIL",
+        "school": "Millington High School",
+        "team": "Millington Rivals",
+        "short": "",
+        "logo": "https://image.maxpreps.io/school-mascot/3/d/e/3def3a75-86ee-43c5-b530-13b898042dcf.gif?version=635979741600000000&width=1024&height=1024"
+      },
+      "term": "fall",
+      "stage": "regular",
+      "clinched": "them",
+      "result": "L",
+      "games": [
+        {
+          "them": 0,
+          "n": 1,
+          "us": 0,
+          "winner": "them"
+        },
+        {
+          "us": 0,
+          "them": 0,
+          "n": 2,
+          "winner": "them"
+        },
+        {
+          "n": 3,
+          "them": 0,
+          "winner": "them",
+          "us": 0
+        }
+      ],
       "stream": {
         "live": "",
         "vod": ""
       },
-      "status": "final",
-      "bye": false,
-      "result": "L",
-      "game": "marvel-rivals",
-      "forfeit": null
+      "current": 3
     },
     {
       "id": "Hlo7TCkT9Bm86icWxp5U",
-      "players": [
-        {
-          "private": false,
-          "name": "Grayson Bentley",
-          "tag": "Ferd",
-          "stats": {},
-          "id": "p-8215d1bd"
-        },
-        {
-          "private": false,
-          "name": "Cole Goodfellow",
-          "id": "p-76937fcb",
-          "sub": true,
-          "tag": "Boscopup",
-          "stats": {}
-        }
-      ],
-      "bye": false,
-      "updatedAt": "2026-10-23T18:26:50.666Z",
-      "current": 3,
       "week": "2",
-      "opponent": {
-        "team": "PNHS Fortnite Orange",
-        "abbr": "PN",
-        "short": "",
-        "school": "Portage Northern High School",
-        "logo": "https://on3static.com/uploads/assets/163/346/346163.png"
-      },
-      "score": {
-        "us": 1,
-        "them": 2
-      },
-      "gameName": "Fortnite Zone Wars Duos",
-      "source": {},
-      "forfeit": null,
-      "result": "L",
-      "status": "final",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "teamName": "Fortnite Varsity #2",
-      "stage": "regular",
-      "term": "fall",
-      "teamId": "t2",
-      "startsAt": "2026-09-29T19:30:00.000Z",
-      "level": "Varsity",
       "game": "fortnite-zw",
-      "clinched": "them",
-      "notes": "",
-      "season": "2026-27",
-      "bestOf": 3,
+      "bye": false,
+      "status": "final",
       "games": [
         {
           "them": 10,
@@ -680,26 +632,88 @@
           "n": 3
         }
       ],
+      "players": [
+        {
+          "private": false,
+          "name": "Grayson Bentley",
+          "tag": "Ferd",
+          "stats": {},
+          "id": "p-8215d1bd"
+        },
+        {
+          "private": false,
+          "name": "Cole Goodfellow",
+          "id": "p-76937fcb",
+          "sub": true,
+          "tag": "Boscopup",
+          "stats": {}
+        }
+      ],
+      "term": "fall",
+      "clinched": "them",
+      "source": {},
+      "teamId": "t2",
+      "bestOf": 3,
+      "season": "2026-27",
       "league": "MHSEL",
-      "event": "MHSEL Fall 2026"
+      "updatedAt": "2026-10-23T18:26:50.666Z",
+      "stage": "regular",
+      "forfeit": null,
+      "opponent": {
+        "short": "",
+        "team": "PNHS Fortnite Orange",
+        "school": "Portage Northern High School",
+        "abbr": "PN",
+        "logo": "https://on3static.com/uploads/assets/163/346/346163.png"
+      },
+      "event": "MHSEL Fall 2026",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "result": "L",
+      "teamName": "Fortnite Varsity #2",
+      "startsAt": "2026-09-29T19:30:00.000Z",
+      "current": 3,
+      "level": "Varsity",
+      "notes": "",
+      "score": {
+        "them": 2,
+        "us": 1
+      },
+      "gameName": "Fortnite Zone Wars Duos"
     },
     {
       "id": "I8ZmE87NHUu8bOPMl6uv",
-      "season": "2026-27",
       "opponent": {
-        "school": "Denby High School",
-        "team": "Denby Tars",
-        "short": "",
+        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1783547688/detroitk12org/nrundbycbwjwrintkkqb/Denby_Circle2.png",
         "abbr": "DEN",
-        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1783547688/detroitk12org/nrundbycbwjwrintkkqb/Denby_Circle2.png"
+        "school": "Denby High School",
+        "short": "",
+        "team": "Denby Tars"
       },
-      "gameName": "Fortnite Zone Wars Duos",
-      "league": "MHSEL",
-      "forfeit": null,
-      "term": "fall",
-      "bestOf": 3,
-      "level": "Varsity",
+      "event": "MHSEL Fall 2026",
+      "current": 2,
+      "updatedAt": "2026-10-23T18:26:34.931Z",
       "startsAt": "2026-09-29T19:30:00.000Z",
+      "teamName": "Fortnite Varsity #1",
+      "gameName": "Fortnite Zone Wars Duos",
+      "notes": "",
+      "level": "Varsity",
+      "score": {
+        "them": 0,
+        "us": 2
+      },
+      "result": "W",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "teamId": "t1",
+      "bye": false,
+      "bestOf": 3,
+      "source": {},
+      "forfeit": null,
       "games": [
         {
           "n": 1,
@@ -714,10 +728,12 @@
           "them": 2
         }
       ],
-      "event": "MHSEL Fall 2026",
+      "game": "fortnite-zw",
       "week": "",
-      "teamName": "Fortnite Varsity #1",
-      "notes": "",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "stage": "regular",
+      "clinched": "us",
       "players": [
         {
           "tag": "TRE4TY.",
@@ -734,40 +750,11 @@
           "id": "p-62e0e640"
         }
       ],
-      "current": 2,
-      "score": {
-        "them": 0,
-        "us": 2
-      },
-      "clinched": "us",
-      "bye": false,
-      "result": "W",
       "status": "final",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "teamId": "t1",
-      "stage": "regular",
-      "game": "fortnite-zw",
-      "updatedAt": "2026-10-23T18:26:34.931Z",
-      "source": {}
+      "term": "fall"
     },
     {
       "id": "H1Z4FXNH3u3ANha5QeLw",
-      "gameName": "Super Smash Bros. Ultimate",
-      "opponent": {
-        "abbr": "KEL",
-        "logo": "",
-        "short": "",
-        "school": "Kelloggsville High School",
-        "team": "Kelloggsville HS Smash"
-      },
-      "game": "smash",
-      "forfeit": null,
-      "level": "JV",
-      "league": "MHSEL",
-      "current": 5,
       "games": [
         {
           "winner": "them",
@@ -800,8 +787,6 @@
           "us": 2
         }
       ],
-      "bestOf": 5,
-      "startsAt": "2026-09-30T19:30:00.000Z",
       "players": [
         {
           "private": false,
@@ -825,41 +810,47 @@
           "tag": "SKELE"
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "season": "2026-27",
-      "notes": "",
-      "teamName": "Smash JV",
-      "score": {
-        "them": 2,
-        "us": 3
-      },
-      "source": {},
-      "week": "2",
+      "term": "fall",
       "clinched": "us",
-      "stage": "regular",
-      "teamId": "t4",
-      "bye": false,
-      "updatedAt": "2026-10-23T18:26:59.402Z",
       "result": "W",
-      "status": "final",
+      "updatedAt": "2026-10-23T18:26:59.402Z",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "term": "fall"
+      "stage": "regular",
+      "forfeit": null,
+      "week": "2",
+      "game": "smash",
+      "gameName": "Super Smash Bros. Ultimate",
+      "event": "MHSEL Fall 2026",
+      "startsAt": "2026-09-30T19:30:00.000Z",
+      "teamName": "Smash JV",
+      "status": "final",
+      "bestOf": 5,
+      "teamId": "t4",
+      "source": {},
+      "notes": "",
+      "level": "JV",
+      "score": {
+        "them": 2,
+        "us": 3
+      },
+      "bye": false,
+      "league": "MHSEL",
+      "season": "2026-27",
+      "current": 5,
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "abbr": "KEL",
+        "team": "Kelloggsville HS Smash",
+        "school": "Kelloggsville High School"
+      }
     },
     {
       "id": "JfVLNtn6MfI1n4iH4HBv",
-      "gameName": "Super Smash Bros. Ultimate",
-      "source": {},
-      "opponent": {
-        "team": "Aggie Wrecking Crew",
-        "logo": "",
-        "abbr": "DAN",
-        "school": "Dansville High School"
-      },
-      "level": "Varsity",
-      "game": "smash",
+      "stage": "regular",
       "games": [
         {
           "them": 0,
@@ -880,24 +871,30 @@
           "n": 3
         }
       ],
-      "teamId": "t3",
-      "event": "MHSEL Fall 2026",
-      "startsAt": "2026-09-30T19:30:00.000Z",
-      "updatedAt": "2026-10-01T21:41:20.794Z",
-      "status": "final",
+      "current": 3,
+      "result": "W",
+      "clinched": "us",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "teamName": "Smash Varsity",
-      "result": "W",
-      "notes": "",
-      "current": 3,
+      "bestOf": 5,
+      "teamId": "t3",
+      "source": {},
+      "updatedAt": "2026-10-01T21:41:20.794Z",
       "score": {
-        "us": 3,
-        "them": 0
+        "them": 0,
+        "us": 3
       },
-      "clinched": "us",
+      "notes": "",
+      "level": "Varsity",
+      "term": "fall",
+      "opponent": {
+        "team": "Aggie Wrecking Crew",
+        "abbr": "DAN",
+        "school": "Dansville High School",
+        "logo": ""
+      },
       "players": [
         {
           "id": "p-e8f9e498",
@@ -927,18 +924,19 @@
           "name": "Calvin Lauren"
         }
       ],
-      "week": "2",
       "league": "MHSEL",
-      "stage": "regular",
+      "season": "2026-27",
+      "gameName": "Super Smash Bros. Ultimate",
+      "teamName": "Smash Varsity",
+      "event": "MHSEL Fall 2026",
+      "startsAt": "2026-09-30T19:30:00.000Z",
+      "status": "final",
+      "week": "2",
       "forfeit": null,
-      "term": "fall",
-      "bestOf": 5,
-      "season": "2026-27"
+      "game": "smash"
     },
     {
       "id": "QLU4qimSgMUFSUGZmD5P",
-      "event": "MHSEL Fall 2026",
-      "startsAt": "2026-10-01T19:30:00.000Z",
       "games": [
         {
           "p": {
@@ -1163,8 +1161,25 @@
           "us": 0
         }
       ],
+      "term": "fall",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "source": {},
+      "opponent": {
+        "logo": "",
+        "abbr": "RHS",
+        "school": "Robichaud Senior High School",
+        "team": "The Bulldogs"
+      },
+      "bestOf": 5,
+      "teamId": "t6",
+      "forfeit": null,
       "week": "2",
-      "teamName": "Marvel Rivals Varsity",
+      "gameName": "Marvel Rivals",
+      "game": "marvel-rivals",
+      "updatedAt": "2026-11-05T16:46:10.032Z",
+      "status": "final",
+      "stage": "regular",
       "players": [
         {
           "tag": "Squish212",
@@ -1305,48 +1320,60 @@
           "tag": "sunny.1000"
         }
       ],
-      "notes": "",
+      "teamName": "Marvel Rivals Varsity",
+      "startsAt": "2026-10-01T19:30:00.000Z",
       "current": 1,
-      "season": "2026-27",
-      "term": "fall",
-      "opponent": {
-        "abbr": "RHS",
-        "team": "The Bulldogs",
-        "school": "Robichaud Senior High School",
-        "logo": ""
-      },
-      "gameName": "Marvel Rivals",
-      "level": "Varsity",
-      "league": "MHSEL",
-      "forfeit": null,
-      "bestOf": 5,
-      "stage": "regular",
-      "game": "marvel-rivals",
-      "source": {},
       "perGame": true,
-      "updatedAt": "2026-11-05T16:46:10.032Z",
-      "clinched": "us",
+      "event": "MHSEL Fall 2026",
+      "result": "W",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "status": "final",
       "score": {
         "us": 3,
         "them": 0
       },
-      "result": "W",
-      "teamId": "t6"
+      "level": "Varsity",
+      "notes": "",
+      "clinched": "us"
     },
     {
       "id": "UBJvlOdDrZhsIsMm41cg",
-      "result": "L",
-      "status": "final",
-      "stream": {
-        "live": "",
-        "vod": ""
+      "score": {
+        "them": 3,
+        "us": 0
       },
+      "notes": "",
+      "level": "Varsity",
+      "opponent": {
+        "logo": "",
+        "abbr": "NOVI",
+        "team": "Novi Wildcats Varsity Rocket League",
+        "school": "Novi High School"
+      },
+      "updatedAt": "2026-10-01T21:46:29.959Z",
+      "status": "final",
+      "term": "fall",
+      "current": 2,
+      "startsAt": "2026-10-01T19:30:00.000Z",
+      "event": "MHSEL Fall 2026",
+      "bestOf": 5,
       "teamId": "t5",
+      "teamName": "Rocket League Varsity",
+      "source": {},
+      "gameName": "Rocket League",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "game": "rocket-league",
+      "week": "2",
+      "forfeit": null,
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "stage": "regular",
+      "result": "L",
       "clinched": "them",
       "players": [
         {
@@ -1383,10 +1410,6 @@
           "name": "Jackson Gibbs"
         }
       ],
-      "term": "fall",
-      "updatedAt": "2026-10-01T21:46:29.959Z",
-      "level": "Varsity",
-      "current": 2,
       "games": [
         {
           "winner": "them",
@@ -1406,42 +1429,33 @@
           "them": 4,
           "winner": "them"
         }
-      ],
-      "event": "MHSEL Fall 2026",
-      "week": "2",
-      "notes": "",
-      "source": {},
-      "forfeit": null,
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "season": "2026-27",
-      "league": "MHSEL",
-      "opponent": {
-        "abbr": "NOVI",
-        "logo": "",
-        "school": "Novi High School",
-        "team": "Novi Wildcats Varsity Rocket League"
-      },
-      "bestOf": 5,
-      "gameName": "Rocket League",
-      "teamName": "Rocket League Varsity",
-      "stage": "regular",
-      "game": "rocket-league",
-      "startsAt": "2026-10-01T19:30:00.000Z"
+      ]
     },
     {
       "id": "3oa5qqQA3BnrwwRzffwI",
       "clinched": "us",
-      "level": "Varsity",
-      "season": "2026-27",
-      "bestOf": 3,
-      "forfeit": null,
-      "league": "MHSEL",
-      "updatedAt": "2026-10-06T21:31:31.091Z",
+      "score": {
+        "us": 2,
+        "them": 0
+      },
+      "status": "final",
       "notes": "",
-      "game": "fortnite-zw",
+      "level": "Varsity",
+      "source": {},
+      "teamId": "t2",
+      "bestOf": 3,
+      "current": 2,
+      "season": "2026-27",
+      "league": "MHSEL",
+      "perGame": true,
+      "event": "MHSEL Fall 2026",
+      "teamName": "Fortnite Varsity #2",
+      "startsAt": "2026-10-06T19:30:00.000Z",
+      "stage": "regular",
+      "term": "fall",
+      "result": "W",
+      "updatedAt": "2026-10-06T21:31:31.091Z",
+      "gameName": "Fortnite Zone Wars Duos",
       "players": [
         {
           "stats": {
@@ -1480,7 +1494,10 @@
           "games": []
         }
       ],
-      "current": 2,
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
       "games": [
         {
           "n": 1,
@@ -1515,57 +1532,48 @@
           }
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "result": "W",
-      "status": "final",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "opponent": {
-        "logo": "",
-        "abbr": "NIL",
-        "school": "Niles High School",
-        "team": "Niles Fortnite Blue",
-        "short": ""
-      },
-      "gameName": "Fortnite Zone Wars Duos",
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "teamId": "t2",
-      "term": "fall",
-      "startsAt": "2026-10-06T19:30:00.000Z",
       "week": "3",
-      "perGame": true,
-      "stage": "regular",
-      "teamName": "Fortnite Varsity #2",
-      "source": {}
+      "game": "fortnite-zw",
+      "opponent": {
+        "abbr": "NIL",
+        "short": "",
+        "team": "Niles Fortnite Blue",
+        "logo": "",
+        "school": "Niles High School"
+      },
+      "forfeit": null
     },
     {
       "id": "7rta1Gtk15ViZWIgpvGn",
-      "game": "fortnite-zw",
-      "result": "W",
+      "event": "MHSEL Fall 2026",
+      "notes": "",
+      "level": "Varsity",
+      "score": {
+        "them": 0,
+        "us": 2
+      },
+      "current": 2,
       "stream": {
         "live": "",
         "vod": ""
       },
-      "status": "final",
-      "startsAt": "2026-10-06T19:30:00.000Z",
+      "perGame": true,
+      "clinched": "us",
+      "updatedAt": "2026-10-06T21:32:38.080Z",
+      "result": "W",
+      "bestOf": 3,
       "teamId": "t1",
-      "level": "Varsity",
-      "teamName": "Fortnite Varsity #1",
+      "source": {},
+      "term": "fall",
+      "season": "2026-27",
+      "league": "MHSEL",
       "opponent": {
-        "team": "PNHS Fortnite Orange",
         "school": "Portage Northern High School",
         "logo": "",
-        "short": "",
-        "abbr": "PN"
+        "abbr": "PN",
+        "team": "PNHS Fortnite Orange",
+        "short": ""
       },
-      "gameName": "Fortnite Zone Wars Duos",
-      "perGame": true,
-      "event": "MHSEL Fall 2026",
       "games": [
         {
           "n": 1,
@@ -1600,19 +1608,6 @@
           }
         }
       ],
-      "notes": "",
-      "source": {},
-      "week": "3",
-      "score": {
-        "them": 0,
-        "us": 2
-      },
-      "season": "2026-27",
-      "forfeit": null,
-      "league": "MHSEL",
-      "bestOf": 3,
-      "updatedAt": "2026-10-06T21:32:38.080Z",
-      "stage": "regular",
       "players": [
         {
           "tag": "TRE4TY.",
@@ -1643,13 +1638,75 @@
           }
         }
       ],
-      "current": 2,
-      "clinched": "us",
-      "term": "fall"
+      "gameName": "Fortnite Zone Wars Duos",
+      "status": "final",
+      "teamName": "Fortnite Varsity #1",
+      "stage": "regular",
+      "game": "fortnite-zw",
+      "forfeit": null,
+      "startsAt": "2026-10-06T19:30:00.000Z",
+      "week": "3"
     },
     {
       "id": "cAJXiPdWHpwTqF9zvn52",
+      "gameName": "Fortnite Zone Wars Duos",
+      "event": "USAEL Open Fall 2026",
+      "teamName": "Fortnite Varsity #1",
+      "players": [
+        {
+          "tag": "TRE4TY.",
+          "id": "p-0b11aaef",
+          "name": "Tavin Flanagan",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "stats": {
+            "elims": 42,
+            "deaths": 0
+          }
+        },
+        {
+          "name": "Gavin Marino",
+          "private": false,
+          "id": "p-62e0e640",
+          "stats": {
+            "elims": 32,
+            "deaths": 0
+          },
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "0gix."
+        }
+      ],
+      "startsAt": "2026-10-07T19:30:00.000Z",
       "notes": "",
+      "level": "Varsity",
+      "score": {
+        "them": 1,
+        "us": 2
+      },
+      "result": "W",
+      "opponent": {
+        "school": "H.A.R.T.S. High School",
+        "logo": "",
+        "team": "HARTs Fortnite Team C",
+        "abbr": "HART",
+        "short": ""
+      },
+      "forfeit": null,
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "bestOf": 3,
+      "teamId": "t1",
+      "source": {},
       "games": [
         {
           "n": 1,
@@ -1700,136 +1757,20 @@
           }
         }
       ],
-      "event": "USAEL Open Fall 2026",
       "game": "fortnite-zw",
-      "clinched": "us",
-      "perGame": true,
-      "level": "Varsity",
-      "season": "2026-27",
-      "bestOf": 3,
-      "league": "USAEL Open",
-      "forfeit": null,
-      "opponent": {
-        "team": "HARTs Fortnite Team C",
-        "school": "H.A.R.T.S. High School",
-        "short": "",
-        "logo": "",
-        "abbr": "HART"
-      },
-      "gameName": "Fortnite Zone Wars Duos",
-      "stage": "regular",
-      "source": {},
       "week": "3",
-      "players": [
-        {
-          "tag": "TRE4TY.",
-          "id": "p-0b11aaef",
-          "name": "Tavin Flanagan",
-          "private": false,
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "stats": {
-            "elims": 42,
-            "deaths": 0
-          }
-        },
-        {
-          "name": "Gavin Marino",
-          "private": false,
-          "id": "p-62e0e640",
-          "stats": {
-            "elims": 32,
-            "deaths": 0
-          },
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "tag": "0gix."
-        }
-      ],
-      "status": "final",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "result": "W",
-      "updatedAt": "2026-10-07T20:16:22.711Z",
+      "clinched": "us",
+      "season": "2026-27",
+      "league": "USAEL Open",
+      "stage": "regular",
       "current": 3,
-      "teamName": "Fortnite Varsity #1",
       "term": "fall",
-      "score": {
-        "them": 1,
-        "us": 2
-      },
-      "startsAt": "2026-10-07T19:30:00.000Z",
-      "teamId": "t1"
+      "status": "final",
+      "perGame": true,
+      "updatedAt": "2026-10-07T20:16:22.711Z"
     },
     {
       "id": "g0FOztmaEfal3hUDXmzZ",
-      "stage": "regular",
-      "season": "2026-27",
-      "clinched": "us",
-      "league": "MHSEL",
-      "updatedAt": "2026-10-07T20:46:39.563Z",
-      "forfeit": null,
-      "bestOf": 5,
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "game": "smash",
-      "players": [
-        {
-          "stats": {
-            "stocks_taken": 6
-          },
-          "games": [
-            1
-          ],
-          "tag": "SKELE",
-          "id": "p-989757e2",
-          "private": false,
-          "name": "Nicholas Govier"
-        },
-        {
-          "stats": {
-            "stocks_taken": 6
-          },
-          "id": "p-f1134599",
-          "tag": "Buptub",
-          "games": [
-            2
-          ],
-          "name": "Evan Hudgins",
-          "private": false
-        },
-        {
-          "tag": "Otto::",
-          "stats": {
-            "stocks_taken": 6
-          },
-          "name": "Roman Toro",
-          "id": "p-b498d9d8",
-          "private": false,
-          "games": [
-            3
-          ]
-        }
-      ],
-      "current": 3,
-      "opponent": {
-        "logo": "",
-        "abbr": "LAM",
-        "school": "Lamphere High School",
-        "team": "JV Smash Charging Rams",
-        "short": ""
-      },
-      "result": "W",
       "games": [
         {
           "them": 0,
@@ -1868,28 +1809,141 @@
           "n": 3
         }
       ],
-      "gameName": "Super Smash Bros. Ultimate",
-      "status": "final",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "event": "MHSEL Fall 2026",
-      "teamId": "t4",
-      "notes": "",
       "term": "fall",
-      "startsAt": "2026-10-07T19:30:00.000Z",
+      "result": "W",
+      "opponent": {
+        "short": "",
+        "logo": "",
+        "team": "JV Smash Charging Rams",
+        "abbr": "LAM",
+        "school": "Lamphere High School"
+      },
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "forfeit": null,
       "week": "3",
+      "game": "smash",
+      "gameName": "Super Smash Bros. Ultimate",
+      "stage": "regular",
+      "updatedAt": "2026-10-07T20:46:39.563Z",
       "teamName": "Smash JV",
-      "source": {},
+      "players": [
+        {
+          "stats": {
+            "stocks_taken": 6
+          },
+          "games": [
+            1
+          ],
+          "tag": "SKELE",
+          "id": "p-989757e2",
+          "private": false,
+          "name": "Nicholas Govier"
+        },
+        {
+          "stats": {
+            "stocks_taken": 6
+          },
+          "id": "p-f1134599",
+          "tag": "Buptub",
+          "games": [
+            2
+          ],
+          "name": "Evan Hudgins",
+          "private": false
+        },
+        {
+          "tag": "Otto::",
+          "stats": {
+            "stocks_taken": 6
+          },
+          "name": "Roman Toro",
+          "id": "p-b498d9d8",
+          "private": false,
+          "games": [
+            3
+          ]
+        }
+      ],
+      "startsAt": "2026-10-07T19:30:00.000Z",
+      "current": 3,
+      "event": "MHSEL Fall 2026",
+      "status": "final",
       "perGame": true,
-      "level": "JV"
+      "source": {},
+      "teamId": "t4",
+      "bestOf": 5,
+      "clinched": "us",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "level": "JV",
+      "notes": "",
+      "score": {
+        "us": 3,
+        "them": 0
+      }
     },
     {
       "id": "lf7u5vm2L6QQygwr9R3H",
-      "clinched": "us",
-      "notes": "",
+      "source": {},
+      "term": "fall",
+      "bestOf": 5,
       "teamId": "t3",
+      "updatedAt": "2026-10-09T19:36:53.228Z",
+      "event": "MHSEL Fall 2026",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "forfeit": null,
+      "week": "3",
+      "game": "smash",
+      "players": [
+        {
+          "id": "p-e8f9e498",
+          "games": [
+            2,
+            4
+          ],
+          "private": false,
+          "stats": {
+            "stocks_taken": 12
+          },
+          "tag": "Lypuff",
+          "name": "Jeffery Howe"
+        },
+        {
+          "stats": {
+            "stocks_taken": 8
+          },
+          "tag": "DeviousDawgs",
+          "games": [
+            3
+          ],
+          "name": "Bo West",
+          "private": false,
+          "id": "p-66fae53c"
+        },
+        {
+          "private": false,
+          "id": "p-75b76f7a",
+          "name": "Rownin Flanagan",
+          "games": [
+            1
+          ],
+          "tag": "Rinferno53",
+          "stats": {
+            "stocks_taken": 2
+          }
+        }
+      ],
+      "notes": "",
+      "level": "Varsity",
+      "score": {
+        "us": 3,
+        "them": 1
+      },
+      "clinched": "us",
       "status": "final",
       "games": [
         {
@@ -1941,100 +1995,35 @@
           "us": 2
         }
       ],
+      "current": 4,
+      "opponent": {
+        "short": "",
+        "logo": "",
+        "team": "Alpha Spartans - SSBU Varsity",
+        "abbr": "MCC",
+        "school": "Mason County Central"
+      },
+      "perGame": true,
+      "gameName": "Super Smash Bros. Ultimate",
+      "stage": "regular",
+      "teamName": "Smash Varsity",
+      "result": "W",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "event": "MHSEL Fall 2026",
-      "result": "W",
-      "perGame": true,
-      "game": "smash",
-      "level": "Varsity",
-      "source": {},
-      "bestOf": 5,
-      "gameName": "Super Smash Bros. Ultimate",
-      "opponent": {
-        "team": "Alpha Spartans - SSBU Varsity",
-        "school": "Mason County Central",
-        "logo": "",
-        "short": "",
-        "abbr": "MCC"
-      },
-      "league": "MHSEL",
-      "current": 4,
-      "season": "2026-27",
-      "players": [
-        {
-          "id": "p-e8f9e498",
-          "games": [
-            2,
-            4
-          ],
-          "private": false,
-          "stats": {
-            "stocks_taken": 12
-          },
-          "tag": "Lypuff",
-          "name": "Jeffery Howe"
-        },
-        {
-          "stats": {
-            "stocks_taken": 8
-          },
-          "tag": "DeviousDawgs",
-          "games": [
-            3
-          ],
-          "name": "Bo West",
-          "private": false,
-          "id": "p-66fae53c"
-        },
-        {
-          "private": false,
-          "id": "p-75b76f7a",
-          "name": "Rownin Flanagan",
-          "games": [
-            1
-          ],
-          "tag": "Rinferno53",
-          "stats": {
-            "stocks_taken": 2
-          }
-        }
-      ],
-      "stage": "regular",
-      "week": "3",
-      "startsAt": "2026-10-07T19:30:00.000Z",
-      "updatedAt": "2026-10-09T19:36:53.228Z",
-      "term": "fall",
-      "teamName": "Smash Varsity",
-      "forfeit": null,
-      "score": {
-        "us": 3,
-        "them": 1
-      }
+      "startsAt": "2026-10-07T19:30:00.000Z"
     },
     {
       "id": "CSQXx69ICiudk4bYbzBB",
-      "status": "final",
-      "term": "fall",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "opponent": {
-        "team": "Saline Marvel Rivals",
-        "short": "",
-        "logo": "",
-        "abbr": "SAL",
-        "school": "Saline High School"
-      },
-      "gameName": "Marvel Rivals",
-      "result": "W",
-      "seriesOnly": true,
-      "level": "Varsity",
-      "perGame": true,
       "teamId": "t6",
+      "bestOf": 5,
+      "stage": "regular",
+      "source": {},
+      "updatedAt": "2026-10-09T15:52:35.131Z",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "perGame": true,
       "games": [
         {
           "n": 1,
@@ -2259,19 +2248,9 @@
           }
         }
       ],
-      "event": "",
-      "startsAt": "2026-10-08T19:30:00.000Z",
-      "teamName": "Marvel Rivals Varsity",
-      "source": {},
-      "updatedAt": "2026-10-09T15:52:35.131Z",
-      "notes": "",
-      "week": "3",
-      "season": "2026-27",
       "clinched": "us",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
+      "status": "final",
+      "current": 3,
       "players": [
         {
           "stats": {
@@ -2412,33 +2391,111 @@
           "name": "Jack Arnold"
         }
       ],
-      "league": "MHSEL",
-      "bestOf": 5,
-      "current": 3,
-      "stage": "regular",
-      "forfeit": null,
-      "game": "marvel-rivals"
-    },
-    {
-      "id": "ZVKiLSKeb7IXFEiliUV9",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "notes": "",
       "level": "Varsity",
-      "teamName": "Rocket League Varsity",
-      "source": {},
+      "term": "fall",
+      "opponent": {
+        "school": "Saline High School",
+        "abbr": "SAL",
+        "team": "Saline Marvel Rivals",
+        "logo": "",
+        "short": ""
+      },
+      "gameName": "Marvel Rivals",
+      "forfeit": null,
       "startsAt": "2026-10-08T19:30:00.000Z",
       "week": "3",
-      "forfeit": null,
-      "updatedAt": "2026-10-09T18:25:42.782Z",
-      "term": "fall",
-      "notes": "",
-      "teamId": "t5",
+      "event": "",
+      "seriesOnly": true,
+      "game": "marvel-rivals",
+      "result": "W",
+      "teamName": "Marvel Rivals Varsity",
       "stream": {
         "live": "",
         "vod": ""
-      },
-      "status": "final",
-      "current": 1,
+      }
+    },
+    {
+      "id": "ZVKiLSKeb7IXFEiliUV9",
+      "forfeit": null,
       "event": "MHSEL Fall 2026",
+      "status": "final",
+      "clinched": "us",
+      "score": {
+        "them": 0,
+        "us": 3
+      },
+      "notes": "",
+      "level": "Varsity",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "players": [
+        {
+          "private": false,
+          "name": "Tavin Flanagan",
+          "id": "p-0b11aaef",
+          "tag": "TRE4TY.",
+          "stats": {
+            "goals": 11,
+            "saves": 6,
+            "shots": 20
+          },
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "id": "p-61bdc66e",
+          "name": "Fred Nikitin",
+          "tag": "Stupid Nonsense",
+          "stats": {
+            "goals": 4,
+            "shots": 7
+          },
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "stats": {
+            "goals": 7,
+            "saves": 3,
+            "shots": 8
+          },
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "id": "p-1f058985",
+          "name": "Jackson Gibbs",
+          "tag": "FishDGibbs"
+        }
+      ],
+      "bestOf": 5,
+      "teamId": "t5",
+      "source": {},
+      "perGame": true,
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "startsAt": "2026-10-08T19:30:00.000Z",
       "result": "W",
+      "teamName": "Rocket League Varsity",
+      "current": 1,
+      "gameName": "Rocket League",
+      "term": "fall",
       "games": [
         {
           "us": 9,
@@ -2506,103 +2563,26 @@
           "n": 3
         }
       ],
-      "players": [
-        {
-          "private": false,
-          "name": "Tavin Flanagan",
-          "id": "p-0b11aaef",
-          "tag": "TRE4TY.",
-          "stats": {
-            "goals": 11,
-            "saves": 6,
-            "shots": 20
-          },
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "id": "p-61bdc66e",
-          "name": "Fred Nikitin",
-          "tag": "Stupid Nonsense",
-          "stats": {
-            "goals": 4,
-            "shots": 7
-          },
-          "private": false,
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "stats": {
-            "goals": 7,
-            "saves": 3,
-            "shots": 8
-          },
-          "private": false,
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "id": "p-1f058985",
-          "name": "Jackson Gibbs",
-          "tag": "FishDGibbs"
-        }
-      ],
-      "gameName": "Rocket League",
+      "updatedAt": "2026-10-09T18:25:42.782Z",
       "opponent": {
         "short": "",
-        "team": "Belleville Rocket League",
         "school": "Belleville High School",
-        "abbr": "BEL",
-        "logo": ""
+        "logo": "",
+        "team": "Belleville Rocket League",
+        "abbr": "BEL"
       },
+      "stage": "regular",
       "game": "rocket-league",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "bestOf": 5,
-      "league": "MHSEL",
-      "clinched": "us",
-      "perGame": true,
-      "season": "2026-27",
-      "stage": "regular"
+      "week": "3"
     },
     {
       "id": "cy7VHkGTGMacx88J0uTa",
-      "week": "4",
-      "updatedAt": "2026-10-15T23:50:43.227Z",
-      "gameName": "Fortnite Zone Wars Duos",
-      "level": "Varsity",
-      "opponent": {
-        "abbr": "MA",
-        "school": "Milton Area High School",
-        "short": "",
-        "logo": "",
-        "team": "FN LIL FICKS N AUSTIN"
-      },
-      "seriesOnly": false,
-      "source": {},
-      "forfeit": null,
-      "startsAt": "2026-10-16T23:00:00.000Z",
       "notes": "",
-      "teamId": "t1",
-      "result": "L",
-      "current": 2,
-      "term": "fall",
-      "stream": {
-        "vod": "",
-        "live": ""
+      "level": "Varsity",
+      "score": {
+        "us": 0,
+        "them": 2
       },
-      "status": "final",
-      "teamName": "Fortnite Varsity #1",
       "players": [
         {
           "private": false,
@@ -2633,7 +2613,38 @@
           "name": "Gavin Marino"
         }
       ],
+      "clinched": "them",
       "event": "USAEL Fall 2026",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "result": "L",
+      "forfeit": null,
+      "league": "USAEL Open",
+      "season": "2026-27",
+      "gameName": "Fortnite Zone Wars Duos",
+      "stage": "regular",
+      "teamName": "Fortnite Varsity #1",
+      "bestOf": 3,
+      "week": "4",
+      "game": "fortnite-zw",
+      "teamId": "t1",
+      "startsAt": "2026-10-16T23:00:00.000Z",
+      "source": {},
+      "current": 2,
+      "status": "final",
+      "updatedAt": "2026-10-15T23:50:43.227Z",
+      "seriesOnly": false,
+      "opponent": {
+        "logo": "",
+        "short": "",
+        "abbr": "MA",
+        "team": "FN LIL FICKS N AUSTIN",
+        "school": "Milton Area High School"
+      },
+      "term": "fall",
+      "perGame": true,
       "games": [
         {
           "n": 1,
@@ -2667,79 +2678,17 @@
             }
           }
         }
-      ],
-      "clinched": "them",
-      "game": "fortnite-zw",
-      "score": {
-        "them": 2,
-        "us": 0
-      },
-      "bestOf": 3,
-      "league": "USAEL Open",
-      "stage": "regular",
-      "perGame": true,
-      "season": "2026-27"
+      ]
     },
     {
       "id": "Wums7gMhATNi9hzvsxRY",
-      "startsAt": "2026-10-20T19:30:00.000Z",
-      "week": "5",
-      "level": "Varsity",
-      "source": {},
-      "teamName": "Fortnite Varsity #1",
-      "bye": false,
-      "notes": "",
-      "teamId": "t1",
-      "gameName": "Fortnite Zone Wars Duos",
-      "opponent": {
-        "logo": "",
-        "abbr": "WLW",
-        "school": "Walled Lake Western",
-        "team": "WLW Fortnite (WHITE)",
-        "short": ""
-      },
-      "result": "L",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "term": "fall",
-      "status": "final",
-      "perGame": false,
-      "event": "MHSEL Fall 2026",
-      "games": [
-        {
-          "n": 1,
-          "us": 10,
-          "them": 7,
-          "winner": "us"
-        },
-        {
-          "n": 2,
-          "us": 4,
-          "them": 10,
-          "winner": "them"
-        },
-        {
-          "n": 3,
-          "us": 3,
-          "them": 10,
-          "winner": "them"
-        }
-      ],
-      "game": "fortnite-zw",
-      "seriesOnly": false,
-      "score": {
-        "us": 1,
-        "them": 2
-      },
-      "updatedAt": "2026-10-21T19:42:12.478Z",
       "forfeit": null,
-      "bestOf": 3,
-      "clinched": "them",
-      "league": "MHSEL",
-      "current": 3,
-      "stage": "regular",
+      "startsAt": "2026-10-20T19:30:00.000Z",
+      "status": "final",
+      "teamName": "Fortnite Varsity #1",
+      "event": "MHSEL Fall 2026",
+      "gameName": "Fortnite Zone Wars Duos",
+      "term": "fall",
       "players": [
         {
           "tag": "TRE4TY.",
@@ -2762,12 +2711,84 @@
           "name": "Gavin Marino"
         }
       ],
-      "season": "2026-27"
+      "opponent": {
+        "abbr": "WLW",
+        "short": "",
+        "school": "Walled Lake Western",
+        "team": "WLW Fortnite (WHITE)",
+        "logo": ""
+      },
+      "league": "MHSEL",
+      "season": "2026-27",
+      "bestOf": 3,
+      "score": {
+        "us": 1,
+        "them": 2
+      },
+      "teamId": "t1",
+      "updatedAt": "2026-10-21T19:42:12.478Z",
+      "notes": "",
+      "level": "Varsity",
+      "seriesOnly": false,
+      "source": {},
+      "week": "5",
+      "game": "fortnite-zw",
+      "perGame": false,
+      "result": "L",
+      "clinched": "them",
+      "games": [
+        {
+          "n": 1,
+          "us": 10,
+          "them": 7,
+          "winner": "us"
+        },
+        {
+          "n": 2,
+          "us": 4,
+          "them": 10,
+          "winner": "them"
+        },
+        {
+          "n": 3,
+          "us": 3,
+          "them": 10,
+          "winner": "them"
+        }
+      ],
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "current": 3,
+      "stage": "regular",
+      "bye": false
     },
     {
       "id": "dniRGCrcKWK7G086D9mr",
-      "league": "MHSEL",
+      "status": "final",
       "bye": false,
+      "seriesOnly": true,
+      "gameName": "Fortnite Zone Wars Duos",
+      "stage": "regular",
+      "players": [],
+      "teamName": "Fortnite Varsity #2",
+      "term": "fall",
+      "startsAt": "2026-10-20T19:30:00.000Z",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "opponent": {
+        "abbr": "GRC",
+        "short": "",
+        "school": "Grand Rapids Christian High School",
+        "team": "Fortnite Var Eagles",
+        "logo": ""
+      },
+      "game": "fortnite-zw",
+      "forfeit": null,
+      "week": "5",
+      "teamId": "t2",
+      "bestOf": 3,
       "games": [
         {
           "n": 1,
@@ -2782,112 +2803,34 @@
           "winner": "us"
         }
       ],
-      "bestOf": 3,
-      "event": "MHSEL Fall 2026",
-      "week": "5",
-      "season": "2026-27",
+      "source": {},
       "notes": "",
-      "clinched": "us",
-      "term": "fall",
       "level": "Varsity",
-      "perGame": false,
-      "teamId": "t2",
-      "stage": "regular",
-      "startsAt": "2026-10-20T19:30:00.000Z",
-      "updatedAt": "2026-10-21T20:18:45.259Z",
-      "game": "fortnite-zw",
-      "teamName": "Fortnite Varsity #2",
-      "seriesOnly": true,
-      "result": "W",
-      "status": "final",
+      "score": {
+        "us": 2,
+        "them": 0
+      },
       "stream": {
         "live": "",
         "vod": ""
       },
-      "forfeit": null,
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "source": {},
-      "gameName": "Fortnite Zone Wars Duos",
-      "opponent": {
-        "abbr": "GRC",
-        "school": "Grand Rapids Christian High School",
-        "short": "",
-        "logo": "",
-        "team": "Fortnite Var Eagles"
-      },
+      "updatedAt": "2026-10-21T20:18:45.259Z",
+      "result": "W",
+      "clinched": "us",
       "current": 2,
-      "players": []
+      "event": "MHSEL Fall 2026",
+      "perGame": false
     },
     {
       "id": "LQRTPY2UEKEljKod0h7i",
       "teamId": "t1",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "status": "final",
-      "week": "5",
-      "result": "W",
-      "clinched": "us",
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "term": "fall",
-      "perGame": true,
-      "source": {},
-      "stage": "regular",
-      "bye": false,
-      "level": "Varsity",
       "bestOf": 3,
-      "forfeit": null,
-      "league": "USAEL Open",
+      "stage": "regular",
+      "source": {},
       "game": "fortnite-zw",
-      "gameName": "Fortnite Zone Wars Duos",
-      "opponent": {
-        "logo": "",
-        "abbr": "HART",
-        "short": "",
-        "team": "HARTS Fortnite Team B",
-        "school": "H.A.R.T.S. High School"
-      },
+      "week": "5",
       "season": "2026-27",
-      "current": 2,
-      "players": [
-        {
-          "tag": "TRE4TY.",
-          "stats": {
-            "elims": 22
-          },
-          "private": false,
-          "games": [
-            1,
-            2
-          ],
-          "name": "Tavin Flanagan",
-          "id": "p-0b11aaef"
-        },
-        {
-          "stats": {
-            "elims": 26
-          },
-          "name": "Gavin Marino",
-          "tag": "0gix.",
-          "id": "p-62e0e640",
-          "private": false,
-          "games": [
-            1,
-            2
-          ]
-        }
-      ],
-      "updatedAt": "2026-10-21T20:00:22.966Z",
-      "notes": "",
-      "teamName": "Fortnite Varsity #1",
-      "event": "USAEL Fall 2026",
+      "league": "USAEL Open",
       "games": [
         {
           "us": 24,
@@ -2918,26 +2861,70 @@
           "us": 24
         }
       ],
-      "startsAt": "2026-10-21T19:00:00.000Z"
+      "perGame": true,
+      "clinched": "us",
+      "status": "final",
+      "current": 2,
+      "term": "fall",
+      "updatedAt": "2026-10-21T20:00:22.966Z",
+      "bye": false,
+      "players": [
+        {
+          "tag": "TRE4TY.",
+          "stats": {
+            "elims": 22
+          },
+          "private": false,
+          "games": [
+            1,
+            2
+          ],
+          "name": "Tavin Flanagan",
+          "id": "p-0b11aaef"
+        },
+        {
+          "stats": {
+            "elims": 26
+          },
+          "name": "Gavin Marino",
+          "tag": "0gix.",
+          "id": "p-62e0e640",
+          "private": false,
+          "games": [
+            1,
+            2
+          ]
+        }
+      ],
+      "score": {
+        "us": 2,
+        "them": 0
+      },
+      "notes": "",
+      "level": "Varsity",
+      "opponent": {
+        "school": "H.A.R.T.S. High School",
+        "logo": "",
+        "abbr": "HART",
+        "short": "",
+        "team": "HARTS Fortnite Team B"
+      },
+      "gameName": "Fortnite Zone Wars Duos",
+      "forfeit": null,
+      "startsAt": "2026-10-21T19:00:00.000Z",
+      "event": "USAEL Fall 2026",
+      "result": "W",
+      "teamName": "Fortnite Varsity #1",
+      "stream": {
+        "live": "",
+        "vod": ""
+      }
     },
     {
       "id": "7mU3Kd3rDpH52IILQWM7",
-      "source": {},
-      "gameName": "Super Smash Bros. Ultimate",
-      "opponent": {
-        "abbr": "FRU",
-        "school": "Fruitport High School",
-        "logo": "",
-        "team": "Fruitport SSBU JV 1",
-        "short": ""
-      },
-      "term": "fall",
-      "level": "JV",
-      "forfeit": null,
-      "teamId": "t4",
-      "week": "5",
+      "teamName": "Smash JV",
+      "updatedAt": "2026-10-22T20:57:06.078Z",
       "startsAt": "2026-10-21T19:30:00.000Z",
-      "event": "MHSEL Fall 2026",
       "games": [
         {
           "them": 2,
@@ -2990,15 +2977,27 @@
           }
         }
       ],
-      "notes": "",
-      "current": 4,
-      "teamName": "Smash JV",
-      "updatedAt": "2026-10-22T20:57:06.078Z",
-      "result": "W",
+      "gameName": "Super Smash Bros. Ultimate",
       "stream": {
-        "vod": "",
-        "live": ""
+        "live": "",
+        "vod": ""
       },
+      "opponent": {
+        "abbr": "FRU",
+        "school": "Fruitport High School",
+        "team": "Fruitport SSBU JV 1",
+        "logo": "",
+        "short": ""
+      },
+      "current": 4,
+      "result": "W",
+      "perGame": true,
+      "stage": "regular",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "term": "fall",
+      "event": "MHSEL Fall 2026",
+      "clinched": "us",
       "players": [
         {
           "stats": {
@@ -3041,26 +3040,35 @@
           "private": false
         }
       ],
-      "status": "final",
-      "clinched": "us",
-      "score": {
-        "them": 1,
-        "us": 3
-      },
+      "source": {},
       "bye": false,
-      "league": "MHSEL",
-      "game": "smash",
-      "stage": "regular",
       "bestOf": 5,
-      "season": "2026-27",
-      "perGame": true
+      "teamId": "t4",
+      "status": "final",
+      "score": {
+        "us": 3,
+        "them": 1
+      },
+      "notes": "",
+      "level": "JV",
+      "game": "smash",
+      "week": "5",
+      "forfeit": null
     },
     {
       "id": "RJQJJmOpbrmzuYCz3fZm",
-      "clinched": "us",
-      "notes": "",
-      "teamId": "t3",
-      "status": "final",
+      "result": "W",
+      "startsAt": "2026-10-21T19:30:00.000Z",
+      "game": "smash",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "week": "5",
+      "teamName": "Smash Varsity",
+      "stage": "regular",
+      "bye": false,
+      "gameName": "Super Smash Bros. Ultimate",
       "games": [
         {
           "n": 1,
@@ -3115,34 +3123,16 @@
           "n": 4
         }
       ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "event": "MHSEL Fall 2026",
-      "result": "W",
+      "term": "fall",
       "perGame": true,
-      "game": "smash",
-      "level": "Varsity",
-      "updatedAt": "2026-10-22T15:14:59.896Z",
-      "bye": false,
-      "source": {},
-      "announced": {
-        "smash:career:stocks_taken": "p-66fae53c",
-        "smash:single:stocks_taken": "p-66fae53c"
-      },
-      "bestOf": 5,
-      "gameName": "Super Smash Bros. Ultimate",
       "opponent": {
-        "team": "Ogemaw Heights Gold",
-        "school": "Ogemaw Heights High School",
+        "abbr": "OH",
         "short": "",
-        "logo": "https://cache.bsnsports.com/comp/sls/get/43/8958?f=jpg&sid=8958&ts=1725630466",
-        "abbr": "OH"
+        "school": "Ogemaw Heights High School",
+        "team": "Ogemaw Heights Gold",
+        "logo": "https://cache.bsnsports.com/comp/sls/get/43/8958?f=jpg&sid=8958&ts=1725630466"
       },
-      "league": "MHSEL",
       "current": 4,
-      "season": "2026-27",
       "players": [
         {
           "id": "p-e8f9e498",
@@ -3185,27 +3175,56 @@
           "tag": "Carrot King"
         }
       ],
-      "stage": "regular",
-      "week": "5",
-      "startsAt": "2026-10-21T19:30:00.000Z",
-      "term": "fall",
-      "teamName": "Smash Varsity",
-      "forfeit": null,
+      "clinched": "us",
+      "announced": {
+        "smash:career:stocks_taken": "p-66fae53c",
+        "smash:single:stocks_taken": "p-66fae53c"
+      },
+      "status": "final",
+      "level": "Varsity",
+      "notes": "",
       "score": {
         "us": 3,
         "them": 1
-      }
+      },
+      "forfeit": null,
+      "league": "MHSEL",
+      "season": "2026-27",
+      "source": {},
+      "updatedAt": "2026-10-22T15:14:59.896Z",
+      "bestOf": 5,
+      "teamId": "t3",
+      "event": "MHSEL Fall 2026"
     },
     {
       "id": "nYCahwxfVUwTEoEQ0Ebt",
-      "league": "MHSEL",
-      "term": "fall",
-      "current": 3,
+      "teamName": "Marvel Rivals Varsity",
       "startsAt": "2026-10-22T19:30:00.000Z",
+      "game": "marvel-rivals",
       "score": {
-        "them": 3,
-        "us": 0
+        "us": 0,
+        "them": 3
       },
+      "week": "5",
+      "level": "Varsity",
+      "notes": "",
+      "result": "L",
+      "gameName": "Marvel Rivals",
+      "forfeit": null,
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "opponent": {
+        "school": "Yale Senior High School",
+        "team": "Yale Bulldogs: Marvel Rivals",
+        "abbr": "YAL",
+        "short": "",
+        "logo": "https://static.eventlink.com/public/1a6e823f-de68-4884-b4a5-542533d2cf97/b85ecbf9-c767-46a0-b697-22c00bc33b20/Primary%20Logo.png"
+      },
+      "bye": false,
+      "updatedAt": "2026-11-05T17:59:00.571Z",
+      "event": "MHSEL Fall 2026",
       "players": [
         {
           "name": "Elka Borreson",
@@ -3362,31 +3381,14 @@
           "private": false
         }
       ],
-      "bestOf": 5,
-      "season": "2026-27",
-      "teamName": "Marvel Rivals Varsity",
-      "gameName": "Marvel Rivals",
-      "updatedAt": "2026-11-05T17:59:00.571Z",
-      "opponent": {
-        "short": "",
-        "team": "Yale Bulldogs: Marvel Rivals",
-        "school": "Yale Senior High School",
-        "abbr": "YAL",
-        "logo": "https://static.eventlink.com/public/1a6e823f-de68-4884-b4a5-542533d2cf97/b85ecbf9-c767-46a0-b697-22c00bc33b20/Primary%20Logo.png"
-      },
+      "term": "fall",
       "stage": "regular",
-      "forfeit": null,
-      "week": "5",
-      "teamId": "t6",
-      "perGame": true,
-      "level": "Varsity",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
+      "clinched": "them",
+      "current": 3,
       "status": "final",
-      "result": "L",
-      "event": "MHSEL Fall 2026",
+      "perGame": true,
+      "teamId": "t6",
+      "bestOf": 5,
       "source": {},
       "games": [
         {
@@ -3476,47 +3478,30 @@
           "n": 3
         }
       ],
-      "clinched": "them",
-      "game": "marvel-rivals",
-      "notes": "",
-      "bye": false
+      "season": "2026-27",
+      "league": "MHSEL"
     },
     {
       "id": "utRDyyr4nbmQJ6NFFKAY",
-      "season": "2026-27",
-      "perGame": false,
-      "notes": "",
-      "opponent": {
-        "school": "Imlay City High School",
-        "short": "",
-        "abbr": "IC",
-        "team": "IC Rocket League Team 2",
-        "logo": ""
+      "score": {
+        "them": 0,
+        "us": 3
       },
-      "game": "rocket-league",
-      "status": "final",
-      "games": [
-        {
-          "us": 0,
-          "n": 1,
-          "them": 0,
-          "winner": null
-        }
-      ],
-      "result": "W",
-      "forfeit": "them",
-      "current": 1,
       "stream": {
-        "live": "",
-        "vod": ""
+        "vod": "",
+        "live": ""
       },
-      "teamName": "Rocket League Varsity",
+      "opponent": {
+        "short": "",
+        "school": "Imlay City High School",
+        "logo": "",
+        "abbr": "IC",
+        "team": "IC Rocket League Team 2"
+      },
       "week": "5",
-      "updatedAt": "2026-10-30T14:50:36.855Z",
-      "level": "Varsity",
-      "clinched": "us",
-      "league": "MHSEL",
-      "source": {},
+      "term": "fall",
+      "gameName": "Rocket League",
+      "stage": "regular",
       "players": [
         {
           "id": "p-0b11aaef",
@@ -3547,29 +3532,56 @@
           "stats": {}
         }
       ],
-      "bestOf": 5,
-      "teamId": "t5",
-      "startsAt": "2026-10-22T19:30:00.000Z",
-      "bye": false,
-      "stage": "regular",
+      "current": 1,
+      "source": {},
+      "notes": "",
+      "games": [
+        {
+          "us": 0,
+          "n": 1,
+          "them": 0,
+          "winner": null
+        }
+      ],
+      "forfeit": "them",
+      "level": "Varsity",
+      "league": "MHSEL",
+      "updatedAt": "2026-10-30T14:50:36.855Z",
+      "result": "W",
       "event": "MHSEL Fall 2026",
-      "term": "fall",
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "gameName": "Rocket League"
+      "teamName": "Rocket League Varsity",
+      "season": "2026-27",
+      "perGame": false,
+      "bye": false,
+      "teamId": "t5",
+      "game": "rocket-league",
+      "startsAt": "2026-10-22T19:30:00.000Z",
+      "status": "final",
+      "bestOf": 5,
+      "clinched": "us"
     },
     {
       "id": "3oBGMtxq61fOi0ZqSFuA",
-      "notes": "",
-      "bestOf": 3,
-      "current": 1,
-      "league": "MHSEL",
+      "source": {},
       "players": [],
-      "term": "fall",
-      "event": "MHSEL Fall 2026",
-      "clinched": "us",
+      "teamId": "t2",
+      "opponent": {
+        "abbr": "FR",
+        "team": "Rams Fortnite",
+        "logo": "https://cfunity-school-logos.nfhsnetwork.com/school_logos/19fd3fe1-537b-45eb-8207-6b0c16a1a641/a38f1483d3_p766.png",
+        "school": "Flat Rock Community High School",
+        "short": ""
+      },
+      "bestOf": 3,
+      "updatedAt": "2026-10-27T20:40:56.771Z",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "stage": "regular",
+      "startsAt": "2026-10-27T19:30:00.000Z",
+      "forfeit": null,
+      "teamName": "Fortnite Varsity #2",
+      "gameName": "Fortnite Zone Wars Duos",
+      "status": "final",
       "games": [
         {
           "n": 1,
@@ -3584,51 +3596,34 @@
           "us": 10
         }
       ],
-      "season": "2026-27",
       "week": "6",
-      "level": "Varsity",
-      "forfeit": null,
-      "bye": false,
-      "teamId": "t2",
-      "perGame": false,
-      "result": "W",
-      "gameName": "Fortnite Zone Wars Duos",
-      "opponent": {
-        "team": "Rams Fortnite",
-        "short": "",
-        "school": "Flat Rock Community High School",
-        "logo": "https://cfunity-school-logos.nfhsnetwork.com/school_logos/19fd3fe1-537b-45eb-8207-6b0c16a1a641/a38f1483d3_p766.png",
-        "abbr": "FR"
+      "game": "fortnite-zw",
+      "score": {
+        "us": 2,
+        "them": 0
       },
+      "notes": "",
+      "level": "Varsity",
+      "clinched": "us",
+      "perGame": false,
+      "term": "fall",
+      "bye": false,
+      "event": "MHSEL Fall 2026",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "status": "final",
-      "stage": "regular",
-      "game": "fortnite-zw",
-      "updatedAt": "2026-10-27T20:40:56.771Z",
-      "teamName": "Fortnite Varsity #2",
-      "source": {},
-      "score": {
-        "them": 0,
-        "us": 2
-      },
-      "startsAt": "2026-10-27T19:30:00.000Z"
+      "result": "W",
+      "current": 1
     },
     {
       "id": "my4ORQIJOP4Vu6Lmibbs",
-      "notes": "",
-      "teamName": "Fortnite Varsity #1",
-      "teamId": "t1",
       "game": "fortnite-zw",
-      "startsAt": "2026-10-27T19:30:00.000Z",
-      "result": "W",
-      "status": "final",
-      "stream": {
-        "vod": "",
-        "live": "https://www.youtube.com/live/AaGx-LEl8cQ?si=ZFMga0OwT3y5hVsd"
-      },
+      "week": "6",
+      "stage": "regular",
+      "perGame": true,
+      "clinched": "us",
+      "current": 3,
       "games": [
         {
           "n": 1,
@@ -3679,24 +3674,31 @@
           "them": 9
         }
       ],
-      "perGame": true,
-      "event": "MHSEL Fall 2026",
-      "updatedAt": "2026-10-27T20:41:51.157Z",
-      "level": "Varsity",
-      "source": {},
-      "gameName": "Fortnite Zone Wars Duos",
-      "opponent": {
-        "team": "Saline Fortnite Exotic",
-        "school": "Saline High School",
-        "short": "",
-        "logo": "https://upload.wikimedia.org/wikipedia/en/7/78/Saline_High_School_%28Michigan%29_logo.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
-        "abbr": "SAL"
+      "term": "fall",
+      "result": "W",
+      "stream": {
+        "live": "https://www.youtube.com/live/AaGx-LEl8cQ?si=ZFMga0OwT3y5hVsd",
+        "vod": ""
       },
+      "gameName": "Fortnite Zone Wars Duos",
+      "source": {},
+      "teamId": "t1",
       "bestOf": 3,
+      "forfeit": null,
+      "startsAt": "2026-10-27T19:30:00.000Z",
+      "updatedAt": "2026-10-27T20:41:51.157Z",
+      "teamName": "Fortnite Varsity #1",
       "league": "MHSEL",
-      "week": "6",
-      "current": 3,
-      "stage": "regular",
+      "season": "2026-27",
+      "score": {
+        "them": 1,
+        "us": 2
+      },
+      "level": "Varsity",
+      "notes": "",
+      "announced": {
+        "all:winpct": "p-62e0e640"
+      },
       "players": [
         {
           "private": false,
@@ -3729,22 +3731,33 @@
           "id": "p-62e0e640"
         }
       ],
-      "season": "2026-27",
       "bye": false,
-      "clinched": "us",
-      "score": {
-        "them": 1,
-        "us": 2
-      },
-      "term": "fall",
-      "forfeit": null,
-      "announced": {
-        "all:winpct": "p-62e0e640"
+      "status": "final",
+      "event": "MHSEL Fall 2026",
+      "opponent": {
+        "short": "",
+        "abbr": "SAL",
+        "team": "Saline Fortnite Exotic",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/7/78/Saline_High_School_%28Michigan%29_logo.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
+        "school": "Saline High School"
       }
     },
     {
       "id": "RB2CjbOi98brkjSNIiv4",
-      "season": "2026-27",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "clinched": "us",
+      "notes": "",
+      "level": "Varsity",
+      "forfeit": null,
+      "status": "final",
+      "updatedAt": "2026-10-30T14:48:46.225Z",
+      "event": "MHSEL Fall 2026",
+      "bestOf": 5,
+      "teamId": "t3",
+      "source": {},
       "players": [
         {
           "tag": "DeviousDawgs",
@@ -3786,32 +3799,38 @@
           "name": "Jeffery Howe"
         }
       ],
-      "stage": "regular",
-      "current": 3,
-      "startsAt": "2026-10-28T19:30:00.000Z",
+      "season": "2026-27",
       "league": "MHSEL",
+      "bye": false,
+      "startsAt": "2026-10-28T19:30:00.000Z",
+      "perGame": true,
       "teamName": "Smash Varsity",
-      "bestOf": 5,
-      "opponent": {
-        "team": "BUTTON (S)MASHIN CHIEFTAINS",
-        "short": "",
-        "abbr": "UTI",
-        "school": "Utica High School",
-        "logo": "https://production-gofan-assets.s3.amazonaws.com/uploads/school/logo/MI10108/Utica%20HS%20(4).png"
+      "review": {
+        "by": "jeffhowe@hartlandschools.us",
+        "at": "2026-10-28T20:25:28.738Z",
+        "name": "Jeff Howe"
       },
       "gameName": "Super Smash Bros. Ultimate",
-      "forfeit": null,
-      "score": {
-        "us": 3,
-        "them": 0
+      "stream": {
+        "live": "",
+        "vod": ""
       },
+      "stage": "regular",
+      "current": 3,
+      "week": "6",
+      "result": "W",
       "game": "smash",
       "approved": {
         "at": "2026-10-28T20:25:40.202Z",
         "by": "cameronmontney@hartlandschools.us"
       },
-      "event": "MHSEL Fall 2026",
-      "perGame": true,
+      "opponent": {
+        "school": "Utica High School",
+        "logo": "https://production-gofan-assets.s3.amazonaws.com/uploads/school/logo/MI10108/Utica%20HS%20(4).png",
+        "abbr": "UTI",
+        "team": "BUTTON (S)MASHIN CHIEFTAINS",
+        "short": ""
+      },
       "term": "fall",
       "games": [
         {
@@ -3857,85 +3876,17 @@
           },
           "n": 3
         }
-      ],
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "status": "final",
-      "result": "W",
-      "teamId": "t3",
-      "notes": "",
-      "updatedAt": "2026-10-30T14:48:46.225Z",
-      "review": {
-        "by": "jeffhowe@hartlandschools.us",
-        "name": "Jeff Howe",
-        "at": "2026-10-28T20:25:28.738Z"
-      },
-      "clinched": "us",
-      "level": "Varsity",
-      "week": "6",
-      "source": {},
-      "bye": false
+      ]
     },
     {
       "id": "jvrdYKUPJcMw0FmN3R5Z",
-      "bye": false,
-      "stage": "regular",
-      "forfeit": null,
-      "current": 4,
-      "league": "MHSEL",
-      "score": {
-        "them": 3,
-        "us": 1
-      },
-      "players": [
-        {
-          "id": "p-989757e2",
-          "stats": {
-            "stocks_taken": 5,
-            "stocks_lost": 6
-          },
-          "games": [
-            1
-          ],
-          "name": "Nicholas Govier",
-          "tag": "SKELE",
-          "private": false
-        },
-        {
-          "games": [
-            3,
-            4
-          ],
-          "id": "p-f1134599",
-          "name": "Evan Hudgins",
-          "tag": "Buptub",
-          "stats": {
-            "stocks_taken": 8,
-            "stocks_lost": 10
-          },
-          "private": false
-        },
-        {
-          "tag": "Thepotato",
-          "name": "Elijah Lowe",
-          "id": "p-578c1bc6",
-          "games": [
-            2
-          ],
-          "stats": {
-            "stocks_taken": 2,
-            "stocks_lost": 6
-          },
-          "private": false
-        }
-      ],
-      "bestOf": 5,
       "season": "2026-27",
-      "clinched": "them",
-      "game": "smash",
-      "source": {},
+      "league": "MHSEL",
+      "updatedAt": "2026-10-28T21:15:11.807Z",
+      "teamName": "Smash JV",
+      "startsAt": "2026-10-28T19:30:00.000Z",
+      "forfeit": null,
+      "bestOf": 5,
       "games": [
         {
           "us": 1,
@@ -3999,71 +3950,86 @@
           "us": 0
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "term": "fall",
-      "updatedAt": "2026-10-28T21:15:11.807Z",
-      "teamName": "Smash JV",
-      "startsAt": "2026-10-28T19:30:00.000Z",
-      "notes": "",
       "teamId": "t4",
-      "perGame": true,
+      "week": "6",
+      "source": {},
+      "game": "smash",
       "gameName": "Super Smash Bros. Ultimate",
-      "level": "JV",
       "opponent": {
+        "team": "Berkley JV Smash Blue",
         "abbr": "BER",
-        "short": "",
-        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1749226814/berkleyschoolsorg/e3yxbh5qzchxppyflq3e/BerkleyHS_Mascot.png",
         "school": "Berkley High School",
-        "team": "Berkley JV Smash Blue"
+        "short": "",
+        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_2/v1749226814/berkleyschoolsorg/e3yxbh5qzchxppyflq3e/BerkleyHS_Mascot.png"
       },
       "status": "final",
-      "stream": {
-        "live": "",
-        "vod": ""
+      "term": "fall",
+      "players": [
+        {
+          "id": "p-989757e2",
+          "stats": {
+            "stocks_taken": 5,
+            "stocks_lost": 6
+          },
+          "games": [
+            1
+          ],
+          "name": "Nicholas Govier",
+          "tag": "SKELE",
+          "private": false
+        },
+        {
+          "games": [
+            3,
+            4
+          ],
+          "id": "p-f1134599",
+          "name": "Evan Hudgins",
+          "tag": "Buptub",
+          "stats": {
+            "stocks_taken": 8,
+            "stocks_lost": 10
+          },
+          "private": false
+        },
+        {
+          "tag": "Thepotato",
+          "name": "Elijah Lowe",
+          "id": "p-578c1bc6",
+          "games": [
+            2
+          ],
+          "stats": {
+            "stocks_taken": 2,
+            "stocks_lost": 6
+          },
+          "private": false
+        }
+      ],
+      "stage": "regular",
+      "bye": false,
+      "current": 4,
+      "event": "MHSEL Fall 2026",
+      "clinched": "them",
+      "perGame": true,
+      "score": {
+        "them": 3,
+        "us": 1
       },
-      "result": "L",
-      "week": "6"
+      "notes": "",
+      "level": "JV",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "result": "L"
     },
     {
       "id": "424n0ENZpy7YWZmzRd7I",
-      "teamId": "t5",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "startsAt": "2026-10-29T19:30:00.000Z",
-      "term": "fall",
-      "result": "L",
       "stream": {
         "live": "",
         "vod": ""
       },
-      "teamName": "Rocket League Varsity",
-      "status": "final",
-      "gameName": "Rocket League",
-      "updatedAt": "2026-10-29T21:04:00.462Z",
-      "week": "6",
-      "stage": "regular",
-      "opponent": {
-        "team": "FalconsRL",
-        "short": "",
-        "logo": "https://pbs.twimg.com/profile_images/469182767779962880/IOLK8sP6_400x400.jpeg",
-        "school": "Divine Child High School",
-        "abbr": "DC"
-      },
-      "source": {},
-      "perGame": true,
-      "league": "MHSEL",
-      "bestOf": 5,
-      "forfeit": null,
-      "season": "2026-27",
-      "level": "Varsity",
-      "seriesOnly": false,
-      "bye": false,
-      "game": "rocket-league",
-      "current": 3,
-      "clinched": "them",
-      "event": "MHSEL Fall 2026",
       "players": [
         {
           "games": [
@@ -4117,6 +4083,31 @@
           "id": "p-1f058985"
         }
       ],
+      "result": "L",
+      "opponent": {
+        "logo": "https://pbs.twimg.com/profile_images/469182767779962880/IOLK8sP6_400x400.jpeg",
+        "abbr": "DC",
+        "school": "Divine Child High School",
+        "team": "FalconsRL",
+        "short": ""
+      },
+      "event": "MHSEL Fall 2026",
+      "week": "6",
+      "game": "rocket-league",
+      "updatedAt": "2026-10-29T21:04:00.462Z",
+      "seriesOnly": false,
+      "forfeit": null,
+      "term": "fall",
+      "startsAt": "2026-10-29T19:30:00.000Z",
+      "score": {
+        "them": 3,
+        "us": 0
+      },
+      "level": "Varsity",
+      "notes": "",
+      "teamName": "Rocket League Varsity",
+      "gameName": "Rocket League",
+      "status": "final",
       "games": [
         {
           "n": 1,
@@ -4189,33 +4180,214 @@
           }
         }
       ],
-      "notes": ""
+      "league": "MHSEL",
+      "season": "2026-27",
+      "perGame": true,
+      "clinched": "them",
+      "current": 3,
+      "source": {},
+      "bestOf": 5,
+      "bye": false,
+      "teamId": "t5",
+      "stage": "regular"
     },
     {
       "id": "we3qKHfvhal7UGqLscnM",
+      "players": [
+        {
+          "tag": "sunny.1000",
+          "stats": {
+            "eliminations": 24,
+            "deaths": 28,
+            "assists": 18,
+            "damage": 48174,
+            "damage_blocked": 76786,
+            "healing": 22060,
+            "accuracy": 54.7
+          },
+          "roles": [
+            "Vanguard",
+            "Strategist"
+          ],
+          "name": "Elka Borreson",
+          "private": false,
+          "id": "p-00c5cd5f",
+          "games": [
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "stats": {},
+          "id": "p-cef94125",
+          "private": false,
+          "name": "Alexander Berry",
+          "games": [],
+          "starter": false,
+          "tag": "Squish212"
+        },
+        {
+          "tag": "Declan",
+          "stats": {
+            "eliminations": 50,
+            "deaths": 26,
+            "assists": 16,
+            "damage": 59274,
+            "damage_blocked": 56696,
+            "healing": 290,
+            "accuracy": 51.7
+          },
+          "roles": [
+            "Duelist",
+            "Vanguard"
+          ],
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Declan Ward",
+          "id": "p-0d4320f9"
+        },
+        {
+          "id": "p-0d309b46",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "tag": "SimplyChaotic",
+          "stats": {
+            "eliminations": 39,
+            "deaths": 34,
+            "assists": 1,
+            "damage": 62137,
+            "damage_blocked": 61701,
+            "healing": 0,
+            "accuracy": 57.3
+          },
+          "roles": [
+            "Duelist",
+            "Vanguard"
+          ],
+          "private": false,
+          "name": "Connor Davis"
+        },
+        {
+          "id": "p-0a81a3ee",
+          "stats": {
+            "eliminations": 27,
+            "deaths": 31,
+            "assists": 38,
+            "damage": 22515,
+            "damage_blocked": 31600,
+            "healing": 74837,
+            "accuracy": 56.7
+          },
+          "roles": [
+            "Strategist"
+          ],
+          "tag": "abbyprofen",
+          "private": false,
+          "starter": true,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Abby Grandy"
+        },
+        {
+          "starter": true,
+          "name": "Jack Arnold",
+          "stats": {
+            "eliminations": 21,
+            "deaths": 31,
+            "assists": 0,
+            "damage": 42946,
+            "damage_blocked": 88858,
+            "healing": 33,
+            "accuracy": 38
+          },
+          "roles": [
+            "Vanguard"
+          ],
+          "tag": "Cow02man",
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "private": false,
+          "id": "p-c279257f"
+        },
+        {
+          "stats": {},
+          "id": "p-2ea9376c",
+          "private": false,
+          "games": [],
+          "name": "Gavin Cowles",
+          "tag": "gxc9310",
+          "starter": false
+        },
+        {
+          "stats": {
+            "eliminations": 25,
+            "deaths": 21,
+            "assists": 37,
+            "damage": 24240,
+            "damage_blocked": 34377,
+            "healing": 95824,
+            "accuracy": 38
+          },
+          "roles": [
+            "Strategist"
+          ],
+          "id": "p-71b5eeec",
+          "private": false,
+          "games": [
+            1,
+            2,
+            3
+          ],
+          "name": "Jeffery Lewis",
+          "tag": "TwinkyToes"
+        },
+        {
+          "games": [],
+          "id": "p-9fba6b8e",
+          "tag": "Rampage059",
+          "stats": {},
+          "private": false,
+          "name": "Jaxon Raymond"
+        }
+      ],
       "current": 4,
-      "score": {
-        "them": 3,
-        "us": 1
-      },
-      "forfeit": null,
-      "bestOf": 5,
-      "teamId": "t6",
-      "term": "fall",
-      "gameName": "Marvel Rivals",
-      "perGame": true,
-      "bye": false,
-      "startsAt": "2026-10-29T19:30:00.000Z",
-      "event": "MHSEL Fall 2026",
       "updatedAt": "2026-11-05T18:08:02.873Z",
-      "stage": "regular",
-      "level": "Varsity",
-      "teamName": "Marvel Rivals Varsity",
-      "season": "2026-27",
       "clinched": "them",
-      "result": "L",
-      "status": "final",
+      "startsAt": "2026-10-29T19:30:00.000Z",
+      "term": "fall",
+      "teamId": "t6",
       "week": "6",
+      "bestOf": 5,
+      "status": "final",
+      "forfeit": null,
+      "teamName": "Marvel Rivals Varsity",
+      "stage": "regular",
+      "source": {},
+      "score": {
+        "us": 1,
+        "them": 3
+      },
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "perGame": true,
+      "level": "Varsity",
+      "league": "MHSEL",
       "games": [
         {
           "winner": "us",
@@ -4446,258 +4618,23 @@
           "them": 0
         }
       ],
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
+      "notes": "",
+      "season": "2026-27",
+      "result": "L",
+      "event": "MHSEL Fall 2026",
       "game": "marvel-rivals",
-      "players": [
-        {
-          "tag": "sunny.1000",
-          "stats": {
-            "eliminations": 24,
-            "deaths": 28,
-            "assists": 18,
-            "damage": 48174,
-            "damage_blocked": 76786,
-            "healing": 22060,
-            "accuracy": 54.7
-          },
-          "roles": [
-            "Vanguard",
-            "Strategist"
-          ],
-          "name": "Elka Borreson",
-          "private": false,
-          "id": "p-00c5cd5f",
-          "games": [
-            1,
-            2,
-            3
-          ]
-        },
-        {
-          "stats": {},
-          "id": "p-cef94125",
-          "private": false,
-          "name": "Alexander Berry",
-          "games": [],
-          "starter": false,
-          "tag": "Squish212"
-        },
-        {
-          "tag": "Declan",
-          "stats": {
-            "eliminations": 50,
-            "deaths": 26,
-            "assists": 16,
-            "damage": 59274,
-            "damage_blocked": 56696,
-            "healing": 290,
-            "accuracy": 51.7
-          },
-          "roles": [
-            "Duelist",
-            "Vanguard"
-          ],
-          "private": false,
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "name": "Declan Ward",
-          "id": "p-0d4320f9"
-        },
-        {
-          "id": "p-0d309b46",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "tag": "SimplyChaotic",
-          "stats": {
-            "eliminations": 39,
-            "deaths": 34,
-            "assists": 1,
-            "damage": 62137,
-            "damage_blocked": 61701,
-            "healing": 0,
-            "accuracy": 57.3
-          },
-          "roles": [
-            "Duelist",
-            "Vanguard"
-          ],
-          "private": false,
-          "name": "Connor Davis"
-        },
-        {
-          "id": "p-0a81a3ee",
-          "stats": {
-            "eliminations": 27,
-            "deaths": 31,
-            "assists": 38,
-            "damage": 22515,
-            "damage_blocked": 31600,
-            "healing": 74837,
-            "accuracy": 56.7
-          },
-          "roles": [
-            "Strategist"
-          ],
-          "tag": "abbyprofen",
-          "private": false,
-          "starter": true,
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "name": "Abby Grandy"
-        },
-        {
-          "starter": true,
-          "name": "Jack Arnold",
-          "stats": {
-            "eliminations": 21,
-            "deaths": 31,
-            "assists": 0,
-            "damage": 42946,
-            "damage_blocked": 88858,
-            "healing": 33,
-            "accuracy": 38
-          },
-          "roles": [
-            "Vanguard"
-          ],
-          "tag": "Cow02man",
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "private": false,
-          "id": "p-c279257f"
-        },
-        {
-          "stats": {},
-          "id": "p-2ea9376c",
-          "private": false,
-          "games": [],
-          "name": "Gavin Cowles",
-          "tag": "gxc9310",
-          "starter": false
-        },
-        {
-          "stats": {
-            "eliminations": 25,
-            "deaths": 21,
-            "assists": 37,
-            "damage": 24240,
-            "damage_blocked": 34377,
-            "healing": 95824,
-            "accuracy": 38
-          },
-          "roles": [
-            "Strategist"
-          ],
-          "id": "p-71b5eeec",
-          "private": false,
-          "games": [
-            1,
-            2,
-            3
-          ],
-          "name": "Jeffery Lewis",
-          "tag": "TwinkyToes"
-        },
-        {
-          "games": [],
-          "id": "p-9fba6b8e",
-          "tag": "Rampage059",
-          "stats": {},
-          "private": false,
-          "name": "Jaxon Raymond"
-        }
-      ],
+      "bye": false,
+      "gameName": "Marvel Rivals",
       "opponent": {
         "short": "",
-        "school": "NexTech High School",
+        "abbr": "NEX",
         "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZoddOCEHLdVBS5RuzqJ6-XZnHBTUzSZahAvUVY7WB0w&s",
-        "team": "NexTech Rivals",
-        "abbr": "NEX"
-      },
-      "source": {},
-      "notes": "",
-      "league": "MHSEL"
+        "school": "NexTech High School",
+        "team": "NexTech Rivals"
+      }
     },
     {
       "id": "9DmFtSdsk9tUypOmD3gv",
-      "perGame": true,
-      "season": "2026-27",
-      "clinched": "us",
-      "game": "fortnite-zw",
-      "bestOf": 3,
-      "league": "MHSEL",
-      "stage": "regular",
-      "updatedAt": "2026-11-05T21:31:38.007Z",
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "bye": false,
-      "players": [
-        {
-          "starter": true,
-          "games": [
-            1,
-            2
-          ],
-          "id": "p-0b11aaef",
-          "tag": "TRE4TY.",
-          "name": "Tavin Flanagan",
-          "stats": {
-            "elims": 29,
-            "deaths": 1
-          },
-          "private": false
-        },
-        {
-          "stats": {
-            "elims": 11,
-            "deaths": 5
-          },
-          "starter": true,
-          "tag": "0gix.",
-          "private": false,
-          "id": "p-62e0e640",
-          "games": [
-            1,
-            2
-          ],
-          "name": "Gavin Marino"
-        }
-      ],
-      "opponent": {
-        "logo": "https://s3-us-west-2.amazonaws.com/scorestream-team-profile-pictures/8122/20210920200801_630_mascotOrig.png",
-        "abbr": "IC",
-        "short": "",
-        "team": "IC Fortnite Team 3",
-        "school": "Imlay City High School"
-      },
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "status": "final",
-      "result": "W",
-      "gameName": "Fortnite Zone Wars Duos",
-      "current": 2,
-      "notes": "",
-      "week": "7",
-      "event": "MHSEL Fall 2026",
       "games": [
         {
           "winner": "us",
@@ -4732,20 +4669,178 @@
           "us": 10
         }
       ],
-      "teamId": "t1",
       "forfeit": null,
-      "level": "Varsity",
       "term": "fall",
+      "players": [
+        {
+          "starter": true,
+          "games": [
+            1,
+            2
+          ],
+          "id": "p-0b11aaef",
+          "tag": "TRE4TY.",
+          "name": "Tavin Flanagan",
+          "stats": {
+            "elims": 29,
+            "deaths": 1
+          },
+          "private": false
+        },
+        {
+          "stats": {
+            "elims": 11,
+            "deaths": 5
+          },
+          "starter": true,
+          "tag": "0gix.",
+          "private": false,
+          "id": "p-62e0e640",
+          "games": [
+            1,
+            2
+          ],
+          "name": "Gavin Marino"
+        }
+      ],
+      "result": "W",
+      "week": "7",
+      "game": "fortnite-zw",
+      "stage": "regular",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "bye": false,
+      "clinched": "us",
+      "perGame": true,
+      "updatedAt": "2026-11-05T21:31:38.007Z",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "source": {},
+      "teamId": "t1",
+      "bestOf": 3,
+      "current": 2,
+      "opponent": {
+        "short": "",
+        "abbr": "IC",
+        "team": "IC Fortnite Team 3",
+        "logo": "https://s3-us-west-2.amazonaws.com/scorestream-team-profile-pictures/8122/20210920200801_630_mascotOrig.png",
+        "school": "Imlay City High School"
+      },
+      "event": "MHSEL Fall 2026",
+      "gameName": "Fortnite Zone Wars Duos",
+      "status": "final",
       "startsAt": "2026-11-04T20:30:00.000Z",
+      "score": {
+        "us": 2,
+        "them": 0
+      },
       "teamName": "Fortnite Varsity #1",
-      "source": {}
+      "level": "Varsity",
+      "notes": ""
     },
     {
       "id": "fGD12X28O93B4DbCULge",
-      "perGame": true,
-      "notes": "",
-      "teamName": "Smash Varsity",
       "updatedAt": "2026-11-04T21:43:44.172Z",
+      "score": {
+        "us": 3,
+        "them": 2
+      },
+      "notes": "",
+      "level": "Varsity",
+      "result": "W",
+      "game": "smash",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "week": "7",
+      "perGame": true,
+      "event": "MHSEL Fall 2026",
+      "clinched": "us",
+      "announced": {
+        "smash:career:stocks_taken": "p-e8f9e498"
+      },
+      "term": "fall",
+      "current": 5,
+      "stage": "regular",
+      "players": [
+        {
+          "private": false,
+          "stats": {
+            "stocks_taken": 12,
+            "stocks_lost": 8
+          },
+          "tag": "DeviousDawgs",
+          "games": [
+            2,
+            5
+          ],
+          "id": "p-66fae53c",
+          "name": "Bo West",
+          "starter": true
+        },
+        {
+          "starter": false,
+          "games": [],
+          "stats": {},
+          "id": "p-75b76f7a",
+          "private": false,
+          "tag": "Rinferno53",
+          "name": "Rownin Flanagan"
+        },
+        {
+          "id": "p-e8f9e498",
+          "private": false,
+          "stats": {
+            "stocks_taken": 9,
+            "stocks_lost": 10
+          },
+          "games": [
+            1,
+            4
+          ],
+          "tag": "Lypuff",
+          "name": "Jeffery Howe",
+          "starter": true
+        },
+        {
+          "private": false,
+          "id": "p-860b6fbe",
+          "tag": "Carrot King",
+          "name": "Calvin Lauren",
+          "games": [
+            3
+          ],
+          "starter": true,
+          "stats": {
+            "stocks_taken": 1,
+            "stocks_lost": 6
+          }
+        },
+        {
+          "games": [],
+          "id": "p-a38df666",
+          "stats": {},
+          "private": false,
+          "name": "Gavin Bentley",
+          "tag": "SlinkyWinter"
+        }
+      ],
+      "bye": false,
+      "status": "final",
+      "opponent": {
+        "abbr": "MS",
+        "short": "",
+        "team": "Smash Varsity",
+        "school": "Mona Shores High School",
+        "logo": "https://www.monashoressports.com/_next/image?url=https%3A%2F%2Fsportshub2-uploads.vnn-prod.zone%2Ffiles%2Fsites%2F498%2F2018%2F02%2F14203833%2Flogo_outline.png&w=3840&q=75"
+      },
+      "gameName": "Super Smash Bros. Ultimate",
+      "bestOf": 5,
+      "teamId": "t3",
+      "source": {},
       "games": [
         {
           "them": 0,
@@ -4838,171 +4933,28 @@
           ]
         }
       ],
+      "forfeit": null,
       "startsAt": "2026-11-04T20:30:00.000Z",
-      "source": {},
+      "teamName": "Smash Varsity",
+      "season": "2026-27",
+      "league": "MHSEL"
+    },
+    {
+      "id": "vFm5KmIcRcYiNM7PxHIJ",
+      "updatedAt": "2026-11-05T18:40:55.676Z",
+      "startsAt": "2026-11-04T20:30:00.000Z",
+      "clinched": "us",
+      "bye": false,
+      "teamId": "t4",
+      "perGame": true,
       "term": "fall",
-      "event": "MHSEL Fall 2026",
-      "result": "W",
+      "week": "7",
       "status": "final",
+      "bestOf": 5,
       "stream": {
         "live": "",
         "vod": ""
       },
-      "bye": false,
-      "week": "7",
-      "level": "Varsity",
-      "opponent": {
-        "abbr": "MS",
-        "logo": "https://www.monashoressports.com/_next/image?url=https%3A%2F%2Fsportshub2-uploads.vnn-prod.zone%2Ffiles%2Fsites%2F498%2F2018%2F02%2F14203833%2Flogo_outline.png&w=3840&q=75",
-        "school": "Mona Shores High School",
-        "short": "",
-        "team": "Smash Varsity"
-      },
-      "gameName": "Super Smash Bros. Ultimate",
-      "teamId": "t3",
-      "players": [
-        {
-          "private": false,
-          "stats": {
-            "stocks_taken": 12,
-            "stocks_lost": 8
-          },
-          "tag": "DeviousDawgs",
-          "games": [
-            2,
-            5
-          ],
-          "id": "p-66fae53c",
-          "name": "Bo West",
-          "starter": true
-        },
-        {
-          "starter": false,
-          "games": [],
-          "stats": {},
-          "id": "p-75b76f7a",
-          "private": false,
-          "tag": "Rinferno53",
-          "name": "Rownin Flanagan"
-        },
-        {
-          "id": "p-e8f9e498",
-          "private": false,
-          "stats": {
-            "stocks_taken": 9,
-            "stocks_lost": 10
-          },
-          "games": [
-            1,
-            4
-          ],
-          "tag": "Lypuff",
-          "name": "Jeffery Howe",
-          "starter": true
-        },
-        {
-          "private": false,
-          "id": "p-860b6fbe",
-          "tag": "Carrot King",
-          "name": "Calvin Lauren",
-          "games": [
-            3
-          ],
-          "starter": true,
-          "stats": {
-            "stocks_taken": 1,
-            "stocks_lost": 6
-          }
-        },
-        {
-          "games": [],
-          "id": "p-a38df666",
-          "stats": {},
-          "private": false,
-          "name": "Gavin Bentley",
-          "tag": "SlinkyWinter"
-        }
-      ],
-      "current": 5,
-      "stage": "regular",
-      "forfeit": null,
-      "game": "smash",
-      "season": "2026-27",
-      "score": {
-        "us": 3,
-        "them": 2
-      },
-      "bestOf": 5,
-      "league": "MHSEL",
-      "announced": {
-        "smash:career:stocks_taken": "p-e8f9e498"
-      },
-      "clinched": "us"
-    },
-    {
-      "id": "vFm5KmIcRcYiNM7PxHIJ",
-      "opponent": {
-        "short": "",
-        "team": "Pine River JV",
-        "logo": "",
-        "abbr": "PR",
-        "school": "Pine River High School"
-      },
-      "stage": "regular",
-      "status": "final",
-      "result": "W",
-      "game": "smash",
-      "bye": false,
-      "season": "2026-27",
-      "event": "MHSEL Fall 2026",
-      "league": "MHSEL",
-      "teamName": "Smash JV",
-      "source": {},
-      "updatedAt": "2026-11-05T18:40:55.676Z",
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "week": "7",
-      "players": [
-        {
-          "stats": {},
-          "tag": "SKELE",
-          "private": false,
-          "name": "Nicholas Govier",
-          "id": "p-989757e2",
-          "games": [
-            1
-          ]
-        },
-        {
-          "id": "p-f1134599",
-          "tag": "Buptub",
-          "games": [
-            2
-          ],
-          "name": "Evan Hudgins",
-          "private": false,
-          "stats": {}
-        },
-        {
-          "stats": {},
-          "name": "Liam Aeh",
-          "games": [
-            3
-          ],
-          "tag": "",
-          "private": false,
-          "id": "p-b1bbb78f"
-        }
-      ],
-      "clinched": "us",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "notes": "",
-      "startsAt": "2026-11-04T20:30:00.000Z",
       "games": [
         {
           "gw": [
@@ -5053,30 +5005,77 @@
           }
         }
       ],
-      "teamId": "t4",
-      "bestOf": 5,
+      "notes": "",
+      "game": "smash",
       "forfeit": null,
-      "current": 3,
+      "level": "JV",
+      "teamName": "Smash JV",
+      "source": {},
+      "event": "MHSEL Fall 2026",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "stage": "regular",
+      "opponent": {
+        "logo": "",
+        "abbr": "PR",
+        "short": "",
+        "school": "Pine River High School",
+        "team": "Pine River JV"
+      },
       "gameName": "Super Smash Bros. Ultimate",
-      "term": "fall",
-      "perGame": true,
-      "level": "JV"
+      "league": "MHSEL",
+      "current": 3,
+      "players": [
+        {
+          "stats": {},
+          "tag": "SKELE",
+          "private": false,
+          "name": "Nicholas Govier",
+          "id": "p-989757e2",
+          "games": [
+            1
+          ]
+        },
+        {
+          "id": "p-f1134599",
+          "tag": "Buptub",
+          "games": [
+            2
+          ],
+          "name": "Evan Hudgins",
+          "private": false,
+          "stats": {}
+        },
+        {
+          "stats": {},
+          "name": "Liam Aeh",
+          "games": [
+            3
+          ],
+          "tag": "",
+          "private": false,
+          "id": "p-b1bbb78f"
+        }
+      ],
+      "result": "W",
+      "season": "2026-27"
     },
     {
       "id": "o2a7id1QpLKBKV7pLtCD",
-      "notes": "",
-      "updatedAt": "2026-11-04T21:52:00.046Z",
-      "opponent": {
-        "team": "Northside Jasper/TJ",
-        "logo": "",
-        "short": "",
-        "school": "Northside Vernon High School",
-        "abbr": "NV"
-      },
-      "gameName": "Fortnite Zone Wars Duos",
-      "forfeit": null,
+      "perGame": false,
+      "status": "final",
+      "current": 2,
       "term": "fall",
-      "event": "USAEL Open Fall 2026",
+      "stage": "regular",
+      "league": "USAEL Open",
+      "season": "2026-27",
+      "clinched": "us",
+      "game": "fortnite-zw",
+      "bestOf": 3,
+      "week": "7",
+      "teamId": "t1",
       "games": [
         {
           "n": 1,
@@ -5092,15 +5091,28 @@
         }
       ],
       "source": {},
-      "result": "W",
-      "week": "7",
+      "notes": "",
+      "level": "Varsity",
+      "forfeit": null,
+      "score": {
+        "us": 2,
+        "them": 0
+      },
       "stream": {
         "vod": "",
         "live": ""
       },
+      "opponent": {
+        "abbr": "NV",
+        "short": "",
+        "school": "Northside Vernon High School",
+        "team": "Northside Jasper/TJ",
+        "logo": ""
+      },
+      "result": "W",
+      "seriesOnly": false,
+      "event": "USAEL Open Fall 2026",
       "startsAt": "2026-11-04T21:00:00.000Z",
-      "status": "final",
-      "level": "Varsity",
       "players": [
         {
           "starter": true,
@@ -5128,31 +5140,17 @@
         }
       ],
       "teamName": "Fortnite Varsity #1",
-      "teamId": "t1",
-      "current": 2,
+      "updatedAt": "2026-11-04T21:52:00.046Z",
       "bye": false,
-      "clinched": "us",
-      "seriesOnly": false,
-      "stage": "regular",
-      "game": "fortnite-zw",
-      "season": "2026-27",
-      "bestOf": 3,
-      "perGame": false,
-      "score": {
-        "them": 0,
-        "us": 2
-      },
-      "league": "USAEL Open"
+      "gameName": "Fortnite Zone Wars Duos"
     },
     {
       "id": "cvlZf6tn5SFnduVIe1PE",
-      "notes": "",
-      "perGame": true,
-      "term": "fall",
-      "event": "MHSEL Fall 2026",
-      "announced": {
-        "marvel-rivals:career:damage_blocked": "p-c279257f"
-      },
+      "season": "2026-27",
+      "league": "MHSEL",
+      "current": 3,
+      "week": "7",
+      "game": "marvel-rivals",
       "games": [
         {
           "n": 1,
@@ -5376,13 +5374,42 @@
           }
         }
       ],
-      "week": "7",
-      "level": "Varsity",
-      "season": "2026-27",
+      "perGame": true,
+      "announced": {
+        "marvel-rivals:career:damage_blocked": "p-c279257f"
+      },
+      "source": {},
       "bestOf": 5,
       "clinched": "us",
-      "league": "MHSEL",
+      "teamId": "t6",
+      "bye": false,
+      "term": "fall",
+      "status": "final",
+      "updatedAt": "2026-11-05T21:30:53.066Z",
+      "stage": "regular",
+      "event": "MHSEL Fall 2026",
+      "gameName": "Marvel Rivals",
+      "forfeit": null,
       "teamName": "Marvel Rivals Varsity",
+      "startsAt": "2026-11-05T20:30:00.000Z",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "score": {
+        "them": 0,
+        "us": 3
+      },
+      "result": "W",
+      "level": "Varsity",
+      "notes": "",
+      "opponent": {
+        "short": "",
+        "abbr": "WM",
+        "team": "Waterford Mott Marvel Rivals",
+        "logo": "",
+        "school": "Waterford Mott High School"
+      },
       "players": [
         {
           "games": [
@@ -5550,48 +5577,26 @@
           "tag": "Rampage059",
           "id": "p-9fba6b8e"
         }
-      ],
-      "stage": "regular",
-      "startsAt": "2026-11-05T20:30:00.000Z",
-      "current": 3,
-      "bye": false,
-      "source": {},
-      "game": "marvel-rivals",
-      "result": "W",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "status": "final",
-      "forfeit": null,
-      "score": {
-        "them": 0,
-        "us": 3
-      },
-      "opponent": {
-        "short": "",
-        "team": "Waterford Mott Marvel Rivals",
-        "abbr": "WM",
-        "logo": "",
-        "school": "Waterford Mott High School"
-      },
-      "teamId": "t6",
-      "updatedAt": "2026-11-05T21:30:53.066Z",
-      "gameName": "Marvel Rivals"
+      ]
     },
     {
       "id": "y784Jg0Jaw58Ur9nouzq",
-      "event": "MHSEL Fall 2026",
+      "forfeit": null,
       "gameName": "Rocket League",
-      "bestOf": 5,
       "teamId": "t5",
-      "stage": "regular",
-      "term": "fall",
-      "bye": false,
-      "score": {
-        "us": 3,
-        "them": 0
+      "opponent": {
+        "abbr": "BBDN",
+        "logo": "https://image.maxpreps.io/school-mascot/a/1/e/a1e5a383-2ef5-48c5-8136-fba92229b9c5.gif?version=636795177600000000&width=1024&height=1024",
+        "school": "Big Bay De Noc School",
+        "short": "",
+        "team": "Bear Bytes"
       },
+      "game": "rocket-league",
+      "teamName": "Rocket League Varsity",
+      "status": "final",
+      "bye": false,
+      "bestOf": 5,
+      "current": 3,
       "players": [
         {
           "games": [
@@ -5662,9 +5667,27 @@
           "name": "Cole Smith"
         }
       ],
-      "startsAt": "2026-11-05T20:30:00.000Z",
-      "clinched": "us",
+      "source": {},
+      "updatedAt": "2026-11-05T21:15:43.195Z",
+      "term": "fall",
+      "week": "7",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "stage": "regular",
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/dx1E2HebUwk?feature=share"
+      },
       "result": "W",
+      "startsAt": "2026-11-05T20:30:00.000Z",
+      "season": "2026-27",
+      "perGame": true,
+      "clinched": "us",
+      "event": "MHSEL Fall 2026",
+      "league": "MHSEL",
+      "notes": "",
       "games": [
         {
           "p": {
@@ -5751,36 +5774,49 @@
           "us": 3
         }
       ],
-      "current": 3,
-      "status": "final",
-      "forfeit": null,
-      "game": "rocket-league",
-      "season": "2026-27",
-      "notes": "",
-      "teamName": "Rocket League Varsity",
-      "level": "Varsity",
-      "source": {},
-      "updatedAt": "2026-11-05T21:15:43.195Z",
-      "perGame": true,
-      "week": "7",
-      "league": "MHSEL",
-      "stream": {
-        "vod": "",
-        "live": "https://youtube.com/live/dx1E2HebUwk?feature=share"
-      },
-      "opponent": {
-        "short": "",
-        "abbr": "BBDN",
-        "team": "Bear Bytes",
-        "school": "Big Bay De Noc School",
-        "logo": "https://image.maxpreps.io/school-mascot/a/1/e/a1e5a383-2ef5-48c5-8136-fba92229b9c5.gif?version=636795177600000000&width=1024&height=1024"
-      }
+      "level": "Varsity"
     },
     {
       "id": "NCUfHg4wLpfMpYqoToho",
+      "forfeit": null,
+      "term": "fall",
       "notes": "",
+      "level": "Varsity",
+      "score": {
+        "us": 0,
+        "them": 2
+      },
+      "opponent": {
+        "logo": "https://cache.bsnsports.com/comp/sls/get/43/20465?f=jpg&sid=20465&ts=1662580394",
+        "short": "",
+        "school": "Universal Learning Academy",
+        "team": "Bluejays Fortnite",
+        "abbr": "UL"
+      },
       "game": "fortnite-zw",
+      "week": "7",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "players": [],
+      "gameName": "Fortnite Zone Wars Duos",
+      "result": "L",
       "event": "MHSEL Fall 2026",
+      "startsAt": "2026-11-06T20:30:00.000Z",
+      "teamName": "Fortnite Varsity #2",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "perGame": false,
+      "bye": false,
+      "current": 2,
+      "stage": "regular",
+      "updatedAt": "2026-11-06T19:02:39.440Z",
+      "source": {},
+      "teamId": "t2",
+      "bestOf": 3,
+      "status": "final",
+      "clinched": "them",
       "games": [
         {
           "n": 1,
@@ -5794,48 +5830,42 @@
           "us": 3,
           "n": 2
         }
-      ],
-      "opponent": {
-        "short": "",
-        "team": "Bluejays Fortnite",
-        "abbr": "UL",
-        "logo": "https://cache.bsnsports.com/comp/sls/get/43/20465?f=jpg&sid=20465&ts=1662580394",
-        "school": "Universal Learning Academy"
-      },
-      "source": {},
-      "gameName": "Fortnite Zone Wars Duos",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "teamName": "Fortnite Varsity #2",
-      "status": "final",
-      "level": "Varsity",
-      "result": "L",
-      "perGame": false,
-      "startsAt": "2026-11-06T20:30:00.000Z",
-      "teamId": "t2",
-      "updatedAt": "2026-11-06T19:02:39.440Z",
-      "forfeit": null,
-      "week": "7",
-      "clinched": "them",
-      "stage": "regular",
-      "bye": false,
-      "term": "fall",
-      "season": "2026-27",
-      "players": [],
-      "bestOf": 3,
+      ]
+    },
+    {
+      "id": "B2l8BXMEuF3DRbvhea4z",
       "current": 2,
+      "season": "2026-27",
+      "league": "MHSEL",
+      "game": "fortnite-zw",
+      "week": "8",
+      "gameName": "Fortnite Zone Wars Duos",
+      "source": {},
+      "bestOf": 3,
+      "teamName": "Fortnite Varsity #1",
+      "perGame": false,
+      "teamId": "t1",
+      "level": "Varsity",
+      "notes": "",
       "score": {
         "us": 0,
         "them": 2
       },
-      "league": "MHSEL"
-    },
-    {
-      "id": "B2l8BXMEuF3DRbvhea4z",
-      "teamName": "Fortnite Varsity #1",
+      "startsAt": "2026-11-10T20:30:00.000Z",
+      "term": "fall",
+      "status": "final",
+      "opponent": {
+        "school": "GI-TEC Mt. Pleasant",
+        "team": "Onyx Fortnite",
+        "abbr": "GTMP",
+        "short": "",
+        "logo": ""
+      },
       "event": "MHSEL Fall 2026",
+      "stage": "regular",
+      "forfeit": null,
+      "clinched": "them",
+      "result": "L",
       "games": [
         {
           "us": 5,
@@ -5850,56 +5880,76 @@
           "them": 10
         }
       ],
-      "week": "8",
-      "source": {},
-      "forfeit": null,
-      "startsAt": "2026-11-10T20:30:00.000Z",
-      "notes": "",
-      "term": "fall",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "status": "final",
-      "result": "L",
-      "updatedAt": "2026-11-10T21:00:04.484Z",
-      "level": "Varsity",
-      "teamId": "t1",
       "players": [],
-      "opponent": {
-        "team": "Onyx Fortnite",
-        "short": "",
-        "abbr": "GTMP",
-        "school": "GI-TEC Mt. Pleasant",
-        "logo": ""
-      },
-      "gameName": "Fortnite Zone Wars Duos",
-      "current": 2,
-      "stage": "regular",
-      "game": "fortnite-zw",
       "bye": false,
-      "season": "2026-27",
-      "score": {
-        "us": 0,
-        "them": 2
-      },
-      "perGame": false,
-      "league": "MHSEL",
-      "clinched": "them",
-      "bestOf": 3
+      "updatedAt": "2026-11-10T21:00:04.484Z"
     },
     {
       "id": "ijHA9d5hIVceqbO9Lts1",
+      "perGame": true,
+      "clinched": "them",
+      "current": 3,
+      "notes": "",
+      "level": "Varsity",
+      "score": {
+        "us": 1,
+        "them": 2
+      },
       "result": "L",
-      "status": "final",
-      "game": "fortnite-zw",
+      "bye": false,
       "stream": {
         "vod": "",
         "live": "https://youtube.com/live/KxEwMcfQXvM?feature=share"
       },
+      "event": "",
+      "gameName": "Fortnite Zone Wars Duos",
+      "forfeit": null,
+      "term": "fall",
+      "stage": "regular",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "source": {},
       "teamId": "t2",
-      "perGame": true,
-      "level": "Varsity",
+      "bestOf": 3,
+      "startsAt": "2026-11-10T20:30:00.000Z",
+      "updatedAt": "2026-11-10T21:37:01.569Z",
+      "teamName": "Fortnite Varsity #2",
+      "players": [
+        {
+          "stats": {
+            "elims": 28,
+            "deaths": 18
+          },
+          "id": "p-8215d1bd",
+          "name": "Grayson Bentley",
+          "games": [
+            1,
+            2
+          ],
+          "tag": "Ferd",
+          "private": false
+        },
+        {
+          "tag": "bob_joe111",
+          "name": "Tyler Foss",
+          "games": [
+            1,
+            2
+          ],
+          "id": "p-57ba7f60",
+          "stats": {
+            "elims": 17,
+            "deaths": 21
+          },
+          "private": false
+        }
+      ],
+      "week": "8",
+      "game": "fortnite-zw",
       "games": [
         {
           "us": 10,
@@ -5940,75 +5990,23 @@
           "n": 3
         }
       ],
-      "event": "",
-      "source": {},
-      "notes": "",
-      "clinched": "them",
-      "teamName": "Fortnite Varsity #2",
-      "score": {
-        "them": 2,
-        "us": 1
-      },
-      "season": "2026-27",
-      "updatedAt": "2026-11-10T21:37:01.569Z",
-      "week": "8",
-      "league": "MHSEL",
-      "players": [
-        {
-          "stats": {
-            "elims": 28,
-            "deaths": 18
-          },
-          "id": "p-8215d1bd",
-          "name": "Grayson Bentley",
-          "games": [
-            1,
-            2
-          ],
-          "tag": "Ferd",
-          "private": false
-        },
-        {
-          "tag": "bob_joe111",
-          "name": "Tyler Foss",
-          "games": [
-            1,
-            2
-          ],
-          "id": "p-57ba7f60",
-          "stats": {
-            "elims": 17,
-            "deaths": 21
-          },
-          "private": false
-        }
-      ],
-      "startsAt": "2026-11-10T20:30:00.000Z",
-      "bestOf": 3,
-      "current": 3,
-      "bye": false,
-      "stage": "regular",
-      "forfeit": null,
-      "term": "fall",
+      "status": "final",
       "opponent": {
-        "short": "",
-        "school": "Howell High School",
         "team": "Howell Fortnite Team 3",
         "abbr": "HOW",
+        "short": "",
+        "school": "Howell High School",
         "logo": "https://image.maxpreps.io/school-mascot/7/d/d/7dd82462-5fec-4ea1-9af9-86e5198e8153.gif?version=634245382800000000&width=1024&height=1024"
-      },
-      "gameName": "Fortnite Zone Wars Duos"
+      }
     },
     {
       "id": "9EK3iDylQb4F4zbiOAZw",
-      "forfeit": null,
-      "teamName": "Smash Varsity",
-      "score": {
-        "them": 2,
-        "us": 3
-      },
+      "stage": "regular",
       "startsAt": "2026-11-11T20:30:00.000Z",
-      "week": "8",
+      "teamName": "Smash Varsity",
+      "bye": false,
+      "forfeit": null,
+      "gameName": "Super Smash Bros. Ultimate",
       "players": [
         {
           "tag": "Rinferno53",
@@ -6060,36 +6058,6 @@
           ]
         }
       ],
-      "bye": false,
-      "term": "fall",
-      "season": "2026-27",
-      "current": 1,
-      "opponent": {
-        "team": "Birmingham HS Smash V",
-        "short": "Seaholm",
-        "school": "Ernest W. Seaholm High School",
-        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_4/v1688066144/birminghamk12mius/rqaadhghytfsdcvod3yh/SEAMainII.png",
-        "abbr": "EWS"
-      },
-      "bestOf": 5,
-      "gameName": "Super Smash Bros. Ultimate",
-      "announced": {
-        "smash:career:stocks_taken": "p-e8f9e498"
-      },
-      "stage": "regular",
-      "league": "MHSEL",
-      "level": "Varsity",
-      "source": {},
-      "updatedAt": "2026-11-13T16:17:44.156Z",
-      "game": "smash",
-      "status": "final",
-      "perGame": true,
-      "stream": {
-        "live": "https://youtube.com/live/pSgKtFoHZ2Q?feature=share",
-        "vod": ""
-      },
-      "result": "W",
-      "notes": "",
       "games": [
         {
           "gw": [
@@ -6182,13 +6150,110 @@
           "them": 0
         }
       ],
-      "event": "MHSEL Fall 2026",
+      "opponent": {
+        "abbr": "EWS",
+        "school": "Ernest W. Seaholm High School",
+        "team": "Birmingham HS Smash V",
+        "short": "Seaholm",
+        "logo": "https://resources.finalsite.net/images/f_auto,q_auto,t_image_size_4/v1688066144/birminghamk12mius/rqaadhghytfsdcvod3yh/SEAMainII.png"
+      },
+      "result": "W",
+      "stream": {
+        "live": "https://youtube.com/live/pSgKtFoHZ2Q?feature=share",
+        "vod": ""
+      },
+      "teamId": "t3",
+      "bestOf": 5,
       "clinched": "us",
-      "teamId": "t3"
+      "source": {},
+      "perGame": true,
+      "announced": {
+        "smash:career:stocks_taken": "p-e8f9e498"
+      },
+      "score": {
+        "us": 3,
+        "them": 2
+      },
+      "level": "Varsity",
+      "notes": "",
+      "term": "fall",
+      "current": 1,
+      "league": "MHSEL",
+      "season": "2026-27",
+      "updatedAt": "2026-11-13T16:17:44.156Z",
+      "week": "8",
+      "game": "smash",
+      "event": "MHSEL Fall 2026",
+      "status": "final"
     },
     {
       "id": "s6zm28J4RjpPqgpTZnWP",
+      "term": "fall",
+      "teamId": "t4",
+      "bye": false,
+      "perGame": true,
+      "week": "8",
+      "bestOf": 5,
+      "status": "final",
+      "clinched": "us",
+      "startsAt": "2026-11-11T20:30:00.000Z",
+      "players": [
+        {
+          "tag": "SKELE",
+          "games": [
+            1,
+            4
+          ],
+          "private": false,
+          "name": "Nicholas Govier",
+          "id": "p-989757e2",
+          "stats": {}
+        },
+        {
+          "tag": "",
+          "stats": {},
+          "name": "Liam Aeh",
+          "id": "p-b1bbb78f",
+          "private": false,
+          "games": [
+            2,
+            5
+          ]
+        },
+        {
+          "name": "Evan Hudgins",
+          "tag": "Buptub",
+          "stats": {},
+          "private": false,
+          "games": [
+            3
+          ],
+          "id": "p-f1134599"
+        }
+      ],
+      "current": 5,
+      "stage": "regular",
       "source": {},
+      "score": {
+        "us": 3,
+        "them": 2
+      },
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "updatedAt": "2026-11-11T21:41:36.265Z",
+      "gameName": "Super Smash Bros. Ultimate",
+      "opponent": {
+        "team": "Capac Chiefs HS Smash",
+        "school": "Capac Jr/Sr High School",
+        "logo": "",
+        "abbr": "CAP",
+        "short": ""
+      },
+      "level": "JV",
+      "league": "MHSEL",
+      "teamName": "Smash JV",
       "games": [
         {
           "winner": "us",
@@ -6271,114 +6336,26 @@
           "n": 5
         }
       ],
-      "league": "MHSEL",
-      "stream": {
-        "vod": "",
-        "live": ""
-      },
-      "gameName": "Super Smash Bros. Ultimate",
-      "players": [
-        {
-          "tag": "SKELE",
-          "games": [
-            1,
-            4
-          ],
-          "private": false,
-          "name": "Nicholas Govier",
-          "id": "p-989757e2",
-          "stats": {}
-        },
-        {
-          "tag": "",
-          "stats": {},
-          "name": "Liam Aeh",
-          "id": "p-b1bbb78f",
-          "private": false,
-          "games": [
-            2,
-            5
-          ]
-        },
-        {
-          "name": "Evan Hudgins",
-          "tag": "Buptub",
-          "stats": {},
-          "private": false,
-          "games": [
-            3
-          ],
-          "id": "p-f1134599"
-        }
-      ],
       "notes": "",
-      "term": "fall",
-      "level": "JV",
-      "result": "W",
-      "bye": false,
-      "startsAt": "2026-11-11T20:30:00.000Z",
-      "status": "final",
       "season": "2026-27",
-      "event": "MHSEL Fall 2026",
-      "teamName": "Smash JV",
+      "result": "W",
+      "forfeit": null,
       "game": "smash",
-      "perGame": true,
-      "clinched": "us",
-      "stage": "regular",
-      "opponent": {
-        "short": "",
-        "logo": "",
-        "team": "Capac Chiefs HS Smash",
-        "school": "Capac Jr/Sr High School",
-        "abbr": "CAP"
-      },
-      "updatedAt": "2026-11-11T21:41:36.265Z",
-      "score": {
-        "us": 3,
-        "them": 2
-      },
-      "week": "8",
-      "bestOf": 5,
-      "teamId": "t4",
-      "current": 5,
-      "forfeit": null
+      "event": "MHSEL Fall 2026"
     },
     {
       "id": "ipUiTPVcn8gIIFUTwVom",
-      "league": "MHSEL",
-      "score": {
-        "us": 0,
-        "them": 3
-      },
-      "term": "fall",
-      "bye": false,
-      "bestOf": 5,
-      "season": "2026-27",
-      "gameName": "Marvel Rivals",
-      "opponent": {
-        "school": "Imlay City High School",
-        "abbr": "IC",
-        "logo": "assets/uploads/highSchools/imlay-city.png",
-        "short": "",
-        "team": "IC Marvel Rivals"
-      },
-      "teamName": "Marvel Rivals Varsity",
-      "stage": "regular",
-      "startsAt": "2026-11-12T20:30:00.000Z",
-      "week": "8",
-      "perGame": false,
-      "updatedAt": "2026-11-13T16:14:34.845Z",
-      "teamId": "t6",
-      "clinched": "them",
-      "level": "Varsity",
-      "status": "final",
-      "stream": {
-        "live": "https://youtube.com/live/eTvOEV1_-fE?feature=share",
-        "vod": ""
-      },
-      "forfeit": null,
-      "result": "L",
       "source": {},
+      "bestOf": 5,
+      "teamId": "t6",
+      "gameName": "Marvel Rivals",
+      "current": 3,
+      "stage": "regular",
+      "teamName": "Marvel Rivals Varsity",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "startsAt": "2026-11-12T20:30:00.000Z",
+      "perGame": false,
       "games": [
         {
           "us": 0,
@@ -6399,9 +6376,28 @@
           "us": 0
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "current": 3,
+      "opponent": {
+        "school": "Imlay City High School",
+        "abbr": "IC",
+        "team": "IC Marvel Rivals",
+        "logo": "assets/uploads/highSchools/imlay-city.png",
+        "short": ""
+      },
+      "updatedAt": "2026-11-13T16:14:34.845Z",
+      "bye": false,
+      "status": "final",
+      "term": "fall",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "notes": "",
+      "level": "Varsity",
+      "clinched": "them",
+      "forfeit": null,
+      "week": "8",
       "game": "marvel-rivals",
+      "result": "L",
       "players": [
         {
           "tag": "sunny.1000",
@@ -6514,46 +6510,92 @@
           "private": false
         }
       ],
-      "notes": ""
+      "stream": {
+        "live": "https://youtube.com/live/eTvOEV1_-fE?feature=share",
+        "vod": ""
+      },
+      "event": "MHSEL Fall 2026"
     },
     {
       "id": "toz7j1qGyXIiTFJku1VZ",
-      "teamName": "Rocket League Varsity",
-      "bye": false,
+      "current": 4,
+      "players": [
+        {
+          "name": "Tavin Flanagan",
+          "stats": {
+            "goals": 0,
+            "assists": 1,
+            "saves": 6,
+            "shots": 3
+          },
+          "games": [
+            1,
+            2
+          ],
+          "tag": "TRE4TY.",
+          "private": false,
+          "id": "p-0b11aaef"
+        },
+        {
+          "name": "Fred Nikitin",
+          "stats": {
+            "goals": 1,
+            "assists": 1,
+            "saves": 3,
+            "shots": 3
+          },
+          "games": [
+            1,
+            2
+          ],
+          "tag": "Stupid Nonsense",
+          "id": "p-61bdc66e",
+          "private": false
+        },
+        {
+          "stats": {
+            "goals": 2,
+            "assists": 1,
+            "saves": 0,
+            "shots": 4
+          },
+          "private": false,
+          "games": [
+            1,
+            2
+          ],
+          "name": "Jackson Gibbs",
+          "tag": "FishDGibbs",
+          "id": "p-1f058985"
+        },
+        {
+          "tag": "ClassyFox",
+          "games": [],
+          "name": "Cole Smith",
+          "private": false,
+          "stats": {},
+          "id": "p-fc730de2"
+        }
+      ],
+      "term": "fall",
       "score": {
         "them": 3,
         "us": 1
       },
-      "forfeit": null,
-      "current": 4,
-      "clinched": "them",
-      "opponent": {
-        "logo": "https://cfunity-school-logos.nfhsnetwork.com/school_logos/19fd3fe1-537b-45eb-8207-6b0c16a1a641/a38f1483d3_p766.png",
-        "team": "Rams Rocket League",
-        "school": "Flat Rock Community High School",
-        "abbr": "FR",
-        "short": ""
-      },
-      "stage": "regular",
-      "bestOf": 5,
-      "term": "fall",
-      "teamId": "t5",
-      "updatedAt": "2026-11-13T13:15:06.382Z",
-      "event": "MHSEL Fall 2026",
-      "perGame": true,
-      "game": "rocket-league",
       "league": "MHSEL",
-      "source": {},
-      "gameName": "Rocket League",
-      "level": "Varsity",
-      "stream": {
-        "vod": "",
-        "live": "https://youtube.com/live/ygGZo-0Qt-0?feature=share"
-      },
-      "status": "final",
-      "notes": "",
-      "startsAt": "2026-11-12T20:30:00.000Z",
+      "week": "8",
+      "stage": "regular",
       "result": "L",
+      "gameName": "Rocket League",
+      "opponent": {
+        "team": "Rams Rocket League",
+        "abbr": "FR",
+        "school": "Flat Rock Community High School",
+        "short": "",
+        "logo": "https://cfunity-school-logos.nfhsnetwork.com/school_logos/19fd3fe1-537b-45eb-8207-6b0c16a1a641/a38f1483d3_p766.png"
+      },
+      "season": "2026-27",
+      "notes": "",
       "games": [
         {
           "p": {
@@ -6620,69 +6662,108 @@
           "winner": "them"
         }
       ],
-      "season": "2026-27",
-      "week": "8",
-      "players": [
-        {
-          "name": "Tavin Flanagan",
-          "stats": {
-            "goals": 0,
-            "assists": 1,
-            "saves": 6,
-            "shots": 3
-          },
-          "games": [
-            1,
-            2
-          ],
-          "tag": "TRE4TY.",
-          "private": false,
-          "id": "p-0b11aaef"
-        },
-        {
-          "name": "Fred Nikitin",
-          "stats": {
-            "goals": 1,
-            "assists": 1,
-            "saves": 3,
-            "shots": 3
-          },
-          "games": [
-            1,
-            2
-          ],
-          "tag": "Stupid Nonsense",
-          "id": "p-61bdc66e",
-          "private": false
-        },
-        {
-          "stats": {
-            "goals": 2,
-            "assists": 1,
-            "saves": 0,
-            "shots": 4
-          },
-          "private": false,
-          "games": [
-            1,
-            2
-          ],
-          "name": "Jackson Gibbs",
-          "tag": "FishDGibbs",
-          "id": "p-1f058985"
-        },
-        {
-          "tag": "ClassyFox",
-          "games": [],
-          "name": "Cole Smith",
-          "private": false,
-          "stats": {},
-          "id": "p-fc730de2"
-        }
-      ]
+      "bye": false,
+      "source": {},
+      "level": "Varsity",
+      "stream": {
+        "live": "https://youtube.com/live/ygGZo-0Qt-0?feature=share",
+        "vod": ""
+      },
+      "teamName": "Rocket League Varsity",
+      "forfeit": null,
+      "event": "MHSEL Fall 2026",
+      "status": "final",
+      "bestOf": 5,
+      "perGame": true,
+      "game": "rocket-league",
+      "clinched": "them",
+      "teamId": "t5",
+      "startsAt": "2026-11-12T20:30:00.000Z",
+      "updatedAt": "2026-11-13T13:15:06.382Z"
     },
     {
       "id": "UmbA9iFS9qNJnCDM2T4u",
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/0fYqJ4EFn0g?feature=share"
+      },
+      "result": "W",
+      "event": "MHSEL Fall 2026",
+      "forfeit": null,
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "notes": "",
+      "level": "Varsity",
+      "players": [
+        {
+          "id": "p-75b76f7a",
+          "private": false,
+          "stats": {},
+          "name": "Rownin Flanagan",
+          "tag": "Rinferno53",
+          "games": []
+        },
+        {
+          "tag": "Lypuff",
+          "name": "Jeffery Howe",
+          "id": "p-e8f9e498",
+          "games": [
+            1
+          ],
+          "starter": true,
+          "stats": {
+            "stocks_taken": 6,
+            "stocks_lost": 1
+          },
+          "private": false
+        },
+        {
+          "private": false,
+          "games": [
+            3
+          ],
+          "stats": {
+            "stocks_taken": 6,
+            "stocks_lost": 1
+          },
+          "starter": true,
+          "id": "p-66fae53c",
+          "tag": "DeviousDawgs",
+          "name": "Bo West"
+        },
+        {
+          "private": false,
+          "stats": {
+            "stocks_taken": 8,
+            "stocks_lost": 5
+          },
+          "name": "Calvin Lauren",
+          "id": "p-860b6fbe",
+          "tag": "Carrot King",
+          "starter": true,
+          "games": [
+            2
+          ]
+        }
+      ],
+      "clinched": "us",
+      "current": 3,
+      "announced": {
+        "smash:career:stocks_taken": "p-e8f9e498"
+      },
+      "status": "final",
+      "bye": false,
+      "term": "fall",
+      "opponent": {
+        "abbr": "OH",
+        "short": "",
+        "team": "Ogemaw Heights Gold",
+        "school": "Ogemaw Heights High School",
+        "logo": "https://cache.bsnsports.com/comp/sls/get/43/8958?f=jpg&sid=8958&ts=1725630466"
+      },
+      "perGame": true,
       "games": [
         {
           "p": {
@@ -6741,225 +6822,35 @@
           }
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "bye": false,
       "league": "MHSEL",
-      "bestOf": 5,
       "season": "2026-27",
-      "gameName": "Super Smash Bros. Ultimate",
-      "announced": {
-        "smash:career:stocks_taken": "p-e8f9e498"
-      },
-      "notes": "",
-      "opponent": {
-        "school": "Ogemaw Heights High School",
-        "abbr": "OH",
-        "logo": "https://cache.bsnsports.com/comp/sls/get/43/8958?f=jpg&sid=8958&ts=1725630466",
-        "short": "",
-        "team": "Ogemaw Heights Gold"
-      },
-      "teamName": "Smash Varsity",
-      "startsAt": "2026-11-16T20:30:00.000Z",
-      "level": "Varsity",
-      "perGame": true,
       "game": "smash",
-      "teamId": "t3",
-      "term": "fall",
-      "stage": "playoffs",
-      "clinched": "us",
-      "status": "final",
-      "stream": {
-        "live": "https://youtube.com/live/0fYqJ4EFn0g?feature=share",
-        "vod": ""
-      },
-      "forfeit": null,
-      "result": "W",
+      "week": "Round of 32",
+      "gameName": "Super Smash Bros. Ultimate",
+      "teamName": "Smash Varsity",
       "source": {},
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "current": 3,
-      "players": [
-        {
-          "id": "p-75b76f7a",
-          "private": false,
-          "stats": {},
-          "name": "Rownin Flanagan",
-          "tag": "Rinferno53",
-          "games": []
-        },
-        {
-          "tag": "Lypuff",
-          "name": "Jeffery Howe",
-          "id": "p-e8f9e498",
-          "games": [
-            1
-          ],
-          "starter": true,
-          "stats": {
-            "stocks_taken": 6,
-            "stocks_lost": 1
-          },
-          "private": false
-        },
-        {
-          "private": false,
-          "games": [
-            3
-          ],
-          "stats": {
-            "stocks_taken": 6,
-            "stocks_lost": 1
-          },
-          "starter": true,
-          "id": "p-66fae53c",
-          "tag": "DeviousDawgs",
-          "name": "Bo West"
-        },
-        {
-          "private": false,
-          "stats": {
-            "stocks_taken": 8,
-            "stocks_lost": 5
-          },
-          "name": "Calvin Lauren",
-          "id": "p-860b6fbe",
-          "tag": "Carrot King",
-          "starter": true,
-          "games": [
-            2
-          ]
-        }
-      ],
+      "stage": "playoffs",
+      "teamId": "t3",
+      "startsAt": "2026-11-16T20:30:00.000Z",
       "updatedAt": "2026-11-16T21:15:11.695Z",
-      "week": "Round of 32"
+      "bestOf": 5
     },
     {
       "id": "s4aiI05iZ6U2cfMFAItE",
-      "forfeit": null,
-      "current": 3,
-      "gameName": "Marvel Rivals",
-      "level": "Varsity",
+      "status": "final",
       "bestOf": 5,
-      "notes": "",
-      "teamId": "t6",
-      "startsAt": "2026-11-16T20:30:00.000Z",
-      "games": [
-        {
-          "them": 0,
-          "us": 0,
-          "winner": "them",
-          "n": 1,
-          "p": {
-            "p-c279257f": {
-              "damage": 7062,
-              "role": "Vanguard",
-              "damage_blocked": 15011,
-              "healing": 894,
-              "hero": "Devil Dinosaur",
-              "assists": 1,
-              "eliminations": 0,
-              "deaths": 7,
-              "accuracy": 75
-            },
-            "p-0d4320f9": {
-              "healing": 5085,
-              "hero": "Emma Frost",
-              "damage": 7359,
-              "damage_blocked": 9703,
-              "assists": 0,
-              "deaths": 7,
-              "accuracy": 37,
-              "eliminations": 1,
-              "role": "Vanguard"
-            },
-            "p-00c5cd5f": {
-              "healing": 11653,
-              "deaths": 7,
-              "hero": "Luna Snow",
-              "accuracy": 40,
-              "eliminations": 2,
-              "role": "Strategist",
-              "assists": 1,
-              "damage": 7407,
-              "damage_blocked": 9495
-            },
-            "p-71b5eeec": {
-              "hero": "Deadpool",
-              "damage": 4769,
-              "assists": 2,
-              "accuracy": 61,
-              "damage_blocked": 6664,
-              "role": "Strategist",
-              "eliminations": 4,
-              "healing": 12591,
-              "deaths": 6
-            },
-            "p-0d309b46": {
-              "role": "Duelist",
-              "damage": 9634,
-              "healing": 170,
-              "eliminations": 5,
-              "damage_blocked": 5741,
-              "assists": 0,
-              "deaths": 8,
-              "hero": "Moon Knight",
-              "accuracy": 34
-            },
-            "p-c7ac1368": {
-              "role": "Strategist",
-              "healing": 1389,
-              "deaths": 7,
-              "accuracy": 30,
-              "hero": "Gambit",
-              "damage_blocked": 20397,
-              "damage": 11312,
-              "assists": 0,
-              "eliminations": 0
-            }
-          }
-        },
-        {
-          "winner": "them",
-          "us": 0,
-          "them": 0,
-          "n": 2
-        },
-        {
-          "winner": "them",
-          "them": 0,
-          "n": 3,
-          "us": 0
-        }
-      ],
+      "week": "Round of 16",
       "term": "fall",
-      "perGame": true,
       "teamName": "Marvel Rivals Varsity",
-      "game": "marvel-rivals",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "league": "MHSEL",
-      "score": {
-        "them": 3,
-        "us": 0
-      },
-      "updatedAt": "2026-11-16T21:41:00.333Z",
-      "source": {},
-      "clinched": "them",
-      "bye": false,
+      "forfeit": null,
+      "teamId": "t6",
       "opponent": {
-        "school": "Yale Senior High School",
-        "team": "Yale Bulldogs: Marvel Rivals",
         "logo": "https://static.eventlink.com/public/1a6e823f-de68-4884-b4a5-542533d2cf97/b85ecbf9-c767-46a0-b697-22c00bc33b20/Primary%20Logo.png",
         "abbr": "YAL",
-        "short": ""
+        "school": "Yale Senior High School",
+        "short": "",
+        "team": "Yale Bulldogs: Marvel Rivals"
       },
-      "stage": "playoffs",
-      "season": "2026-27",
-      "status": "final",
       "players": [
         {
           "tag": "sunny.1000",
@@ -7117,23 +7008,150 @@
           ]
         }
       ],
-      "event": "MHSEL Fall 2026",
+      "current": 3,
+      "gameName": "Marvel Rivals",
+      "stage": "playoffs",
+      "score": {
+        "us": 0,
+        "them": 3
+      },
+      "league": "MHSEL",
+      "clinched": "them",
+      "startsAt": "2026-11-16T20:30:00.000Z",
+      "season": "2026-27",
       "result": "L",
-      "week": "Round of 16"
-    },
-    {
-      "id": "H3aLfxbvh8zI4i6zPIpa",
-      "result": "L",
-      "updatedAt": "2026-11-17T21:33:42.618Z",
-      "status": "final",
+      "bye": false,
+      "games": [
+        {
+          "them": 0,
+          "us": 0,
+          "winner": "them",
+          "n": 1,
+          "p": {
+            "p-c279257f": {
+              "damage": 7062,
+              "role": "Vanguard",
+              "damage_blocked": 15011,
+              "healing": 894,
+              "hero": "Devil Dinosaur",
+              "assists": 1,
+              "eliminations": 0,
+              "deaths": 7,
+              "accuracy": 75
+            },
+            "p-0d4320f9": {
+              "healing": 5085,
+              "hero": "Emma Frost",
+              "damage": 7359,
+              "damage_blocked": 9703,
+              "assists": 0,
+              "deaths": 7,
+              "accuracy": 37,
+              "eliminations": 1,
+              "role": "Vanguard"
+            },
+            "p-00c5cd5f": {
+              "healing": 11653,
+              "deaths": 7,
+              "hero": "Luna Snow",
+              "accuracy": 40,
+              "eliminations": 2,
+              "role": "Strategist",
+              "assists": 1,
+              "damage": 7407,
+              "damage_blocked": 9495
+            },
+            "p-71b5eeec": {
+              "hero": "Deadpool",
+              "damage": 4769,
+              "assists": 2,
+              "accuracy": 61,
+              "damage_blocked": 6664,
+              "role": "Strategist",
+              "eliminations": 4,
+              "healing": 12591,
+              "deaths": 6
+            },
+            "p-0d309b46": {
+              "role": "Duelist",
+              "damage": 9634,
+              "healing": 170,
+              "eliminations": 5,
+              "damage_blocked": 5741,
+              "assists": 0,
+              "deaths": 8,
+              "hero": "Moon Knight",
+              "accuracy": 34
+            },
+            "p-c7ac1368": {
+              "role": "Strategist",
+              "healing": 1389,
+              "deaths": 7,
+              "accuracy": 30,
+              "hero": "Gambit",
+              "damage_blocked": 20397,
+              "damage": 11312,
+              "assists": 0,
+              "eliminations": 0
+            }
+          }
+        },
+        {
+          "winner": "them",
+          "us": 0,
+          "them": 0,
+          "n": 2
+        },
+        {
+          "winner": "them",
+          "them": 0,
+          "n": 3,
+          "us": 0
+        }
+      ],
+      "notes": "",
       "stream": {
         "vod": "",
         "live": ""
       },
-      "teamId": "t2",
-      "perGame": false,
-      "term": "fall",
       "level": "Varsity",
+      "updatedAt": "2026-11-16T21:41:00.333Z",
+      "perGame": true,
+      "event": "MHSEL Fall 2026",
+      "game": "marvel-rivals",
+      "source": {}
+    },
+    {
+      "id": "H3aLfxbvh8zI4i6zPIpa",
+      "notes": "",
+      "level": "Varsity",
+      "score": {
+        "us": 0,
+        "them": 2
+      },
+      "players": [],
+      "bye": false,
+      "clinched": "them",
+      "result": "L",
+      "stream": {
+        "live": "",
+        "vod": ""
+      },
+      "event": "MHSEL Fall 2026",
+      "forfeit": null,
+      "stage": "playoffs",
+      "season": "2026-27",
+      "league": "MHSEL",
+      "gameName": "Fortnite Zone Wars Duos",
+      "bestOf": 3,
+      "term": "fall",
+      "teamId": "t2",
+      "source": {},
+      "teamName": "Fortnite Varsity #2",
+      "updatedAt": "2026-11-17T21:33:42.618Z",
+      "startsAt": "2026-11-17T20:30:00.000Z",
+      "current": 2,
+      "status": "final",
       "games": [
         {
           "winner": "them",
@@ -7148,39 +7166,82 @@
           "them": 10
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "week": "Round of 32",
-      "source": {},
-      "notes": "",
-      "clinched": "them",
-      "teamName": "Fortnite Varsity #2",
-      "score": {
-        "them": 2,
-        "us": 0
-      },
-      "season": "2026-27",
-      "bye": false,
-      "league": "MHSEL",
-      "players": [],
-      "startsAt": "2026-11-17T20:30:00.000Z",
-      "bestOf": 3,
-      "current": 2,
-      "stage": "playoffs",
-      "game": "fortnite-zw",
-      "forfeit": null,
       "opponent": {
         "school": "Detroit Catholic Central",
-        "abbr": "DCC",
         "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJg8uf6sQ8WlBIYYpPngqLVvPWtSfdkF8vemmOCjApPA&s=10",
-        "short": "",
-        "team": "DCC Varsity FN"
+        "team": "DCC Varsity FN",
+        "abbr": "DCC",
+        "short": ""
       },
-      "gameName": "Fortnite Zone Wars Duos"
+      "perGame": false,
+      "week": "Round of 32",
+      "game": "fortnite-zw"
     },
     {
       "id": "XY94e7ebRzzwzEi6fMyk",
-      "forfeit": null,
+      "week": "Round of 32",
+      "startsAt": "2026-11-17T20:30:00.000Z",
+      "game": "fortnite-zw",
+      "bye": false,
+      "source": {},
+      "teamName": "Fortnite Varsity #1",
+      "event": "MHSEL Fall 2026",
+      "teamId": "t1",
+      "bestOf": 3,
+      "season": "2026-27",
+      "league": "MHSEL",
+      "gameName": "Fortnite Zone Wars Duos",
+      "term": "fall",
+      "perGame": true,
+      "opponent": {
+        "team": "LHS Fortnite",
+        "school": "Linden High School",
+        "abbr": "LIN",
+        "short": "",
+        "logo": "https://cmsv2-assets.apptegy.net/uploads/9313/logo/10604/LindenEagle.png"
+      },
+      "level": "Varsity",
       "notes": "",
+      "score": {
+        "us": 2,
+        "them": 0
+      },
+      "status": "final",
+      "current": 2,
+      "clinched": "us",
+      "updatedAt": "2026-11-17T20:56:42.150Z",
+      "players": [
+        {
+          "tag": "TRE4TY.",
+          "games": [
+            1,
+            2
+          ],
+          "name": "Tavin Flanagan",
+          "stats": {
+            "elims": 23,
+            "deaths": 2
+          },
+          "private": false,
+          "id": "p-0b11aaef",
+          "starter": true
+        },
+        {
+          "id": "p-62e0e640",
+          "private": false,
+          "starter": true,
+          "stats": {
+            "elims": 17,
+            "deaths": 5
+          },
+          "name": "Gavin Marino",
+          "tag": "0gix.",
+          "games": [
+            1,
+            2
+          ]
+        }
+      ],
       "games": [
         {
           "p": {
@@ -7215,109 +7276,52 @@
           "us": 10
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "game": "fortnite-zw",
-      "players": [
-        {
-          "tag": "TRE4TY.",
-          "games": [
-            1,
-            2
-          ],
-          "name": "Tavin Flanagan",
-          "stats": {
-            "elims": 23,
-            "deaths": 2
-          },
-          "private": false,
-          "id": "p-0b11aaef",
-          "starter": true
-        },
-        {
-          "id": "p-62e0e640",
-          "private": false,
-          "starter": true,
-          "stats": {
-            "elims": 17,
-            "deaths": 5
-          },
-          "name": "Gavin Marino",
-          "tag": "0gix.",
-          "games": [
-            1,
-            2
-          ]
-        }
-      ],
-      "level": "Varsity",
-      "season": "2026-27",
-      "current": 2,
-      "bye": false,
-      "bestOf": 3,
-      "updatedAt": "2026-11-17T20:56:42.150Z",
-      "clinched": "us",
-      "league": "MHSEL",
-      "teamName": "Fortnite Varsity #1",
-      "stage": "playoffs",
-      "source": {},
-      "week": "Round of 32",
-      "startsAt": "2026-11-17T20:30:00.000Z",
-      "status": "final",
-      "perGame": true,
+      "forfeit": null,
       "stream": {
         "live": "https://youtube.com/live/Ba-yal955OM?feature=share",
         "vod": ""
       },
-      "result": "W",
-      "term": "fall",
-      "opponent": {
-        "short": "",
-        "team": "LHS Fortnite",
-        "abbr": "LIN",
-        "logo": "https://cmsv2-assets.apptegy.net/uploads/9313/logo/10604/LindenEagle.png",
-        "school": "Linden High School"
-      },
-      "gameName": "Fortnite Zone Wars Duos",
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "teamId": "t1"
+      "stage": "playoffs",
+      "result": "W"
     },
     {
       "id": "XnYzIqTxs7vR104cuIWA",
-      "startsAt": "2026-11-17T20:30:00.000Z",
-      "season": "2026-27",
       "stage": "playoffs",
-      "teamName": "Smash JV",
-      "bestOf": 5,
-      "league": "MHSEL",
-      "term": "fall",
-      "opponent": {
-        "logo": "https://on3static.com/cdn-cgi/image/width=1200,format=auto,metadata=none/uploads/assets/271/332/332271.png",
-        "abbr": "BEL",
-        "team": "Belleville Super Tigers JV1",
-        "school": "Belleville High School",
-        "short": ""
-      },
-      "week": "Round of 32",
-      "gameName": "Super Smash Bros. Ultimate",
-      "score": {
-        "us": 3,
-        "them": 0
-      },
-      "perGame": true,
-      "result": "W",
-      "status": "final",
-      "notes": "",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
       "bye": false,
-      "forfeit": null,
-      "updatedAt": "2026-11-17T21:27:02.843Z",
-      "teamId": "t4",
+      "status": "final",
+      "players": [
+        {
+          "tag": "Thepotato",
+          "stats": {},
+          "name": "Elijah Lowe",
+          "private": false,
+          "games": [
+            1
+          ],
+          "id": "p-578c1bc6"
+        },
+        {
+          "stats": {},
+          "tag": "",
+          "id": "p-b1bbb78f",
+          "name": "Liam Aeh",
+          "private": false,
+          "games": [
+            2
+          ]
+        },
+        {
+          "id": "p-f1134599",
+          "private": false,
+          "tag": "Buptub",
+          "stats": {},
+          "games": [
+            3
+          ],
+          "name": "Evan Hudgins"
+        }
+      ],
+      "clinched": "us",
       "games": [
         {
           "us": 2,
@@ -7368,95 +7372,48 @@
           "us": 2
         }
       ],
-      "event": "MHSEL Fall 2026",
-      "clinched": "us",
-      "game": "smash",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "teamId": "t4",
+      "bestOf": 5,
+      "forfeit": null,
+      "source": {},
+      "result": "W",
+      "gameName": "Super Smash Bros. Ultimate",
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "teamName": "Smash JV",
       "level": "JV",
-      "players": [
-        {
-          "tag": "Thepotato",
-          "stats": {},
-          "name": "Elijah Lowe",
-          "private": false,
-          "games": [
-            1
-          ],
-          "id": "p-578c1bc6"
-        },
-        {
-          "stats": {},
-          "tag": "",
-          "id": "p-b1bbb78f",
-          "name": "Liam Aeh",
-          "private": false,
-          "games": [
-            2
-          ]
-        },
-        {
-          "id": "p-f1134599",
-          "private": false,
-          "tag": "Buptub",
-          "stats": {},
-          "games": [
-            3
-          ],
-          "name": "Evan Hudgins"
-        }
-      ],
+      "notes": "",
+      "score": {
+        "us": 3,
+        "them": 0
+      },
+      "term": "fall",
+      "updatedAt": "2026-11-17T21:27:02.843Z",
+      "startsAt": "2026-11-17T20:30:00.000Z",
       "current": 3,
-      "source": {}
+      "week": "Round of 32",
+      "game": "smash",
+      "opponent": {
+        "logo": "https://on3static.com/cdn-cgi/image/width=1200,format=auto,metadata=none/uploads/assets/271/332/332271.png",
+        "short": "",
+        "abbr": "BEL",
+        "team": "Belleville Super Tigers JV1",
+        "school": "Belleville High School"
+      },
+      "event": "MHSEL Fall 2026",
+      "perGame": true
     },
     {
       "id": "DMXNF2JpzFv2ZROXV3ET",
-      "week": "Round of 16",
-      "event": "USAEL Open Fall 2026",
+      "forfeit": null,
       "updatedAt": "2026-11-17T22:45:30.536Z",
-      "games": [
-        {
-          "n": 1,
-          "us": 17,
-          "them": 6,
-          "winner": "us",
-          "p": {
-            "p-0b11aaef": {
-              "elims": 7
-            },
-            "p-62e0e640": {
-              "elims": 10
-            }
-          }
-        },
-        {
-          "n": 2,
-          "us": 26,
-          "them": 4,
-          "winner": "us",
-          "p": {
-            "p-0b11aaef": {
-              "elims": 9
-            },
-            "p-62e0e640": {
-              "elims": 17
-            }
-          }
-        }
-      ],
-      "notes": "",
-      "perGame": true,
+      "status": "final",
       "bye": false,
-      "season": "2026-27",
-      "league": "USAEL Open",
-      "term": "fall",
-      "clinched": "us",
-      "bestOf": 3,
-      "level": "Varsity",
-      "teamName": "Fortnite Varsity #1",
-      "game": "fortnite-zw",
-      "stage": "playoffs",
-      "seriesOnly": false,
-      "startsAt": "2026-11-17T22:00:00.000Z",
-      "source": {},
+      "event": "USAEL Open Fall 2026",
       "players": [
         {
           "private": false,
@@ -7487,89 +7444,77 @@
           "name": "Gavin Marino"
         }
       ],
-      "current": 2,
+      "league": "USAEL Open",
+      "season": "2026-27",
+      "source": {},
+      "bestOf": 3,
+      "teamId": "t1",
+      "clinched": "us",
       "score": {
         "us": 2,
         "them": 0
       },
+      "level": "Varsity",
+      "notes": "",
+      "games": [
+        {
+          "n": 1,
+          "us": 17,
+          "them": 6,
+          "winner": "us",
+          "p": {
+            "p-0b11aaef": {
+              "elims": 7
+            },
+            "p-62e0e640": {
+              "elims": 10
+            }
+          }
+        },
+        {
+          "n": 2,
+          "us": 26,
+          "them": 4,
+          "winner": "us",
+          "p": {
+            "p-0b11aaef": {
+              "elims": 9
+            },
+            "p-62e0e640": {
+              "elims": 17
+            }
+          }
+        }
+      ],
       "result": "W",
+      "perGame": true,
       "stream": {
         "vod": "",
         "live": ""
       },
-      "status": "final",
-      "teamId": "t1",
-      "forfeit": null,
+      "game": "fortnite-zw",
+      "week": "Round of 16",
+      "current": 2,
       "opponent": {
-        "team": "Elite Academic Academy A",
         "logo": "",
-        "school": "Elite Academic Academy",
         "short": "",
+        "school": "Elite Academic Academy",
+        "team": "Elite Academic Academy A",
         "abbr": "EA"
       },
-      "gameName": "Fortnite Zone Wars Duos"
+      "gameName": "Fortnite Zone Wars Duos",
+      "term": "fall",
+      "seriesOnly": false,
+      "stage": "playoffs",
+      "startsAt": "2026-11-17T22:00:00.000Z",
+      "teamName": "Fortnite Varsity #1"
     },
     {
       "id": "iHZAEpAf3N6waQoAMDxd",
       "week": "Round of 16",
-      "gameName": "Super Smash Bros. Ultimate",
-      "level": "JV",
-      "opponent": {
-        "short": "",
-        "team": "Saline Smash JV",
-        "abbr": "SAL",
-        "school": "Saline High School",
-        "logo": "https://upload.wikimedia.org/wikipedia/en/7/78/Saline_High_School_%28Michigan%29_logo.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original"
-      },
-      "source": {},
-      "forfeit": null,
-      "startsAt": "2026-11-19T20:30:00.000Z",
-      "notes": "",
-      "teamId": "t4",
-      "current": 5,
-      "result": "L",
-      "stream": {
-        "live": "",
-        "vod": ""
-      },
-      "term": "fall",
-      "status": "final",
-      "teamName": "Smash JV",
-      "players": [
-        {
-          "name": "Elijah Lowe",
-          "id": "p-578c1bc6",
-          "tag": "Thepotato",
-          "games": [
-            1
-          ],
-          "stats": {},
-          "private": false
-        },
-        {
-          "stats": {},
-          "id": "p-b1bbb78f",
-          "games": [
-            2,
-            4
-          ],
-          "private": false,
-          "tag": "",
-          "name": "Liam Aeh"
-        },
-        {
-          "stats": {},
-          "private": false,
-          "games": [
-            3,
-            5
-          ],
-          "id": "p-f1134599",
-          "tag": "Buptub",
-          "name": "Evan Hudgins"
-        }
-      ],
-      "event": "MHSEL Fall 2026",
+      "game": "smash",
+      "perGame": true,
+      "clinched": "them",
       "games": [
         {
           "gw": [
@@ -7658,26 +7603,95 @@
           "n": 5
         }
       ],
-      "clinched": "them",
-      "game": "smash",
-      "updatedAt": "2026-11-19T22:01:02.243Z",
-      "score": {
-        "them": 3,
-        "us": 2
-      },
-      "bestOf": 5,
-      "league": "MHSEL",
-      "stage": "playoffs",
-      "perGame": true,
       "bye": false,
-      "season": "2026-27"
+      "status": "final",
+      "current": 5,
+      "term": "fall",
+      "source": {},
+      "bestOf": 5,
+      "teamId": "t4",
+      "league": "MHSEL",
+      "season": "2026-27",
+      "stage": "playoffs",
+      "gameName": "Super Smash Bros. Ultimate",
+      "event": "MHSEL Fall 2026",
+      "forfeit": null,
+      "stream": {
+        "vod": "",
+        "live": ""
+      },
+      "startsAt": "2026-11-19T20:30:00.000Z",
+      "result": "L",
+      "teamName": "Smash JV",
+      "updatedAt": "2026-11-19T22:01:02.243Z",
+      "level": "JV",
+      "notes": "",
+      "score": {
+        "us": 2,
+        "them": 3
+      },
+      "players": [
+        {
+          "name": "Elijah Lowe",
+          "id": "p-578c1bc6",
+          "tag": "Thepotato",
+          "games": [
+            1
+          ],
+          "stats": {},
+          "private": false
+        },
+        {
+          "stats": {},
+          "id": "p-b1bbb78f",
+          "games": [
+            2,
+            4
+          ],
+          "private": false,
+          "tag": "",
+          "name": "Liam Aeh"
+        },
+        {
+          "stats": {},
+          "private": false,
+          "games": [
+            3,
+            5
+          ],
+          "id": "p-f1134599",
+          "tag": "Buptub",
+          "name": "Evan Hudgins"
+        }
+      ],
+      "opponent": {
+        "short": "",
+        "logo": "https://upload.wikimedia.org/wikipedia/en/7/78/Saline_High_School_%28Michigan%29_logo.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original",
+        "team": "Saline Smash JV",
+        "abbr": "SAL",
+        "school": "Saline High School"
+      }
     },
     {
       "id": "jk2Zf1MssFwbIlJNJojN",
-      "notes": "",
-      "updatedAt": "2026-11-19T21:40:45.438Z",
-      "game": "rocket-league",
+      "clinched": "them",
+      "bye": false,
       "event": "MHSEL Fall 2026",
+      "current": 6,
+      "result": "L",
+      "level": "Varsity",
+      "notes": "",
+      "stream": {
+        "vod": "",
+        "live": "https://youtube.com/live/KzN2joITGyw?feature=share"
+      },
+      "score": {
+        "them": 4,
+        "us": 2
+      },
+      "perGame": true,
+      "source": {},
+      "teamName": "Rocket League Varsity",
       "games": [
         {
           "winner": "us",
@@ -7854,33 +7868,14 @@
           "n": 6
         }
       ],
-      "opponent": {
-        "logo": "https://cfunity-school-logos.nfhsnetwork.com/school_logos/19fd3fe1-537b-45eb-8207-6b0c16a1a641/a38f1483d3_p766.png",
-        "abbr": "FR",
-        "school": "Flat Rock Community High School",
-        "team": "Rams Rocket League",
-        "short": ""
-      },
-      "source": {},
-      "gameName": "Rocket League",
-      "stream": {
-        "vod": "",
-        "live": "https://youtube.com/live/KzN2joITGyw?feature=share"
-      },
-      "status": "final",
-      "level": "Varsity",
-      "teamName": "Rocket League Varsity",
-      "result": "L",
-      "perGame": true,
-      "startsAt": "2026-11-19T20:30:00.000Z",
+      "bestOf": 7,
       "teamId": "t5",
-      "bye": false,
-      "forfeit": null,
+      "game": "rocket-league",
       "week": "Round of 16",
-      "clinched": "them",
-      "stage": "playoffs",
-      "term": "fall",
+      "startsAt": "2026-11-19T20:30:00.000Z",
+      "updatedAt": "2026-11-19T21:40:45.438Z",
       "season": "2026-27",
+      "league": "MHSEL",
       "players": [
         {
           "games": [
@@ -7955,75 +7950,27 @@
           "name": "Cole Smith"
         }
       ],
-      "bestOf": 7,
-      "current": 6,
-      "score": {
-        "them": 4,
-        "us": 2
+      "gameName": "Rocket League",
+      "term": "fall",
+      "opponent": {
+        "short": "",
+        "team": "Rams Rocket League",
+        "abbr": "FR",
+        "school": "Flat Rock Community High School",
+        "logo": "https://cfunity-school-logos.nfhsnetwork.com/school_logos/19fd3fe1-537b-45eb-8207-6b0c16a1a641/a38f1483d3_p766.png"
       },
-      "league": "MHSEL"
+      "stage": "playoffs",
+      "forfeit": null,
+      "status": "final"
     },
     {
       "id": "LNPmwlfQ1aG6FEWNH5LM",
-      "clinched": "us",
+      "term": "fall",
+      "forfeit": null,
+      "status": "final",
       "stage": "playoffs",
-      "game": "fortnite-zw",
-      "bestOf": 3,
-      "perGame": true,
       "league": "USAEL Open",
       "season": "2026-27",
-      "score": {
-        "us": 2,
-        "them": 0
-      },
-      "bye": false,
-      "source": {},
-      "forfeit": null,
-      "notes": "",
-      "seriesOnly": false,
-      "games": [
-        {
-          "n": 1,
-          "us": 19,
-          "them": 3,
-          "winner": "us",
-          "p": {
-            "p-62e0e640": {
-              "elims": 11
-            },
-            "p-0b11aaef": {
-              "elims": 8
-            }
-          }
-        },
-        {
-          "n": 2,
-          "us": 16,
-          "them": 11,
-          "winner": "us",
-          "p": {
-            "p-62e0e640": {
-              "elims": 6
-            },
-            "p-0b11aaef": {
-              "elims": 10
-            }
-          }
-        }
-      ],
-      "gameName": "Fortnite Zone Wars Duos",
-      "opponent": {
-        "abbr": "MA",
-        "school": "Milton Area High School",
-        "logo": "https://core-docs.s3.amazonaws.com/milton_area_school_district_ar/article/image/large_0f71f497-00a8-4186-98df-30c47df6b74e.png",
-        "team": "FN MILTON HS",
-        "short": ""
-      },
-      "event": "USAEL Open Fall 2026",
-      "week": "Quarterfinal",
-      "current": 2,
-      "level": "Varsity",
-      "term": "fall",
       "players": [
         {
           "starter": true,
@@ -8054,16 +8001,69 @@
           "id": "p-62e0e640"
         }
       ],
+      "game": "fortnite-zw",
+      "week": "Quarterfinal",
+      "seriesOnly": false,
+      "bye": false,
+      "games": [
+        {
+          "n": 1,
+          "us": 19,
+          "them": 3,
+          "winner": "us",
+          "p": {
+            "p-62e0e640": {
+              "elims": 11
+            },
+            "p-0b11aaef": {
+              "elims": 8
+            }
+          }
+        },
+        {
+          "n": 2,
+          "us": 16,
+          "them": 11,
+          "winner": "us",
+          "p": {
+            "p-62e0e640": {
+              "elims": 6
+            },
+            "p-0b11aaef": {
+              "elims": 10
+            }
+          }
+        }
+      ],
+      "clinched": "us",
+      "source": {},
       "updatedAt": "2026-11-19T23:29:36.168Z",
+      "bestOf": 3,
       "teamId": "t1",
-      "teamName": "Fortnite Varsity #1",
-      "status": "final",
       "stream": {
-        "vod": "",
-        "live": ""
+        "live": "",
+        "vod": ""
       },
+      "perGame": true,
+      "notes": "",
+      "level": "Varsity",
       "result": "W",
-      "startsAt": "2026-11-19T23:00:00.000Z"
+      "score": {
+        "them": 0,
+        "us": 2
+      },
+      "current": 2,
+      "opponent": {
+        "logo": "https://core-docs.s3.amazonaws.com/milton_area_school_district_ar/article/image/large_0f71f497-00a8-4186-98df-30c47df6b74e.png",
+        "short": "",
+        "abbr": "MA",
+        "school": "Milton Area High School",
+        "team": "FN MILTON HS"
+      },
+      "gameName": "Fortnite Zone Wars Duos",
+      "event": "USAEL Open Fall 2026",
+      "startsAt": "2026-11-19T23:00:00.000Z",
+      "teamName": "Fortnite Varsity #1"
     }
   ]
 }
